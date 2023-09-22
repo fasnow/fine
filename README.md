@@ -60,6 +60,10 @@ Quake查询页面
 
 里面有一个隐藏小彩蛋^_^
 
+## **交流群**
+
+<img src="images/image-20230922112803375.png" alt="image-20230922112803375" style="zoom: 50%;" />
+
 ## TODO
 
 ？？？

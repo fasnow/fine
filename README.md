@@ -4,7 +4,7 @@
 
 网络空间资产测绘工具，目前支持fofa、hunter、quake和零零信安，以及一些其他功能。
 
-工具使用electron+typescript~~+vue3+element plus~~+react+antd+golang构建。
+工具使用electron+typescript<s>+vue3+element plus</s>+react+antd+golang构建。
 
 ## 更新内容
 **2023.09.22 v1.0.0** 
@@ -32,7 +32,7 @@
 
 账号以及代理设置
 
-![image-20230922092542982](images/image-20230922092542982.png)
+![image-20230922103929445](images/image-20230922103929445.png)
 
 域名查询
 

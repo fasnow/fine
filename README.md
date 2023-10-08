@@ -7,6 +7,10 @@
 工具使用electron+typescript<s>+vue3+element plus</s>+react+antd+golang构建。
 
 ## 更新内容
+**2023.10.08 v1.0.1** 
+
+1. 添加了快速修改token和代理功能。
+
 **2023.09.22 v1.0.0** 
 
 1. 经过不专业的功能测试重构完成...；

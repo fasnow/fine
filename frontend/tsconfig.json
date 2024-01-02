@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "allowJs": true,
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "paths": {
+      "*": ["node_modules/*"],
+      // "src/*": ["src/*"]//保证以绝对路径导入模块不会报错
+    },
+     "jsx": "react-jsx",//react需要添加这个,
+    //  "ignoreDeprecations": "5.0",
+    //  "suppressImplicitAnyIndexErrors":true,
+  },
+  "include": ["src/**/*","src/**/**/*"]
+}

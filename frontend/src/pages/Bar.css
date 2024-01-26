@@ -1,0 +1,52 @@
+.exit-button:hover {
+  background-color: rgb(255, 0, 0) !important;
+  color: white !important;
+}
+
+.bar {
+  display: flex;
+  justify-content: space-between;
+  background-color: #ffffff;
+  height: 30px;
+  align-items: center;
+  /* // 设置可拖动 */
+  --wails-draggable:drag;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.left {
+  display: flex;
+  align-items: flex-start;
+  -webkit-app-region: drag;
+}
+
+.right {
+  display: flex;
+  align-items: flex-end;
+  --wails-draggable: no-drag;
+}
+
+.downloadItem {
+  position: relative;
+  /* 相对定位，为后面的另一个span提供参考位置 */
+}
+
+.file {
+  position: absolute;
+  /* 绝对定位，相对于.downloadItem定位 */
+  height: calc(100% - 4px);
+  right: 0;
+  display: none;
+  /* 初始状态隐藏 */
+  background-color: #f0f0f0;
+}
+
+.downloadItem:hover .file {
+  display: flex;
+  /* 当鼠标移动到.listItem时，显示.file */
+}
+
+.downloadItem:hover {
+  background-color: #f0f0f0;
+}

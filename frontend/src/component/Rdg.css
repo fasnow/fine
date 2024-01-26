@@ -1,0 +1,14 @@
+/* CustomRadioGroup.css */
+
+.custom-radio {
+    margin: 5px 0;
+    cursor: pointer;
+    color: black;
+    transition: color 0.3s;
+}
+
+.custom-radio.active,
+.custom-radio:hover {
+    color: #1677ff;
+    cursor: pointer;
+}

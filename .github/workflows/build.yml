@@ -1,0 +1,117 @@
+name: Build and Release
+
+# on:
+#   push:
+#     branches:
+#       - main
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Golang
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20.4
+
+    - name: Build Backend
+      run: cd backend && go get . && go build -o fine-cmd.exe main.go
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.12.0'
+
+    - name: Install Frontend Dependencies
+      run: cd frontend && npm install
+    
+    - name: Build APP
+      run: cd frontend && npm run make
+
+    - name: Rename Windows Artifact
+      run: cd frontend/out/prod/make/zip/ && mv fine.zip fine-win32-x64.zip
+
+    - name: Upload Windows Build
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-build
+        path: frontend/out/prod/make/zip/fine-win32-x64.zip
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Golang
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20.4
+
+    - name: Build Backend
+      run: cd backend && go get . && go build -o fine-cmd main.go
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.12.0'
+
+    - name: Install Frontend Dependencies
+      run: cd frontend && npm install
+    
+    - name: Build APP
+      run: cd frontend && npm run make
+    
+    - name: ls
+      run: cd frontend/out/prod/make/zip && ls  -a
+
+    - name: Rename MacOS Artifact
+      run: cd frontend/out/prod/make/zip/ && mv fine.zip fine-darwin.zip
+
+    - name: Upload MacOS Build
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-build
+        path: frontend/out/prod/make/zip/fine-darwin.zip
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [build-windows,build-macos]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Download Windows Build Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: windows-build
+        path: release/
+
+    - name: Download MacOS Build Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: macos-build
+        path: release/
+
+    - name: dir
+      run: dir && dir release
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          release/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}

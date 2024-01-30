@@ -1,6 +1,3 @@
-//go:build !windows
-// +build !windows
-
 package runtime
 
 import (
@@ -17,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"syscall"
 	"time"
 )
 
@@ -46,6 +44,7 @@ func (r *Runtime) ShowItemInFolder(dir, filename string) error {
 	default:
 		return os.ErrInvalid
 	}
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	return cmd.Start()
 }
 
@@ -61,6 +60,9 @@ func (r *Runtime) OpenFolder(path string) error {
 		cmd = exec.Command("explorer", path)
 	default:
 		return os.ErrInvalid
+	}
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	}
 	return cmd.Start()
 }
@@ -78,6 +80,9 @@ func (r *Runtime) OpenFile(dir, filename string) error {
 		cmd = exec.Command("cmd", "/c", "start", absFilePath)
 	default:
 		return os.ErrInvalid
+	}
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	}
 	return cmd.Start()
 }

@@ -45,6 +45,7 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "react-activation": "^0.12.4",
     "react-freeze": "^1.0.3",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-redux": "^9.0.4",
     "react-resizable": "^3.0.5",
     "react-router-dom": "^6.21.1",

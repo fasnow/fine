@@ -108,7 +108,7 @@ typings/
 
 **/out/
 **/data.db
-**/build/
+**/build/bin
 **/dist/
 **/test/
 **/node_modules/

@@ -18,7 +18,10 @@
 .left {
   display: flex;
   align-items: flex-start;
-  -webkit-app-region: drag;
+  /* // 设置可拖动 */
+  --wails-draggable:drag;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .right {

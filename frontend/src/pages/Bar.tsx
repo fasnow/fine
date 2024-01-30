@@ -522,19 +522,35 @@ const DownloadHistory: React.FC = () => {
 const Bar: React.FC = () => {
     const [platform, setPlatform] = useState<string>("")
     const version = useRef(packageJson.version)
+    const [isFullScreen,setIsFullScreen] = useState<boolean>(false)
     useEffect(() => {
         const platform = async () => {
             const result = await GetPlatform()
             console.log(result)
-            setPlatform((result))
+            // setPlatform((result))
+            setPlatform("windows")
         }
         platform()
     }, [])
 
+    const handleWindowResize=()=>{
+        WindowIsFullscreen().then(
+            result=>{
+                if(result){
+                    WindowUnmaximise()
+                    setIsFullScreen(false)
+                    return
+                }
+                WindowFullscreen()
+                setIsFullScreen(true)
+            }
+        )
+    }
+
 
     return (
         <div id="drag" className="bar" style={{ backgroundColor: 'rgb(255, 255, 255,1)'}}>
-            <div className="left">{appIcon(platform)}</div>
+            <div className="left" onClick={handleWindowResize}>{appIcon(platform)}</div>
             <div className="right">
                 <Space size={1}>
                     <span onClick={genshinLaunch} style={{ color: "#4676c3", margin: "0px 10px 0px 10px" }}> v{version.current}</span>
@@ -562,7 +578,47 @@ const Bar: React.FC = () => {
                             }}
                         />
                     </Tooltip>
-                    {platform == "windows" ? <TitleBarOverlay /> : <></>}
+                    {/*{platform == "windows" ? <TitleBarOverlay /> : <></>}*/}
+                    <div>
+                        <Button
+                            type="text"
+                            style={buttonStyle}
+                            icon={<LineOutlined />}
+                            size="small"
+                            onClick={WindowMinimise}
+                        />
+                        {isFullScreen ? (
+                            <Button
+                                type="text"
+                                style={buttonStyle}
+                                icon={<CompressOutlined />}
+                                size="small"
+                                onClick={() => {
+                                    WindowUnmaximise();
+                                    setIsFullScreen(false)
+                                }}
+                            />
+                        ) : (
+                            <Button
+                                type="text"
+                                style={buttonStyle}
+                                icon={<ExpandOutlined />}
+                                size="small"
+                                onClick={() => {
+                                    WindowMaximise();
+                                    setIsFullScreen(true)
+                                }}
+                            />
+                        )}
+                        <Button
+                            type="text"
+                            style={buttonStyle}
+                            icon={<CloseOutlined />}
+                            size="small"
+                            className="exit-button"
+                            onClick={Quit}
+                        />
+                    </div>
                 </Space>
             </div>
         </div>

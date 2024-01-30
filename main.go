@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"embed"
-	"fine/backend/event"
-
 	app "fine/backend/app"
 	"fine/backend/config"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/runtime"
 	"fine/backend/sdk/client/fofa"
 	"fine/backend/sdk/client/httpx"
@@ -19,6 +18,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 )
 
 //go:embed all:frontend/dist
@@ -33,6 +33,9 @@ func main() {
 		Frameless: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
+		},
+		Mac: &mac.Options{
+			TitleBar: mac.TitleBarHiddenInset(),
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {

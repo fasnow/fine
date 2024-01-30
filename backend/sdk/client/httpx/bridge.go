@@ -3,10 +3,9 @@ package httpx
 import (
 	"bufio"
 	"fine/backend/app"
+	"fine/backend/event"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"golang.org/x/text/encoding/simplifiedchinese"
 	"os"
 	"os/exec"
 	runtime2 "runtime"
@@ -47,17 +46,13 @@ func (r *Bridge) Run(path, flags, inputFlag string, targets string) error {
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			decodeBytes, _ := simplifiedchinese.GB18030.NewDecoder().Bytes(scanner.Bytes())
-			fmt.Println(string(decodeBytes))
-			runtime.EventsEmit(r.app.GetContext(), "httpx", string(decodeBytes))
+			event.Emit(event.GetSingleton().HttpxOuput, string(scanner.Bytes()))
 		}
 	}()
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			decodeBytes, _ := simplifiedchinese.GB18030.NewDecoder().Bytes(scanner.Bytes())
-			fmt.Println(string(decodeBytes))
-			runtime.EventsEmit(r.app.GetContext(), "httpx", string(decodeBytes))
+			event.Emit(event.GetSingleton().HttpxOuput, string(scanner.Bytes()))
 		}
 	}()
 	go func() {
@@ -65,7 +60,7 @@ func (r *Bridge) Run(path, flags, inputFlag string, targets string) error {
 		if err != nil {
 			fmt.Println("Error waiting for command:", err)
 		}
-		runtime.EventsEmit(r.app.GetContext(), "httpxDone")
+		event.Emit(event.GetSingleton().HttpxOuputDone, "")
 	}()
 	return nil
 }

@@ -21,6 +21,8 @@ import {useDispatch} from "react-redux";
 import {setFofaAuth, setProxy} from "@/store/store";
 import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
+import TianYanCha from "@/pages/unitmap/TianYanCha";
+import {Get} from "../wailsjs/go/event/Event";
 
 
 
@@ -197,5 +199,11 @@ const items: TabsProps['items'] = [
                                                         // centered
         /></div>,
     },
+    // {
+    //     key: '6',
+    //     label: '天眼查',
+    //     children: <div style={{padding:"0 10px"}}><TianYanCha/></div>,
+    // },
+
 ];
 

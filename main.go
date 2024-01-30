@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"embed"
+	"fine/backend/event"
+
 	app "fine/backend/app"
 	"fine/backend/config"
 	"fine/backend/db/service"
@@ -35,9 +37,11 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			mainApp.SetContext(ctx)
+			event.SetContext(ctx)
 		},
 		Bind: []interface{}{
 			mainApp,
+			event.GetSingleton(),
 			runtime.NewRuntime(mainApp),
 			httpx.NewHttpxBridge(mainApp),
 			config.GetConfig(),

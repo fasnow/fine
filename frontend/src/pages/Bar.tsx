@@ -26,6 +26,7 @@ import {model} from "../../wailsjs/go/models";
 import DownloadLog = model.DownloadLog;
 import * as path from "path";
 import semver from "semver/preload";
+import {Get} from "../../wailsjs/go/event/Event";
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
     height: "30px",
@@ -113,9 +114,13 @@ const DownloadViewContent: React.FC = () => {
     const [total,setTotal] = useState<number>(0)
     useEffect(() => {
         loadMoreData()
-        EventsOn("hasNewDownloadItem", function(){
-            loadMoreData()
-        })
+        Get().then(
+            result=>{
+                EventsOn(String(result.hasNewDownloadItem), function(){
+                    loadMoreData()
+                })
+            }
+        )
     }, []);
     const openDataFolder = async () => {
         const dir = await GetDataBaseDir()
@@ -469,9 +474,13 @@ const Proxy: React.FC = () => {
 const DownloadHistory: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     useEffect(() => {
-        EventsOn("hasNewDownloadItem", function(){
-            setOpen(true)
-        })
+        Get().then(
+            result=>{
+                EventsOn(String(result.hasNewDownloadItem), function(){
+                    setOpen(true)
+                })
+            }
+        )
     }, [])
     return <>
         <Proxy />

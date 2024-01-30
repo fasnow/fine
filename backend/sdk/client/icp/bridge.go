@@ -5,11 +5,11 @@ import (
 	"fine/backend/config"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/sdk/model/icp"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
-	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yitter/idgenerator-go/idgen"
 	"math"
 	"path/filepath"
@@ -105,9 +105,7 @@ func (b *Bridge) Export(taskID int64) error {
 		return err
 	}
 	b.downloadLog.UpdateStatus(fileID, 1, "")
-	ctx := b.app.GetContext()
-	wailsRuntime.EventsEmit(ctx, "hasNewDownloadItem")
-	wailsRuntime.EventsEmit(ctx, "hasNewIcpDownloadItem")
+	event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewIcpDownloadItem)
 	return nil
 }
 

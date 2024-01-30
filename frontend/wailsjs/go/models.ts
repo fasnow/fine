@@ -194,6 +194,45 @@ export namespace config {
 
 }
 
+export namespace event {
+	
+	export class Event {
+	    hasNewFofaDownloadItem: number;
+	    hasNewDownloadItem: number;
+	    hasNewHunterDownloadItem: number;
+	    hunterQueryFinished: number;
+	    hasNewIcpDownloadItem: number;
+	    hasNewQuakeDownloadItem: number;
+	    hasNew0ZoneSiteDownloadItem: number;
+	    hasNew0ZoneMemberDownloadItem: number;
+	    hasNew0ZoneEmailDownloadItem: number;
+	    hasNew0ZoneDomainDownloadItem: number;
+	    httpxOuput: number;
+	    httpxOuputDone: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Event(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.hasNewFofaDownloadItem = source["hasNewFofaDownloadItem"];
+	        this.hasNewDownloadItem = source["hasNewDownloadItem"];
+	        this.hasNewHunterDownloadItem = source["hasNewHunterDownloadItem"];
+	        this.hunterQueryFinished = source["hunterQueryFinished"];
+	        this.hasNewIcpDownloadItem = source["hasNewIcpDownloadItem"];
+	        this.hasNewQuakeDownloadItem = source["hasNewQuakeDownloadItem"];
+	        this.hasNew0ZoneSiteDownloadItem = source["hasNew0ZoneSiteDownloadItem"];
+	        this.hasNew0ZoneMemberDownloadItem = source["hasNew0ZoneMemberDownloadItem"];
+	        this.hasNew0ZoneEmailDownloadItem = source["hasNew0ZoneEmailDownloadItem"];
+	        this.hasNew0ZoneDomainDownloadItem = source["hasNew0ZoneDomainDownloadItem"];
+	        this.httpxOuput = source["httpxOuput"];
+	        this.httpxOuputDone = source["httpxOuputDone"];
+	    }
+	}
+
+}
+
 export namespace fofa {
 	
 	export class Item {

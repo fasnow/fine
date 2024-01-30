@@ -5,12 +5,12 @@ import (
 	"fine/backend/config"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	quakeModel "fine/backend/sdk/model/quake"
 	"fine/backend/utils"
 
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
 	"time"
@@ -241,9 +241,7 @@ func (b *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 		if err := b.quake.Export(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		ctx := b.app.GetContext()
-		runtime.EventsEmit(b.app.GetContext(), "hasNewQuakeDownloadItem")
-		runtime.EventsEmit(ctx, "hasNewDownloadItem")
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewQuakeDownloadItem)
 	}()
 	return nil
 }

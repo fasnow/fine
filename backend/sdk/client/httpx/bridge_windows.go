@@ -1,6 +1,3 @@
-//go:build !windows
-// +build !windows
-
 package httpx
 
 import (
@@ -12,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 type Bridge struct {
@@ -33,6 +31,7 @@ func (r *Bridge) Run(path, flags, inputFlag string, targets string) error {
 	t := strings.Join(strings.Split(targets, "\n"), ",")
 	args := strings.Fields(fmt.Sprintf("%s %s %s %s", path, flags, inputFlag, t))
 	r.cmd = exec.Command(args[0], args[1:]...)
+	r.cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	stdout, _ := r.cmd.StdoutPipe()
 	stderr, _ := r.cmd.StderrPipe()
 
@@ -64,7 +63,7 @@ func (r *Bridge) Run(path, flags, inputFlag string, targets string) error {
 
 func (r *Bridge) Stop() error {
 	if r.cmd != nil && r.cmd.Process != nil && (r.cmd.ProcessState == nil || !r.cmd.ProcessState.Exited()) {
-		err := r.cmd.Process.Signal(os.Interrupt)
+		err := r.cmd.Process.Signal(os.Kill)
 		return err
 	}
 	return nil

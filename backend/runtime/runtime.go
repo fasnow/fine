@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"syscall"
 	"time"
 )
 
@@ -43,7 +44,9 @@ func (r *Runtime) ShowItemInFolder(dir, filename string) error {
 	default:
 		return os.ErrInvalid
 	}
-
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	}
 	return cmd.Start()
 }
 
@@ -60,7 +63,9 @@ func (r *Runtime) OpenFolder(path string) error {
 	default:
 		return os.ErrInvalid
 	}
-
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	}
 	return cmd.Start()
 }
 
@@ -78,7 +83,9 @@ func (r *Runtime) OpenFile(dir, filename string) error {
 	default:
 		return os.ErrInvalid
 	}
-
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	}
 	return cmd.Start()
 }
 

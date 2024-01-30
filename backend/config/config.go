@@ -235,14 +235,20 @@ func (c *Config) SaveProxy(proxy Proxy) error {
 	if err := c.SaveConf(*c); err != nil {
 		return err
 	}
-	auth := ""
-	if proxy.User != "" {
-		auth = proxy.User
-		if proxy.Pass != "" {
-			auth += ":" + proxy.Pass
+
+	if proxy.Enable {
+		auth := ""
+		if proxy.User != "" {
+			auth = proxy.User
+			if proxy.Pass != "" {
+				auth += ":" + proxy.Pass
+			}
 		}
+		_ = ghttp.SetGlobalProxy(fmt.Sprintf("%s://%s%s:%s", proxy.Type, auth, proxy.Host, proxy.Port))
+	} else {
+		_ = ghttp.SetGlobalProxy("")
 	}
-	_ = ghttp.SetGlobalProxy(fmt.Sprintf("%s://%s%s:%s", proxy.Type, auth, proxy.Host, proxy.Port))
+
 	return nil
 }
 

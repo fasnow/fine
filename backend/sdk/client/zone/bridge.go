@@ -5,11 +5,11 @@ import (
 	"fine/backend/config"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/sdk/model/zone"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yitter/idgenerator-go/idgen"
 	"math"
 	"path/filepath"
@@ -546,9 +546,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 		if err := SiteDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		ctx := b.app.GetContext()
-		runtime.EventsEmit(ctx, "hasNew0zoneSiteDownloadItem")
-		runtime.EventsEmit(ctx, "hasNewDownloadItem")
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneSiteDownloadItem)
 	}()
 	return nil
 }
@@ -614,9 +612,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 		if err := DomainDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		ctx := b.app.GetContext()
-		runtime.EventsEmit(ctx, "hasNew0zoneDomainDownloadItem")
-		runtime.EventsEmit(ctx, "hasNewDownloadItem")
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
@@ -682,9 +678,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 		if err := MemberDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		ctx := b.app.GetContext()
-		runtime.EventsEmit(ctx, "hasNew0zoneMemberDownloadItem")
-		runtime.EventsEmit(ctx, "hasNewDownloadItem")
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
@@ -750,9 +744,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 		if err := EmailDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		ctx := b.app.GetContext()
-		runtime.EventsEmit(ctx, "hasNew0zoneEmailDownloadItem")
-		runtime.EventsEmit(ctx, "hasNewDownloadItem")
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }

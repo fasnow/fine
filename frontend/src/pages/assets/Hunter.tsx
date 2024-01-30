@@ -24,6 +24,7 @@ import ResizableTitle from "@/component/ResizableTitle";
 import {ItemType} from "antd/es/menu/hooks/useItems";
 import type { Tab } from 'rc-tabs/lib/interface';
 import {Get0zoneAuth, GetHunterAuth} from "../../../wailsjs/go/config/Config";
+import {Get} from "../../../wailsjs/go/event/Event";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const pageSizeOptions = [10, 20, 50, 100]
 const defaultCheckedColsValue: string[] = [
@@ -199,15 +200,19 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             )
         }
         useEffect(() => {
-            EventsOn("hasNewHunterDownloadItem",()=>{
-                setIsExporting(false)
-                setDisable(false)
-                GetRestToken().then(
-                    result=>{
-                        dispatch(setHunterUser({restToken:result}))
-                    }
-                )
-            })
+            Get().then(
+                result=>{
+                    EventsOn(String(result.hasNewHunterDownloadItem), function(){
+                        setIsExporting(false)
+                        setDisable(false)
+                        GetRestToken().then(
+                            result=>{
+                                dispatch(setHunterUser({restToken:result}))
+                            }
+                        )
+                    })
+                }
+            )
         }, []);
         useEffect(() => {
             const maxPage = Math.ceil(props.total / pageSize)
@@ -305,7 +310,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '序号', dataIndex: "index", width: 52, ellipsis: true, fixed: "left", onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "index",})
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "index",})
                         }
                     }
                 }
@@ -314,7 +319,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: 'URL', dataIndex: "url", ellipsis: true, width: 250, fixed: "left", sorter: ((a, b) => localeCompare(a.url, b.url)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "url",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "url",});
                         },
                         onClick: () => copyCell(record.url)
                     }
@@ -324,7 +329,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '域名', dataIndex: "domain", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.domain, b.domain)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "domain",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "domain",});
                         },
                         onClick: () => copyCell(record.domain)
                     }
@@ -334,7 +339,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: 'IP', dataIndex: "ip", ellipsis: true, width: 90, sorter: ((a, b) => localeCompare(a.ip, b.ip)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "ip",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "ip",});
                         },
                         onClick: () => copyCell(record.ip)
                     }
@@ -344,7 +349,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '端口', dataIndex: "port", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.port, b.port)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "port",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "port",});
                         },
                         onClick: () => copyCell(record.port)
                     }
@@ -354,7 +359,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '协议', dataIndex: "protocol", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.protocol, b.protocol)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "protocol",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "protocol",});
                         },
                         onClick: () => copyCell(record.protocol)
                     }
@@ -364,7 +369,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '网站标题', dataIndex: "web_title", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.web_title, b.web_title)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "web_title",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "web_title",});
                         },
                         onClick: () => copyCell(record.web_title)
                     }
@@ -374,7 +379,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '响应码', dataIndex: "status_code", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.status_code, b.status_code)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "status_code",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "status_code",});
                         },
                         onClick: () => copyCell(record.status_code)
                     }
@@ -396,7 +401,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                     })
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "component",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "component",});
                         },
                         onClick: () => copyCell(tmp?.join(" | "))
                     }
@@ -406,7 +411,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '操作系统', dataIndex: "os", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.os, b.os)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "os",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "os",});
                         },
                         onClick: () => copyCell(record.os)
                     }
@@ -416,7 +421,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '备案单位', dataIndex: "company", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.company, b.company)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "company",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "company",});
                         },
                         onClick: () => copyCell(record.company)
                     }
@@ -426,7 +431,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '城市', dataIndex: "city", ellipsis: true, sorter: ((a, b) => localeCompare(a.city, b.city)), width: 100, onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "city",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "city",});
                         },
                         onClick: () => copyCell(record.city)
                     }
@@ -436,7 +441,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '更新时间', dataIndex: "updated_at", ellipsis: true, width: 100, onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "updated_at",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "updated_at",});
                         },
                         onClick: () => copyCell(record.updated_at)
                     }
@@ -446,7 +451,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: 'web应用', dataIndex: "is_web", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.is_web, b.is_web)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "is_web",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "is_web",});
                         },
                         onClick: () => copyCell(record.is_web)
                     }
@@ -456,7 +461,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: 'Banner', dataIndex: "banner", ellipsis: true, width: 100, onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "banner",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "banner",});
                         },
                         onClick: () => copyCell(record.banner)
                     }
@@ -466,7 +471,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '风险资产', dataIndex: "is_risk", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.is_risk, b.is_risk)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "is_risk",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "is_risk",});
                         },
                         onClick: () => copyCell(record.is_risk)
                     }
@@ -476,7 +481,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '备案号', dataIndex: "number", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.number, b.number)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "number",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "number",});
                         },
                         onClick: () => copyCell(record.number)
                     }
@@ -486,7 +491,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '注册机构', dataIndex: "as_org", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.as_org, b.as_org)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "as_org",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "as_org",});
                         },
                         onClick: () => copyCell(record.as_org)
                     }
@@ -496,7 +501,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '运营商', dataIndex: "isp", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.isp, b.isp)), onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index && (selectedRow = {item: record, rowIndex: index, colKey: "isp",});
+                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "isp",});
                         },
                         onClick: () => copyCell(record.isp)
                     }
@@ -534,13 +539,17 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             }
         }, [])
         useEffect(() => {
-            EventsOn("hasNewHunterDownloadItem",()=>{
-                GetRestToken().then(
-                    result=>{
-                        dispatch(setHunterUser({restToken:result}))
-                    }
-                )
-            })
+            Get().then(
+                result=>{
+                    EventsOn(String(result.hasNewHunterDownloadItem), function(){
+                        GetRestToken().then(
+                            result=>{
+                                dispatch(setHunterUser({restToken:result}))
+                            }
+                        )
+                    })
+                }
+            )
         }, []);
 
         const handleMenuItemClick = (key: MenuItemsKey) => {
@@ -614,12 +623,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         const handleFirstQuery = async (pageSize: number) => {
             const {input, isWeb, dateRange, statusCode, portFilter} = this.state
             const tmpInput = input.trim()
+            setCurrentPageSize(pageSize)
             if (tmpInput === "") {
                 return
             }
             setLoading(true)
             setCurrentPage(1)
-            setCurrentPageSize(pageSize)
             setTotal(0)
             pageIDMap.current = []
             this.setState({
@@ -667,13 +676,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                             return {index: ++index, ...rest, convertValues}
                         }))
                         setCurrentPage(newPage)
-                        // this.props.setHunterUser({
-                        //     accountType: result.accountType,
-                        //     consumeQuota: result.consumeQuota,
-                        //     restQuota: result.restQuota
-                        // })
                         setTotal(result.total)
                         pageIDMap.current[newPage] = result.id
+                        dispatch(setHunterUser({
+                            restToken:result.restQuota
+                        }))
                         setLoading(false)
                     }
                 ).catch(

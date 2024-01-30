@@ -5,11 +5,11 @@ import (
 	"fine/backend/config"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/sdk/model/fofa"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
 	"time"
@@ -157,9 +157,7 @@ func (b *Bridge) Export(taskID int64, page, pageSize int64) error {
 		if err := b.fofa.Export(exportItems, outputAbsFilepath, queryLog.Fields); err != nil {
 			return
 		}
-		ctx := b.app.GetContext()
-		runtime.EventsEmit(ctx, "hasNewFofaDownloadItem")
-		runtime.EventsEmit(ctx, "hasNewDownloadItem")
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewDownloadItem)
 	}()
 	return nil
 }

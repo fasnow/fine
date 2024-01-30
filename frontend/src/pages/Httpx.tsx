@@ -12,11 +12,16 @@ import {errorNotification} from "@/component/Notification";
 import * as child_process from "child_process";
 import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
-import {SyncOutlined} from "@ant-design/icons";
+import {CloudOutlined, CopyOutlined, GlobalOutlined, SyncOutlined} from "@ant-design/icons";
 import {ILinkHandler, Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit'
 import * as xterm from "xterm";
+import ContextMenu from "@/component/ContextMenu";
+import {ItemType} from "antd/es/menu/hooks/useItems";
+import {MenuItemsKey} from "@/type";
+import copy from "copy-to-clipboard";
+import {Get} from "../../wailsjs/go/event/Event";
 
 const Httpx = () => {
     const [path,setPath] = useState<string>("")
@@ -27,6 +32,8 @@ const Httpx = () => {
     const [targets,setTargets] = useState<string>("")
     const terminalRef = useRef<Terminal>(new Terminal());
     const fitAddon = useRef<FitAddon>(new  FitAddon());
+    const selectedValue = useRef<string>("")
+
     useEffect(() => {
         if (terminalRef.current) {
             const elem = document.getElementById('output')
@@ -34,7 +41,9 @@ const Httpx = () => {
                 terminalRef.current.open(elem);
                 terminalRef.current.loadAddon(fitAddon.current)
                 terminalRef.current.options.linkHandler={
-                    activate: (event, text, range)=> BrowserOpenURL(text)
+                    activate: (event, text, range)=> {
+                        BrowserOpenURL(text)
+                    }
                 }
                 fitAddon.current.fit()
                 window.addEventListener("resize", ()=>{
@@ -49,28 +58,31 @@ const Httpx = () => {
                 setInputFlag(result.inputFlag)
             }
         )
-        EventsOn("httpx",(value)=>{
-            const urlRegex = /https?:\/\/\S+/g;
-            let match;
-            let resultString = value;
-            while ((match = urlRegex.exec(value)) !== null) {
-                const matchedUri = match[0];
-                const replacement = `\x1b]8;;${matchedUri}\x07${matchedUri}\x1b]8;;\x07`;
-                resultString = resultString.replace(matchedUri, replacement);
+        Get().then(
+            result=>{
+                EventsOn(String(result.httpxOuput),(value)=>{
+                    const urlRegex = /https?:\/\/\S+/g;
+                    let match;
+                    let resultString = value;
+                    while ((match = urlRegex.exec(value)) !== null) {
+                        const matchedUri = match[0];
+                        const replacement = `\x1b]8;;${matchedUri}\x07${matchedUri}\x1b]8;;\x07`;
+                        resultString = resultString.replace(matchedUri, replacement);
+                    }
+                    terminalRef.current && terminalRef.current.writeln(resultString)
+                })
+                EventsOn(String(result.httpxOuputDone),()=>{
+                    setRunning(false)
+                    terminalRef.current && terminalRef.current.write("$$$ Finished")
+                })
             }
-            terminalRef.current && terminalRef.current.writeln(resultString)
-        })
-        EventsOn("httpxDone",()=>{
-            setRunning(false)
-            terminalRef.current && terminalRef.current.write("$$$ Finished")
-        })
+        )
     }, []);
-
-
 
     const saveHttpx=()=>{
         SaveHttpx({path:path,flags:flags,inputFlag:inputFlag})
     }
+
     const setHttpxPath=()=>{
         OpenFileDialog().then(
             result=>{
@@ -98,6 +110,7 @@ const Httpx = () => {
             errorNotification("错误", err)
         })
     }
+
     return (
         <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
             <div style={{display:"flex",justifyContent:"center",gap:"10px"}}>
@@ -132,7 +145,7 @@ const Httpx = () => {
                         {/*<TextArea value={output} autoSize style={{maxHeight:"calc(100vh - 120px)"}}*/}
                         {/*          onChange={e=>setOutput(e.target.value)}*/}
                         {/*/>*/}
-                        <div id="output" style={{height:"calc(100vh - 120px)"}}/>
+                            <div id="output" style={{height:"calc(100vh - 120px)"}}/>
                     </Allotment.Pane>
                 </Allotment>
             </div>

@@ -5,11 +5,11 @@ import (
 	"fine/backend/config"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/sdk/model/hunter"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
 	"strings"
@@ -71,6 +71,7 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		queryResult.Total = total
 		queryResult.Page = page
 		queryResult.TaskID = taskID
+		queryResult.RestQuota = b.token.GetLast() //从数据库获取剩余积分
 		for _, cacheItem := range cacheItems {
 			queryResult.Items = append(queryResult.Items, cacheItem.Item)
 		}
@@ -91,7 +92,7 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 	if err != nil {
 		return nil, err
 	}
-	b.token.Add(result.RestQuota)
+	b.token.Add(result.RestQuota) //剩余积分添加到数据库记录
 	if result.Total > 0 {
 		// 缓存查询成功的条件，用于导出
 		id := idgen.NextId()
@@ -189,6 +190,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 				continue
 			}
 			_ = b.dataCache.BatchInsert(exportDataTaskID, result.Items)
+			b.token.Add(result.RestQuota) //剩余积分添加到数据库记录
 			time.Sleep(time.Duration(interval) * time.Millisecond)
 		}
 		cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
@@ -202,9 +204,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 		if err := b.hunter.Export(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		ctx := b.app.GetContext()
-		runtime.EventsEmit(b.app.GetContext(), "hasNewHunterDownloadItem")
-		runtime.EventsEmit(ctx, "hasNewDownloadItem")
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewHunterDownloadItem)
 	}()
 	return nil
 }

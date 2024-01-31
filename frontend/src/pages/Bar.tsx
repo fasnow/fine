@@ -124,9 +124,10 @@ const DownloadViewContent: React.FC = () => {
     }, []);
     const openDataFolder = async () => {
         const dir = await GetDataBaseDir()
-        await OpenFolder(dir)
+        OpenFolder(dir).catch(
+            err=>errorNotification("错误",err)
+        )
     }
-
     const loadMoreData = () => {
         GetByOffset(data.length, 10).then(
             result=>{
@@ -546,7 +547,7 @@ const Bar: React.FC = () => {
             }
         )
     }
-    
+
     return (
         <div id="drag" className="bar" style={{ backgroundColor: 'rgb(255, 255, 255,1)'}} onDoubleClick={handleWindowResize}>
             <div className="left" >{appIcon(platform)}</div>

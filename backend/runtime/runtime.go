@@ -1,6 +1,3 @@
-//go:build !windows
-// +build !windows
-
 package runtime
 
 import (
@@ -34,7 +31,6 @@ func (r *Runtime) GetPlatform() string {
 
 func (r *Runtime) ShowItemInFolder(dir, filename string) error {
 	absFilePath := filepath.Join(dir, filename)
-	fmt.Println(absFilePath)
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "darwin": // macOS
@@ -42,7 +38,8 @@ func (r *Runtime) ShowItemInFolder(dir, filename string) error {
 	case "linux": // Linux
 		cmd = exec.Command("xdg-open", absFilePath)
 	case "windows": // Windows
-		cmd = exec.Command("explorer", "/select,", absFilePath)
+		cmd = exec.Command("cmd", "/c", "explorer", "/select,", absFilePath)
+		HideCmdWindow(cmd)
 	default:
 		return os.ErrInvalid
 	}
@@ -51,14 +48,14 @@ func (r *Runtime) ShowItemInFolder(dir, filename string) error {
 
 func (r *Runtime) OpenFolder(path string) error {
 	var cmd *exec.Cmd
-	fmt.Println(path)
 	switch runtime.GOOS {
 	case "darwin": // macOS
 		cmd = exec.Command("open", path)
 	case "linux": // Linux
 		cmd = exec.Command("xdg-open", path)
 	case "windows": // Windows
-		cmd = exec.Command("explorer", path)
+		cmd = exec.Command("cmd", "/c", "explorer", path)
+		HideCmdWindow(cmd)
 	default:
 		return os.ErrInvalid
 	}
@@ -76,6 +73,7 @@ func (r *Runtime) OpenFile(dir, filename string) error {
 		cmd = exec.Command("xdg-open", absFilePath)
 	case "windows": // Windows
 		cmd = exec.Command("cmd", "/c", "start", absFilePath)
+		HideCmdWindow(cmd)
 	default:
 		return os.ErrInvalid
 	}

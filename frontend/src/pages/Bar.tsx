@@ -13,7 +13,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import {
     BrowserOpenURL, EventsOn,
     Quit,
-    WindowFullscreen, WindowIsFullscreen,
+    WindowFullscreen, WindowIsFullscreen, WindowIsMaximised,
     WindowMaximise,
     WindowMinimise,
     WindowUnmaximise
@@ -534,24 +534,23 @@ const Bar: React.FC = () => {
     }, [])
 
     const handleWindowResize=()=>{
-        WindowIsFullscreen().then(
+        WindowIsMaximised().then(
             result=>{
                 if(result){
                     WindowUnmaximise()
                     setIsFullScreen(false)
                     return
                 }
-                WindowFullscreen()
+                WindowMaximise()
                 setIsFullScreen(true)
             }
         )
     }
-
-
+    
     return (
-        <div id="drag" className="bar" style={{ backgroundColor: 'rgb(255, 255, 255,1)'}}>
-            <div className="left" onClick={handleWindowResize}>{appIcon(platform)}</div>
-            <div className="right">
+        <div id="drag" className="bar" style={{ backgroundColor: 'rgb(255, 255, 255,1)'}} onDoubleClick={handleWindowResize}>
+            <div className="left" >{appIcon(platform)}</div>
+            <div className="right" onDoubleClick={(e)=>e.stopPropagation()}>
                 <Space size={1}>
                     <span onClick={genshinLaunch} style={{ color: "#4676c3", margin: "0px 10px 0px 10px" }}> v{version.current}</span>
                     <DownloadHistory />
@@ -604,7 +603,7 @@ const Bar: React.FC = () => {
                                 style={buttonStyle}
                                 icon={<ExpandOutlined />}
                                 size="small"
-                                onClick={() => {
+                                onClick={(e) => {
                                     WindowMaximise();
                                     setIsFullScreen(true)
                                 }}

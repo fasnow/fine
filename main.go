@@ -19,6 +19,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
+	runtime2 "runtime"
 )
 
 //go:embed all:frontend/dist
@@ -30,7 +31,7 @@ func main() {
 		Title:     "fine",
 		Width:     1200,
 		Height:    768,
-		Frameless: true,
+		Frameless: runtime2.GOOS != "darwin",
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

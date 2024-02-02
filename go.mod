@@ -10,10 +10,11 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
-	github.com/tidwall/gjson v1.9.3
+	github.com/tidwall/gjson v1.17.0
 	github.com/wailsapp/wails/v2 v2.7.1
 	github.com/xuri/excelize/v2 v2.8.0
 	github.com/yitter/idgenerator-go v1.3.3
+	golang.org/x/crypto v0.14.0
 	golang.org/x/net v0.17.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/sqlite v1.5.4
@@ -44,7 +45,8 @@ require (
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
@@ -52,7 +54,6 @@ require (
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/xuri/efp v0.0.0-20230802181842-ad255f2331ca // indirect
 	github.com/xuri/nfp v0.0.0-20230819163627-dc951e3ffe1a // indirect
-	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.13.0 // indirect

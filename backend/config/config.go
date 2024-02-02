@@ -74,11 +74,12 @@ func GetConfig() *Config {
 }
 
 type Config struct {
-	Auth     Auth  `yaml:"auth" json:"auth"`
-	Proxy    Proxy `yaml:"proxy" json:"proxy"`
-	Interval `yaml:"interval" json:"interval"`
-	Timeout  int   `yaml:"timeout" json:"timeout"` //秒
-	Httpx    Httpx `yaml:"httpx" json:"httpx"`
+	Auth           Auth  `yaml:"auth" json:"auth"`
+	Proxy          Proxy `yaml:"proxy" json:"proxy"`
+	Interval       `yaml:"interval" json:"interval"`
+	Timeout        int    `yaml:"timeout" json:"timeout"` //秒
+	Httpx          Httpx  `yaml:"httpx" json:"httpx"`
+	WxDataCacheDir string `yaml:"wxDataCacheDir" json:"wxDataCacheDir"`
 }
 
 type Httpx struct {
@@ -125,23 +126,6 @@ type Interval struct {
 	Zone   int `yaml:"0.zone" json:"0.zone"`
 }
 
-// GetDefaultTimeout second
-func (c *Config) GetDefaultTimeout() int {
-	return defaultTimeout
-}
-
-func (c *Config) GetDefaultInterval() Interval {
-	return defaultConfig.Interval
-}
-
-func GetDefaultTimeout() int {
-	return defaultTimeout
-}
-
-func GetDefaultInterval() Interval {
-	return defaultConfig.Interval
-}
-
 func (c *Config) Init() error {
 	if err := c.ifDirNonExistThenCreat(baseDir); err != nil {
 		return err
@@ -161,8 +145,49 @@ func (c *Config) Init() error {
 	return nil
 }
 
+// GetDefaultTimeout second
+func (c *Config) GetDefaultTimeout() int {
+	return defaultTimeout
+}
+
+func (c *Config) GetDefaultInterval() Interval {
+	return defaultConfig.Interval
+}
+
+func GetDefaultTimeout() int {
+	return defaultTimeout
+}
+
+func GetDefaultInterval() Interval {
+	return defaultConfig.Interval
+}
+
+func (c *Config) GetConfigBaseDir() string {
+	return baseDir
+}
+
+func (c *Config) GetDataBaseDir() string {
+	return dataDir
+}
+
+func GetBaseDataDir() string {
+	return dataDir
+}
+
 func (c *Config) GetAll() Config {
 	return cfgInstance
+}
+
+func (c *Config) SaveConf(conf Config) (err error) {
+	marshal, err := yaml.Marshal(conf)
+	if err != nil {
+		return err
+	}
+	if err = os.WriteFile(cfgAbsFilePath, marshal, 0666); err != nil {
+		return err
+	}
+	cfgInstance = conf
+	return nil
 }
 
 func (c *Config) ifDirNonExistThenCreat(dir string) error {
@@ -230,6 +255,15 @@ func (c *Config) GetConfigFromFile() (*Config, error) {
 	return &cfgInstance, nil
 }
 
+func (c *Config) GetProxy() Proxy {
+	if cfgInstance.Proxy.Host == "" {
+		c.Proxy = defaultConfig.Proxy
+		_ = c.SaveConf(*c)
+		return cfgInstance.Proxy
+	}
+	return cfgInstance.Proxy
+}
+
 func (c *Config) SaveProxy(proxy Proxy) error {
 	c.Proxy = proxy
 	if err := c.SaveConf(*c); err != nil {
@@ -252,6 +286,10 @@ func (c *Config) SaveProxy(proxy Proxy) error {
 	return nil
 }
 
+func (c *Config) GetFofaAuth() Fofa {
+	return cfgInstance.Auth.Fofa
+}
+
 func (c *Config) SaveFofaAuth(email, key string) error {
 	c.Auth.Fofa = Fofa{
 		Key:   key,
@@ -263,12 +301,20 @@ func (c *Config) SaveFofaAuth(email, key string) error {
 	return nil
 }
 
+func (c *Config) GetHunterAuth() Hunter {
+	return cfgInstance.Auth.Hunter
+}
+
 func (c *Config) SaveHunterAuth(key string) error {
 	c.Auth.Hunter = Hunter{Key: key}
 	if err := c.SaveConf(*c); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (c *Config) GetQuakeAuth() Quake {
+	return cfgInstance.Auth.Quake
 }
 
 func (c *Config) SaveQuakeAuth(key string) error {
@@ -279,6 +325,10 @@ func (c *Config) SaveQuakeAuth(key string) error {
 	return nil
 }
 
+func (c *Config) Get0zoneAuth() Zone {
+	return cfgInstance.Auth.Zone
+}
+
 func (c *Config) Save0zoneAuth(key string) error {
 	c.Auth.Zone = Zone{Key: key}
 	if err := c.SaveConf(*c); err != nil {
@@ -287,15 +337,15 @@ func (c *Config) Save0zoneAuth(key string) error {
 	return nil
 }
 
-func (c *Config) SaveConf(conf Config) (err error) {
-	marshal, err := yaml.Marshal(conf)
-	if err != nil {
+func (c *Config) GetWxDataCacheDir() string {
+	return c.WxDataCacheDir
+}
+
+func (c *Config) SaveWxDataCacheDir(dir string) error {
+	c.WxDataCacheDir = filepath.Dir(dir)
+	if err := c.SaveConf(*c); err != nil {
 		return err
 	}
-	if err = os.WriteFile(cfgAbsFilePath, marshal, 0666); err != nil {
-		return err
-	}
-	cfgInstance = conf
 	return nil
 }
 
@@ -314,49 +364,12 @@ func (c *Config) CheckAuth(name string) bool {
 	}
 }
 
-func (c *Config) GetConfigBaseDir() string {
-	return baseDir
-}
-
-func (c *Config) GetDataBaseDir() string {
-	return dataDir
-}
-
-func GetBaseDataDir() string {
-	return dataDir
-}
-
 func (c *Config) GetDBFile() string {
 	return dbAbsFilePath
 }
 
 func (c *Config) GetConfigAbsFilePath() string {
 	return cfgAbsFilePath
-}
-
-func (c *Config) GetFofaAuth() Fofa {
-	return cfgInstance.Auth.Fofa
-}
-
-func (c *Config) GetHunterAuth() Hunter {
-	return cfgInstance.Auth.Hunter
-}
-
-func (c *Config) GetQuakeAuth() Quake {
-	return cfgInstance.Auth.Quake
-}
-
-func (c *Config) Get0zoneAuth() Zone {
-	return cfgInstance.Auth.Zone
-}
-
-func (c *Config) GetProxy() Proxy {
-	if cfgInstance.Proxy.Host == "" {
-		c.Proxy = defaultConfig.Proxy
-		_ = c.SaveConf(*c)
-		return cfgInstance.Proxy
-	}
-	return cfgInstance.Proxy
 }
 
 func (c *Config) GetHttpx() Httpx {

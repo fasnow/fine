@@ -133,6 +133,7 @@ export namespace config {
 	    "0.zone": number;
 	    timeout: number;
 	    httpx: Httpx;
+	    wxDataCacheDir: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -148,6 +149,7 @@ export namespace config {
 	        this["0.zone"] = source["0.zone"];
 	        this.timeout = source["timeout"];
 	        this.httpx = this.convertValues(source["httpx"], Httpx);
+	        this.wxDataCacheDir = source["wxDataCacheDir"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

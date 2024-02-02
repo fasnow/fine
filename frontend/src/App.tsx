@@ -23,9 +23,8 @@ import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
 import TianYanCha from "@/pages/unitmap/TianYanCha";
 import {Get} from "../wailsjs/go/event/Event";
-
-
-
+import {commandExecute} from "./pages/wxMiniProgram/wuLib"
+import {doFile} from "./pages/wxMiniProgram/wuWxapkg"
 const { Header } = Lay;
 const headerStyle: React.CSSProperties = {
     textAlign: 'center',
@@ -59,7 +58,7 @@ const App: React.FC = () => {
         if (isQingmingJie) {
             bodyElement.style.filter = 'grayscale(100%)';
         }
-
+        commandExecute(doFile,"")
     }, [])
     useEffect(() => {
         try {

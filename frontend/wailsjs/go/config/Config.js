@@ -62,6 +62,10 @@ export function GetQuakeAuth() {
   return window['go']['config']['Config']['GetQuakeAuth']();
 }
 
+export function GetWxDataCacheDir() {
+  return window['go']['config']['Config']['GetWxDataCacheDir']();
+}
+
 export function Init() {
   return window['go']['config']['Config']['Init']();
 }
@@ -92,4 +96,8 @@ export function SaveProxy(arg1) {
 
 export function SaveQuakeAuth(arg1) {
   return window['go']['config']['Config']['SaveQuakeAuth'](arg1);
+}
+
+export function SaveWxDataCacheDir(arg1) {
+  return window['go']['config']['Config']['SaveWxDataCacheDir'](arg1);
 }

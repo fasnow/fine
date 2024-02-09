@@ -525,13 +525,11 @@ const Bar: React.FC = () => {
     const version = useRef(packageJson.version)
     const [isFullScreen,setIsFullScreen] = useState<boolean>(false)
     useEffect(() => {
-        const platform = async () => {
-            const result = await GetPlatform()
-            console.log(result)
-            // setPlatform((result))
-            setPlatform("windows")
-        }
-        platform()
+        GetPlatform().then(
+            result=>{
+                setPlatform(result)
+            }
+        )
     }, [])
 
     const handleWindowResize=()=>{
@@ -567,7 +565,7 @@ const Bar: React.FC = () => {
                             }}
                         />
                     </Tooltip>
-                    <Tooltip placement={platform == "win32" ? "bottom" : "bottomLeft"} title="提交Bug" >
+                    <Tooltip placement={platform === "windows" ? "bottom" : "bottomLeft"} title="提交Bug" >
                         <Button
                             type="text"
                             style={buttonStyle}
@@ -578,47 +576,48 @@ const Bar: React.FC = () => {
                             }}
                         />
                     </Tooltip>
-                    {/*{platform == "windows" ? <TitleBarOverlay /> : <></>}*/}
-                    <div>
-                        <Button
-                            type="text"
-                            style={buttonStyle}
-                            icon={<LineOutlined />}
-                            size="small"
-                            onClick={WindowMinimise}
-                        />
-                        {isFullScreen ? (
+                    {
+                        platform === "windows" &&  <div>
                             <Button
                                 type="text"
                                 style={buttonStyle}
-                                icon={<CompressOutlined />}
+                                icon={<LineOutlined />}
                                 size="small"
-                                onClick={() => {
-                                    WindowUnmaximise();
-                                    setIsFullScreen(false)
-                                }}
+                                onClick={WindowMinimise}
                             />
-                        ) : (
+                            {isFullScreen ? (
+                                <Button
+                                    type="text"
+                                    style={buttonStyle}
+                                    icon={<CompressOutlined />}
+                                    size="small"
+                                    onClick={() => {
+                                        WindowUnmaximise();
+                                        setIsFullScreen(false)
+                                    }}
+                                />
+                            ) : (
+                                <Button
+                                    type="text"
+                                    style={buttonStyle}
+                                    icon={<ExpandOutlined />}
+                                    size="small"
+                                    onClick={(e) => {
+                                        WindowMaximise();
+                                        setIsFullScreen(true)
+                                    }}
+                                />
+                            )}
                             <Button
                                 type="text"
                                 style={buttonStyle}
-                                icon={<ExpandOutlined />}
+                                icon={<CloseOutlined />}
                                 size="small"
-                                onClick={(e) => {
-                                    WindowMaximise();
-                                    setIsFullScreen(true)
-                                }}
+                                className="exit-button"
+                                onClick={Quit}
                             />
-                        )}
-                        <Button
-                            type="text"
-                            style={buttonStyle}
-                            icon={<CloseOutlined />}
-                            size="small"
-                            className="exit-button"
-                            onClick={Quit}
-                        />
-                    </div>
+                        </div>
+                    }
                 </Space>
             </div>
         </div>

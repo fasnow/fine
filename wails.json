@@ -1,6 +1,6 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "fine",
+  "name": "Fine",
   "outputfilename": "Fine",
   "frontend:install": "npm install --force",
   "frontend:build": "npm run build",

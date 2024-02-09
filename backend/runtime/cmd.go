@@ -3,7 +3,10 @@
 
 package runtime
 
-import "os/exec"
+import (
+	"os"
+	"os/exec"
+)
 
 func HideCmdWindow(cmd *exec.Cmd) {
 }

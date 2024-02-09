@@ -35,6 +35,11 @@ jobs:
           cd frontend
           npm install --force
 
+      - name: Pwd
+        if: matrix.os == 'macos-latest'
+        run: |
+          pwd
+
       - name: Build
         run: |
           wails build

@@ -51,4 +51,5 @@ jobs:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: |
             ${{ matrix.os == 'windows-latest' ? './build/bin/Fine.exe' : './build/bin/Fine.app' }}
-          asset_name: ${{ matrix.os == 'windows-latest' ? 'Fine.exe' : 'Fine.app' }}
+          asset_name: |
+            ${{ matrix.os == 'windows-latest' ? 'Fine.exe' : 'Fine.app' }}

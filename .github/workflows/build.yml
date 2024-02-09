@@ -21,7 +21,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/setup-go@v2
         with:
-          go-version: 'latest'
+          go-version: '1.22.0'
 
       - name: Install Wails
         if: matrix.os == 'windows-latest'

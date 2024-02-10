@@ -6,24 +6,11 @@ on:
       - '*'  # 当有标签推送时触发
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [windows-latest,macos-latest]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
-      - name: Read Package Version
-        id: version
-        run: |
-          cd frontend
-          echo "::set-output name=version::$(jq -r '.version' package.json)"
-          ${{ steps.version.outputs.version }}
-
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -47,37 +34,73 @@ jobs:
         run: |
           wails build
 
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-artifact
+          path: |
+            build/bin/*
 
 
-      - name: Ls1
-        if: matrix.os == 'macos-latest'
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.22.0'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
         run: |
-          cd 'build/bin/'
-          ls
+          cd frontend
+          npm install --force
 
-      - name: Ls2
-        if: matrix.os == 'windows-latest'
+      - name: Build
         run: |
-          cd 'build/bin/'
-          dir
+          wails build
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: compiled-files
+          name: macos-artifact
           path: |
             build/bin/*
-
   release:
     runs-on: macos-latest
-    needs: build
+    needs: [build-windows,build-macos]
     steps:
-      - name: Download Build Artifacts
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Read Package Version
+        id: version
+        run: |
+          cd frontend
+          echo "::set-output name=version::$(jq -r '.version' package.json)"
+          echo ${{ steps.version.outputs.version }}
+
+      - name: Download Windows Build Artifacts
         uses: actions/download-artifact@v2
         with:
-          name: compiled-files
-          path: downloaded-assets
+          name: windows-artifact
+          path: artifacts
 
+      - name: Download Macos Build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-artifact
+          path: artifacts
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -91,5 +114,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            downloaded-assets/*
+            artifacts/*
 

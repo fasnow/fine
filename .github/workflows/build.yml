@@ -17,6 +17,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: Read Package Version
+        id: version
+        run:
+          cd frontend
+          echo "::set-output name=version::$(jq -r '.version' package.json)"
+          ${{ steps.version.outputs.version }}
+
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -70,9 +78,6 @@ jobs:
           name: compiled-files
           path: downloaded-assets
 
-      - name: Read Package Version
-        id: version
-        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
 
       - name: Upload Release Asset
         id: upload-release-asset

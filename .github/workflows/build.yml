@@ -104,15 +104,16 @@ jobs:
 
       - name: Dir
         run: |
-          ls macos-artifact
+          ls -l macos-artifact
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            windows-artifact/Fine.exe
-            macos-artifact/Fine.app
+            ./macos-artifact/Fine.app
+            ./macos-artifact/fine.app
+            ./windows-artifact/Fine.exe
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
 

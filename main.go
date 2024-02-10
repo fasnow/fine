@@ -58,6 +58,9 @@ func main() {
 			quake.NewQuakeBridge(mainApp),
 			zone.NewZoneBridge(mainApp),
 		},
+		Debug: options.Debug{
+			OpenInspectorOnStartup: false,
+		},
 	}
 	if err := wails.Run(opts); err != nil {
 		println("Error:", err.Error())

@@ -107,7 +107,7 @@ func DoConfig(filename string) (any, any, any) {
 	//var networkTimeout = gjson.Get(content, "networkTimeout")
 	var subPackages = gjson.Get(content, "subPackages").Array()
 	if len(subPackages) > 0 {
-		var newSubPackages []string
+		//var newSubPackages []string
 		//var tmpPages []string
 
 		for _, subPackage := range subPackages {
@@ -135,7 +135,7 @@ func DoConfig(filename string) (any, any, any) {
 			}
 			sjson.Set(subPackage.Raw, "root", root)
 			sjson.Set(subPackage.Raw, "pages", sbuPages)
-			newSubPackages = append(newSubPackages, subPackage)
+			//newSubPackages = append(newSubPackages, subPackage)
 		}
 	}
 

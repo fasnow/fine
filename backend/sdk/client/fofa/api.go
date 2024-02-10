@@ -337,6 +337,7 @@ func (f *Fofa) User() (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(f)
 	response, err := f.http.Do(request)
 	if err != nil {
 		return nil, err

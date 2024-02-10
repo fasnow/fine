@@ -69,6 +69,8 @@ jobs:
       - name: Build
         run: |
           wails build
+          cd build/bin
+          ls -a
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3

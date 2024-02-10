@@ -102,18 +102,12 @@ jobs:
           name: macos-artifact
           path: artifacts/
 
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
         with:
-#          tag_name: ${{ steps.version.outputs.version }}
-#          name: Release ${{ steps.version.outputs.version }}
-#          body: TODO New Release.
-#          draft: false
-#          prerelease: false
           files: |
             artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
 

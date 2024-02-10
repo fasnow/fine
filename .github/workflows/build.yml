@@ -41,10 +41,15 @@ jobs:
 
       - name: Upload Release Asset
         id: upload-release-asset
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ (matrix.os == 'windows-latest' && './build/bin/Fine.exe') || './build/bin/Fine.app' }}
-          asset_name: ${{ (matrix.os == 'windows-latest' && 'Fine.exe') || 'Fine.app' }}
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          body: TODO New Release.
+          draft: false
+          prerelease: false
+          files: |
+            ${{ (matrix.os == 'windows-latest' && './build/bin/Fine.exe') || './build/bin/Fine.app' }}
+         

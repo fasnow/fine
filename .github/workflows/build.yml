@@ -19,7 +19,7 @@ jobs:
 
       - name: Read Package Version
         id: version
-        run:
+        run: |
           cd frontend
           echo "::set-output name=version::$(jq -r '.version' package.json)"
           ${{ steps.version.outputs.version }}

@@ -76,8 +76,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          name: Release ${{ github.ref }}
           body: TODO New Release.
           draft: false
           prerelease: false

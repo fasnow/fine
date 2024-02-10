@@ -80,5 +80,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./Fine.*
+            ./downloaded-assets/.*
 

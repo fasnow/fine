@@ -104,6 +104,11 @@ jobs:
           name: macos-artifact
           path: macos-artifact/
 
+      - name: Dir
+        run: |
+          ls macos-artifact
+          ls windows-artifact
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')

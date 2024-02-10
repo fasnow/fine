@@ -39,6 +39,10 @@ jobs:
         run: |
           wails build
 
+      - name: Ls
+        run: ${{ (matrix.os == 'windows-latest' && cd ./build/bin/ && dir) || (cd ./build/bin/ && ls) }}
+
+
       - name: Upload Release Asset
         id: upload-release-asset
         uses: softprops/action-gh-release@v1

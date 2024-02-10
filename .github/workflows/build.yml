@@ -6,7 +6,7 @@ on:
       - '*'  # 当有标签推送时触发
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -60,8 +60,9 @@ jobs:
           path: |
             ./build/bin/*
 
-  Release:
+  release:
     runs-on: macos-latest
+    needs: build
     steps:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v2

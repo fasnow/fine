@@ -39,9 +39,19 @@ jobs:
         run: |
           wails build
 
-      - name: Ls
-        run: ${{ (matrix.os == 'windows-latest' && cd './build/bin/' && dir) || (cd './build/bin/' && ls) }}
 
+
+      - name: Ls1
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd './build/bin/'
+          ls
+
+      - name: Ls2
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd './build/bin/'
+          dir
 
       - name: Upload Release Asset
         id: upload-release-asset

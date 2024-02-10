@@ -70,12 +70,18 @@ jobs:
           name: compiled-files
           path: downloaded-assets
 
+      - name: Read Package Version
+        id: version
+        run: echo "::set-output name=version::$(jq -r '.version' package.json)"
+
       - name: Upload Release Asset
         id: upload-release-asset
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
         with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
           body: TODO New Release.
           draft: false
           prerelease: false

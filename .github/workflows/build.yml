@@ -53,6 +53,21 @@ jobs:
           cd './build/bin/'
           dir
 
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: compiled-files
+          path: |
+            ./build/bin/*
+
+  Release:
+    runs-on: macos-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: compiled-files
+          path: ./downloaded-assets
       - name: Upload Release Asset
         id: upload-release-asset
         uses: softprops/action-gh-release@v1
@@ -65,5 +80,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./build/bin/*
-         
+            ./Fine.*
+

@@ -6,8 +6,8 @@ on:
       - '*'  # 当有标签推送时触发
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+#  build-windows:
+#    runs-on: windows-latest
 #    steps:
 #      - name: Checkout Repository
 #        uses: actions/checkout@v4
@@ -78,7 +78,7 @@ jobs:
             build/bin/*
   release:
     runs-on: macos-latest
-    needs: [build-windows,build-macos]
+    needs: [build-macos]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

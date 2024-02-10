@@ -81,5 +81,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./downloaded-assets/.*
+            ./downloaded-assets/*
 

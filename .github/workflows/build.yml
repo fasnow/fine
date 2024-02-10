@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@4
+        uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v4

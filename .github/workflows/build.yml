@@ -44,13 +44,13 @@ jobs:
       - name: Ls1
         if: matrix.os == 'macos-latest'
         run: |
-          cd './build/bin/'
+          cd 'build/bin/'
           ls
 
       - name: Ls2
         if: matrix.os == 'windows-latest'
         run: |
-          cd './build/bin/'
+          cd 'build/bin/'
           dir
 
       - name: Upload Artifacts
@@ -58,7 +58,7 @@ jobs:
         with:
           name: compiled-files
           path: |
-            ./build/bin/*
+            build/bin/*
 
   release:
     runs-on: macos-latest
@@ -68,7 +68,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: compiled-files
-          path: ./downloaded-assets
+          path: downloaded-assets
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -82,6 +82,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./downloaded-assets/Fine.exe
-            ./downloaded-assets/Fine.app
+            downloaded-assets/*
 

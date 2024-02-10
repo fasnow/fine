@@ -65,5 +65,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ${{ (matrix.os == 'windows-latest' && './build/bin/Fine.exe') || './build/bin/Fine.app' }}
+            ./build/bin/*
          

@@ -69,8 +69,6 @@ jobs:
       - name: Build
         run: |
           wails build
-          cd build/bin
-          ls -a
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
@@ -104,18 +102,13 @@ jobs:
           name: macos-artifact
           path: macos-artifact/
 
-      - name: Dir
-        run: |
-          ls macos-artifact
-          ls windows-artifact
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            windows-artifact/*
-            macos-artifact/*
+            windows-artifact/Fine.exe
+            macos-artifact/Fine.app
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
 

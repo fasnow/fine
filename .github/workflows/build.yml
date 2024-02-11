@@ -36,7 +36,7 @@ jobs:
       - name: Zip Build Artifacts
         run: |
           cd build/bin/
-          zip -r Fine-amd64.zip *
+          Compress-Archive -Path .\* -DestinationPath .\Fine-amd64.zip
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2

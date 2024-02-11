@@ -71,16 +71,14 @@ jobs:
 
       - name: Zip Build Artifacts
         run: |
-          cd build/bin/
-          zip -r Fine-darwin.zip *
-          mv Fine-darwin.zip $GITHUB_WORKSPACE
+          zip -r Fine-darwin.zip build/bin/*
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: macos-artifact
           path: |
-            $GITHUB_WORKSPACE/Fine-darwin.zip
+            Fine-darwin.zip
   release:
     runs-on: macos-latest
     needs: [build-macos]

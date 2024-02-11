@@ -110,7 +110,8 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 111
-            2. 222
+            1. 更新框架；
+            2. 添加了数据库功能，移除了零零信安部分功能；
+            3. 新增MacOS平台。
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}

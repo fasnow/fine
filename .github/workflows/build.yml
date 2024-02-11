@@ -1,5 +1,4 @@
-name: Build and Release
-#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
+name: Fine Auto Release
 on:
   push:
     tags:
@@ -70,12 +69,18 @@ jobs:
 #        run: |
 #          wails build
 
+      - name: Zip Build Artifacts
+        run: |
+          cd build/bin/
+          zip -r Fine-darwin.zip *
+          mv Fine-darwin.zip $GITHUB_WORKSPACE
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: macos-artifact
           path: |
-            build/bin/*
+            $GITHUB_WORKSPACE/Fine-darwin.zip
   release:
     runs-on: macos-latest
     needs: [build-macos]
@@ -100,18 +105,14 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: macos-artifact
-          path: macos-artifact/
-
-      - name: Dir
-        run: |
-          ls -l macos-artifact
+          path: artifacts/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            macos-artifact/*
+            artifacts/*
 #            windows-artifact/*
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

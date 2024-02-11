@@ -58,7 +58,6 @@ const App: React.FC = () => {
         if (isQingmingJie) {
             bodyElement.style.filter = 'grayscale(100%)';
         }
-        // commandExecute(doFile,"")
     }, [])
     useEffect(() => {
         try {

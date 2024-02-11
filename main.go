@@ -28,7 +28,7 @@ var assets embed.FS
 func main() {
 	mainApp := app.NewApp()
 	opts := &options.App{
-		Title:     "fine",
+		Title:     "Fine",
 		Width:     1200,
 		Height:    768,
 		Frameless: runtime2.GOOS != "darwin",

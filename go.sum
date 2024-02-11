@@ -5,8 +5,6 @@ github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx2
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/fasnow/ghttp v0.0.0-20240209174124-ec6d9d397424 h1:ANymtI4ucxf2Ai2v4GC/xC28rNSVly431uXBpwCBjF8=
-github.com/fasnow/ghttp v0.0.0-20240209174124-ec6d9d397424/go.mod h1:FhjXn9lR5qcoG3XsbdgBjBqqQ8KFOn4CasqS6GD4GfE=
 github.com/fasnow/ghttp v0.0.0-20240210111335-7479a60de093 h1:xSNoxsYVqfmNnpTHX+RL7sIWr8BNGKH23VwEkuihhdM=
 github.com/fasnow/ghttp v0.0.0-20240210111335-7479a60de093/go.mod h1:FhjXn9lR5qcoG3XsbdgBjBqqQ8KFOn4CasqS6GD4GfE=
 github.com/go-ole/go-ole v1.3.0 h1:Dt6ye7+vXGIKZ7Xtk4s6/xVdGDQynvom7xCFEdWr6uE=

@@ -13,6 +13,7 @@ import (
 	"github.com/yitter/idgenerator-go/idgen"
 	"math"
 	"path/filepath"
+	"strconv"
 )
 
 type Bridge struct {
@@ -76,7 +77,7 @@ func (b *Bridge) Export(taskID int64) error {
 	result, err := b.icp.Page(1).PageSize(queryLog.Total).Query(queryLog.UnitName)
 	if err != nil {
 		b.downloadLog.UpdateStatus(fileID, -1, err.Error())
-		return err
+		return errors.New(strconv.FormatInt(taskID, 10) + queryLog.UnitName)
 	}
 
 	var data [][]any

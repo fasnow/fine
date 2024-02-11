@@ -96,20 +96,30 @@ func DoConfig(filename string) (any, any, any) {
 	entryPagePath = ChangeExt(entryPagePath, "")
 	newPages := make([]string, 0, len(pages)+1)
 	newPages = append(newPages, entryPagePath)
+
+	var window = gjson.Get(content, "global")
+	if window.Raw == "" {
+		window = gjson.Get(content, "global.window")
+	}
+
+	var tabBar = gjson.Get(content, "tabBar")
+	var networkTimeout = gjson.Get(content, "networkTimeout")
+
+	var app = map[string]any{
+		"pages":          newPages,
+		"window":         window,
+		"tabBar":         tabBar,
+		"networkTimeout": networkTimeout,
+	}
 	for _, page := range pages {
 		if page.String() != entryPagePath {
 			newPages = append(newPages, page.String())
 		}
 	}
 
-	var window = gjson.Get(content, "global.window")
-	var tabBar = gjson.Get(content, "tabBar")
-	//var networkTimeout = gjson.Get(content, "networkTimeout")
 	var subPackages = gjson.Get(content, "subPackages").Array()
 	if len(subPackages) > 0 {
-		//var newSubPackages []string
-		//var tmpPages []string
-
+		var appSubPackages []any
 		for _, subPackage := range subPackages {
 			root := gjson.Get(subPackage.Raw, "root").String()
 			lastChar := root[len(root)-1:]
@@ -120,23 +130,31 @@ func DoConfig(filename string) (any, any, any) {
 			if firstChar == "/" {
 				root = root[1:]
 			}
-			var sbuPages []string
+			var subPagez []string
 			var subPackagePages = gjson.Get(subPackage.Raw, "pages").Array()
 			for _, page := range subPackagePages {
 				replacedPage := strings.Replace(page.String(), root, "", 1)
-				sbuPages = append(sbuPages, replacedPage)
+				subPagez = append(subPagez, replacedPage)
 				for index, page := range newPages {
 					if page == root+replacedPage {
-						//注意数组越界
+						//没有处理数组越界情况
 						newPages = append(newPages[0:index], newPages[index+1:]...)
 						break
 					}
 				}
 			}
-			sjson.Set(subPackage.Raw, "root", root)
-			sjson.Set(subPackage.Raw, "pages", sbuPages)
-			//newSubPackages = append(newSubPackages, subPackage)
+			newSubPackage, err2 := sjson.Set(subPackage.Raw, "root", root)
+			if err2 != nil {
+				return nil, nil, nil
+			}
+			newSubPackage, err2 = sjson.Set(newSubPackage, "pages", subPagez)
+			if err2 != nil {
+				return nil, nil, nil
+			}
+			appSubPackages = append(appSubPackages, newSubPackage)
 		}
+		app["subPackages"] = appSubPackages
+		app["pages"] = newPages
 	}
 
 	return window, tabBar, subPackages

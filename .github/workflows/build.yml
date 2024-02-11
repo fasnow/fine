@@ -5,41 +5,45 @@ on:
       - '*'  # 当有标签推送时触发
 
 jobs:
-#  build-windows:
-#    runs-on: windows-latest
-#    steps:
-#      - name: Checkout Repository
-#        uses: actions/checkout@v4
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v4
-#        with:
-#          go-version: '1.22.0'
-#
-#      - name: Install Wails
-#        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-#
-#      - name: Set up Node.js
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: '18'
-#
-#      - name: Install dependencies
-#        run: |
-#          cd frontend
-#          npm install --force
-#
-#      - name: Build
-#        run: |
-#          wails build
-#
-#      - name: Upload Artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: windows-artifact
-#          path: |
-#            build/bin/*
-#
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22.0'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install --force
+
+      - name: Build
+        run: |
+          wails build
+
+      - name: Zip Build Artifacts
+        run: |
+          cd build/bin/
+          zip -r Fine-amd64.zip *
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-artifact
+          path: |
+            build/bin/Fine-amd64.zip
 
   build-macos:
     runs-on: macos-latest
@@ -47,41 +51,42 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-#      - name: Set up Go
-#        uses: actions/setup-go@v4
-#        with:
-#          go-version: '1.22.0'
-#
-#      - name: Install Wails
-#        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22.0'
 
-#      - name: Set up Node.js
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: '18'
-#
-#      - name: Install dependencies
-#        run: |
-#          cd frontend
-#          npm install --force
-#
-#      - name: Build
-#        run: |
-#          wails build
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install --force
+
+      - name: Build
+        run: |
+          wails build
 
       - name: Zip Build Artifacts
         run: |
-          zip -r Fine-darwin.zip build/bin/*
+          cd build/bin/
+          zip -r Fine-darwin.zip *
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: macos-artifact
           path: |
-            Fine-darwin.zip
+            build/bin/Fine-darwin.zip
   release:
     runs-on: macos-latest
-    needs: [build-macos]
+    needs: [build-macos,build-windows]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -93,11 +98,11 @@ jobs:
           echo "::set-output name=version::$(jq -r '.version' package.json)"
           echo ${{ steps.version.outputs.version }}
 
-#      - name: Download Windows Build Artifacts
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: windows-artifact
-#          path: windows-artifact/
+      - name: Download Windows Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-artifact
+          path: artifacts/
 
       - name: Download Macos Build Artifacts
         uses: actions/download-artifact@v2
@@ -111,7 +116,5 @@ jobs:
         with:
           files: |
             artifacts/*
-#            windows-artifact/*
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
-

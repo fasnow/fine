@@ -4,7 +4,7 @@ go 1.21.6
 
 require (
 	github.com/buger/jsonparser v1.1.1
-	github.com/fasnow/ghttp v0.0.0-20240209174124-ec6d9d397424
+	github.com/fasnow/ghttp v0.0.0-20240210111335-7479a60de093
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1

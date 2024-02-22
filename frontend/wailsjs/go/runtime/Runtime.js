@@ -22,6 +22,14 @@ export function OpenFolder(arg1) {
   return window['go']['runtime']['Runtime']['OpenFolder'](arg1);
 }
 
+export function ReadFileAsBase64(arg1) {
+  return window['go']['runtime']['Runtime']['ReadFileAsBase64'](arg1);
+}
+
 export function ShowItemInFolder(arg1, arg2) {
   return window['go']['runtime']['Runtime']['ShowItemInFolder'](arg1, arg2);
+}
+
+export function WriteFile(arg1, arg2) {
+  return window['go']['runtime']['Runtime']['WriteFile'](arg1, arg2);
 }

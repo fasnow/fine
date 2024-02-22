@@ -1,29 +1,27 @@
-import React, {ReactNode, useEffect, useMemo, useRef, useState} from 'react';
-import { Button, ButtonProps, ConfigProvider, Divider, Form, FormProps, Input, InputNumber, MenuProps, Modal, Pagination, Select, Space, Switch, Table, Tabs, Tooltip, message } from 'antd';
+import React, {ReactNode, useEffect, useRef, useState} from 'react';
+import { Button, Divider, Form, Input, InputNumber, Modal, Pagination, Select, Space, Switch, Table, Tabs, Tooltip, message } from 'antd';
 import { SearchOutlined, QuestionOutlined, UserOutlined, SyncOutlined, CloudDownloadOutlined, LoadingOutlined, CloudOutlined, CopyOutlined, GlobalOutlined } from '@ant-design/icons';
 import { errorNotification } from '@/component/Notification';
-import { QUERY_FIRST, FofaUserType, MenuItemsKey, copy } from '@/type';
+import { QUERY_FIRST, MenuItemsKey, copy } from '@/type';
 import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
 import ColumnsFilter, { DataSourceItemType } from '@/component/ColumnFilter';
 import { CheckboxValueType } from 'antd/es/checkbox/Group';
 import ContextMenu from '@/component/ContextMenu';
 import { RootState, setFofaAuth, setFofaUser } from '@/store/store';
-import { ConnectedProps, connect, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
 import { ResizeCallbackData } from 'react-resizable';
 import ResizableTitle from '@/component/ResizableTitle';
 import { ExportDataPanelProps } from './Props';
-import ScrollBar from '@/component/ScrollBar';
 import helpIcon from '@/assets/images/help.svg'
 import { buttonProps, authFormProps } from '../setting/Setting';
-import {config, fofa} from "../../../wailsjs/go/models";
+import {fofa} from "../../../wailsjs/go/models";
 import {Export, GetUserInfo, Query, SetAuth} from "../../../wailsjs/go/fofa/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import {ItemType} from "antd/es/menu/hooks/useItems";
-import User = fofa.User;
-import {GetFofaAuth, SaveFofaAuth} from "../../../wailsjs/go/config/Config";
-import {Root} from "react-dom/client";
+
+import {GetFofaAuth} from "../../../wailsjs/go/config/Config";
 import {Get} from "../../../wailsjs/go/event/Event";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;

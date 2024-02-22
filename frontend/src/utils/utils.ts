@@ -1,11 +1,3 @@
-
-import useSelection from "antd/es/table/hooks/useSelection";
-import { errorNotification, successNotification } from "../component/Notification";
-import { DownloadLogItem } from "../type";
-import { RootState } from "../store/store";
-import { useSelector } from "react-redux";
-
-
 export const dataFormat = (date: string, fmt: string): string => {
     if (date && fmt) {
         const _date = new Date(date);

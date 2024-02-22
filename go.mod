@@ -4,10 +4,12 @@ go 1.21.6
 
 require (
 	github.com/buger/jsonparser v1.1.1
+	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
 	github.com/fasnow/ghttp v0.0.0-20240210111335-7479a60de093
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
+	github.com/robertkrimen/otto v0.3.0
 	github.com/tidwall/gjson v1.9.3
 	github.com/tidwall/sjson v1.1.7
 	github.com/wailsapp/wails/v2 v2.7.1
@@ -22,8 +24,11 @@ require (
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
+	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/google/pprof v0.0.0-20240207164012-fb44976bdcd5 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
@@ -54,4 +59,5 @@ require (
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"embed"
-	app "fine/backend/app"
+	"fine/backend/app"
 	"fine/backend/config"
 	"fine/backend/db/service"
 	"fine/backend/event"
@@ -57,6 +57,7 @@ func main() {
 			hunter.NewHunterBridge(mainApp),
 			quake.NewQuakeBridge(mainApp),
 			zone.NewZoneBridge(mainApp),
+			runtime.NewPath(),
 		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: false,

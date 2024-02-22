@@ -11,14 +11,14 @@ import {
   Get0zoneAuth,
   GetFofaAuth, GetHunterAuth, GetProxy, GetQuakeAuth,
   Save0zoneAuth,
-  SaveFofaAuth,
-  SaveHunterAuth,
   SaveProxy,
   SaveQuakeAuth
 } from "../../../wailsjs/go/config/Config";
 import {config} from "../../../wailsjs/go/models";
 import {SetAuth as SetHunterAuth} from "../../../wailsjs/go/hunter/Bridge";
 import {SetAuth as SetFofaAuth} from "../../../wailsjs/go/fofa/Bridge";
+import {SetAuth as Set0zoneAuth} from "../../../wailsjs/go/zone/Bridge";
+import {SetAuth as SetQuakeAuth} from "../../../wailsjs/go/zone/Bridge";
 const onChange = (key: string) => {
   console.log(key);
 };
@@ -255,7 +255,7 @@ const Account: React.FC = () => {
     function save(values: any) {
       setEditable(false)
       form.setFieldsValue(values);
-      Save0zoneAuth(values.key).catch(
+      Set0zoneAuth(values.key).catch(
           err=>errorNotification("错误",err,3)
       )
     }
@@ -300,7 +300,7 @@ const Account: React.FC = () => {
     function save(values: any) {
       setEditable(false)
       form.setFieldsValue(values);
-      SaveQuakeAuth(values.key).catch(
+      SetQuakeAuth(values.key).catch(
           err=>errorNotification("错误",err,3)
       )
     }

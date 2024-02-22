@@ -1,8 +1,7 @@
-import React, { LegacyRef, useState } from "react"
-import { Button, Dropdown, MenuProps, message } from "antd";
+import React, { LegacyRef } from "react"
+import { Dropdown, MenuProps, message } from "antd";
 import { ItemType } from "antd/es/menu/hooks/useItems";
-import copy from "copy-to-clipboard";
-import {MenuItemsKey} from "../type";
+
 interface MenuContextProps extends React.HTMLAttributes<HTMLDivElement> {
     items: ItemType[],
     onItemClick: (key: string) => void,

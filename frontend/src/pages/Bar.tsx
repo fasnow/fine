@@ -7,13 +7,13 @@ import { GITHUB_URL, ISSUE_URL } from "@/type";
 import packageJson from '../../package.json';
 import favicon from "../assets/images/paimon.svg"
 import { genshinLaunch } from "./op";
-import { RootState, setHasNewLogItem } from "@/store/store";
+import { RootState } from "@/store/store";
 import { Proxy as ProxyComp } from "./setting/Setting"
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
     BrowserOpenURL, EventsOn,
     Quit,
-    WindowFullscreen, WindowIsFullscreen, WindowIsMaximised,
+    WindowIsMaximised,
     WindowMaximise,
     WindowMinimise,
     WindowUnmaximise
@@ -322,7 +322,6 @@ const Update: React.FC = () => {
     const [releaseUrl, setReleaseUrl] = useState<string>("")
     const [releaseVersion, setReleaseVersion] = useState<string>("")
     const [releaseDescription, setReleaseDescription] = useState<string>("")
-    const dispatch = useDispatch()
     useEffect(() => {
         CheckUpdate().then(
             result=>{
@@ -397,11 +396,11 @@ const Update: React.FC = () => {
                 </span><br />
                 <span style={{ display: 'flex', flexDirection: "column" }}>
                     <span>更新内容:</span>
-                    {(releaseDescription && <span style={{ whiteSpace: "pre", margin: "2px" }}>&nbsp;&nbsp;&nbsp;&nbsp;{releaseDescription}</span>)}
+                    {(releaseDescription && <span style={{ whiteSpace: "pre", margin: "2px" }}>{("\t"+releaseDescription).replace(/\n(?!\n?$)/g, '\n\t')}</span>)}
                 </span>
                 <span style={{ display: 'flex', flexDirection: "column" }}>
                     <span>下载地址:</span>
-                    {(releaseUrl && <span style={{ whiteSpace: "pre", margin: "2px" }}>&nbsp;&nbsp;&nbsp;&nbsp;{releaseUrl}</span>)}
+                    {(releaseUrl && <span style={{ whiteSpace: "pre", margin: "2px" }}>{"\t"+releaseUrl}</span>)}
                 </span>
             </div>
         </Modal></>
@@ -414,7 +413,6 @@ const Proxy: React.FC = () => {
     useEffect(() => {
         setUrl(`${proxy.type}://${proxy.host}:${proxy.port}`)
     }, [proxy])
-
 
     return <>
         <Popover

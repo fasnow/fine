@@ -1,29 +1,28 @@
 import React, {ReactNode, useEffect, useRef, useState} from 'react';
-import { Button, Col, Collapse, ConfigProvider, DatePicker, Divider, Form, Input, InputNumber, List, MenuProps, Modal, Pagination, Popover, Row, Select, Space, Switch, Table, Tabs, TabsProps, Tag, TimeRangePickerProps, Tooltip, message } from 'antd';
+import { Button, Col, Collapse, DatePicker, Divider, Form, Input, InputNumber, List, Modal, Pagination, Popover, Row, Select, Space, Switch, Table, Tabs, Tooltip, message } from 'antd';
 import { SearchOutlined, QuestionOutlined, UserOutlined, CloudDownloadOutlined, LoadingOutlined, ExclamationCircleOutlined, CloudOutlined, CopyOutlined, GlobalOutlined } from '@ant-design/icons';
 import { errorNotification } from '@/component/Notification';
-import { QUERY_FIRST, MenuItemsKey, HunterUserType, RangePresets, copy } from '@/type';
+import { MenuItemsKey, HunterUserType, RangePresets, copy } from '@/type';
 import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
 import ColumnsFilter, { DataSourceItemType } from '../../component/ColumnFilter';
 import { CheckboxValueType } from 'antd/es/checkbox/Group';
 import ContextMenu from '../../component/ContextMenu';
 import { RootState, setHunterAuth, setHunterUser } from '@/store/store';
-import { ConnectedProps, connect, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import dayjs from 'dayjs';
 import { ResizeCallbackData } from 'react-resizable';
 import { HunterComponentType } from '@/type/hunter';
 import { ExportDataPanelProps } from './Props';
-import ScrollBar from '../../component/ScrollBar';
 import { buttonProps, authFormProps } from '../setting/Setting';
 import { localeCompare } from '@/utils/utils';
-import {fofa, hunter} from "../../../wailsjs/go/models";
+import {hunter} from "../../../wailsjs/go/models";
 import {Export, GetRestToken, Query, SetAuth} from "../../../wailsjs/go/hunter/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import ResizableTitle from "@/component/ResizableTitle";
 import {ItemType} from "antd/es/menu/hooks/useItems";
 import type { Tab } from 'rc-tabs/lib/interface';
-import {Get0zoneAuth, GetHunterAuth} from "../../../wailsjs/go/config/Config";
+import {GetHunterAuth} from "../../../wailsjs/go/config/Config";
 import {Get} from "../../../wailsjs/go/event/Event";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const pageSizeOptions = [10, 20, 50, 100]
@@ -188,7 +187,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         const [exportable, setExportable] = useState<boolean>(false)
         const dispatch = useDispatch()
         const [disable,setDisable] = useState<boolean>(false)
-        const exportData = async (page: number) => {
+        const exportData =  (page: number) => {
             setIsExporting(true)
             setDisable(true)
             Export(props.id, page, pageSize).then().catch(
@@ -237,7 +236,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 {...ExportDataPanelProps}
                 title="导出结果"
                 open={exportable}
-                onOk={async () => {
+                onOk={() => {
                     if ((maxPage == 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
                         setStatus("error")
                         return
@@ -642,7 +641,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                     setPageData(result.items?.map((item) => {
                         const instance = new hunter.Item(item)
                         const {convertValues, ...reset} = instance
-                        return {index: ++index, ...item, convertValues}
+                        return {index: ++index, ...item, convertValues, ...reset}
                     }))
                     setTotal(result.total)
                     setLoading(false)
@@ -856,7 +855,7 @@ type TabType = {
 const AuthSetting: React.FC = () => {
     const [form] = Form.useForm()
     const [editable, setEditable] = useState(false)
-    const hunterAuth = useSelector((state: RootState) => state.config.auth?.hunter)
+    useSelector((state: RootState) => state.config.auth?.hunter);
     const [open, setOpen] = useState<boolean>(false)
     const dispatch = useDispatch()
     function save(values: any) {

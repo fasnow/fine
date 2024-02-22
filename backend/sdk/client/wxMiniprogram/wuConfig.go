@@ -4,10 +4,14 @@ import (
 	"encoding/binary"
 	"fine/backend/utils"
 	"fmt"
+	"github.com/goccy/go-json"
+	"github.com/robertkrimen/otto"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -18,13 +22,13 @@ type ApkgInfo struct {
 	dataLength     uint32
 	lastMark       byte
 	fileCount      uint32
-	fileInfo       []fileInfo
+	Files          []SubFileInfo
 }
 
-type fileInfo struct {
-	name string
-	off  uint32
-	size uint32
+type SubFileInfo struct {
+	Name string
+	Off  uint32
+	Size uint32
 }
 
 func GetApkgInfo(buf []byte) (*ApkgInfo, error) {
@@ -41,29 +45,29 @@ func GetApkgInfo(buf []byte) (*ApkgInfo, error) {
 	apkgInfo.fileCount = binary.BigEndian.Uint32(buf[14:18])
 	off := 14 + 4
 	for i := 0; i < int(apkgInfo.fileCount); i++ {
-		var info fileInfo
+		var info SubFileInfo
 		nameLen := binary.BigEndian.Uint32(buf[off : off+4])
 		off += 4
-		info.name = string(buf[off : off+int(nameLen)])
+		info.Name = string(buf[off : off+int(nameLen)])
 		off += int(nameLen)
-		info.off = binary.BigEndian.Uint32(buf[off : off+4])
+		info.Off = binary.BigEndian.Uint32(buf[off : off+4])
 		off += 4
-		info.size = binary.BigEndian.Uint32(buf[off : off+4])
+		info.Size = binary.BigEndian.Uint32(buf[off : off+4])
 		off += 4
-		apkgInfo.fileInfo = append(apkgInfo.fileInfo, info)
+		apkgInfo.Files = append(apkgInfo.Files, info)
 	}
 	return apkgInfo, nil
 }
 
-func SplitFile(buf []byte, fileInfoList []fileInfo, dataDir string) {
+func SplitFile(buf []byte, fileInfoList []SubFileInfo, dataDir string) {
 	dataDir, _ = filepath.Abs(dataDir)
 	for _, info := range fileInfoList {
 		var filename string
-		if strings.HasPrefix(info.name, "/") {
-			filename = "." + info.name
+		if strings.HasPrefix(info.Name, "/") {
+			filename = "." + info.Name
 		}
 		filePath := filepath.Join(dataDir, filename)
-		err := os.WriteFile(filePath, buf[info.off:info.off+info.size], 0644)
+		err := os.WriteFile(filePath, buf[info.Off:info.Off+info.Size], 0644)
 		if err != nil {
 			continue
 		}
@@ -81,29 +85,33 @@ func DealThreeThings(dir, mainDir, nowDir string) {
 	}
 }
 
-func DoConfig(filename string) (any, any, any) {
-	abs, err := filepath.Abs(filename)
+func DoConfig(configFilename string) error {
+	abs, err := filepath.Abs(configFilename)
 	if err != nil {
-		return nil, nil, nil
+		return err
 	}
+	dir := filepath.Dir(abs)
 	bytes, err := os.ReadFile(abs)
 	if err != nil {
-		return nil, nil, nil
+		return err
 	}
 	content := string(bytes)
 	var pages = gjson.Get(content, "pages").Array()
+
 	var entryPagePath = gjson.Get(content, "entryPagePath").String()
-	entryPagePath = ChangeExt(entryPagePath, "")
 	newPages := make([]string, 0, len(pages)+1)
-	newPages = append(newPages, entryPagePath)
-
-	var window = gjson.Get(content, "global")
-	if window.Raw == "" {
-		window = gjson.Get(content, "global.window")
+	if entryPagePath != "" {
+		entryPagePath = ChangeExt(entryPagePath, "")
+		newPages = append(newPages, entryPagePath)
 	}
-
-	var tabBar = gjson.Get(content, "tabBar")
-	var networkTimeout = gjson.Get(content, "networkTimeout")
+	for _, page := range pages {
+		if page.String() != entryPagePath {
+			newPages = append(newPages, page.String())
+		}
+	}
+	var window, _ = JsonToMap(gjson.Get(content, "global.window"))
+	var tabBar, _ = JsonToMap(gjson.Get(content, "tabBar"))
+	var networkTimeout, _ = JsonToMap(gjson.Get(content, "networkTimeout"))
 
 	var app = map[string]any{
 		"pages":          newPages,
@@ -111,15 +119,9 @@ func DoConfig(filename string) (any, any, any) {
 		"tabBar":         tabBar,
 		"networkTimeout": networkTimeout,
 	}
-	for _, page := range pages {
-		if page.String() != entryPagePath {
-			newPages = append(newPages, page.String())
-		}
-	}
-
 	var subPackages = gjson.Get(content, "subPackages").Array()
 	if len(subPackages) > 0 {
-		var appSubPackages []any
+		var appSubPackages []map[string]any
 		for _, subPackage := range subPackages {
 			root := gjson.Get(subPackage.Raw, "root").String()
 			lastChar := root[len(root)-1:]
@@ -132,6 +134,9 @@ func DoConfig(filename string) (any, any, any) {
 			}
 			var subPagez []string
 			var subPackagePages = gjson.Get(subPackage.Raw, "pages").Array()
+			if len(subPackagePages) == 0 {
+				continue
+			}
 			for _, page := range subPackagePages {
 				replacedPage := strings.Replace(page.String(), root, "", 1)
 				subPagez = append(subPagez, replacedPage)
@@ -143,21 +148,253 @@ func DoConfig(filename string) (any, any, any) {
 					}
 				}
 			}
-			newSubPackage, err2 := sjson.Set(subPackage.Raw, "root", root)
-			if err2 != nil {
-				return nil, nil, nil
+			newSubPackage, err := sjson.Set(subPackage.Raw, "root", root)
+			if err != nil {
+				return err
 			}
-			newSubPackage, err2 = sjson.Set(newSubPackage, "pages", subPagez)
-			if err2 != nil {
-				return nil, nil, nil
+			newSubPackage, err = sjson.Set(newSubPackage, "pages", subPagez)
+			if err != nil {
+				return err
 			}
-			appSubPackages = append(appSubPackages, newSubPackage)
+			if mapFormattedData, err := JsonToMap(gjson.Parse(newSubPackage)); err != nil {
+				return err
+			} else {
+				appSubPackages = append(appSubPackages, mapFormattedData)
+			}
 		}
 		app["subPackages"] = appSubPackages
 		app["pages"] = newPages
 	}
+	navigateToMiniProgramAppIdList := gjson.Get(content, "navigateToMiniProgramAppIdList").String()
+	if navigateToMiniProgramAppIdList != "" {
+		app["navigateToMiniProgramAppIdList"] = navigateToMiniProgramAppIdList
+	}
 
-	return window, tabBar, subPackages
-	//var app = map[string]any{}
-	//let app = {pages: k, window: e.global && e.global.window, tabBar: e.tabBar, networkTimeout: e.networkTimeout};
+	if utils.FileExists(filepath.Join(dir, "workers.js")) {
+		app["workers"], _ = getWorkerPath(filepath.Join(dir, "workers.js"))
+	}
+	extAppid := gjson.Get(content, "extAppid").String()
+	if extAppid != "" {
+		app["navigateToMiniProgramAppIdList"] = navigateToMiniProgramAppIdList
+	}
+	ext := gjson.Get(content, "ext").String()
+	if ext != "" {
+		if jsonData, err := json.MarshalIndent(map[string]any{
+			"extEnable": true,
+			"extAppID":  extAppid,
+			"ext":       ext,
+		}, "", "    "); err != nil {
+			return err
+		} else if err = WriteContentToFile(filepath.Join(dir, "ext.json"), jsonData); err != nil {
+			return err
+		}
+
+	}
+	debug := gjson.Get(content, "debug").String()
+	if len(debug) > 0 {
+		app["debug"] = debug
+	}
+	cur, _ := filepath.Abs("./file")
+	page := gjson.Get(content, "page").Map()
+	for k, p := range page {
+		pMap := p.Map()
+		ppMap := pMap["window"].Map()["usingComponents"].Map()
+		for key, _ := range ppMap {
+			componentPath := ppMap[key].String() + "\\.html" //sjson.Set中设置的键包含 . 需要转义
+			if strings.HasPrefix(componentPath, "/") {
+				componentPath = componentPath[1:]
+			} else {
+				f, _ := filepath.Abs(filepath.Join(filepath.Dir(k), componentPath))
+				componentPath = ToDir(f, cur)
+			}
+			if page[componentPath].Raw == "" {
+				if content, err = sjson.Set(content, "page."+componentPath, "{}"); err != nil {
+					return err
+				}
+			} else if page[componentPath].Raw != "" && page[componentPath].Map()["window"].Raw == "" {
+				if content, err = sjson.Set(content, fmt.Sprintf("page.%s.window", componentPath), "{}"); err != nil {
+					return err
+				}
+			}
+			if content, err = sjson.Set(content, fmt.Sprintf("page.%s.window.component", componentPath), true); err != nil {
+				return err
+			}
+		}
+	}
+
+	f, _ := filepath.Abs(filepath.Join(dir, "app-service.js"))
+	if utils.FileExists(f) {
+		appServiceJsContent, err := os.ReadFile(f)
+		if err != nil {
+			return err
+		}
+		pattern := `__wxAppCode__\['[^\.]+\.json[^;]+;`
+		re := regexp.MustCompile(pattern)
+		matches := re.FindAllString(string(appServiceJsContent), -1)
+		code := strings.Join(matches, "")
+		vm := otto.New()
+		_, _ = vm.Run(`var __wxAppCode__ = {};`)
+		_, err = vm.Run(code)
+		if err != nil {
+			return err
+		}
+		// 获取__wxAppCode__
+		wxAppCode, err := vm.Run(`__wxAppCode__;`)
+		if err != nil {
+			return err
+		}
+		wxAppCodeObject, err := wxAppCode.Export()
+		if err != nil {
+			return err
+		}
+		attachInfo := wxAppCodeObject.(map[string]any)
+		for name, _ := range attachInfo {
+			if content, err = sjson.Set(content, "page."+ChangeExt(name, "\\.html"), map[string]any{"window": attachInfo[name]}); err != nil {
+				return err
+			}
+		}
+	}
+	var delWeight = 8
+	fmt.Println(delWeight)
+	var temp = gjson.Get(content, "page").Map()
+	for key, value := range temp {
+		var fileName, _ = filepath.Abs(filepath.Join(dir, ChangeExt(key, ".json")))
+		mapFormattedData, err := JsonToMap(gjson.Get(value.Raw, "window"))
+		if err != nil {
+			return err
+		}
+		jsonData, err := json.MarshalIndent(mapFormattedData, "", "    ")
+		if err != nil {
+			return err
+		}
+		err = WriteContentToFile(fileName, jsonData)
+		if err != nil {
+			return err
+		}
+		if configFilename == fileName {
+			delWeight = 0
+		}
+	}
+
+	for _, subPackage := range app["subPackages"].([]map[string]any) {
+		for _, subPackagePage := range subPackage["pages"].([]string) {
+			var a = subPackage["root"].(string) + subPackagePage + ".xx"
+
+			//添加默认的 wxs, wxml, wxss
+			var jsName = ChangeExt(a, ".js")
+			fileNameOfWxs, err := filepath.Abs(filepath.Join(dir, jsName))
+			if err != nil {
+				return err
+			}
+			err = WriteContentToFile(fileNameOfWxs, []byte("// "+jsName+"\nPage({data: {}})"))
+			if err != nil {
+				return err
+			}
+
+			var wxmlName = ChangeExt(a, ".wxml")
+			fileNameOfWxml, err := filepath.Abs(filepath.Join(dir, jsName))
+			if err != nil {
+				return err
+			}
+			err = WriteContentToFile(fileNameOfWxml, []byte("<!--"+wxmlName+"--><text>"+wxmlName+"</text>"))
+			if err != nil {
+				return err
+			}
+
+			var cssName = ChangeExt(a, ".wxss")
+			if fileNameOfWxss, err := filepath.Abs(filepath.Join(dir, cssName)); err != nil {
+				return err
+			} else {
+				if err = WriteContentToFile(fileNameOfWxss, []byte("/* "+cssName+" */")); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	tabBarTemp := app["tabBar"].(map[string]any)
+	list := tabBarTemp["list"].([]any)
+	if tabBarTemp != nil && list != nil {
+		var digests []struct {
+			Hash string
+			Name string
+		}
+		files := ScanDirByExt(dir, "")
+		for _, file := range files {
+			if text, err := os.ReadFile(file); err != nil {
+				return err
+			} else {
+				hash := SHA256HashByBytes(text)
+				digests = append(digests, struct{ Hash, Name string }{hash, file})
+			}
+		}
+
+		for key, tmpItem := range list {
+			var item = tmpItem.(map[string]any)
+			item["pagePath"] = ChangeExt(item["pagePath"].(string), "")
+			var iconData = item["iconData"].(string)
+			if iconData != "" {
+				hash, _ := SHA256HashByBase64(iconData)
+				for _, digest := range digests {
+					if digest.Hash == hash {
+						delete(item, "iconData")
+						item["iconPath"] = strings.ReplaceAll(FixDir(dir, digest.Name), "\\", "/")
+						list[key] = item
+						break
+					}
+				}
+			}
+			var selectedIconData = item["selectedIconData"].(string)
+			if selectedIconData != "" {
+				hash, _ := SHA256HashByBase64(selectedIconData)
+				for _, digest := range digests {
+					if digest.Hash == hash {
+						delete(item, "selectedIconData")
+						item["selectedIconData"] = strings.ReplaceAll(FixDir(dir, digest.Name), "\\", "/")
+						list[key] = item
+						break
+					}
+				}
+			}
+
+		}
+		tabBarTemp["list"] = list
+		app["tabBar"] = tabBarTemp["list"]
+
+		if jsonData, err := json.MarshalIndent(app, "", "    "); err != nil {
+			return err
+		} else {
+			if err = WriteContentToFile(filepath.Join(dir, "app.json"), jsonData); err != nil {
+				return err
+			}
+		}
+	}
+
+	if jsonData, err := json.MarshalIndent(app, "", "    "); err != nil {
+		return err
+	} else {
+		if err = WriteContentToFile(filepath.Join(dir, "app.json"), jsonData); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func getWorkerPath(name string) (string, error) {
+	// 读取文件内容
+	code, err := ioutil.ReadFile(name)
+	if err != nil {
+		return "", err
+	}
+
+	// 使用正则表达式匹配 define 函数调用
+	defineRegex := regexp.MustCompile(`define\(([^)]+)\)`)
+	matches := defineRegex.FindStringSubmatch(string(code))
+	if len(matches) < 2 {
+		return "", nil
+	}
+	modulePath := matches[1]
+	commonPath := filepath.Dir(modulePath)
+	return commonPath, nil
 }

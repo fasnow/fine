@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"encoding/base64"
 	"fine/backend/app"
 	"fmt"
 	"github.com/buger/jsonparser"
@@ -127,4 +128,24 @@ func (r *Runtime) OpenFileDialog() (string, error) {
 		return "", err
 	}
 	return path, nil
+}
+
+func (r *Runtime) ReadFileAsBase64(filename string) (string, error) {
+	bytes, err := os.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(bytes), nil
+}
+
+func (r *Runtime) WriteFile(filename string, byteData string) error {
+	dir := filepath.Dir(filename)
+	if err := os.MkdirAll(dir, 0644); err != nil {
+		return err
+	}
+	decodeString, err := base64.StdEncoding.DecodeString(byteData)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filename, decodeString, 0644)
 }

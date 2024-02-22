@@ -2,26 +2,21 @@ import React, {useEffect, useRef, useState} from 'react';
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
-import {Button, Input} from "antd";
+import {Button, Input, InputNumber, Select, Space} from "antd";
 import "@/pages/Httpx.css"
 import {GetHttpx, SaveHttpx} from "../../wailsjs/go/config/Config";
-import {Simulate} from "react-dom/test-utils";
-import reset = Simulate.reset;
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
 import {errorNotification} from "@/component/Notification";
-import * as child_process from "child_process";
 import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
-import {CloudOutlined, CopyOutlined, GlobalOutlined, SyncOutlined} from "@ant-design/icons";
-import {ILinkHandler, Terminal} from 'xterm';
+import {SyncOutlined} from "@ant-design/icons";
+import {Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit'
-import * as xterm from "xterm";
-import ContextMenu from "@/component/ContextMenu";
-import {ItemType} from "antd/es/menu/hooks/useItems";
-import {MenuItemsKey} from "@/type";
-import copy from "copy-to-clipboard";
 import {Get} from "../../wailsjs/go/event/Event";
+import {range} from "d3";
+import Compact from "antd/es/space/Compact";
+import {current} from "@reduxjs/toolkit";
 
 const Httpx = () => {
     const [path,setPath] = useState<string>("")
@@ -32,9 +27,13 @@ const Httpx = () => {
     const [targets,setTargets] = useState<string>("")
     const terminalRef = useRef<Terminal>(new Terminal());
     const fitAddon = useRef<FitAddon>(new  FitAddon());
-    const selectedValue = useRef<string>("")
+    const urls = useRef<string[]>([])
+    const [total,setTotal] = useState<number>(0)
+    const [start,setStart] = useState<number>(1)
+    const [length,setLength] = useState<number>(15)
 
     useEffect(() => {
+        //设置终端格式
         if (terminalRef.current) {
             const elem = document.getElementById('output')
             if(elem){
@@ -51,6 +50,7 @@ const Httpx = () => {
                 })
             }
         }
+        //设置httpx配置
         GetHttpx().then(
             result=>{
                 setPath(result.path)
@@ -58,9 +58,11 @@ const Httpx = () => {
                 setInputFlag(result.inputFlag)
             }
         )
+        //获取事件类的单例并设置httpx输出监听器用于输出到前端
         Get().then(
             result=>{
                 EventsOn(String(result.httpxOuput),(value)=>{
+                    //将终端中的链接转为超链接实现可以点击打开浏览器
                     const urlRegex = /https?:\/\/\S+/g;
                     let match;
                     let resultString = value;
@@ -68,12 +70,15 @@ const Httpx = () => {
                         const matchedUri = match[0];
                         const replacement = `\x1b]8;;${matchedUri}\x07${matchedUri}\x1b]8;;\x07`;
                         resultString = resultString.replace(matchedUri, replacement);
+                        urls.current.push(matchedUri)
+                        setTotal(urls.current.length)
                     }
                     terminalRef.current && terminalRef.current.writeln(resultString)
                 })
                 EventsOn(String(result.httpxOuputDone),()=>{
                     setRunning(false)
                     terminalRef.current && terminalRef.current.write("$$$ Finished")
+                    console.log(urls.current)
                 })
             }
         )
@@ -99,6 +104,10 @@ const Httpx = () => {
     }
 
     const exec=()=>{
+        urls.current=[]
+        setTotal(0)
+        setStart(1)
+        setLength(length)
         Run(path,flags,inputFlag,targets).then(r => setRunning(true)).catch(err=> {
             errorNotification("错误", err)
             setRunning(false)
@@ -109,6 +118,16 @@ const Httpx = () => {
         Stop().then(r => setRunning(false)).catch(err=> {
             errorNotification("错误", err)
         })
+    }
+
+    const BrowserOpenMultiUrl=()=>{
+        if(!urls.current || urls.current.length==0)return
+        for (const url of urls.current.slice(start-1, start-1+length)) {
+            BrowserOpenURL(url)
+        }
+        const nextStart = start+length
+        setLength(nextStart>urls.current.length?0:length)
+        setStart(nextStart>urls.current.length?urls.current.length:nextStart)
     }
 
     return (
@@ -134,7 +153,19 @@ const Httpx = () => {
                 {running && <Button size={"small"} onClick={stop} icon={<SyncOutlined spin={running}/>}>终止</Button>}
             </div>
 
-            <div style={{height:"calc(100vh - 120px)"}}>
+            <Space style={{display:"flex",justifyContent:"center"}} size={20}>
+                <Space.Compact size={"small"}>
+                    <InputNumber style={{width:"150px"}} prefix={<div>总数:</div>} value={total}/>
+                    <InputNumber style={{width:"150px"}} prefix={<div>起始:</div>} min={1} value={start} onChange={(value)=>value&&setStart(value)} />
+                    <InputNumber style={{width:"150px"}} prefix={<div>长度:</div>} value={length} onChange={(value)=>value&&setLength(value)}/>
+                    <Button onClick={BrowserOpenMultiUrl}>默认浏览器打开下一组</Button>
+                </Space.Compact>
+                <Button size={"small"} onClick={()=>terminalRef.current.reset()}>清空终端</Button>
+            </Space>
+            {/*<div style={{justifyContent:"center",display:"flex"}}>*/}
+            {/*    */}
+            {/*</div>*/}
+            <div style={{height:"calc(100vh - 140px)"}}>
                 <Allotment onChange={()=>fitAddon.current.fit()} >
                     <Allotment.Pane preferredSize={"300"}  className={"httpx-left"}>
                         <TextArea  value={targets} size={"small"} placeholder={"每行一个"} autoSize style={{maxHeight:"calc(100vh - 120px)"}}
@@ -145,7 +176,7 @@ const Httpx = () => {
                         {/*<TextArea value={output} autoSize style={{maxHeight:"calc(100vh - 120px)"}}*/}
                         {/*          onChange={e=>setOutput(e.target.value)}*/}
                         {/*/>*/}
-                            <div id="output" style={{height:"calc(100vh - 120px)"}}/>
+                            <div id="output" style={{height:"calc(100vh - 130px)"}}/>
                     </Allotment.Pane>
                 </Allotment>
             </div>

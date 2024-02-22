@@ -12,13 +12,12 @@ func TestQueryOptionsService_Add(t *testing.T) {
 	db.SetDBAbsFilepath("data.db")
 	s := NewICPQueryLog()
 	taskID := idgen.NextId()
-	options := &model.IcpExportCacheItem{
-		Page:     1,
-		Size:     2,
-		UnitName: "",
-		Total:    0,
-		Status:   0,
-		Filename: "",
+	options := &model.ICPQueryLog{
+		BaseModel: model.BaseModel{},
+		TaskID:    0,
+		UnitName:  "",
+		Total:     0,
+		MaxPage:   0,
 	}
 
 	err := s.Add(options, taskID)

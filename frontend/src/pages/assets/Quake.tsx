@@ -1,5 +1,5 @@
 import React, {CSSProperties, ReactNode, useEffect, useRef, useState} from 'react';
-import { Button, Col, ConfigProvider, DatePicker, Divider, Form, Input, InputNumber, MenuProps, Modal, Pagination, Row, Select, Space, Switch, Table, Tabs, TabsProps, Tooltip, message } from 'antd';
+import { Button, Col, DatePicker, Divider, Form, Input, InputNumber, MenuProps, Modal, Pagination, Row, Select, Space, Switch, Table, Tabs, TabsProps, Tooltip, message } from 'antd';
 import { SearchOutlined, QuestionOutlined, UserOutlined, CloudDownloadOutlined, LoadingOutlined, ExclamationCircleOutlined, SyncOutlined, CrownOutlined, CrownTwoTone, CloudOutlined, CopyOutlined, GlobalOutlined } from '@ant-design/icons';
 import { errorNotification } from '@/component/Notification';
 import { QUERY_FIRST, MenuItemsKey, RangePresets, copy } from '@/type';
@@ -7,10 +7,8 @@ import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
 import ColumnsFilter, { DataSourceItemType } from '../../component/ColumnFilter';
 import { CheckboxValueType } from 'antd/es/checkbox/Group';
 import ContextMenu from '../../component/ContextMenu';
-import {RootState, setHasNewLogItem, setHunterUser, setQuakeAuth, setQuakeUser} from '@/store/store';
-import { ConnectedProps, connect, useDispatch, useSelector } from 'react-redux';
-import quakeFreePoint from '@/assets/images/quake-point-free.png'
-import quakeBuyPoint from '@/assets/images/quake-point-buy.png'
+import {RootState, setQuakeAuth, setQuakeUser} from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
 import { LocationType, UserType } from '@/type/quake';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';

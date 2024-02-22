@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {ConfigProvider, Layout as Lay, Tabs, TabsProps} from 'antd';
 
-import { Outlet } from 'react-router-dom';
-import Sider from 'antd/es/layout/Sider';
-
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import locale from 'antd/locale/zh_CN';
-import {GetAll, GetConfigFromFile, GetProxy, Init} from "../wailsjs/go/config/Config";
+import {GetProxy, Init} from "../wailsjs/go/config/Config";
 import {errorNotification} from "@/component/Notification";
 import Bar from "@/pages/Bar";
-import Menu from "@/pages/Menu";
 import Fofa from "@/pages/assets/Fofa";
 import {Setting} from "@/pages/setting/Setting";
 import IP138 from "@/pages/Ip138";
@@ -21,9 +17,7 @@ import {useDispatch} from "react-redux";
 import {setFofaAuth, setProxy} from "@/store/store";
 import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
-import TianYanCha from "@/pages/unitmap/TianYanCha";
-import {Get} from "../wailsjs/go/event/Event";
-import {commandExecute} from "./pages/wxMiniProgram/wuLib"
+import {Environment} from "../wailsjs/runtime";
 // import {doFile} from "./pages/wxMiniProgram/wuWxapkg"
 const { Header } = Lay;
 const headerStyle: React.CSSProperties = {
@@ -52,12 +46,14 @@ const App: React.FC = () => {
     const dispatch = useDispatch()
     useEffect(() => {
         const currentDate = new Date();
-        // 判断是否是清明节，这里简化为4月4日至4月6日为清明节
         const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
         const bodyElement = document.body;
         if (isQingmingJie) {
             bodyElement.style.filter = 'grayscale(100%)';
         }
+        Environment().then(
+            r=>console.log(r)
+        )
     }, [])
     useEffect(() => {
         try {

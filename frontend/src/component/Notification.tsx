@@ -1,4 +1,4 @@
-import { ModalProps, notification } from 'antd';
+import { notification } from 'antd';
 import "./Notification.css"
 
 

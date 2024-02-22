@@ -1,7 +1,3 @@
-import { CloudOutlined, CopyOutlined, GlobalOutlined } from "@ant-design/icons";
-import { MenuProps, TimeRangePickerProps } from "antd";
-import Item from "antd/es/list/Item";
-import { ItemType } from "antd/es/menu/hooks/useItems";
 import copyToClipboard from "copy-to-clipboard";
 import dayjs,{Dayjs} from "dayjs";
 interface Preset {

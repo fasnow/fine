@@ -2,10 +2,6 @@ import React from "react";
 import type { MenuProps } from "antd";
 import { ConfigProvider, Menu } from "antd";
 import { useNavigate } from "react-router-dom";
-import { warningNotification } from "../component/Notification";
-import { RootState } from "../store/store";
-import { useSelector } from "react-redux";
-import {MenuInfo} from "rc-menu/lib/interface";
 
 type MenuItem = Required<MenuProps>["items"][number];
 

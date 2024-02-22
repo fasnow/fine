@@ -11,4 +11,8 @@ export function OpenFileDialog():Promise<string>;
 
 export function OpenFolder(arg1:string):Promise<void>;
 
+export function ReadFileAsBase64(arg1:string):Promise<string>;
+
 export function ShowItemInFolder(arg1:string,arg2:string):Promise<void>;
+
+export function WriteFile(arg1:string,arg2:string):Promise<void>;

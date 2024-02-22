@@ -1,7 +1,7 @@
 import { CheckOutlined, CopyOutlined } from "@ant-design/icons";
 import { Button, ButtonProps, Tooltip } from "antd";
 import { TooltipPlacement } from "antd/es/tooltip";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import copy from 'copy-to-clipboard';
 interface CopyProps extends ButtonProps {
     onClick?: () => void

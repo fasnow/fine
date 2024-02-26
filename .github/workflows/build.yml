@@ -136,4 +136,4 @@ jobs:
             1. 添加微信小程序反编译功能。
         env:
 #          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ FINE_TEST_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

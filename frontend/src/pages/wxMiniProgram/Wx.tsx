@@ -29,7 +29,7 @@ export const Wx: React.FC = () => {
 
     useEffect(() => {
         GetPlatform().then(
-            r=>setVersion(r)
+            r=>setPlatform(r)
         )
         const handleResite = ()=>{
             setHeight(window.innerHeight-100)

@@ -25,11 +25,11 @@ export const Wx: React.FC = () => {
     const [version,setVersion]=useState<string>("")
     const [appletPath,setAppletPath]=useState<string>("")
     const dataCachePath = useRef<string>("")
-    const platform = useRef<string>("")
+    const [platform,setPlatform] = useState<string>("")
 
     useEffect(() => {
         GetPlatform().then(
-            r=>platform.current=r
+            r=>setVersion(r)
         )
         const handleResite = ()=>{
             setHeight(window.innerHeight-100)
@@ -139,7 +139,7 @@ export const Wx: React.FC = () => {
 
         }}>
             {
-                platform.current != "windows" && <div
+                platform != "windows" && <div
                     style={{
                         position: "fixed",
                         display:"flex",

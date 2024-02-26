@@ -87,7 +87,7 @@ jobs:
           npm install --force
           npm run build
           mv decompile ../backend/sdk/client/wx/decompile
-          ../upx-4.2.2-src/build/release/upx ../backend/sdk/client/wx/decompile -9
+          ../upx-4.2.2-src/build/release/upx ../backend/sdk/client/wx/decompile -9 --force-macos
 
       - name: Install Frontend dependencies
         run: |

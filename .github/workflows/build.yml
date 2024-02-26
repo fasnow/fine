@@ -79,7 +79,7 @@ jobs:
       - name: Build WxMiniProgramDecompile
         run: |
           wget https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-src.tar.xz
-          tar -zxvf upx-4.2.2-src.tar.xz --overwrite
+          tar -zxvf upx-4.2.2-src.tar.xz
           cd upx-4.2.2-src
           make
           cd ../wechatMiniProgram

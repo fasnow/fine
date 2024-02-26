@@ -28,7 +28,7 @@ jobs:
       - name: Build WxMiniProgramDecompile
         run: |
           Invoke-WebRequest -Uri 'https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-win64.zip' -OutFile 'upx.zip'
-          Expand-Archive -Path 'upx.zip' -DestinationPath 'upx'
+          Expand-Archive -Path 'upx.zip' -DestinationPath 'upx' -Force
           cd wechatMiniProgram
           npm install pkg
           npm install --force
@@ -79,7 +79,7 @@ jobs:
       - name: Build WxMiniProgramDecompile
         run: |
           wget https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-src.tar.xz
-          tar -zxvf upx-4.2.2-src.tar.xz
+          tar -zxvf upx-4.2.2-src.tar.xz --overwrite
           cd upx-4.2.2-src
           make
           cd ../wechatMiniProgram

@@ -9,6 +9,12 @@ export function Exist(arg1:string):Promise<boolean>;
 
 export function GetAbsFilenameAllByDir(arg1:string,arg2:string):Promise<Array<string>>;
 
+export function GetAbsSubDirByDir(arg1:string,arg2:string):Promise<Array<string>>;
+
+export function GetRelativeFilenameAllByDir(arg1:string,arg2:string):Promise<Array<string>>;
+
 export function Join(arg1:Array<string>):Promise<string>;
+
+export function RemoveAll(arg1:string,arg2:boolean):Promise<void>;
 
 export function WriteBase64edBytesToFile(arg1:string,arg2:string):Promise<void>;

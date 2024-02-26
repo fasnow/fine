@@ -5,6 +5,8 @@ export function CheckUpdate():Promise<{[key: string]: string}>;
 
 export function GetPlatform():Promise<string>;
 
+export function OpenDirectoryDialog():Promise<string>;
+
 export function OpenFile(arg1:string,arg2:string):Promise<void>;
 
 export function OpenFileDialog():Promise<string>;

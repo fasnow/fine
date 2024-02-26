@@ -37,7 +37,7 @@ import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import {fofa, zone} from "../../../wailsjs/go/models";
 import {current} from "@reduxjs/toolkit";
 import {Get0zoneAuth} from "../../../wailsjs/go/config/Config";
-import {Get} from "../../../wailsjs/go/event/Event";
+import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 interface TabType {
@@ -575,7 +575,7 @@ const SiteTabContent = forwardRef((props, ref) => {
     }
 
     useEffect(() => {
-        Get().then(
+        GetAllEvents().then(
             result=>{
                 EventsOn(String(result.hasNew0ZoneSiteDownloadItem), function(){
                     setIsExporting(false)
@@ -886,7 +886,7 @@ const DomainTabContent = forwardRef((props, ref) => {
     }));
 
     useEffect(() => {
-        Get().then(
+        GetAllEvents().then(
             result=>{
                 EventsOn(String(result.hasNew0ZoneDomainDownloadItem), function(){
                     setIsExporting(false)
@@ -1481,7 +1481,7 @@ const EmailTabContent = forwardRef((props, ref) => {
 
 
     useEffect(() => {
-        Get().then(
+        GetAllEvents().then(
             result=>{
                 EventsOn(String(result.hasNew0ZoneEmailDownloadItem), function(){
                     setIsExporting(false)
@@ -1789,7 +1789,7 @@ const MemberTabContent = forwardRef((props, ref) => {
 
 
     useEffect(() => {
-        Get().then(
+        GetAllEvents().then(
             result=>{
                 EventsOn(String(result.hasNew0ZoneMemberDownloadItem), function(){
                     setIsExporting(false)

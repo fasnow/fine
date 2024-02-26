@@ -18,8 +18,20 @@ export function GetAbsFilenameAllByDir(arg1, arg2) {
   return window['go']['runtime']['Path']['GetAbsFilenameAllByDir'](arg1, arg2);
 }
 
+export function GetAbsSubDirByDir(arg1, arg2) {
+  return window['go']['runtime']['Path']['GetAbsSubDirByDir'](arg1, arg2);
+}
+
+export function GetRelativeFilenameAllByDir(arg1, arg2) {
+  return window['go']['runtime']['Path']['GetRelativeFilenameAllByDir'](arg1, arg2);
+}
+
 export function Join(arg1) {
   return window['go']['runtime']['Path']['Join'](arg1);
+}
+
+export function RemoveAll(arg1, arg2) {
+  return window['go']['runtime']['Path']['RemoveAll'](arg1, arg2);
 }
 
 export function WriteBase64edBytesToFile(arg1, arg2) {

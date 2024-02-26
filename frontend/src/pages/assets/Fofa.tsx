@@ -22,7 +22,7 @@ import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import {ItemType} from "antd/es/menu/hooks/useItems";
 
 import {GetFofaAuth} from "../../../wailsjs/go/config/Config";
-import {Get} from "../../../wailsjs/go/event/Event";
+import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
@@ -215,7 +215,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         const [maxPage, setMaxPage] = useState<number>(0)
         const [disable,setDisable] = useState<boolean>(false)
         useEffect(() => {
-            Get().then(
+            GetAllEvents().then(
                 result=>{
                     EventsOn(String(result.hasNewFofaDownloadItem),()=>{
                         setIsExporting(false)

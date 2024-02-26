@@ -4,7 +4,7 @@ import {ConfigProvider, Layout as Lay, Tabs, TabsProps} from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import locale from 'antd/locale/zh_CN';
-import {GetProxy, Init} from "../wailsjs/go/config/Config";
+import {GetProxy} from "../wailsjs/go/config/Config";
 import {errorNotification} from "@/component/Notification";
 import Bar from "@/pages/Bar";
 import Fofa from "@/pages/assets/Fofa";
@@ -18,6 +18,7 @@ import {setFofaAuth, setProxy} from "@/store/store";
 import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
+import {Wx} from "@/pages/wxMiniProgram/Wx";
 // import {doFile} from "./pages/wxMiniProgram/wuWxapkg"
 const { Header } = Lay;
 const headerStyle: React.CSSProperties = {
@@ -57,12 +58,13 @@ const App: React.FC = () => {
     }, [])
     useEffect(() => {
         try {
-            Init()
             GetProxy().then(
                 result=>{
                     dispatch(setProxy(result))
                 }
             )
+            // doConfig("D:\\Tools\\wechatMiniAppReverse\\wxappUnpacker52破解版\\wx320a5673052ac189\\app-config.json")
+
         }catch (e) {
             errorNotification("错误",e,3)
         }
@@ -193,11 +195,11 @@ const items: TabsProps['items'] = [
                                                         // centered
         /></div>,
     },
-    // {
-    //     key: '6',
-    //     label: '天眼查',
-    //     children: <div style={{padding:"0 10px"}}><TianYanCha/></div>,
-    // },
 
+    {
+        key: '6',
+        label: '小程序反编译',
+        children: <div ><Wx/></div>,
+    },
 ];
 

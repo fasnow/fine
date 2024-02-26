@@ -27,7 +27,7 @@ type Bridge struct {
 }
 
 func NewHunterBridge(app *app.App) *Bridge {
-	hunterAuth := config.GetConfig().GetHunterAuth()
+	hunterAuth := config.GetSingleton().GetHunterAuth()
 	return &Bridge{
 		hunter:      NewClient(hunterAuth.Key),
 		queryLog:    service.NewHunterQueryLog(),
@@ -149,7 +149,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 	}, fileID)
 	go func() {
 		var retry = 10
-		interval := config.GetConfig().GetDefaultInterval().Hunter
+		interval := config.GetSingleton().GetDefaultInterval().Hunter
 		exportDataTaskID := idgen.NextId()
 		for index := int64(1); index <= page; index++ {
 			req := NewGetDataReqBuilder().
@@ -210,7 +210,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	if err := config.GetConfig().SaveHunterAuth(key); err != nil {
+	if err := config.GetSingleton().SaveHunterAuth(key); err != nil {
 		return err
 
 	}

@@ -86,6 +86,20 @@ export namespace config {
 		    return a;
 		}
 	}
+	export class Wechat {
+	    appletPath: string;
+	    dataCachePath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Wechat(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.appletPath = source["appletPath"];
+	        this.dataCachePath = source["dataCachePath"];
+	    }
+	}
 	export class Httpx {
 	    path: string;
 	    flags: string;
@@ -133,7 +147,7 @@ export namespace config {
 	    "0.zone": number;
 	    timeout: number;
 	    httpx: Httpx;
-	    wxDataCacheDir: string;
+	    wechat: Wechat;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -149,7 +163,7 @@ export namespace config {
 	        this["0.zone"] = source["0.zone"];
 	        this.timeout = source["timeout"];
 	        this.httpx = this.convertValues(source["httpx"], Httpx);
-	        this.wxDataCacheDir = source["wxDataCacheDir"];
+	        this.wechat = this.convertValues(source["wechat"], Wechat);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -193,6 +207,7 @@ export namespace config {
 	}
 	
 	
+	
 
 }
 
@@ -211,6 +226,7 @@ export namespace event {
 	    hasNew0ZoneDomainDownloadItem: number;
 	    httpxOuput: number;
 	    httpxOuputDone: number;
+	    decompileWxMiniProgram: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Event(source);
@@ -230,6 +246,7 @@ export namespace event {
 	        this.hasNew0ZoneDomainDownloadItem = source["hasNew0ZoneDomainDownloadItem"];
 	        this.httpxOuput = source["httpxOuput"];
 	        this.httpxOuputDone = source["httpxOuputDone"];
+	        this.decompileWxMiniProgram = source["decompileWxMiniProgram"];
 	    }
 	}
 
@@ -1197,6 +1214,45 @@ export namespace quake {
 	        this.role_validity = this.convertValues(source["role_validity"], Object);
 	        this.personal_information_status = source["personal_information_status"];
 	        this.role = this.convertValues(source["role"], UserRole);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace wechat {
+	
+	export class WxapkgInfo {
+	    path: string;
+	    updateDate: string;
+	    subDirs: WxapkgInfo[];
+	
+	    static createFrom(source: any = {}) {
+	        return new WxapkgInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.updateDate = source["updateDate"];
+	        this.subDirs = this.convertValues(source["subDirs"], WxapkgInfo);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

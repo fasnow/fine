@@ -13,7 +13,7 @@ import {SyncOutlined} from "@ant-design/icons";
 import {Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit'
-import {Get} from "../../wailsjs/go/event/Event";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {range} from "d3";
 import Compact from "antd/es/space/Compact";
 import {current} from "@reduxjs/toolkit";
@@ -59,7 +59,7 @@ const Httpx = () => {
             }
         )
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
-        Get().then(
+        GetAllEvents().then(
             result=>{
                 EventsOn(String(result.httpxOuput),(value)=>{
                     //将终端中的链接转为超链接实现可以点击打开浏览器

@@ -20,11 +20,10 @@ const (
 )
 
 var (
-	baseDir         string
-	dataDir         string
-	cfgAbsFilePath  string
-	dbAbsFilePath   string
-	downloadLogFile string
+	baseDir        string
+	dataDir        string
+	cfgAbsFilePath string
+	dbAbsFilePath  string
 
 	once          sync.Once
 	cfgInstance   Config
@@ -52,34 +51,88 @@ var (
 	}
 )
 
-func GetConfig() *Config {
-	once.Do(func() {
-		cfgInstance = Config{}
-		baseDir = filepath.Dir(os.Args[0])
-		if runtime.GOOS != "windows" {
-			baseDir, _ = os.UserHomeDir()
-			baseDir = filepath.Join(baseDir, "fine")
-		}
-		dataDir = filepath.Join(baseDir, "data")
-		cfgAbsFilePath = filepath.Join(baseDir, "config.yaml")
-		dbAbsFilePath = filepath.Join(dataDir, "data.db")
-		err := cfgInstance.Init()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		db.SetDBAbsFilepath(dbAbsFilePath)
-	})
+func init() {
+	cfgInstance = Config{}
+	baseDir = filepath.Dir(os.Args[0])
+	if runtime.GOOS != "windows" {
+		baseDir, _ = os.UserHomeDir()
+		baseDir = filepath.Join(baseDir, "fine")
+	}
+	dataDir = filepath.Join(baseDir, "data")
+	cfgAbsFilePath = filepath.Join(baseDir, "config.yaml")
+	dbAbsFilePath = filepath.Join(dataDir, "data.db")
+	if err := cfgInstance.ifDirNonExistThenCreat(baseDir); err != nil {
+		return
+	}
+	if err := cfgInstance.ifDirNonExistThenCreat(dataDir); err != nil {
+		fmt.Println(err)
+		return
+	}
+	if err := cfgInstance.ifDirNonExistThenCreat(filepath.Join(dataDir, "wechatMiniProgram")); err != nil {
+		return
+	}
+	if err := cfgInstance.ifDirNonExistThenCreat(filepath.Join(baseDir, "bin")); err != nil {
+		return
+	}
+	config, err := cfgInstance.GetConfigFromFile()
+	if err != nil {
+		return
+	}
+	cfgInstance = *config
+	cfgInstance.Wechat.DataCachePath = filepath.Join(dataDir, "wechatMiniProgram")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	db.SetDBAbsFilepath(dbAbsFilePath)
+}
+
+func GetSingleton() *Config {
+	//once.Do(func() {
+	//	cfgInstance = Config{}
+	//	baseDir = filepath.Dir(os.Args[0])
+	//	if runtime.GOOS != "windows" {
+	//		baseDir, _ = os.UserHomeDir()
+	//		baseDir = filepath.Join(baseDir, "fine")
+	//	}
+	//	dataDir = filepath.Join(baseDir, "data")
+	//	cfgAbsFilePath = filepath.Join(baseDir, "config.yaml")
+	//	dbAbsFilePath = filepath.Join(dataDir, "data.db")
+	//	if err := cfgInstance.ifDirNonExistThenCreat(baseDir); err != nil {
+	//		return
+	//	}
+	//	if err := cfgInstance.ifDirNonExistThenCreat(dataDir); err != nil {
+	//		fmt.Println(err)
+	//		return
+	//	}
+	//	if err := cfgInstance.ifDirNonExistThenCreat(filepath.Join(dataDir, "wechatMiniProgram")); err != nil {
+	//		return
+	//	}
+	//	if err := cfgInstance.ifDirNonExistThenCreat(filepath.Join(baseDir, "bin")); err != nil {
+	//		return
+	//	}
+	//	config, err := cfgInstance.GetConfigFromFile()
+	//	if err != nil {
+	//		return
+	//	}
+	//	cfgInstance = *config
+	//	cfgInstance.wechat.DataCachePath = filepath.Join(dataDir, "wechatMiniProgram")
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		return
+	//	}
+	//	db.SetDBAbsFilepath(dbAbsFilePath)
+	//})
 	return &cfgInstance
 }
 
 type Config struct {
-	Auth           Auth  `yaml:"auth" json:"auth"`
-	Proxy          Proxy `yaml:"proxy" json:"proxy"`
-	Interval       `yaml:"interval" json:"interval"`
-	Timeout        int    `yaml:"timeout" json:"timeout"` //秒
-	Httpx          Httpx  `yaml:"httpx" json:"httpx"`
-	WxDataCacheDir string `yaml:"wxDataCacheDir" json:"wxDataCacheDir"`
+	Auth     Auth  `yaml:"auth" json:"auth"`
+	Proxy    Proxy `yaml:"proxy" json:"proxy"`
+	Interval `yaml:"interval" json:"interval"`
+	Timeout  int    `yaml:"timeout" json:"timeout"` //秒
+	Httpx    Httpx  `yaml:"httpx" json:"httpx"`
+	Wechat   Wechat `yaml:"wechat" json:"wechat"`
 }
 
 type Httpx struct {
@@ -126,23 +179,9 @@ type Interval struct {
 	Zone   int `yaml:"0.zone" json:"0.zone"`
 }
 
-func (c *Config) Init() error {
-	if err := c.ifDirNonExistThenCreat(baseDir); err != nil {
-		return err
-	}
-	if err := c.ifDirNonExistThenCreat(filepath.Join(baseDir, "bin")); err != nil {
-		return err
-	}
-	if err := c.ifDirNonExistThenCreat(dataDir); err != nil {
-		fmt.Println(err)
-		return err
-	}
-	config, err := c.GetConfigFromFile()
-	if err != nil {
-		return err
-	}
-	cfgInstance = *config
-	return nil
+type Wechat struct {
+	AppletPath    string `yaml:"appletPath" json:"appletPath"`
+	DataCachePath string `json:"dataCachePath"`
 }
 
 // GetDefaultTimeout second
@@ -337,18 +376,6 @@ func (c *Config) Save0zoneAuth(key string) error {
 	return nil
 }
 
-func (c *Config) GetWxDataCacheDir() string {
-	return c.WxDataCacheDir
-}
-
-func (c *Config) SaveWxDataCacheDir(dir string) error {
-	c.WxDataCacheDir = filepath.Dir(dir)
-	if err := c.SaveConf(*c); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (c *Config) CheckAuth(name string) bool {
 	switch name {
 	case FofaName:
@@ -383,6 +410,23 @@ func (c *Config) GetHttpx() Httpx {
 
 func (c *Config) SaveHttpx(httpx Httpx) error {
 	c.Httpx = httpx
+	if err := c.SaveConf(*c); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Config) GetWechat() Wechat {
+	if cfgInstance.Wechat.AppletPath == "" {
+		c.Wechat.AppletPath = ""
+		_ = c.SaveConf(*c)
+		return cfgInstance.Wechat
+	}
+	return cfgInstance.Wechat
+}
+
+func (c *Config) SaveWechat(wechat Wechat) error {
+	c.Wechat = wechat
 	if err := c.SaveConf(*c); err != nil {
 		return err
 	}

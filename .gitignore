@@ -114,4 +114,6 @@ typings/
 **/node_modules/
 **/dist/
 **/*.yaml
+!.github/workflows/*.yaml
 **/.idea
+**/decompile*

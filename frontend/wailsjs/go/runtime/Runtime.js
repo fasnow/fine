@@ -10,6 +10,10 @@ export function GetPlatform() {
   return window['go']['runtime']['Runtime']['GetPlatform']();
 }
 
+export function OpenDirectoryDialog() {
+  return window['go']['runtime']['Runtime']['OpenDirectoryDialog']();
+}
+
 export function OpenFile(arg1, arg2) {
   return window['go']['runtime']['Runtime']['OpenFile'](arg1, arg2);
 }

@@ -23,7 +23,7 @@ import ResizableTitle from "@/component/ResizableTitle";
 import {ItemType} from "antd/es/menu/hooks/useItems";
 import type { Tab } from 'rc-tabs/lib/interface';
 import {GetHunterAuth} from "../../../wailsjs/go/config/Config";
-import {Get} from "../../../wailsjs/go/event/Event";
+import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const pageSizeOptions = [10, 20, 50, 100]
 const defaultCheckedColsValue: string[] = [
@@ -199,7 +199,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             )
         }
         useEffect(() => {
-            Get().then(
+            GetAllEvents().then(
                 result=>{
                     EventsOn(String(result.hasNewHunterDownloadItem), function(){
                         setIsExporting(false)
@@ -538,7 +538,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             }
         }, [])
         useEffect(() => {
-            Get().then(
+            GetAllEvents().then(
                 result=>{
                     EventsOn(String(result.hasNewHunterDownloadItem), function(){
                         GetRestToken().then(

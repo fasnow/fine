@@ -21,7 +21,7 @@ import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 
 import {icp} from "../../../wailsjs/go/models";
 import {CheckImage, Export, GetImage, IsSignExpired, Query} from "../../../wailsjs/go/icp/Bridge";
-import {Get} from "../../../wailsjs/go/event/Event";
+import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 
 type dataCacheType = {
     [key: number]: icp.Item[];
@@ -197,7 +197,7 @@ const IcpContent: React.FC = () => {
     const [disable,setDisable] = useState<boolean>(false)
 
     useEffect(() => {
-         Get().then(
+        GetAllEvents().then(
             result=>{
                 EventsOn(String(result.hasNewIcpDownloadItem),()=>{
                     setDisable(false)

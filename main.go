@@ -14,6 +14,7 @@ import (
 	"fine/backend/sdk/client/icp"
 	"fine/backend/sdk/client/ip138"
 	"fine/backend/sdk/client/quake"
+	wechat "fine/backend/sdk/client/wx"
 	"fine/backend/sdk/client/zone"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -48,7 +49,7 @@ func main() {
 			event.GetSingleton(),
 			runtime.NewRuntime(mainApp),
 			httpx.NewHttpxBridge(mainApp),
-			config.GetConfig(),
+			config.GetSingleton(),
 			service.NewDownloadLogService(),
 			service.NewFofaDBService(),
 			icp.NewICPBridge(mainApp),
@@ -58,9 +59,10 @@ func main() {
 			quake.NewQuakeBridge(mainApp),
 			zone.NewZoneBridge(mainApp),
 			runtime.NewPath(),
+			wechat.NewWechatBridge(mainApp),
 		},
 		Debug: options.Debug{
-			OpenInspectorOnStartup: false,
+			OpenInspectorOnStartup: true,
 		},
 	}
 	if err := wails.Run(opts); err != nil {

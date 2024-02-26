@@ -25,7 +25,7 @@ type Bridge struct {
 }
 
 func NewFofaBridge(app *app.App) *Bridge {
-	fofaAuth := config.GetConfig().GetFofaAuth()
+	fofaAuth := config.GetSingleton().GetFofaAuth()
 	return &Bridge{
 		fofa:        NewClient(fofaAuth.Email, fofaAuth.Key),
 		queryLog:    service.NewFOFAQueryLog(),
@@ -112,7 +112,7 @@ func (b *Bridge) Export(taskID int64, page, pageSize int64) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetConfig().GetDefaultInterval().Fofa
+		interval := config.GetSingleton().GetDefaultInterval().Fofa
 		for index := int64(1); index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -171,7 +171,7 @@ func (b *Bridge) GetUserInfo() (*User, error) {
 }
 
 func (b *Bridge) SetAuth(email, key string) error {
-	if err := config.GetConfig().SaveFofaAuth(email, key); err != nil {
+	if err := config.GetSingleton().SaveFofaAuth(email, key); err != nil {
 		return err
 
 	}

@@ -32,9 +32,7 @@ export function GetProxy():Promise<config.Proxy>;
 
 export function GetQuakeAuth():Promise<config.Quake>;
 
-export function GetWxDataCacheDir():Promise<string>;
-
-export function Init():Promise<void>;
+export function GetWechat():Promise<config.Wechat>;
 
 export function Save0zoneAuth(arg1:string):Promise<void>;
 
@@ -50,4 +48,4 @@ export function SaveProxy(arg1:config.Proxy):Promise<void>;
 
 export function SaveQuakeAuth(arg1:string):Promise<void>;
 
-export function SaveWxDataCacheDir(arg1:string):Promise<void>;
+export function SaveWechat(arg1:config.Wechat):Promise<void>;

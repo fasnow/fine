@@ -130,6 +130,17 @@ func (r *Runtime) OpenFileDialog() (string, error) {
 	return path, nil
 }
 
+func (r *Runtime) OpenDirectoryDialog() (string, error) {
+	fmt.Println(r.app.GetContext())
+	path, err := wailsRuntime.OpenDirectoryDialog(r.app.GetContext(), wailsRuntime.OpenDialogOptions{
+		Title: "选择目录",
+	})
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
 func (r *Runtime) ReadFileAsBase64(filename string) (string, error) {
 	bytes, err := os.ReadFile(filename)
 	if err != nil {

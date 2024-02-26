@@ -26,7 +26,7 @@ type Bridge struct {
 }
 
 func NewZoneBridge(app *app.App) *Bridge {
-	auth := config.GetConfig().Get0zoneAuth()
+	auth := config.GetSingleton().Get0zoneAuth()
 	return &Bridge{
 		zone:        NewClient(auth.Key),
 		queryLog:    service.NewZoneQueryLog(),
@@ -38,7 +38,7 @@ func NewZoneBridge(app *app.App) *Bridge {
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	if err := config.GetConfig().Save0zoneAuth(key); err != nil {
+	if err := config.GetSingleton().Save0zoneAuth(key); err != nil {
 		return err
 
 	}
@@ -504,7 +504,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetConfig().GetDefaultInterval().Zone
+		interval := config.GetSingleton().GetDefaultInterval().Zone
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -570,7 +570,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetConfig().GetDefaultInterval().Zone
+		interval := config.GetSingleton().GetDefaultInterval().Zone
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -636,7 +636,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetConfig().GetDefaultInterval().Zone
+		interval := config.GetSingleton().GetDefaultInterval().Zone
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -702,7 +702,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetConfig().GetDefaultInterval().Zone
+		interval := config.GetSingleton().GetDefaultInterval().Zone
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).

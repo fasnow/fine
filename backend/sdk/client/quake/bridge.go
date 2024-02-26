@@ -27,7 +27,7 @@ type Bridge struct {
 }
 
 func NewQuakeBridge(app *app.App) *Bridge {
-	auth := config.GetConfig().GetQuakeAuth()
+	auth := config.GetSingleton().GetQuakeAuth()
 	return &Bridge{
 		quake:       NewClient(auth.Key),
 		queryLog:    service.NewQuakeQueryLog(),
@@ -39,7 +39,7 @@ func NewQuakeBridge(app *app.App) *Bridge {
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	if err := config.GetConfig().SaveQuakeAuth(key); err != nil {
+	if err := config.GetSingleton().SaveQuakeAuth(key); err != nil {
 		return err
 
 	}
@@ -189,7 +189,7 @@ func (b *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 
 	go func() {
 		var retry = 10
-		interval := config.GetConfig().GetDefaultInterval().Quake
+		interval := config.GetSingleton().GetDefaultInterval().Quake
 		exportDataTaskID := idgen.NextId()
 		for index := 1; index <= page; index++ {
 			req := NewGetRealtimeDataBuilder().

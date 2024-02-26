@@ -31,7 +31,7 @@ import {quake} from "../../../wailsjs/go/models";
 import {ItemType} from "antd/es/menu/hooks/useItems";
 import {GetQuakeAuth} from "../../../wailsjs/go/config/Config";
 import {GetRestToken} from "../../../wailsjs/go/hunter/Bridge";
-import {Get} from "../../../wailsjs/go/event/Event";
+import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
@@ -327,7 +327,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       }
     }, [pageSize, props.total])
     useEffect(() => {
-      Get().then(
+      GetAllEvents().then(
           result=>{
             EventsOn(String(result.hasNewQuakeDownloadItem), function(){
               setIsExporting(false)

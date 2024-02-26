@@ -15,7 +15,8 @@ func NewPath() *Path {
 	return &Path{}
 }
 
-func (r *Path) Join(path ...string) string {
+func (r *Path) Join(path []string) string {
+	fmt.Println(path)
 	return filepath.Join(path...)
 }
 
@@ -79,4 +80,78 @@ func (r *Path) GetAbsFilenameAllByDir(dir, extension string) ([]string, error) {
 		}
 	}
 	return fileList, nil
+}
+
+func (r *Path) GetRelativeFilenameAllByDir(dir, extension string) ([]string, error) {
+	var fileList []string
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		// 获取文件或目录的绝对路径
+		filePath := filepath.Join(dir, file.Name())
+		// 判断是否是文件
+		if file.Type().IsRegular() {
+			if strings.HasSuffix(file.Name(), extension) {
+				fileList = append(fileList, filePath)
+			}
+		} else if file.IsDir() {
+			files, err := r.GetAbsFilenameAllByDir(filePath, extension)
+			if err != nil {
+				continue
+			}
+			fileList = append(fileList, files...)
+		} else {
+			// 其他类型的文件
+			fmt.Println("Unknown file type:", filePath)
+		}
+	}
+	return fileList, nil
+}
+
+func (r *Path) GetAbsSubDirByDir(dir, extension string) ([]string, error) {
+	var fileList []string
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		// 获取文件或目录的绝对路径
+		filePath := filepath.Join(dir, file.Name())
+		// 判断是否是文件
+		if file.Type().IsRegular() {
+			if strings.HasSuffix(file.Name(), extension) {
+				fileList = append(fileList, filePath)
+			}
+		} else if file.IsDir() {
+			files, err := r.GetAbsFilenameAllByDir(filePath, extension)
+			if err != nil {
+				continue
+			}
+			fileList = append(fileList, files...)
+		} else {
+			// 其他类型的文件
+			fmt.Println("Unknown file type:", filePath)
+		}
+	}
+	return fileList, nil
+}
+
+func (r *Path) RemoveAll(path string, reserveRoot bool) {
+	//不处理任何错误
+	if !reserveRoot {
+		os.RemoveAll(path)
+		return
+	}
+	filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if path == p {
+			return nil
+		}
+		os.RemoveAll(p)
+		return nil
+	})
 }

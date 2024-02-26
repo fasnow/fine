@@ -17,3 +17,10 @@ func TestPath_GetAbsFilenameAllByDir(t *testing.T) {
 	}
 	t.Log(string(marshal))
 }
+
+func TestPath_RemoveAll(t *testing.T) {
+	r := &Path{}
+	if err := r.RemoveAll("D:\\AppAutoDownloadFiles\\WeChat\\WeChat Files\\Applet", true); err != nil {
+		t.Log(err)
+	}
+}

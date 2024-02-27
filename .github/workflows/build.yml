@@ -44,6 +44,7 @@ jobs:
       - name: Build
         run: |
           wails build
+          upx/upx-4.2.2-win64/upx.exe build/bin/Fine.exe -9
 
       - name: Zip Build Artifacts
         run: |
@@ -97,6 +98,7 @@ jobs:
       - name: Build
         run: |
           wails build
+          upx-4.2.2-src/build/release/upx build/bin/Fine.app -9 --force-macos
 
       - name: Zip Build Artifacts
         run: |

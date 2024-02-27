@@ -34,7 +34,7 @@ jobs:
           npm install --force
           npm run build
           mv decompile.exe ../backend/sdk/client/wx/decompile
-          ../upx/upx-4.2.2-win64/upx.exe ../backend/sdk/client/wx/decompile -9
+
 
       - name: Install Frontend dependencies
         run: |
@@ -44,6 +44,7 @@ jobs:
       - name: Build
         run: |
           wails build
+          upx/upx-4.2.2-win64/upx.exe build/bin/Fine.exe -9
 
       - name: Zip Build Artifacts
         run: |
@@ -87,7 +88,6 @@ jobs:
           npm install --force
           npm run build
           mv decompile ../backend/sdk/client/wx/decompile
-          ../upx-4.2.2-src/build/release/upx ../backend/sdk/client/wx/decompile -9 --force-macos
 
       - name: Install Frontend dependencies
         run: |
@@ -97,6 +97,7 @@ jobs:
       - name: Build
         run: |
           wails build
+          //macos upx无法压缩
 
       - name: Zip Build Artifacts
         run: |

@@ -97,7 +97,7 @@ jobs:
       - name: Build
         run: |
           wails build
-          //macos upx无法压缩
+#          macos upx无法压缩
 
       - name: Zip Build Artifacts
         run: |

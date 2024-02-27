@@ -44,7 +44,6 @@ jobs:
       - name: Build
         run: |
           wails build
-          upx/upx-4.2.2-win64/upx.exe build/bin/Fine.exe -9
 
       - name: Zip Build Artifacts
         run: |
@@ -98,7 +97,6 @@ jobs:
       - name: Build
         run: |
           wails build
-          upx-4.2.2-src/build/release/upx build/bin/Fine.app -9 --force-macos
 
       - name: Zip Build Artifacts
         run: |
@@ -137,7 +135,7 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 添加微信小程序反编译功能。
+            1. 添加Windows平台下的微信小程序反编译功能。
         env:
 #          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

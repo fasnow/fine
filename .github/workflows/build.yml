@@ -137,5 +137,5 @@ jobs:
           body: |
             1. 添加Windows平台下的微信小程序反编译功能。
         env:
-#          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

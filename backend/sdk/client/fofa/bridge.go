@@ -157,7 +157,7 @@ func (b *Bridge) Export(taskID int64, page, pageSize int64) error {
 		if err := b.fofa.Export(exportItems, outputAbsFilepath, queryLog.Fields); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewFofaDownloadItem)
 	}()
 	return nil
 }

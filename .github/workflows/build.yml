@@ -136,7 +136,7 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 添加Windows平台下的微信小程序反编译功能。
+            1. 修复Fofa导出结束后导出按钮仍禁用问题。
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

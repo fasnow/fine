@@ -2,8 +2,8 @@ package db
 
 import (
 	"fine/backend/db/model"
-	"fine/backend/sdk/model/hunter"
-	quakeModel "fine/backend/sdk/model/quake"
+	"fine/backend/service/model/hunter"
+	quakeModel "fine/backend/service/model/quake"
 	"fmt"
 	"github.com/yitter/idgenerator-go/idgen"
 	"gorm.io/driver/sqlite"

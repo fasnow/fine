@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/sdk/model/fofa"
+	"fine/backend/service/model/fofa"
 	"github.com/yitter/idgenerator-go/idgen"
 	"testing"
 )

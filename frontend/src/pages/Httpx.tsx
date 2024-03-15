@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
-import {Button, Checkbox, Input, InputNumber, Select, Space} from "antd";
+import {Button, Checkbox, Input, InputNumber, Select, Space, Tooltip} from "antd";
 import "@/pages/Httpx.css"
 import {GetHttpx, SaveHttpx} from "../../wailsjs/go/config/Config";
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
@@ -144,27 +144,38 @@ const Httpx = () => {
     return (
         <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
             <div style={{display:"flex",justifyContent:"center",gap:"10px"}}>
-                <span>Httpx路径</span>
-                <Space.Compact>
-                    <Input value={path} size={"small"} style={{width:"400px"}}
-                           onChange={e=>setPath(e.target.value)}
-                           onBlur={saveHttpx}
+                <span style={{display:"flex",gap:"5px"}}>
+                    <span>Httpx路径</span>
+                    <Space.Compact>
+                        <Input value={path} size={"small"} style={{width:"400px"}}
+                               onChange={e=>setPath(e.target.value)}
+                               onBlur={saveHttpx}
 
+                        />
+                        <Button size={"small"} onClick={setHttpxPath}>选择</Button>
+                    </Space.Compact>
+                </span>
+                <span style={{display:"flex",gap:"5px"}}>
+                    <span>程序参数</span>
+                    <Input value={flags} size={"small"} style={{width:"200px"}}
+                           onChange={e=>setFlags(e.target.value)}
+                           onBlur={saveHttpx}
                     />
-                    <Button size={"small"} onClick={setHttpxPath}>选择</Button>
-                </Space.Compact>
-                <span>程序参数</span>
-                <Input value={flags} size={"small"} style={{width:"200px"}}
-                       onChange={e=>setFlags(e.target.value)}
-                       onBlur={saveHttpx}
-                />
-                <span>输入参数</span>
-                <Input value={inputFlag} size={"small"} style={{width:"80px"}}
-                       onChange={e=>setInputFlag(e.target.value)}
-                       onBlur={saveHttpx}
-                />
-                <span>从文件读取</span>
-                <Checkbox checked={fromFile} onChange={(e)=>setFromFile(e.target.checked)}/>
+                </span>
+                <span style={{display:"flex",gap:"5px"}}>
+                    <span>输入参数</span>
+                    <Input value={inputFlag} size={"small"} style={{width:"50px"}}
+                           onChange={e=>setInputFlag(e.target.value)}
+                           onBlur={saveHttpx}
+                    />
+                </span>
+
+                <Tooltip title={"配合-l参数使用,否则请使用-u参数"} placement={"bottom"} >
+                    <span style={{display:"flex",gap:"5px"}}>
+                        <span>从文件读取</span>
+                        <Checkbox checked={fromFile} onChange={(e)=>setFromFile(e.target.checked)}/>
+                    </span>
+                </Tooltip>
                 {!running && <Button size={"small"} onClick={exec}>执行</Button>}
                 {running && <Button size={"small"} onClick={stop} icon={<SyncOutlined spin={running}/>}>终止</Button>}
             </div>

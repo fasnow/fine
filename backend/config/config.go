@@ -46,7 +46,8 @@ var (
 		Httpx: Httpx{
 			Path:      "",
 			Flags:     "-sc -cl -title",
-			InputFlag: "-u",
+			InputFlag: "-l",
+			FromFile:  true,
 		},
 	}
 )
@@ -139,6 +140,7 @@ type Httpx struct {
 	Path      string `yaml:"path" json:"path"`
 	Flags     string `yaml:"flags" json:"flags"`
 	InputFlag string `yaml:"inputFlag" json:"inputFlag"`
+	FromFile  bool   `yaml:"fromFile" json:"fromFile"`
 }
 
 type (

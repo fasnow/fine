@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
-import {Button, Input, InputNumber, Select, Space} from "antd";
+import {Button, Checkbox, Input, InputNumber, Select, Space} from "antd";
 import "@/pages/Httpx.css"
 import {GetHttpx, SaveHttpx} from "../../wailsjs/go/config/Config";
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
@@ -22,6 +22,7 @@ const Httpx = () => {
     const [path,setPath] = useState<string>("")
     const [flags,setFlags] = useState<string>("")
     const [inputFlag,setInputFlag] = useState<string>("")
+    const [fromFile,setFromFile] = useState<boolean>(false)
     const [output,setOutput] = useState<string>("")
     const [running,setRunning] = useState<boolean>(false)
     const [targets,setTargets] = useState<string>("")
@@ -31,7 +32,7 @@ const Httpx = () => {
     const [total,setTotal] = useState<number>(0)
     const [start,setStart] = useState<number>(1)
     const [length,setLength] = useState<number>(15)
-
+    const isFirstSet = useRef<boolean>(true)
     useEffect(() => {
         //设置终端格式
         if (terminalRef.current) {
@@ -56,6 +57,7 @@ const Httpx = () => {
                 setPath(result.path)
                 setFlags(result.flags)
                 setInputFlag(result.inputFlag)
+                setFromFile(result.fromFile)
             }
         )
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
@@ -78,14 +80,23 @@ const Httpx = () => {
                 EventsOn(String(result.httpxOuputDone),()=>{
                     setRunning(false)
                     terminalRef.current && terminalRef.current.write("$$$ Finished")
+                    terminalRef.current && terminalRef.current.write("")
                     console.log(urls.current)
                 })
             }
         )
     }, []);
 
+    useEffect(() => {
+        if(isFirstSet.current) {
+            isFirstSet.current=false
+            return
+        }
+        saveHttpx()
+    }, [fromFile]);
+
     const saveHttpx=()=>{
-        SaveHttpx({path:path,flags:flags,inputFlag:inputFlag})
+        SaveHttpx({path:path,flags:flags,inputFlag:inputFlag,fromFile:fromFile})
     }
 
     const setHttpxPath=()=>{
@@ -93,7 +104,7 @@ const Httpx = () => {
             result=>{
                 if(result){
                     setPath(result)
-                    SaveHttpx({path:result  ,flags:flags,inputFlag:inputFlag})
+                    SaveHttpx({path:result  ,flags:flags,inputFlag:inputFlag,fromFile:fromFile})
                 }
             }
         ).catch(
@@ -108,7 +119,7 @@ const Httpx = () => {
         setTotal(0)
         setStart(1)
         setLength(length)
-        Run(path,flags,inputFlag,targets).then(r => setRunning(true)).catch(err=> {
+        Run(path,flags,inputFlag,fromFile,targets).then(r => setRunning(true)).catch(err=> {
             errorNotification("错误", err)
             setRunning(false)
         })
@@ -134,11 +145,14 @@ const Httpx = () => {
         <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
             <div style={{display:"flex",justifyContent:"center",gap:"10px"}}>
                 <span>Httpx路径</span>
-                <Input value={path} size={"small"} style={{width:"400px"}}
-                       onChange={e=>setPath(e.target.value)}
-                       onBlur={saveHttpx}
-                />
-                <Button size={"small"} onClick={setHttpxPath}>选择</Button>
+                <Space.Compact>
+                    <Input value={path} size={"small"} style={{width:"400px"}}
+                           onChange={e=>setPath(e.target.value)}
+                           onBlur={saveHttpx}
+
+                    />
+                    <Button size={"small"} onClick={setHttpxPath}>选择</Button>
+                </Space.Compact>
                 <span>程序参数</span>
                 <Input value={flags} size={"small"} style={{width:"200px"}}
                        onChange={e=>setFlags(e.target.value)}
@@ -149,6 +163,8 @@ const Httpx = () => {
                        onChange={e=>setInputFlag(e.target.value)}
                        onBlur={saveHttpx}
                 />
+                <span>从文件读取</span>
+                <Checkbox checked={fromFile} onChange={(e)=>setFromFile(e.target.checked)}/>
                 {!running && <Button size={"small"} onClick={exec}>执行</Button>}
                 {running && <Button size={"small"} onClick={stop} icon={<SyncOutlined spin={running}/>}>终止</Button>}
             </div>

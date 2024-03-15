@@ -136,7 +136,8 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 修复Fofa导出结束后导出按钮仍禁用问题。
+            1. 修复FOFA导出结束后导出按钮仍禁用问题;
+            2. HTTPX添加目标后默认从文本读取,支持一次探测更多目标。
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

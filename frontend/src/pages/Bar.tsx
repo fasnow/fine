@@ -12,10 +12,10 @@ import { Proxy as ProxyComp } from "./setting/Setting"
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
     BrowserOpenURL, EventsOn,
-    Quit,
+    Quit, WindowFullscreen, WindowIsFullscreen,
     WindowIsMaximised,
     WindowMaximise,
-    WindowMinimise,
+    WindowMinimise, WindowToggleMaximise, WindowUnfullscreen,
     WindowUnmaximise
 } from "../../wailsjs/runtime";
 import {CheckUpdate, GetPlatform, OpenFile, OpenFolder, ShowItemInFolder} from "../../wailsjs/go/runtime/Runtime";
@@ -33,7 +33,7 @@ const buttonStyle: React.CSSProperties = {
     width: "30px",
     transition: "0s",
 };
-
+const { confirm } = Modal;
 const appIcon = (platform: string) => {
     if (platform === "windows") {
         return <span
@@ -480,6 +480,11 @@ const DownloadHistory: React.FC = () => {
                 })
             }
         )
+
+        addEventListener("fullscreenchange", (event) => {
+            console.log(1)
+        });
+
     }, [])
     return <>
         <Proxy />
@@ -521,31 +526,62 @@ const DownloadHistory: React.FC = () => {
 const Bar: React.FC = () => {
     const [platform, setPlatform] = useState<string>("")
     const version = useRef(packageJson.version)
+
+    //必须搭配使用,EventsOn里面获取不到isFullScreen更新后的值
     const [isFullScreen,setIsFullScreen] = useState<boolean>(false)
+    const f=useRef<boolean>(false)
+
+    const [open,setOpen]=useState<boolean>(false)
+
     useEffect(() => {
         GetPlatform().then(
-            result=>{
+            result => {
                 setPlatform(result)
             }
         )
+        const t = async () => {
+            EventsOn(String((await GetAllEvents()).windowSizeChange), (r) => {
+                if(r==0&& f.current){
+                    setIsFullScreen(false)
+                    f.current=false
+                }else if(r==1&&!f.current){
+                    setIsFullScreen(true)
+                    f.current=true
+                }
+            })
+        }
+        t()
     }, [])
 
-    const handleWindowResize=()=>{
-        WindowIsMaximised().then(
-            result=>{
-                if(result){
-                    WindowUnmaximise()
-                    setIsFullScreen(false)
-                    return
-                }
-                WindowMaximise()
-                setIsFullScreen(true)
-            }
-        )
+    const handleQuit = () => {
+        confirm({
+            title: '确定退出?',
+            onOk() {
+                Quit()
+            },
+            onCancel() {},
+            style:{top:"20%"},
+            okButtonProps:{size:"small"},
+            cancelButtonProps:{size:"small"},
+            maskClosable:false,
+            closable:false,
+            width:300,
+        })
     }
-
     return (
-        <div id="drag" className="bar" style={{ backgroundColor: 'rgb(255, 255, 255,1)'}} onDoubleClick={handleWindowResize}>
+        <div
+            id="drag"
+            className="bar"
+            // draggable
+            style={{
+                backgroundColor: 'rgb(255, 255, 255,1)'
+        }}
+            onDoubleClick={()=>{
+                WindowToggleMaximise();
+                f.current=!f.current
+                setIsFullScreen(pre=>!pre)
+            }}
+        >
             <div className="left" >{appIcon(platform)}</div>
             <div className="right" onDoubleClick={(e)=>e.stopPropagation()}>
                 <Space size={1}>
@@ -590,8 +626,9 @@ const Bar: React.FC = () => {
                                     icon={<CompressOutlined />}
                                     size="small"
                                     onClick={() => {
-                                        WindowUnmaximise();
+                                        WindowToggleMaximise();
                                         setIsFullScreen(false)
+                                        f.current=false
                                     }}
                                 />
                             ) : (
@@ -601,8 +638,9 @@ const Bar: React.FC = () => {
                                     icon={<ExpandOutlined />}
                                     size="small"
                                     onClick={(e) => {
-                                        WindowMaximise();
+                                        WindowToggleMaximise();
                                         setIsFullScreen(true)
+                                        f.current=true
                                     }}
                                 />
                             )}
@@ -612,7 +650,7 @@ const Bar: React.FC = () => {
                                 icon={<CloseOutlined />}
                                 size="small"
                                 className="exit-button"
-                                onClick={Quit}
+                                onClick={handleQuit}
                             />
                         </div>
                     }

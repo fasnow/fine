@@ -104,6 +104,7 @@ export namespace config {
 	    path: string;
 	    flags: string;
 	    inputFlag: string;
+	    fromFile: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Httpx(source);
@@ -114,6 +115,7 @@ export namespace config {
 	        this.path = source["path"];
 	        this.flags = source["flags"];
 	        this.inputFlag = source["inputFlag"];
+	        this.fromFile = source["fromFile"];
 	    }
 	}
 	export class Proxy {
@@ -214,6 +216,7 @@ export namespace config {
 export namespace event {
 	
 	export class Event {
+	    windowSizeChange: number;
 	    hasNewFofaDownloadItem: number;
 	    hasNewDownloadItem: number;
 	    hasNewHunterDownloadItem: number;
@@ -234,6 +237,7 @@ export namespace event {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.windowSizeChange = source["windowSizeChange"];
 	        this.hasNewFofaDownloadItem = source["hasNewFofaDownloadItem"];
 	        this.hasNewDownloadItem = source["hasNewDownloadItem"];
 	        this.hasNewHunterDownloadItem = source["hasNewHunterDownloadItem"];

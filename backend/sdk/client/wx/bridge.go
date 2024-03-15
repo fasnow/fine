@@ -84,8 +84,10 @@ func (r *Bridge) Decompile(id, version string) error {
 
 	// 执行嵌入的文件
 	cmd := exec.Command(exePath, decryptedFile)
+	fmt.Println(exePath, decryptedFile)
 	runtime.HideCmdWindow(cmd)
 	if err := cmd.Run(); err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return fmt.Errorf("返回值")

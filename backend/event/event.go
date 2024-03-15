@@ -6,11 +6,13 @@ import (
 	"github.com/yitter/idgenerator-go/idgen"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type EventName int
 
 type Value struct {
+	WindowSizeChange              EventName `json:"windowSizeChange"`
 	HasNewFofaDownloadItem        EventName `json:"hasNewFofaDownloadItem"`
 	HasNewDownloadItem            EventName `json:"hasNewDownloadItem"`
 	HasNewHunterDownloadItem      EventName `json:"hasNewHunterDownloadItem"`
@@ -33,10 +35,15 @@ type Event struct {
 var once sync.Once
 var event *Event
 
+func init() {
+	go loopWindowEvent()
+}
+
 func GetSingleton() *Event {
 	once.Do(func() {
 		event = &Event{
 			Value{
+				WindowSizeChange:              EventName(idgen.NextId()),
 				HasNewFofaDownloadItem:        EventName(idgen.NextId()),
 				HasNewDownloadItem:            EventName(idgen.NextId()),
 				HasNewHunterDownloadItem:      EventName(idgen.NextId()),
@@ -72,4 +79,24 @@ func HasNewDownloadLogItemEventEmit(eventName EventName) {
 
 func Emit(eventName EventName, data any) {
 	runtime.EventsEmit(ctx, strconv.Itoa(int(eventName)), data)
+}
+
+func loopWindowEvent() {
+	for {
+		time.Sleep(300 * time.Millisecond)
+		if ctx == nil {
+			continue
+		}
+		if t := runtime.WindowIsNormal(ctx); t {
+			Emit(GetSingleton().WindowSizeChange, 0)
+			continue
+		}
+		if t := runtime.WindowIsMaximised(ctx); t {
+			Emit(GetSingleton().WindowSizeChange, 1)
+			continue
+		}
+		if t := runtime.WindowIsMinimised(ctx); t {
+			Emit(GetSingleton().WindowSizeChange, -1)
+		}
+	}
 }

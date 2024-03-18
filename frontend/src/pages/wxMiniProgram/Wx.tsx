@@ -26,6 +26,7 @@ export const Wx: React.FC = () => {
     const [appletPath,setAppletPath]=useState<string>("")
     const dataCachePath = useRef<string>("")
     const [platform,setPlatform] = useState<string>("")
+    const timer = useRef<any>()
 
     useEffect(() => {
         GetPlatform().then(
@@ -37,6 +38,7 @@ export const Wx: React.FC = () => {
         // 添加事件监听器
         window.addEventListener('resize',handleResite );
         handleResite()
+
         GetAppletSubDir().then(
             result=>{
                 getAppletSubDir(result)
@@ -50,6 +52,27 @@ export const Wx: React.FC = () => {
             }
         )
     }, []);
+
+    useEffect(()=>{
+        if(appletPath?.length>0){
+            //先清除前一个再重新设置
+            if(timer.current){
+                clearTimeout(timer.current);
+            }
+            timer.current = setTimeout(()=>{
+                GetAppletSubDir().then(
+                    result=>{
+                        getAppletSubDir(result)
+                    }
+                )
+            },3000)//3秒更新一次
+            return
+        }
+        if(timer.current){
+            clearTimeout(timer.current);
+        }
+    },[appletPath])
+
 
 
     // GetAllEvents().then(

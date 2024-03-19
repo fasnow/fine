@@ -1,10 +1,10 @@
 package model
 
 import (
-	"fine/backend/sdk/model/fofa"
-	"fine/backend/sdk/model/hunter"
-	quakeModel "fine/backend/sdk/model/quake"
-	"fine/backend/sdk/model/zone"
+	"fine/backend/service/model/fofa"
+	"fine/backend/service/model/hunter"
+	quakeModel "fine/backend/service/model/quake"
+	"fine/backend/service/model/zone"
 )
 
 type Fofa struct {

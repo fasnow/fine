@@ -3,7 +3,7 @@ package service
 import (
 	"fine/backend/db"
 	"fine/backend/db/model"
-	quakeModel "fine/backend/sdk/model/quake"
+	quakeModel "fine/backend/service/model/quake"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

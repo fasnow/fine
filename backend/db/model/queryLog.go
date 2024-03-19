@@ -1,8 +1,8 @@
 package model
 
 import (
-	"fine/backend/sdk/model"
-	"fine/backend/sdk/model/zone"
+	"fine/backend/service/model"
+	"fine/backend/service/model/zone"
 )
 
 type ICPQueryLog struct {

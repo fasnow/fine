@@ -3,7 +3,7 @@ package service
 import (
 	"fine/backend/db"
 	"fine/backend/db/model"
-	"fine/backend/sdk/model/fofa"
+	"fine/backend/service/model/fofa"
 	"gorm.io/gorm"
 )
 

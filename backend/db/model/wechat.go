@@ -1,6 +1,6 @@
 package model
 
-import "fine/backend/sdk/model"
+import "fine/backend/service/model"
 
 type MiniProgram struct {
 	*BaseModel

@@ -4,6 +4,7 @@ import (
 	"fine/backend/db/model"
 	"fine/backend/service/model/hunter"
 	quakeModel "fine/backend/service/model/quake"
+	"fine/backend/service/model/wechat"
 	"fmt"
 	"github.com/yitter/idgenerator-go/idgen"
 	"gorm.io/driver/sqlite"
@@ -70,6 +71,9 @@ func GetDBConnect() *gorm.DB {
 			//&model.ZoneAim{},
 			&model.ZoneQueryLog{},
 		); err != nil {
+			panic(err)
+		}
+		if err = dbConn.AutoMigrate(&model.MiniProgram{}, &wechat.Version{}); err != nil {
 			panic(err)
 		}
 

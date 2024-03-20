@@ -63,7 +63,7 @@ const Httpx = () => {
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
         GetAllEvents().then(
             result=>{
-                EventsOn(String(result.httpxOuput),(value)=>{
+                EventsOn(String(result.httpxOutput),(value)=>{
                     //将终端中的链接转为超链接实现可以点击打开浏览器
                     const urlRegex = /https?:\/\/\S+/g;
                     let match;
@@ -77,7 +77,7 @@ const Httpx = () => {
                     }
                     terminalRef.current && terminalRef.current.writeln(resultString)
                 })
-                EventsOn(String(result.httpxOuputDone),()=>{
+                EventsOn(String(result.httpxOutputDone),()=>{
                     setRunning(false)
                     terminalRef.current && terminalRef.current.write("$$$ Finished")
                     terminalRef.current && terminalRef.current.write("")

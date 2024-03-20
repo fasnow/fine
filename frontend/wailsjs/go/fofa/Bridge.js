@@ -6,6 +6,10 @@ export function Export(arg1, arg2, arg3) {
   return window['go']['fofa']['Bridge']['Export'](arg1, arg2, arg3);
 }
 
+export function GetAllMiniProgram() {
+  return window['go']['fofa']['Bridge']['GetAllMiniProgram']();
+}
+
 export function GetUserInfo() {
   return window['go']['fofa']['Bridge']['GetUserInfo']();
 }

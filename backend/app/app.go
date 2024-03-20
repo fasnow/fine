@@ -2,8 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
-	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -19,9 +17,6 @@ func NewApp() *App {
 func (a *App) SetContext(ctx context.Context) {
 	a.ctx = ctx
 	a.startup(ctx)
-	wailsRuntime.EventsOn(ctx, "test", func(data ...interface{}) {
-		fmt.Println("11111111111111111111")
-	})
 }
 
 func (a *App) GetContext() context.Context {

@@ -1,0 +1,24 @@
+package wechat
+
+type Version struct {
+	//gorm.Model
+	VersionID  int64
+	Number     string `json:"number"`
+	Unpacked   bool   `json:"unpacked"`
+	UpdateDate string `json:"update_date"`
+}
+
+type MiniProgram struct {
+	AppID      string    `json:"app_id"`
+	UpdateDate string    `json:"update_date"`
+	Versions   []Version `gorm:"foreignKey:VersionID" json:"versions"`
+}
+
+type TestA struct {
+	A bool   `json:"a"`
+	B string `json:"b"`
+}
+
+type TestB struct {
+	Tests []TestA `json:"tests"`
+}

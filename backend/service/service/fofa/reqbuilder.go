@@ -2,7 +2,7 @@ package fofa
 
 import (
 	"encoding/base64"
-	"fine/backend/service/client"
+	"fine/backend/service/service"
 	"strconv"
 )
 
@@ -17,7 +17,7 @@ type GetDataReq struct {
 func NewGetDataReqBuilder() *GetDataReqBuilder {
 	builder := &GetDataReqBuilder{}
 	builder.req = &Req{
-		QueryParams: &client.QueryParams{},
+		QueryParams: &service.QueryParams{},
 	}
 	return builder
 }

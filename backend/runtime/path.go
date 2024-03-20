@@ -138,20 +138,17 @@ func (r *Path) GetAbsSubDirByDir(dir, extension string) ([]string, error) {
 	return fileList, nil
 }
 
-func (r *Path) RemoveAll(path string, reserveRoot bool) {
-	//不处理任何错误
+func (r *Path) RemoveAll(path string, reserveRoot bool) error {
 	if !reserveRoot {
-		os.RemoveAll(path)
-		return
+		return os.RemoveAll(path)
 	}
-	filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
+	return filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
 		if path == p {
 			return nil
 		}
-		os.RemoveAll(p)
-		return nil
+		return os.RemoveAll(p)
 	})
 }

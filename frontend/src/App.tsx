@@ -18,8 +18,10 @@ import {setFofaAuth, setProxy} from "@/store/store";
 import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
-import {Wx} from "@/pages/wxMiniProgram/Wx";
+import {MiniProgram} from "@/pages/wechat/Wechat";
+import {GetAllMiniProgram} from "../wailsjs/go/service/TT";
 // import {doFile} from "./pages/wxMiniProgram/wuWxapkg"
+
 const { Header } = Lay;
 const headerStyle: React.CSSProperties = {
     textAlign: 'center',
@@ -55,6 +57,17 @@ const App: React.FC = () => {
         Environment().then(
             r=>console.log(r)
         )
+
+        GetAllMiniProgram().then(r=>{
+            console.log(r)
+        })
+        // Test2().then(r=>{
+        //     console.log(r)
+        // })
+        // Test3().then(r=>{
+        //     console.log(r)
+        // })
+
     }, [])
     useEffect(() => {
         try {
@@ -199,7 +212,7 @@ const items: TabsProps['items'] = [
     {
         key: '6',
         label: '小程序反编译',
-        children: <div ><Wx/></div>,
+        children: <div ><MiniProgram/></div>,
     },
 ];
 

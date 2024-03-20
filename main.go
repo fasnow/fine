@@ -8,14 +8,15 @@ import (
 	"fine/backend/db/service"
 	"fine/backend/event"
 	"fine/backend/runtime"
-	"fine/backend/service/client/fofa"
-	"fine/backend/service/client/httpx"
-	"fine/backend/service/client/hunter"
-	"fine/backend/service/client/icp"
-	"fine/backend/service/client/ip138"
-	"fine/backend/service/client/quake"
-	wechat "fine/backend/service/client/wx"
-	"fine/backend/service/client/zone"
+	service2 "fine/backend/service/service"
+	"fine/backend/service/service/fofa"
+	"fine/backend/service/service/httpx"
+	"fine/backend/service/service/hunter"
+	"fine/backend/service/service/icp"
+	"fine/backend/service/service/ip138"
+	"fine/backend/service/service/quake"
+	"fine/backend/service/service/wechat"
+	"fine/backend/service/service/zone"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -56,18 +57,20 @@ func main() {
 			mainApp,
 			event.GetSingleton(),
 			runtime.NewRuntime(mainApp),
+			runtime.NewPath(),
 			httpx.NewHttpxBridge(mainApp),
 			config.GetSingleton(),
-			service.NewDownloadLogService(),
-			service.NewFofaDBService(),
 			icp.NewICPBridge(mainApp),
 			ip138.NewIP138Bridge(mainApp),
 			fofa.NewFofaBridge(mainApp),
 			hunter.NewHunterBridge(mainApp),
 			quake.NewQuakeBridge(mainApp),
 			zone.NewZoneBridge(mainApp),
-			runtime.NewPath(),
 			wechat.NewWechatBridge(mainApp),
+			//&wechat.Bridge{},
+			service.NewDownloadLogService(),
+			service.NewFofaDBService(),
+			&service2.TT{},
 		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: true,

@@ -2,7 +2,7 @@ package hunter
 
 import (
 	"encoding/base64"
-	"fine/backend/service/client"
+	"fine/backend/service/service"
 	"strconv"
 )
 
@@ -10,7 +10,7 @@ type Req struct {
 	HttpMethod  string
 	ApiPath     string
 	Body        interface{}
-	QueryParams *client.QueryParams
+	QueryParams *service.QueryParams
 	//PathParams  *plugin.PathParams
 }
 
@@ -25,7 +25,7 @@ type GetDataReq struct {
 func NewGetDataReqBuilder() *GetDataReqBuilder {
 	builder := &GetDataReqBuilder{}
 	builder.req = &Req{
-		QueryParams: &client.QueryParams{},
+		QueryParams: &service.QueryParams{},
 	}
 	return builder
 }

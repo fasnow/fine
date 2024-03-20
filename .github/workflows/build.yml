@@ -33,7 +33,7 @@ jobs:
           npm install pkg
           npm install --force
           npm run build
-          mv decompile.exe ../backend/sdk/client/wx/decompile
+          mv decompile.exe ../backend/service/service/wechat/decompile
 
 
       - name: Install Frontend dependencies
@@ -87,7 +87,7 @@ jobs:
           npm install pkg
           npm install --force
           npm run build
-          mv decompile ../backend/sdk/client/wx/decompile
+          mv decompile ../backend/service/service/wechat/decompile
 
       - name: Install Frontend dependencies
         run: |

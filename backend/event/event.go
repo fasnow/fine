@@ -23,9 +23,10 @@ type Value struct {
 	HasNew0zoneMemberDownloadItem EventName `json:"hasNew0ZoneMemberDownloadItem"`
 	HasNew0zoneEmailDownloadItem  EventName `json:"hasNew0ZoneEmailDownloadItem"`
 	HasNew0zoneDomainDownloadItem EventName `json:"hasNew0ZoneDomainDownloadItem"`
-	HttpxOuput                    EventName `json:"httpxOuput"`
-	HttpxOuputDone                EventName `json:"httpxOuputDone"`
-	DecompileWxMiniProgram        EventName `json:"decompileWxMiniProgram"`
+	HttpxOutput                   EventName `json:"httpxOutput"`
+	HttpxOutputDone               EventName `json:"httpxOutputDone"`
+	DecompileWxMiniProgramOutput  EventName `json:"decompileWxMiniProgram"`
+	DecompileWxMiniProgramDone    EventName `json:"decompileWxMiniProgramDone"`
 }
 
 type Event struct {
@@ -53,9 +54,10 @@ func GetSingleton() *Event {
 				HasNew0zoneSiteDownloadItem:   EventName(idgen.NextId()),
 				HasNew0zoneMemberDownloadItem: EventName(idgen.NextId()),
 				HasNew0zoneEmailDownloadItem:  EventName(idgen.NextId()),
-				HttpxOuput:                    EventName(idgen.NextId()),
-				HttpxOuputDone:                EventName(idgen.NextId()),
-				DecompileWxMiniProgram:        EventName(idgen.NextId()),
+				HttpxOutput:                   EventName(idgen.NextId()),
+				HttpxOutputDone:               EventName(idgen.NextId()),
+				DecompileWxMiniProgramOutput:  EventName(idgen.NextId()),
+				DecompileWxMiniProgramDone:    EventName(idgen.NextId()),
 			},
 		}
 	})

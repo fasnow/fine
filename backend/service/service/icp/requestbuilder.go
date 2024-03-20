@@ -1,7 +1,7 @@
 package icp
 
 import (
-	"fine/backend/service/client"
+	"fine/backend/service/service"
 	"strconv"
 )
 
@@ -9,7 +9,7 @@ type Req struct {
 	HttpMethod  string
 	ApiPath     string
 	Body        interface{}
-	QueryParams *client.QueryParams
+	QueryParams *service.QueryParams
 	//PathParams  *plugin.PathParams
 }
 
@@ -23,7 +23,7 @@ type GetDataReq struct {
 
 func NewGetDataReqBuilder() *GetDataReqBuilder {
 	req := &Req{
-		QueryParams: &client.QueryParams{},
+		QueryParams: &service.QueryParams{},
 	}
 	return &GetDataReqBuilder{req: req}
 }

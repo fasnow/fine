@@ -1,8 +1,8 @@
 package zone
 
 import (
-	"fine/backend/service/client"
 	"fine/backend/service/model/zone"
+	"fine/backend/service/service"
 )
 
 type ReqBody struct {
@@ -19,7 +19,7 @@ type Req struct {
 	HttpMethod  string
 	ApiPath     string
 	Body        ReqBody
-	QueryParams *client.QueryParams
+	QueryParams *service.QueryParams
 	//PathParams  *plugin.PathParams
 }
 
@@ -33,7 +33,7 @@ type GetDataReqBuilder struct {
 
 func NewGetDataReqBuilder() *GetDataReqBuilder {
 	builder := &GetDataReqBuilder{}
-	builder.req = &Req{QueryParams: &client.QueryParams{}}
+	builder.req = &Req{QueryParams: &service.QueryParams{}}
 	return builder
 }
 

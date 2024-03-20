@@ -1,12 +1,14 @@
 package quake
 
-import "fine/backend/service/client"
+import (
+	"fine/backend/service/service"
+)
 
 type Req[i interface{}] struct {
 	HttpMethod  string
 	ApiPath     string
 	Body        i
-	QueryParams *client.QueryParams
+	QueryParams *service.QueryParams
 	//PathParams  *plugin.PathParams
 }
 
@@ -35,7 +37,7 @@ type GetRealtimeDataReqBuilder struct {
 func NewGetRealtimeDataBuilder() *GetRealtimeDataReqBuilder {
 	builder := &GetRealtimeDataReqBuilder{}
 	builder.req = &Req[GetRealtimeDataReqBody]{
-		QueryParams: &client.QueryParams{},
+		QueryParams: &service.QueryParams{},
 	}
 	return builder
 }
@@ -136,7 +138,7 @@ type GetDeepDataReqBuilder struct {
 func NewGetDeepDataReqBuilder() *GetDeepDataReqBuilder {
 	builder := &GetDeepDataReqBuilder{}
 	builder.req = &Req[GetDeepDataReqBody]{
-		QueryParams: &client.QueryParams{},
+		QueryParams: &service.QueryParams{},
 	}
 	return builder
 }

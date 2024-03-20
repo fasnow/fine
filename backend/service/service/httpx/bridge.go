@@ -55,13 +55,13 @@ func (r *Bridge) Run(path, flags, inputFlag string, isFile bool, targets string)
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			event.Emit(event.GetSingleton().HttpxOuput, string(scanner.Bytes()))
+			event.Emit(event.GetSingleton().HttpxOutput, string(scanner.Bytes()))
 		}
 	}()
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			event.Emit(event.GetSingleton().HttpxOuput, string(scanner.Bytes()))
+			event.Emit(event.GetSingleton().HttpxOutput, string(scanner.Bytes()))
 		}
 
 	}()
@@ -70,7 +70,7 @@ func (r *Bridge) Run(path, flags, inputFlag string, isFile bool, targets string)
 		if err != nil {
 			fmt.Println("Error waiting for command:", err)
 		}
-		event.Emit(event.GetSingleton().HttpxOuputDone, "")
+		event.Emit(event.GetSingleton().HttpxOutputDone, "")
 		os.Remove(tmpFilename)
 	}()
 	return nil

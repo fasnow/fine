@@ -2,8 +2,8 @@ package hunter
 
 import (
 	"errors"
-	"fine/backend/service/client"
 	"fine/backend/service/model/hunter"
+	"fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/fasnow/ghttp"
@@ -26,7 +26,7 @@ type Result struct {
 
 //type Component struct {
 //	Name    string `json:"name"`    //组件名称
-//	Version string `json:"version"` //组件版本
+//	Number string `json:"version"` //组件版本
 //}
 //
 //type Item struct {
@@ -66,7 +66,7 @@ func (h *Hunter) Get(req *GetDataReq) (*Result, error) {
 		return nil, err
 	}
 	if response.StatusCode != 200 {
-		return nil, client.NonStatusOK
+		return nil, service.NonStatusOK
 	}
 	body, err := ghttp.GetResponseBody(response.Body)
 	if err != nil {

@@ -227,9 +227,10 @@ export namespace event {
 	    hasNew0ZoneMemberDownloadItem: number;
 	    hasNew0ZoneEmailDownloadItem: number;
 	    hasNew0ZoneDomainDownloadItem: number;
-	    httpxOuput: number;
-	    httpxOuputDone: number;
+	    httpxOutput: number;
+	    httpxOutputDone: number;
 	    decompileWxMiniProgram: number;
+	    decompileWxMiniProgramDone: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Event(source);
@@ -248,9 +249,10 @@ export namespace event {
 	        this.hasNew0ZoneMemberDownloadItem = source["hasNew0ZoneMemberDownloadItem"];
 	        this.hasNew0ZoneEmailDownloadItem = source["hasNew0ZoneEmailDownloadItem"];
 	        this.hasNew0ZoneDomainDownloadItem = source["hasNew0ZoneDomainDownloadItem"];
-	        this.httpxOuput = source["httpxOuput"];
-	        this.httpxOuputDone = source["httpxOuputDone"];
+	        this.httpxOutput = source["httpxOutput"];
+	        this.httpxOutputDone = source["httpxOutputDone"];
 	        this.decompileWxMiniProgram = source["decompileWxMiniProgram"];
+	        this.decompileWxMiniProgramDone = source["decompileWxMiniProgramDone"];
 	    }
 	}
 
@@ -1243,20 +1245,80 @@ export namespace quake {
 
 export namespace wechat {
 	
-	export class WxapkgInfo {
-	    path: string;
-	    updateDate: string;
-	    subDirs: WxapkgInfo[];
+	export class Version {
+	    number: string;
+	    unpacked: boolean;
+	    update_date: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new WxapkgInfo(source);
+	        return new Version(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.path = source["path"];
-	        this.updateDate = source["updateDate"];
-	        this.subDirs = this.convertValues(source["subDirs"], WxapkgInfo);
+	        this.number = source["number"];
+	        this.unpacked = source["unpacked"];
+	        this.update_date = source["update_date"];
+	    }
+	}
+	export class MiniProgram {
+	    app_id: string;
+	    update_date: string;
+	    versions: Version[];
+	
+	    static createFrom(source: any = {}) {
+	        return new MiniProgram(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.app_id = source["app_id"];
+	        this.update_date = source["update_date"];
+	        this.versions = this.convertValues(source["versions"], Version);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class TestA {
+	    a: boolean;
+	    b: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TestA(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.a = source["a"];
+	        this.b = source["b"];
+	    }
+	}
+	export class TestB {
+	    tests: TestA[];
+	
+	    static createFrom(source: any = {}) {
+	        return new TestB(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.tests = this.convertValues(source["tests"], TestA);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

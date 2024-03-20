@@ -3,7 +3,8 @@ package fofa
 import (
 	"encoding/json"
 	"errors"
-	"fine/backend/service/client"
+	service2 "fine/backend/service/service"
+
 	"fine/backend/service/model/fofa"
 	"fine/backend/utils"
 	"fmt"
@@ -19,7 +20,7 @@ type Req struct {
 	HttpMethod  string
 	ApiPath     string
 	Body        interface{}
-	QueryParams *client.QueryParams
+	QueryParams *service2.QueryParams
 	//PathParams  *plugin.PathParams
 }
 
@@ -57,7 +58,7 @@ type Result struct {
 //	Link            string `json:"link"`             //link				资产的URL链接			权限：无
 //	Product         string `json:"product"`          //product			产品名				权限：专业版本及以上
 //	ProductCategory string `json:"product_category"` //product_category 产品分类			    权限：专业版本及以上
-//	Version         string `json:"version"`          //version			版本号				权限：专业版本及以上
+//	Number         string `json:"version"`          //version			版本号				权限：专业版本及以上
 //	LastUpdateTime  string `json:"lastupdatetime"`   //lastupdatetime	FOFA最后更新时间	    权限：专业版本及以上
 //	Cname           string `json:"cname"`            //cname			域名cname			权限：专业版本及以上
 //	IconHash        string `json:"icon_hash"`        //icon_hash		返回的icon_hash值	权限：商业版本及以上
@@ -92,7 +93,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 		return nil, err
 	}
 	if response.StatusCode != 200 {
-		return nil, client.NonStatusOK
+		return nil, service2.NonStatusOK
 	}
 	body, err := ghttp.GetResponseBody(response.Body)
 	if err != nil {
@@ -118,7 +119,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 
 	items, _, _, err := jsonparser.Get(body, "results")
 	if items == nil {
-		return nil, client.UnexpectedStructureError
+		return nil, service2.UnexpectedStructureError
 	}
 
 	// 把不带键的 [[],[]...] 转成带键的 [{},{}...]

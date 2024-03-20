@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fine/backend/service/client"
 	"fine/backend/service/model/icp"
+	"fine/backend/service/service"
 	"fmt"
 	"github.com/fasnow/ghttp"
 	"github.com/google/uuid"
@@ -165,7 +165,7 @@ func (i *ICP) PageSize(size int) *ICP {
 func (i *ICP) Query(unitName string) (*Result, error) {
 	unitName = strings.TrimSpace(unitName)
 	if unitName == "" {
-		return nil, client.UnexpectedQueryStatementError
+		return nil, service.UnexpectedQueryStatementError
 	}
 	if i.page <= 0 {
 		i.page = 1

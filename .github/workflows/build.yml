@@ -136,7 +136,10 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 改进生成临时文件过多的问题。
+            1. 改进生成临时文件过多的问题;
+            2. 添加定时器获取最新小程序信息;
+            3. 自动反编译;
+            4. 其他非功能性优化。
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

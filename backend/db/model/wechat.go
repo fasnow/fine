@@ -1,11 +1,10 @@
 package model
 
-import "fine/backend/service/model"
+import (
+	"fine/backend/service/model/wechat"
+)
 
 type MiniProgram struct {
 	*BaseModel
-	decryptedWxapkgFile     string
-	decryptedSubWxapkgFile  model.StringArray
-	decompiledWxapkgFile    string
-	decompiledSubWxapkgFile model.StringArray
+	wechat.MiniProgram
 }

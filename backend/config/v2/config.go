@@ -143,6 +143,7 @@ func init() {
 		}
 	}
 
+	instance = defaultConfig
 	ini.PrettyFormat = false
 	if deprecatedCfg != nil {
 		tt := defaultConfig
@@ -199,7 +200,6 @@ func init() {
 			proxy.GetSingleton().SetTimeout(instance.Timeout)
 			logger.Info(fmt.Sprintf("set timeout %fs", proxy.GetSingleton().GetTimeout().Seconds()))
 
-			instance = defaultConfig
 			return
 		}
 		cfg, err := ini.LoadSources(options, defaultConfig.filePath)
@@ -207,7 +207,6 @@ func init() {
 			logger.Info("can't open config file:" + err.Error())
 			os.Exit(0)
 		}
-		instance = defaultConfig
 		err = cfg.MapTo(instance)
 		if err != nil {
 			logger.Info("can't map to config file:" + err.Error())

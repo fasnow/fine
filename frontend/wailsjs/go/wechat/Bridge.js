@@ -6,6 +6,10 @@ export function ClearApplet() {
   return window['go']['wechat']['Bridge']['ClearApplet']();
 }
 
+export function ClearDecompiled() {
+  return window['go']['wechat']['Bridge']['ClearDecompiled']();
+}
+
 export function Decompile(arg1) {
   return window['go']['wechat']['Bridge']['Decompile'](arg1);
 }
@@ -16,12 +20,4 @@ export function GetAllMiniProgram() {
 
 export function SetAppletPath(arg1) {
   return window['go']['wechat']['Bridge']['SetAppletPath'](arg1);
-}
-
-export function Test1() {
-  return window['go']['wechat']['Bridge']['Test1']();
-}
-
-export function Test2() {
-  return window['go']['wechat']['Bridge']['Test2']();
 }

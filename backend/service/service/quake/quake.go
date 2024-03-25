@@ -1,7 +1,7 @@
 package quake
 
 import (
-	"github.com/fasnow/ghttp"
+	"net/http"
 )
 
 const (
@@ -60,7 +60,7 @@ type filterField struct {
 
 type Quake struct {
 	key      string
-	http     *ghttp.Client
+	Http     *http.Client
 	Realtime *realtimeData
 	DeepData *deepData
 	Field    *filterField
@@ -69,7 +69,7 @@ type Quake struct {
 func NewClient(key string) *Quake {
 	client := &Quake{
 		key:      key,
-		http:     &ghttp.Client{},
+		Http:     &http.Client{},
 		Realtime: &realtimeData{},
 		DeepData: &deepData{},
 		Field:    &filterField{},

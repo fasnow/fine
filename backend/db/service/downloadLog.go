@@ -3,6 +3,7 @@ package service
 import (
 	"fine/backend/db"
 	"fine/backend/db/model"
+	"fine/backend/logger"
 	"gorm.io/gorm"
 	"os"
 	"path/filepath"
@@ -19,6 +20,7 @@ func NewDownloadLogService() *DownloadLogService {
 func (d *DownloadLogService) Insert(item model.DownloadLog, fileID int64) error {
 	item.FileID = fileID
 	if err := d.dbConn.Create(&item).Error; err != nil {
+		logger.Info(err.Error())
 		return err
 	}
 	return nil
@@ -27,10 +29,12 @@ func (d *DownloadLogService) Insert(item model.DownloadLog, fileID int64) error 
 func (d *DownloadLogService) MarkAsDeleted(fileId int64) {
 	var logItem = &model.DownloadLog{}
 	if err := d.dbConn.Where("file_id = ?", fileId).First(logItem).Error; err != nil {
+		logger.Info(err.Error())
 		return
 	}
 	//d.dbConn.Where("file_id = ?", logItem.FileID).Updates(&model.DownloadLog{Deleted: true})
 	if err := os.Remove(filepath.Join(logItem.Dir, logItem.Filename)); err != nil && !os.IsNotExist(err) {
+		logger.Info(err.Error())
 		return
 	}
 }
@@ -38,6 +42,7 @@ func (d *DownloadLogService) MarkAsDeleted(fileId int64) {
 // Clear 清空记录，文件仍存在
 func (d *DownloadLogService) Clear() error {
 	if err := d.dbConn.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.DownloadLog{}).Error; err != nil {
+		logger.Info(err.Error())
 		return err
 	}
 	return nil

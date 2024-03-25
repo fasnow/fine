@@ -2,10 +2,12 @@ package zone
 
 import (
 	"fine/backend/app"
-	"fine/backend/config"
+	"fine/backend/config/v2"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
 	"fine/backend/event"
+	"fine/backend/logger"
+	"fine/backend/proxy"
 	"fine/backend/service/model/zone"
 	"fine/backend/utils"
 	"fmt"
@@ -26,9 +28,10 @@ type Bridge struct {
 }
 
 func NewZoneBridge(app *app.App) *Bridge {
-	auth := config.GetSingleton().Get0zoneAuth()
+	tt := NewClient(config.Get0zone().Token)
+	proxy.GetSingleton().Add(tt)
 	return &Bridge{
-		zone:        NewClient(auth.Key),
+		zone:        tt,
 		queryLog:    service.NewZoneQueryLog(),
 		downloadLog: service.NewDownloadLogService(),
 		dataCache:   service.NewZoneDBService(),
@@ -38,7 +41,10 @@ func NewZoneBridge(app *app.App) *Bridge {
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	if err := config.GetSingleton().Save0zoneAuth(key); err != nil {
+	t := config.Get0zone()
+	t.Token = key
+	if err := config.GetSingleton().Save0zone(t); err != nil {
+		logger.Info(err.Error())
 		return err
 
 	}
@@ -103,6 +109,7 @@ func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*Que
 	if total != 0 {
 		cacheItems, err := b.dataCache.Site.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Result.Total = total
@@ -120,6 +127,7 @@ func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*Que
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
 	result, err := b.zone.Site.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -152,6 +160,7 @@ func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*Q
 	if total != 0 {
 		cacheItems, err := b.dataCache.Domain.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Result.Total = total
@@ -169,6 +178,7 @@ func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*Q
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
 	result, err := b.zone.Domain.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -201,6 +211,7 @@ func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*Quer
 	if total != 0 {
 		cacheItems, err := b.dataCache.Apk.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Result.Total = total
@@ -218,6 +229,7 @@ func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*Quer
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
 	result, err := b.zone.Apk.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -250,6 +262,7 @@ func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*Q
 	if total != 0 {
 		cacheItems, err := b.dataCache.Member.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Result.Total = total
@@ -267,6 +280,7 @@ func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*Q
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
 	result, err := b.zone.Member.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -299,6 +313,7 @@ func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*Qu
 	if total != 0 {
 		cacheItems, err := b.dataCache.Email.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Result.Total = total
@@ -316,6 +331,7 @@ func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*Qu
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
 	result, err := b.zone.Email.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -348,6 +364,7 @@ func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*Que
 	if total != 0 {
 		cacheItems, err := b.dataCache.Code.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Result.Total = total
@@ -365,6 +382,7 @@ func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*Que
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
 	result, err := b.zone.Code.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -397,6 +415,7 @@ func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*Quer
 	if total != 0 {
 		cacheItems, err := b.dataCache.Dwm.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Result.Total = total
@@ -414,6 +433,7 @@ func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*Quer
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
 	result, err := b.zone.Darknet.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -491,8 +511,8 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetBaseDataDir()
-	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenTimestamp())
+	dataDir := config.GetDataDir()
+	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(model.DownloadLog{
 		Dir:      dataDir,
@@ -504,7 +524,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetSingleton().GetDefaultInterval().Zone
+		interval := config.Get0zone().Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -528,11 +548,11 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 				}
 				index--
 				retry--
-				time.Sleep(time.Duration(interval) * time.Millisecond)
+				time.Sleep(interval)
 				continue
 			}
 			_ = b.dataCache.Site.BatchInsert(exportDataTaskID, result.Items)
-			time.Sleep(time.Duration(interval) * time.Millisecond)
+			time.Sleep(interval)
 		}
 
 		cacheItems, err := b.dataCache.Site.GetByTaskID(exportDataTaskID)
@@ -557,8 +577,8 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetBaseDataDir()
-	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenTimestamp())
+	dataDir := config.GetDataDir()
+	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(model.DownloadLog{
 		Dir:      dataDir,
@@ -570,7 +590,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetSingleton().GetDefaultInterval().Zone
+		interval := config.Get0zone().Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -594,11 +614,11 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 				}
 				index--
 				retry--
-				time.Sleep(time.Duration(interval) * time.Millisecond)
+				time.Sleep(interval)
 				continue
 			}
 			_ = b.dataCache.Domain.BatchInsert(exportDataTaskID, result.Items)
-			time.Sleep(time.Duration(interval) * time.Millisecond)
+			time.Sleep(interval)
 		}
 
 		cacheItems, err := b.dataCache.Domain.GetByTaskID(exportDataTaskID)
@@ -623,8 +643,8 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetBaseDataDir()
-	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenTimestamp())
+	dataDir := config.GetDataDir()
+	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(model.DownloadLog{
 		Dir:      dataDir,
@@ -636,7 +656,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetSingleton().GetDefaultInterval().Zone
+		interval := config.Get0zone().Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -660,11 +680,11 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 				}
 				index--
 				retry--
-				time.Sleep(time.Duration(interval) * time.Millisecond)
+				time.Sleep(interval)
 				continue
 			}
 			_ = b.dataCache.Member.BatchInsert(exportDataTaskID, result.Items)
-			time.Sleep(time.Duration(interval) * time.Millisecond)
+			time.Sleep(interval)
 		}
 
 		cacheItems, err := b.dataCache.Member.GetByTaskID(exportDataTaskID)
@@ -689,8 +709,8 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetBaseDataDir()
-	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenTimestamp())
+	dataDir := config.GetDataDir()
+	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(model.DownloadLog{
 		Dir:      dataDir,
@@ -702,7 +722,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.GetSingleton().GetDefaultInterval().Zone
+		interval := config.Get0zone().Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -726,11 +746,11 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 				}
 				index--
 				retry--
-				time.Sleep(time.Duration(interval) * time.Millisecond)
+				time.Sleep(interval)
 				continue
 			}
 			_ = b.dataCache.Email.BatchInsert(exportDataTaskID, result.Items)
-			time.Sleep(time.Duration(interval) * time.Millisecond)
+			time.Sleep(interval)
 		}
 
 		cacheItems, err := b.dataCache.Email.GetByTaskID(exportDataTaskID)

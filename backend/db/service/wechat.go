@@ -4,7 +4,6 @@ import (
 	"fine/backend/db"
 	"fine/backend/db/model"
 	"fine/backend/service/model/wechat"
-	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -49,7 +48,6 @@ func (r *WechatDBService) UpdateUnpackedStatus(appid, version string, unpacked b
 			item.Versions[i].Unpacked = unpacked
 		}
 	}
-	fmt.Println(item)
 	if item.AppID != "" {
 		return r.dbConn.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&item).Error
 	}
@@ -57,5 +55,5 @@ func (r *WechatDBService) UpdateUnpackedStatus(appid, version string, unpacked b
 }
 
 func (r *WechatDBService) DeleteAll() error {
-	return r.dbConn.Select(clause.Associations).Delete(&model.MiniProgram{}).Error
+	return r.dbConn.Select(clause.Associations).Where("1 = 1").Delete(&model.MiniProgram{}).Error
 }

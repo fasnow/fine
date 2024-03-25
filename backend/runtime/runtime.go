@@ -3,7 +3,6 @@ package runtime
 import (
 	"encoding/base64"
 	"fine/backend/app"
-	"fmt"
 	"github.com/buger/jsonparser"
 	"github.com/fasnow/ghttp"
 	"github.com/pkg/errors"
@@ -66,7 +65,6 @@ func (r *Runtime) OpenFolder(path string) error {
 func (r *Runtime) OpenFile(dir, filename string) error {
 	var cmd *exec.Cmd
 	absFilePath := filepath.Join(dir, filename)
-	fmt.Println(absFilePath)
 	switch runtime.GOOS {
 	case "darwin": // macOS
 		cmd = exec.Command("open", absFilePath)
@@ -120,7 +118,6 @@ func (r *Runtime) CheckUpdate() (map[string]string, error) {
 }
 
 func (r *Runtime) OpenFileDialog() (string, error) {
-	fmt.Println(r.app.GetContext())
 	path, err := wailsRuntime.OpenFileDialog(r.app.GetContext(), wailsRuntime.OpenDialogOptions{
 		Title: "选择文件",
 	})
@@ -131,7 +128,6 @@ func (r *Runtime) OpenFileDialog() (string, error) {
 }
 
 func (r *Runtime) OpenDirectoryDialog() (string, error) {
-	fmt.Println(r.app.GetContext())
 	path, err := wailsRuntime.OpenDirectoryDialog(r.app.GetContext(), wailsRuntime.OpenDialogOptions{
 		Title: "选择目录",
 	})

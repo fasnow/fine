@@ -4,12 +4,10 @@ import {wechat} from '../models';
 
 export function ClearApplet():Promise<void>;
 
+export function ClearDecompiled():Promise<void>;
+
 export function Decompile(arg1:Array<wechat.MiniProgram>):Promise<void>;
 
 export function GetAllMiniProgram():Promise<Array<wechat.MiniProgram>>;
 
 export function SetAppletPath(arg1:string):Promise<void>;
-
-export function Test1():Promise<Array<wechat.MiniProgram>>;
-
-export function Test2():Promise<Array<wechat.TestB>>;

@@ -3,6 +3,7 @@ package ip138
 import (
 	"encoding/json"
 	"errors"
+	"fine/backend/logger"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/buger/jsonparser"
@@ -41,10 +42,12 @@ func (i *IP138) getToken() (string, error) {
 	// User-Agent必须为空,不然可能会出现302
 	request.Header.Set("User-Agent", "")
 	if err != nil {
+		logger.Info(err.Error())
 		return "", err
 	}
-	response, err := i.http.Do(request)
+	response, err := i.Http.Do(request)
 	if err != nil {
+		logger.Info(err.Error())
 		return "", err
 	}
 	defer response.Body.Close()
@@ -53,6 +56,7 @@ func (i *IP138) getToken() (string, error) {
 	}
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
+		logger.Info(err.Error())
 		return "", err
 	}
 
@@ -82,11 +86,13 @@ func (d *domain) GetCurrentIP(domain string) ([]*IPItem, string, error) {
 	d.client.domain = domain
 	ips, err := d.read()
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, "", err
 	}
 	if len(ips) == 0 {
 		code, err2 := d.client.Domain.write()
 		if err2 != nil {
+			logger.Info(err2.Error())
 			return nil, "", err2
 		}
 		if code == 21001 {
@@ -101,6 +107,7 @@ func (d *domain) GetCurrentIP(domain string) ([]*IPItem, string, error) {
 	for ip2, sign := range ips {
 		location, err3 := d.getLocation(ip2, sign)
 		if err3 != nil {
+			logger.Info(err3.Error())
 			return nil, "", err3
 		}
 		items = append(items, &IPItem{
@@ -123,10 +130,12 @@ func (d *domain) GetHistoryIP(domain string) ([]*IPItem, error) {
 	// User-Agent必须为空,不然可能会出现302,read和write的User-Agent必须一致
 	request.Header.Set("User-Agent", "")
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
-	response, err := d.client.http.Do(request)
+	response, err := d.client.Http.Do(request)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if response.StatusCode == 502 {
@@ -134,10 +143,12 @@ func (d *domain) GetHistoryIP(domain string) ([]*IPItem, error) {
 	}
 	body, err := ghttp.GetResponseBody(response.Body)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	doc, err := html.Parse(strings.NewReader(string(body)))
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	return d.findElements(doc), nil
@@ -154,10 +165,12 @@ func (d *domain) read() (map[string]string, error) {
 	// User-Agent必须为空,不然可能会出现302,read和write的User-Agent必须一致
 	request.Header.Set("User-Agent", "")
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
-	response, err := d.client.http.Do(request)
+	response, err := d.client.Http.Do(request)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if response.StatusCode == 502 {
@@ -165,14 +178,17 @@ func (d *domain) read() (map[string]string, error) {
 	}
 	body, err := ghttp.GetResponseBody(response.Body)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	var result Response
 	err = json.Unmarshal(body, &result)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Status {
@@ -203,7 +219,7 @@ func (d *domain) write() (int, error) {
 		return -1, err
 	}
 	request.Header.Set("User-Agent", "") // User-Agent必须为空,不然可能会出现302,read和write的User-Agent必须一致
-	response, err := d.client.http.Do(request)
+	response, err := d.client.Http.Do(request)
 	if err != nil {
 		return -1, err
 	}
@@ -233,7 +249,7 @@ func (d *domain) getLocation(ip, sign string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	response, err := d.client.http.Do(request)
+	response, err := d.client.Http.Do(request)
 	if err != nil {
 		return "", err
 	}
@@ -302,7 +318,7 @@ func (i *ip) GetCurrentDomain(ip string) ([]*DomainItem, error) {
 	if err != nil {
 		return nil, err
 	}
-	response, err := i.client.http.Do(request)
+	response, err := i.client.Http.Do(request)
 	if err != nil {
 		return nil, err
 	}

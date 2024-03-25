@@ -1,6 +1,6 @@
 
 import React, {useEffect, useRef, useState} from 'react';
-import {Button, Dropdown, Input, MenuProps, message, Popconfirm, Space, Spin, Tooltip, Tree} from 'antd';
+import {Button, Input, MenuProps, message, Popconfirm, Space, Spin, Tooltip, Tree} from 'antd';
 import type { GetProps, TreeDataNode } from 'antd';
 import {FolderOpenOutlined,FileZipFilled} from "@ant-design/icons";
 import {GetAbsSubDirByDir, Join, RemoveAll} from "../../../wailsjs/go/runtime/Path";
@@ -11,11 +11,16 @@ import {FitAddon} from "xterm-addon-fit";
 import {EventsOn} from "../../../wailsjs/runtime";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 import {GetPlatform, OpenDirectoryDialog, OpenFolder} from "../../../wailsjs/go/runtime/Runtime";
-import {GetAll, GetDataBaseDir, GetWechat, SaveWechat} from "../../../wailsjs/go/config/Config";
+import {GetWechat, GetWechatDataPath, SaveWechat} from "../../../wailsjs/go/config/Config";
 import {wechat} from "../../../wailsjs/go/models";
 import {errorNotification} from "@/component/Notification";
 import Icon from "antd/es/icon";
-import {ClearApplet, Decompile, GetAllMiniProgram, Test1, Test2} from "../../../wailsjs/go/wechat/Bridge";
+import {
+    ClearApplet,
+    ClearDecompiled,
+    Decompile,
+    GetAllMiniProgram,
+} from "../../../wailsjs/go/wechat/Bridge";
 type DirectoryTreeProps = GetProps<typeof Tree.DirectoryTree>;
 
 export const MiniProgram: React.FC = () => {
@@ -29,17 +34,18 @@ export const MiniProgram: React.FC = () => {
     const dataCachePath = useRef<string>("")
     const [platform,setPlatform] = useState<string>("")
     const timer = useRef<any>()
-
+    const [auto,setAuto] = useState<boolean>(false)
+    const autoRef = useRef<boolean>(false) //直接在定时任务当中无法调用auto更新后的值，只能用ref
+    const [isClearing,setIsClearing] = useState<boolean>(false)
     useEffect(() => {
         GetPlatform().then(
             r=>setPlatform(r)
         )
         const handleResize = ()=>{
-            setHeight(window.innerHeight-124)
+            setHeight(window.innerHeight-144)
         }
         window.addEventListener('resize',handleResize );
         handleResize()
-
         GetAllEvents().then((result)=>{
             //获取反编译输出
             EventsOn(String(result.decompileWxMiniProgram),(data)=>{
@@ -56,28 +62,25 @@ export const MiniProgram: React.FC = () => {
                 )
             })
         })
-
         GetWechat().then(
             result=>{
-                setAppletPath(result.appletPath)
-                dataCachePath.current = result.dataCachePath
+                setAppletPath(result.applet)
             }
         )
-    }, []);
-
-    useEffect(()=>{
-        if(appletPath?.length>0){
-            //先清除前一个再重新设置
-            if(timer.current){
-                clearInterval(timer.current);
+        GetWechatDataPath().then(
+            result=>{
+                dataCachePath.current = result
             }
-            const temp = setTimeout(()=>{
-                GetAllMiniProgram().then(
-                    result=>{
-                        scheduledTask(result)
-                    }
-                )
-                timer.current = setInterval(()=>{
+        )
+
+        //自动获取新的
+        const temp = setTimeout(()=>{
+            GetAllMiniProgram().then(
+                result=>{
+                    scheduledTask(result)
+                }
+            )
+            timer.current = setInterval(()=>{
                     GetAllMiniProgram().then(
                         result=>{
                             scheduledTask(result)
@@ -85,38 +88,37 @@ export const MiniProgram: React.FC = () => {
                     )
                 }
                 ,3000)//3秒更新一次
-                clearTimeout(temp);
-            },0)
-            return
-        }
-        if(timer.current){
-            clearInterval(timer.current);
-        }
-    },[appletPath])
+            clearTimeout(temp);
+        },0)
+    }, []);
 
     const scheduledTask=(items:any)=>{
-        const unpackedItems: wechat.MiniProgram[] = []
-        for (let i=0;i< items.length;i++) {
-            let item = items[i]
-            const versions:wechat.Version[] = []
-            for (let j=0;j< item.versions.length;j++) {
-                let version = item.versions[j]
-                if(!version.unpacked){
-                    versions.push(version)
+        //是否自动反编译没有被反编译的
+        if(autoRef.current){
+            const unpackedItems: wechat.MiniProgram[] = []
+            for (let i=0;i< items.length;i++) {
+                let item = items[i]
+                const versions:wechat.Version[] = []
+                for (let j=0;j< item.versions.length;j++) {
+                    let version = item.versions[j]
+                    if(!version.unpacked){
+                        versions.push(version)
+                    }
+                }
+                let temp = {versions:versions.slice()}//必须这样不然会修改到原数组
+                temp.versions = versions
+                if(temp.versions && temp.versions.length>0){
+                    unpackedItems.push(item)
                 }
             }
-            let temp = JSON.parse(JSON.stringify(item))//必须要这样不然verisons字段会变空，不知道是wails原因还是js原因，花了一天解决...
-            temp.versions = versions
-            if(temp.versions && temp.versions.length>0){
-                unpackedItems.push(item)
+            if(unpackedItems.length>0){
+                decompile(unpackedItems)
             }
         }
-        // //反编译没有被反编译的
-        if(unpackedItems.length>0){
-            decompile(unpackedItems)
-        }
+
         resetTreeData(items)
     }
+
 
     const resetTreeData=(items:wechat.MiniProgram[])=>{
         const data = []
@@ -176,7 +178,7 @@ export const MiniProgram: React.FC = () => {
         OpenDirectoryDialog().then(
             result=>{
                 if(result){
-                    SaveWechat({appletPath:result,dataCachePath:dataCachePath.current}).then(
+                    SaveWechat({applet:result}).then(
                         ()=> {
                             setAppletPath(result)
                             GetAllMiniProgram().then(
@@ -197,10 +199,8 @@ export const MiniProgram: React.FC = () => {
     };
 
     return (
-
         <div style={{
             position: "relative",
-
         }}>
             {
                 platform != "windows" && <div
@@ -221,66 +221,95 @@ export const MiniProgram: React.FC = () => {
             }
             <div
                 style={{
-                    position:"relative",
                     padding:"0 10px",
                     display:"flex",
                     justifyContent:"center",
                     flexDirection:"column",
-                    gap:"10px"
-                }}>
-
+                    gap:"10px",
+                    height:"calc(100vh - 24px)"
+                }}
+            >
                 <Space.Compact style={{justifyContent:"center"}}>
                     <Input style={{width:"600px",}} size={'small'} prefix={<>微信Applet路径</>} value={appletPath} />
                     <Button size={"small"} onClick={configAppletPath}>选择</Button>
+                    {
+                        auto?
+                        < Button size={"small"} onClick={()=> {
+                            setAuto(false)
+                            autoRef.current=false
+                        }} style={{backgroundColor:"red",color:"white"}}>停用自动反编译</Button>
+                        :
+                        < Button size={"small"} onClick={()=> {
+                            setAuto(true)
+                            autoRef.current=true
+                        }} style={{backgroundColor:"green",color:"white"}}>启用自动反编译</Button>
+                    }
                     <Popconfirm
                         placement="bottom"
                         title={"删除"}
-                        description={"确认删除Applet目录下的所有文件吗?"}
+                        description={<>确认删除Applet目录下的所有文件吗?<br/>
+                            (会同时删除反编译后的所有文件)</>}
                         okText="Yes"
                         cancelText="No"
                         onConfirm={()=>{
+                            setIsClearing(true)
                             ClearApplet().catch(
                                 err=>errorNotification("错误",err)
-                            ).finally(
+                            ).then(()=>setTreeData([])).finally(
                                 ()=>{
-                                    GetAllMiniProgram().then(
-                                        result=>{
-                                            scheduledTask(result)
-                                        }
-                                    )
+                                    setIsClearing(false)
                                 }
                             )
                         }}
                     >
                         <Button size={"small"} >清空Applet目录</Button>
                     </Popconfirm>
+                    <Popconfirm
+                        placement="bottom"
+                        title={"删除"}
+                        description={"确认删除所有反编译后的文件吗?"}
+                        okText="Yes"
+                        cancelText="No"
+                        onConfirm={()=>{
+                            setIsClearing(true)
+                            ClearDecompiled().catch(
+                                err=>errorNotification("错误",err)
+                            ).then(()=>setTreeData([])).finally(
+                                ()=>setIsClearing(false)
+                            )
+                        }}
+                    >
+                        <Button size={"small"} >清空反编译后的文件</Button>
+                    </Popconfirm>
                 </Space.Compact>
                 <Button size={"small"} type={"text"}>建议先执行清空Applet目录以避免无法回溯是哪个小程序</Button>
-                <div style={{height:"calc(100vh - 100px)"}}>
+                <div style={{height:"100%"}}>
                     <Allotment onChange={()=>fitAddon.current.fit()} >
-                        <Allotment.Pane preferredSize={"350"}  className={"httpx-left"}>
+                        <Allotment.Pane preferredSize={"350"}  className={"httpx-left"} >
                             <div >
-                                <Tree
-                                    expandAction={false}
-                                    height={height}
-                                    defaultExpandAll
-                                    onSelect={onSelect}
-                                    onExpand={onExpand}
-                                    treeData={treeData}
-                                />
+                                <Spin spinning={isClearing}>
+                                    <Tree
+                                        expandAction={false}
+                                        height={height}
+                                        defaultExpandAll
+                                        onSelect={onSelect}
+                                        onExpand={onExpand}
+                                        treeData={treeData}
+                                    />
+                                </Spin>
                             </div>
                         </Allotment.Pane>
                         <Allotment.Pane  className={"httpx-right"}>
-                            {/*<TextArea value={output} autoSize style={{maxHeight:"calc(100vh - 120px)"}}*/}
-                            {/*          onChange={e=>setOutput(e.target.value)}*/}
-                            {/*/>*/}
                             <div style={{
+                                position:"static",
                                 margin:"10px",
                                 display:"flex",
-                                justifyContent:"center",
+                                // justifyContent:"center",
                                 flexDirection:"column",
-                                gap:10
-
+                                // alignItems:"center",
+                                gap:10,
+                                gridAutoFlow:'column',
+                                height:"calc(100%)"
                             }}>
                                 <Button size={"small"} onClick={
                                     async () => {
@@ -290,7 +319,7 @@ export const MiniProgram: React.FC = () => {
                                 <TextArea
                                     value={decompileResult}
                                     onChange={(e)=>setDecompileResult(e.target.value)}
-                                    rows={20}
+                                    style={{maxHeight:"calc(100% - 80px)",flex: 1}}
                                 />
                             </div>
                         </Allotment.Pane>

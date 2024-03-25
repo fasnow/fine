@@ -29,7 +29,7 @@ import {
 } from "../../../wailsjs/go/quake/Bridge";
 import {quake} from "../../../wailsjs/go/models";
 import {ItemType} from "antd/es/menu/hooks/useItems";
-import {GetQuakeAuth} from "../../../wailsjs/go/config/Config";
+import {GetQuake} from "../../../wailsjs/go/config/Config";
 import {GetRestToken} from "../../../wailsjs/go/hunter/Bridge";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 const { Option } = Select;
@@ -197,10 +197,10 @@ const AuthSetting: React.FC = () => {
         closeIcon={null}
         width={420}
         afterOpenChange={open=>{
-          open && GetQuakeAuth().then(
+          open && GetQuake().then(
               result=>{
                 form.setFieldsValue({
-                  key:result.key
+                  key:result.token
                 });
               }
           )
@@ -988,7 +988,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             pagination={false}
             footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Pagination
-                showSizeChanger
+                  showQuickJumper
+                  showSizeChanger
                 total={total}
                 pageSizeOptions={pageSizeOptions}
                 defaultPageSize={pageSizeOptions[0]}

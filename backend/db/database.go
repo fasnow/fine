@@ -2,10 +2,10 @@ package db
 
 import (
 	"fine/backend/db/model"
+	"fine/backend/logger"
 	"fine/backend/service/model/hunter"
 	quakeModel "fine/backend/service/model/quake"
 	"fine/backend/service/model/wechat"
-	"fmt"
 	"github.com/yitter/idgenerator-go/idgen"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -36,28 +36,33 @@ func GetDBConnect() *gorm.DB {
 	}
 	once.Do(func() {
 		var err error
-		fmt.Println(dbAbsFilePath)
 		dbConn, err = gorm.Open(sqlite.Open(dbAbsFilePath), &gorm.Config{})
 		if err != nil {
-			fmt.Println(err)
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(&model.ICPQueryLog{}); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(&model.DownloadLog{}); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(&model.CacheTotal{}); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(&model.Fofa{}, &model.FOFAQueryLog{}); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(&model.Hunter{}, &hunter.Component{}, &model.HunterQueryLog{}, &model.HunterRestToken{}); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(&model.Quake{}, &model.QuakeRealtimeQueryLog{}, &quakeModel.Service{}, &quakeModel.Component{}); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(
@@ -71,9 +76,11 @@ func GetDBConnect() *gorm.DB {
 			//&model.ZoneAim{},
 			&model.ZoneQueryLog{},
 		); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(&model.MiniProgram{}, &wechat.Version{}); err != nil {
+			logger.Info(err.Error())
 			panic(err)
 		}
 

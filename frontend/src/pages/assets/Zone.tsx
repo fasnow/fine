@@ -36,7 +36,7 @@ import {
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import {fofa, zone} from "../../../wailsjs/go/models";
 import {current} from "@reduxjs/toolkit";
-import {Get0zoneAuth} from "../../../wailsjs/go/config/Config";
+import {Get0zone} from "../../../wailsjs/go/config/Config";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
@@ -160,10 +160,10 @@ const AuthSetting: React.FC = () => {
                 width={420}
                 destroyOnClose
                 afterOpenChange={(open)=>{
-                    open && Get0zoneAuth().then(
+                    open && Get0zone().then(
                         result=>{
                             form.setFieldsValue({
-                                key: result.key,
+                                key: result.token,
                             });
                         }
                     ).catch(
@@ -759,6 +759,7 @@ const SiteTabContent = forwardRef((props, ref) => {
                 pagination={false}
                 footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Pagination
+                        showQuickJumper
                         showSizeChanger
                         total={total}
                         pageSizeOptions={pageSizeOptions}
@@ -1066,6 +1067,7 @@ const DomainTabContent = forwardRef((props, ref) => {
                 pagination={false}
                 footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Pagination
+                        showQuickJumper
                         showSizeChanger
                         total={total}
                         pageSizeOptions={pageSizeOptions}
@@ -1370,6 +1372,7 @@ const ApkTabContent = forwardRef((props, ref) => {
             pagination={false}
             footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Pagination
+                    showQuickJumper
                     showSizeChanger
                     total={total}
                     pageSizeOptions={pageSizeOptions}
@@ -1657,6 +1660,7 @@ const EmailTabContent = forwardRef((props, ref) => {
                 pagination={false}
                 footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Pagination
+                        showQuickJumper
                         showSizeChanger
                         total={total}
                         pageSizeOptions={pageSizeOptions}
@@ -1955,6 +1959,7 @@ const MemberTabContent = forwardRef((props, ref) => {
                 pagination={false}
                 footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Pagination
+                        showQuickJumper
                         showSizeChanger
                         total={total}
                         pageSizeOptions={pageSizeOptions}
@@ -2335,6 +2340,7 @@ const CodeTabContent = forwardRef((props, ref) => {
 
                 <footer style={{ padding: "8px", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#fafafa", borderRadius: "0 0 8px 8px" }}>
                     <Pagination
+                        showQuickJumper
                         // showSizeChanger
                         total={total}
                         pageSizeOptions={pageSizeOptions}
@@ -2710,6 +2716,7 @@ const DarknetTabContent = forwardRef((props, ref) => {
 
                 <footer style={{ padding: "8px", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#fafafa", borderRadius: "0 0 8px 8px" }}>
                     <Pagination
+                        showQuickJumper
                         // showSizeChanger
                         total={total}
                         pageSizeOptions={pageSizeOptions}

@@ -1,7 +1,6 @@
 {
   "name": "fine",
   "private": true,
-  "version": "1.1.4",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc && vite build",

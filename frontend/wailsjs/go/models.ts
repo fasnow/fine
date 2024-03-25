@@ -1,44 +1,9 @@
 export namespace config {
 	
-	export class Zone {
-	    key: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Zone(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.key = source["key"];
-	    }
-	}
-	export class Quake {
-	    key: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Quake(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.key = source["key"];
-	    }
-	}
-	export class Hunter {
-	    key: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Hunter(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.key = source["key"];
-	    }
-	}
 	export class Fofa {
-	    key: string;
 	    email: string;
+	    token: string;
+	    interval: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Fofa(source);
@@ -46,65 +11,16 @@ export namespace config {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.key = source["key"];
 	        this.email = source["email"];
-	    }
-	}
-	export class Auth {
-	    fofa: Fofa;
-	    hunter: Hunter;
-	    quake: Quake;
-	    "0.zone": Zone;
-	
-	    static createFrom(source: any = {}) {
-	        return new Auth(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.fofa = this.convertValues(source["fofa"], Fofa);
-	        this.hunter = this.convertValues(source["hunter"], Hunter);
-	        this.quake = this.convertValues(source["quake"], Quake);
-	        this["0.zone"] = this.convertValues(source["0.zone"], Zone);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class Wechat {
-	    appletPath: string;
-	    dataCachePath: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Wechat(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.appletPath = source["appletPath"];
-	        this.dataCachePath = source["dataCachePath"];
+	        this.token = source["token"];
+	        this.interval = source["interval"];
 	    }
 	}
 	export class Httpx {
 	    path: string;
 	    flags: string;
-	    inputFlag: string;
-	    fromFile: boolean;
+	    input_flag: string;
+	    from_file: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Httpx(source);
@@ -114,8 +30,22 @@ export namespace config {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.path = source["path"];
 	        this.flags = source["flags"];
-	        this.inputFlag = source["inputFlag"];
-	        this.fromFile = source["fromFile"];
+	        this.input_flag = source["input_flag"];
+	        this.from_file = source["from_file"];
+	    }
+	}
+	export class Hunter {
+	    token: string;
+	    interval: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Hunter(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.token = source["token"];
+	        this.interval = source["interval"];
 	    }
 	}
 	export class Proxy {
@@ -140,76 +70,46 @@ export namespace config {
 	        this.pass = source["pass"];
 	    }
 	}
-	export class Config {
-	    auth: Auth;
-	    proxy: Proxy;
-	    fofa: number;
-	    hunter: number;
-	    quake: number;
-	    "0.zone": number;
-	    timeout: number;
-	    httpx: Httpx;
-	    wechat: Wechat;
+	export class Quake {
+	    token: string;
+	    interval: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new Config(source);
+	        return new Quake(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.auth = this.convertValues(source["auth"], Auth);
-	        this.proxy = this.convertValues(source["proxy"], Proxy);
-	        this.fofa = source["fofa"];
-	        this.hunter = source["hunter"];
-	        this.quake = source["quake"];
-	        this["0.zone"] = source["0.zone"];
-	        this.timeout = source["timeout"];
-	        this.httpx = this.convertValues(source["httpx"], Httpx);
-	        this.wechat = this.convertValues(source["wechat"], Wechat);
+	        this.token = source["token"];
+	        this.interval = source["interval"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
-	
-	
-	
-	export class Interval {
-	    fofa: number;
-	    hunter: number;
-	    quake: number;
-	    "0.zone": number;
+	export class Wechat {
+	    applet: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Interval(source);
+	        return new Wechat(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.fofa = source["fofa"];
-	        this.hunter = source["hunter"];
-	        this.quake = source["quake"];
-	        this["0.zone"] = source["0.zone"];
+	        this.applet = source["applet"];
 	    }
 	}
+	export class Zone {
+	    token: string;
+	    interval: number;
 	
+	    static createFrom(source: any = {}) {
+	        return new Zone(source);
+	    }
 	
-	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.token = source["token"];
+	        this.interval = source["interval"];
+	    }
+	}
 
 }
 
@@ -1275,50 +1175,6 @@ export namespace wechat {
 	        this.app_id = source["app_id"];
 	        this.update_date = source["update_date"];
 	        this.versions = this.convertValues(source["versions"], Version);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class TestA {
-	    a: boolean;
-	    b: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new TestA(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.a = source["a"];
-	        this.b = source["b"];
-	    }
-	}
-	export class TestB {
-	    tests: TestA[];
-	
-	    static createFrom(source: any = {}) {
-	        return new TestB(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.tests = this.convertValues(source["tests"], TestA);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

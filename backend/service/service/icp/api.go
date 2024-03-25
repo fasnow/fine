@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fine/backend/logger"
 	"fine/backend/service/model/icp"
 	"fine/backend/service/service"
 	"fmt"
@@ -39,7 +40,7 @@ func init() {
 }
 
 type ICP struct {
-	http      *ghttp.Client
+	Http      *http.Client
 	page      int
 	size      int
 	token     string
@@ -85,7 +86,7 @@ type Result struct {
 
 func NewClient() *ICP {
 	return &ICP{
-		http: &ghttp.Client{},
+		Http: &http.Client{},
 	}
 }
 
@@ -105,12 +106,14 @@ func (i *ICP) getToken() (string, error) {
 	req, _ = http.NewRequest("POST", getTokenUrl, strings.NewReader(postData.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Set("Referer", referer)
-	response, err := i.http.Do(req)
+	response, err := i.Http.Do(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return "", err
 	}
 	body, err := ghttp.GetResponseBody(response.Body)
 	if err != nil {
+		logger.Info(err.Error())
 		return "", err
 	}
 	// 被ban或者服务器出错
@@ -129,6 +132,7 @@ func (i *ICP) getToken() (string, error) {
 func (i *ICP) GetTokenFromRemote() (string, error) {
 	token, err := i.getToken()
 	if err != nil {
+		logger.Info(err.Error())
 		return "", errors.New("获取token失败 " + err.Error())
 	}
 	return token, nil
@@ -137,6 +141,7 @@ func (i *ICP) GetTokenFromRemote() (string, error) {
 func (i *ICP) SetTokenFromRemote() error {
 	token, err := i.GetTokenFromRemote()
 	if err != nil {
+		logger.Info(err.Error())
 		return err
 	}
 	i.token = token
@@ -181,6 +186,7 @@ func (i *ICP) Query(unitName string) (*Result, error) {
 	}
 	bytesData, err := json.Marshal(postData)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	req, err := http.NewRequest("POST", queryUrl, bytes.NewReader(bytesData))
@@ -190,8 +196,9 @@ func (i *ICP) Query(unitName string) (*Result, error) {
 	req.Header.Set("Sign", i.sign)
 	req.Header.Set("Referer", referer)
 	req.Header.Set("Cookie", "__jsluid_s=8e209cf6c7c40f530a300ac8dd0eb6c7")
-	response, err := i.http.Do(req)
+	response, err := i.Http.Do(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	body, err := ghttp.GetResponseBody(response.Body)
@@ -260,7 +267,7 @@ func (i *ICP) GetImage() (*icp.Image, error) {
 	req.Header.Set("Token", i.token)
 	req.Header.Set("Referer", referer)
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := i.http.Do(req)
+	resp, err := i.Http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +303,7 @@ func (i *ICP) CheckImage(pointJson string) (sign, smallImage string, err error) 
 	req.Header.Set("Token", i.token)
 	req.Header.Set("Referer", referer)
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := i.http.Do(req)
+	resp, err := i.Http.Do(req)
 	if err != nil {
 		return "", "", err
 	}

@@ -14,6 +14,7 @@ require (
 	github.com/yitter/idgenerator-go v1.3.3
 	golang.org/x/crypto v0.19.0
 	golang.org/x/net v0.21.0
+	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/sqlite v1.5.5
 	gorm.io/gorm v1.25.7

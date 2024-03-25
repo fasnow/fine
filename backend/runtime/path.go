@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"encoding/base64"
-	"fmt"
+	"fine/backend/logger"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +16,6 @@ func NewPath() *Path {
 }
 
 func (r *Path) Join(path []string) string {
-	fmt.Println(path)
 	return filepath.Join(path...)
 }
 
@@ -75,8 +74,7 @@ func (r *Path) GetAbsFilenameAllByDir(dir, extension string) ([]string, error) {
 			}
 			fileList = append(fileList, files...)
 		} else {
-			// 其他类型的文件
-			fmt.Println("Unknown file type:", filePath)
+			logger.Info(filePath)
 		}
 	}
 	return fileList, nil
@@ -104,7 +102,7 @@ func (r *Path) GetRelativeFilenameAllByDir(dir, extension string) ([]string, err
 			fileList = append(fileList, files...)
 		} else {
 			// 其他类型的文件
-			fmt.Println("Unknown file type:", filePath)
+			logger.Info(filePath)
 		}
 	}
 	return fileList, nil
@@ -132,7 +130,7 @@ func (r *Path) GetAbsSubDirByDir(dir, extension string) ([]string, error) {
 			fileList = append(fileList, files...)
 		} else {
 			// 其他类型的文件
-			fmt.Println("Unknown file type:", filePath)
+			logger.Info(filePath)
 		}
 	}
 	return fileList, nil

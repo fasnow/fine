@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fine/backend/app"
 	"fine/backend/event"
+	"fine/backend/logger"
 	"fine/backend/runtime"
 	"fmt"
 	"github.com/pkg/errors"
@@ -32,10 +33,12 @@ func (r *Bridge) Run(path, flags, inputFlag string, isFile bool, targets string)
 	if isFile {
 		file, err := os.CreateTemp("", "temp*.txt")
 		if err != nil {
+			logger.Info(err.Error())
 			return err
 		}
 		_, err = file.WriteString(targets)
 		if err != nil {
+			logger.Info(err.Error())
 			return err
 		}
 		tmpFilename = file.Name()
@@ -49,6 +52,7 @@ func (r *Bridge) Run(path, flags, inputFlag string, isFile bool, targets string)
 	stdout, _ := r.cmd.StdoutPipe()
 	stderr, _ := r.cmd.StderrPipe()
 	if err := r.cmd.Start(); err != nil {
+		logger.Info(err.Error())
 		r.cmd = nil
 		return err
 	}
@@ -68,7 +72,7 @@ func (r *Bridge) Run(path, flags, inputFlag string, isFile bool, targets string)
 	go func() {
 		err := r.cmd.Wait()
 		if err != nil {
-			fmt.Println("Error waiting for command:", err)
+			logger.Info(err.Error())
 		}
 		event.Emit(event.GetSingleton().HttpxOutputDone, "")
 		os.Remove(tmpFilename)

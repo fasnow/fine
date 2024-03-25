@@ -1,7 +1,9 @@
 package wechat
 
+import "gorm.io/gorm"
+
 type Version struct {
-	//gorm.Model
+	gorm.Model
 	VersionID  int64
 	Number     string `json:"number"`
 	Unpacked   bool   `json:"unpacked"`

@@ -1,5 +1,5 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
-import { AuthType, FofaAuthType, HunterAuthType, QuakeAuthType, ZoneAuthType, DownloadLogItem, HunterUserType } from "../type"
+import { AuthType, FofaAuthType, HunterAuthType, QuakeAuthType, ZoneAuthType, DownloadLogItem, HunterUserType } from "@/type"
 import {config, fofa} from "../../wailsjs/go/models";
 import { UserType as QuakeUserType } from "../type/quake"
 
@@ -107,7 +107,7 @@ const configSlice = createSlice({
     initialState: {
         auth: initialAuthState,
         proxy: initialProxyState
-    } as config.Config,
+    } ,
     //方法
     reducers: {
         setAuth: (state, action: {

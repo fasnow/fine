@@ -574,6 +574,7 @@ const IcpContent: React.FC = () => {
                 pagination={false}
                 footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Pagination
+                        showQuickJumper
                         showSizeChanger
                         total={total}
                         pageSizeOptions={pageSizeOptions}

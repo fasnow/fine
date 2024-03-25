@@ -107,7 +107,7 @@ typings/
 # Electron-Forge
 
 **/out/
-**/data.db
+**/*.db
 **/build/bin
 **/dist/
 **/test/
@@ -117,3 +117,5 @@ typings/
 !.github/workflows/*.yaml
 **/.idea
 **/decompile*
+**/log
+**/*.ini

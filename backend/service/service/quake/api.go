@@ -2,6 +2,7 @@ package quake
 
 import (
 	"errors"
+	"fine/backend/logger"
 	"fine/backend/service/model/quake"
 	"fine/backend/service/service"
 	"fine/backend/utils"
@@ -91,15 +92,18 @@ func (r *realtimeData) Service(req *GetRealtimeDataReq) (*RSDQueryResult, error)
 	postData := strings.NewReader(string(postOptions))
 	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApiUrl, postData)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	byteData, page, size, total, err := r.client.parser(request)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	var resultItems []quake.RealtimeServiceItem
 	err = json.Unmarshal(byteData, &resultItems)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	return &RSDQueryResult{
@@ -278,7 +282,7 @@ func (f *faviconSimilarityData) Get(faviconHash string, similar float64, size in
 	req, _ = http.NewRequest("POST", QuakeFaviconSimilarityDataApiUrl, reqBody)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-QuakeToken", f.client.key)
-	response, err := f.client.http.Do(req)
+	response, err := f.client.Http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -550,7 +554,7 @@ func (q *Quake) send(request *http.Request) ([]byte, error) {
 	if request.Method == "POST" {
 		request.Header.Set("Content-Type", "application/json")
 	}
-	response, err := q.http.Do(request)
+	response, err := q.Http.Do(request)
 	if err != nil {
 		return nil, err
 	}

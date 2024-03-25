@@ -2,10 +2,12 @@ package icp
 
 import (
 	"fine/backend/app"
-	"fine/backend/config"
+	"fine/backend/config/v2"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
 	"fine/backend/event"
+	"fine/backend/logger"
+	"fine/backend/proxy"
 	"fine/backend/service/model/icp"
 	"fine/backend/utils"
 	"fmt"
@@ -24,8 +26,10 @@ type Bridge struct {
 }
 
 func NewICPBridge(app *app.App) *Bridge {
+	tt := NewClient()
+	proxy.GetSingleton().Add(tt)
 	return &Bridge{
-		icp:         NewClient(),
+		icp:         tt,
 		queryLog:    service.NewICPQueryLog(),
 		downloadLog: service.NewDownloadLogService(),
 		app:         app,
@@ -42,6 +46,7 @@ func (b *Bridge) Query(query string, page, pageSize int) (*QueryResult, error) {
 	queryResult := &QueryResult{}
 	result, err := b.icp.Page(page).PageSize(pageSize).Query(query)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	if result.Total > 0 {
@@ -61,11 +66,12 @@ func (b *Bridge) Query(query string, page, pageSize int) (*QueryResult, error) {
 func (b *Bridge) Export(taskID int64) error {
 	queryLog, err := b.queryLog.GetByTaskID(taskID)
 	if err != nil {
+		logger.Info(err.Error())
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetBaseDataDir()
-	filename := fmt.Sprintf("ICP_%s.xlsx", utils.GenTimestamp())
+	dataDir := config.GetDataDir()
+	filename := fmt.Sprintf("ICP_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(model.DownloadLog{
 		Dir:      dataDir,
@@ -76,6 +82,7 @@ func (b *Bridge) Export(taskID int64) error {
 
 	result, err := b.icp.Page(1).PageSize(queryLog.Total).Query(queryLog.UnitName)
 	if err != nil {
+		logger.Info(err.Error())
 		b.downloadLog.UpdateStatus(fileID, -1, err.Error())
 		return errors.New(strconv.FormatInt(taskID, 10) + queryLog.UnitName)
 	}
@@ -102,6 +109,7 @@ func (b *Bridge) Export(taskID int64) error {
 		data = append(data, tmpItem)
 	}
 	if err := utils.SaveToExcel(data, outputAbsFilepath); err != nil {
+		logger.Info(err.Error())
 		b.downloadLog.UpdateStatus(fileID, -1, err.Error())
 		return err
 	}
@@ -113,6 +121,7 @@ func (b *Bridge) Export(taskID int64) error {
 func (b *Bridge) GetImage() (*icp.Image, error) {
 	image, err := b.icp.GetImage()
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	return image, nil
@@ -125,6 +134,7 @@ func (b *Bridge) IsSignExpired() bool {
 func (b *Bridge) CheckImage(pointJson string) (*map[string]any, error) {
 	sign, smallImage, err := b.icp.CheckImage(pointJson)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	return &map[string]any{

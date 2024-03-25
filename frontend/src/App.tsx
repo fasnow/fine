@@ -19,7 +19,6 @@ import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
 import {MiniProgram} from "@/pages/wechat/Wechat";
-import {GetAllMiniProgram} from "../wailsjs/go/service/TT";
 // import {doFile} from "./pages/wxMiniProgram/wuWxapkg"
 
 const { Header } = Lay;
@@ -57,17 +56,6 @@ const App: React.FC = () => {
         Environment().then(
             r=>console.log(r)
         )
-
-        GetAllMiniProgram().then(r=>{
-            console.log(r)
-        })
-        // Test2().then(r=>{
-        //     console.log(r)
-        // })
-        // Test3().then(r=>{
-        //     console.log(r)
-        // })
-
     }, [])
     useEffect(() => {
         try {

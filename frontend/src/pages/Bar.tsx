@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./Bar.css";
 import { useDispatch, useSelector } from "react-redux";
 import { GITHUB_URL, ISSUE_URL } from "@/type";
-import packageJson from '../../package.json';
+import wailsJson from '../../../wails.json';
 import favicon from "../assets/images/paimon.svg"
 import { genshinLaunch } from "./op";
 import { RootState } from "@/store/store";
@@ -21,12 +21,12 @@ import {
 import {CheckUpdate, GetPlatform, OpenFile, OpenFolder, ShowItemInFolder} from "../../wailsjs/go/runtime/Runtime";
 import {errorNotification, infoNotification} from "@/component/Notification";
 import {Clear, GetByOffset, MarkAsDeleted} from "../../wailsjs/go/service/DownloadLogService";
-import {GetDataBaseDir} from "../../wailsjs/go/config/Config";
 import {model} from "../../wailsjs/go/models";
 import DownloadLog = model.DownloadLog;
 import * as path from "path";
 import semver from "semver/preload";
 import { GetAllEvents} from "../../wailsjs/go/event/Event";
+import {GetDataDir} from "../../wailsjs/go/config/Config";
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
     height: "30px",
@@ -123,7 +123,7 @@ const DownloadViewContent: React.FC = () => {
         )
     }, []);
     const openDataFolder = async () => {
-        const dir = await GetDataBaseDir()
+        const dir = await GetDataDir()
         OpenFolder(dir).catch(
             err=>errorNotification("错误",err)
         )
@@ -318,7 +318,7 @@ const DownloadViewContent: React.FC = () => {
 const Update: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [open, setOpen] = useState<boolean>(false)
-    const version = useRef(packageJson.version)
+    const version = useRef(wailsJson.info.productVersion)
     const [releaseUrl, setReleaseUrl] = useState<string>("")
     const [releaseVersion, setReleaseVersion] = useState<string>("")
     const [releaseDescription, setReleaseDescription] = useState<string>("")
@@ -525,7 +525,7 @@ const DownloadHistory: React.FC = () => {
 
 const Bar: React.FC = () => {
     const [platform, setPlatform] = useState<string>("")
-    const version = useRef(packageJson.version)
+    const version = useRef(wailsJson.info.productVersion)
 
     //必须搭配使用,EventsOn里面获取不到isFullScreen更新后的值
     const [isFullScreen,setIsFullScreen] = useState<boolean>(false)

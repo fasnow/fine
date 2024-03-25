@@ -2,6 +2,7 @@ package zone
 
 import (
 	"archive/zip"
+	"fine/backend/logger"
 	"fine/backend/service/model/zone"
 	"fine/backend/utils"
 	"fmt"
@@ -21,6 +22,7 @@ func (s *site) Get(req *GetDataReq) (*SiteResult, error) {
 	req.req.Body.QueryType = zone.SiteType
 	page, size, total, dataList, err := s.client.analyze(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	var result SiteResult
@@ -31,6 +33,7 @@ func (s *site) Get(req *GetDataReq) (*SiteResult, error) {
 	if len(dataList) != 0 {
 		err = json.Unmarshal(dataList, &siteDataItems)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 	}
@@ -52,6 +55,7 @@ func (d *domain) Get(req *GetDataReq) (*DomainResult, error) {
 	req.req.Body.QueryType = zone.DomainType
 	page, size, total, dataList, err := d.client.analyze(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	var result DomainResult
@@ -69,6 +73,7 @@ func (d *domain) Get(req *GetDataReq) (*DomainResult, error) {
 	if len(dataList) != 0 {
 		err = json.Unmarshal(dataList, &tempDomainStructList)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 	}
@@ -98,10 +103,12 @@ func (d *domain) Get(req *GetDataReq) (*DomainResult, error) {
 	}
 	marshal, err := json.Marshal(tempDomainStructList)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	err = json.Unmarshal(marshal, &domainDataItems)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	result.Items = domainDataItems
@@ -118,6 +125,7 @@ func (m *member) Get(req *GetDataReq) (*MemberResult, error) {
 	req.req.Body.QueryType = zone.MemberType
 	page, size, total, dataList, err := m.client.analyze(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	var result MemberResult
@@ -137,6 +145,7 @@ func (m *member) Get(req *GetDataReq) (*MemberResult, error) {
 	if len(dataList) != 0 {
 		err = json.Unmarshal(dataList, &tempMemberStructList)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 	}

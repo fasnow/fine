@@ -3,6 +3,7 @@ package service
 import (
 	"fine/backend/db"
 	"fine/backend/db/model"
+	"fine/backend/logger"
 	"gorm.io/gorm"
 )
 
@@ -18,6 +19,7 @@ func NewICPQueryLog() *ICPQueryLog {
 func (q *ICPQueryLog) Add(item *model.ICPQueryLog, taskID int64) error {
 	item.TaskID = taskID
 	if err := q.dbConn.Create(item).Error; err != nil {
+		logger.Info(err.Error())
 		return err
 	}
 	return nil
@@ -26,6 +28,7 @@ func (q *ICPQueryLog) Add(item *model.ICPQueryLog, taskID int64) error {
 func (q *ICPQueryLog) GetByTaskID(taskID int64) (*model.ICPQueryLog, error) {
 	item := &model.ICPQueryLog{}
 	if err := q.dbConn.Where("task_id = ?", taskID).Find(item).Error; err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	return item, nil
@@ -43,6 +46,7 @@ func NewFOFAQueryLog() *FOFAQueryLog {
 func (q *FOFAQueryLog) Add(item *model.FOFAQueryLog, taskID int64) error {
 	item.TaskID = taskID
 	if err := q.dbConn.Create(item).Error; err != nil {
+		logger.Info(err.Error())
 		return err
 	}
 	return nil
@@ -51,6 +55,7 @@ func (q *FOFAQueryLog) Add(item *model.FOFAQueryLog, taskID int64) error {
 func (q *FOFAQueryLog) GetByTaskID(taskID int64) (*model.FOFAQueryLog, error) {
 	item := &model.FOFAQueryLog{}
 	if err := q.dbConn.Where("task_id = ?", taskID).Find(item).Error; err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	return item, nil

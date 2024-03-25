@@ -1,7 +1,7 @@
 package hunter
 
 import (
-	"github.com/fasnow/ghttp"
+	"net/http"
 )
 
 const (
@@ -11,13 +11,13 @@ const (
 
 type Hunter struct {
 	key  string
-	http *ghttp.Client
+	Http *http.Client
 }
 
 func NewClient(key string) *Hunter {
 	return &Hunter{
 		key:  key,
-		http: &ghttp.Client{},
+		Http: &http.Client{},
 	}
 }
 

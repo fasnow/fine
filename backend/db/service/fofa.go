@@ -3,6 +3,7 @@ package service
 import (
 	"fine/backend/db"
 	"fine/backend/db/model"
+	"fine/backend/logger"
 	"fine/backend/service/model/fofa"
 	"gorm.io/gorm"
 )
@@ -25,6 +26,7 @@ func (f *FofaDBService) BatchInsert(taskID int64, items []*fofa.Item) error {
 		})
 	}
 	if err := f.dbConn.Create(&dbItems).Error; err != nil {
+		logger.Info(err.Error())
 		return err
 	}
 	return nil
@@ -33,6 +35,7 @@ func (f *FofaDBService) BatchInsert(taskID int64, items []*fofa.Item) error {
 func (f *FofaDBService) GetByTaskID(taskID int64) ([]*model.Fofa, error) {
 	items := make([]*model.Fofa, 0)
 	if err := f.dbConn.Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+		logger.Info(err.Error())
 		return items, err
 	}
 	return items, nil

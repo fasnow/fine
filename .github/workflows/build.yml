@@ -136,10 +136,11 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 改进生成临时文件过多的问题;
-            2. 添加定时器获取最新小程序信息;
-            3. 自动反编译;
-            4. 其他非功能性优化。
+            1. 修改配置文件格式,原格式仍适用;
+            2. Httpx功能新增复制功能;
+            3. 微信小程序反编译功能新增自动检测与自动反编译;
+            4. 修复微信小程序反编译时系统资源消耗过大问题;
+            5. 如无法正常运行请删除数据库文件后重试。
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

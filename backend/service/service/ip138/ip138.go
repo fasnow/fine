@@ -1,7 +1,7 @@
 package ip138
 
 import (
-	"github.com/fasnow/ghttp"
+	"net/http"
 )
 
 // 从baseReadURL获取ip解析结果，如果有则直接返回结果
@@ -31,7 +31,7 @@ type Response struct {
 }
 
 type IP138 struct {
-	http   *ghttp.Client
+	Http   *http.Client
 	domain string
 	Domain *domain
 	IP     *ip
@@ -39,7 +39,7 @@ type IP138 struct {
 
 func NewClient() *IP138 {
 	client := &IP138{
-		http:   &ghttp.Client{},
+		Http:   &http.Client{},
 		Domain: &domain{},
 		IP:     &ip{},
 	}

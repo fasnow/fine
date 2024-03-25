@@ -22,7 +22,7 @@ import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import ResizableTitle from "@/component/ResizableTitle";
 import {ItemType} from "antd/es/menu/hooks/useItems";
 import type { Tab } from 'rc-tabs/lib/interface';
-import {GetHunterAuth} from "../../../wailsjs/go/config/Config";
+import {GetHunter} from "../../../wailsjs/go/config/Config";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const pageSizeOptions = [10, 20, 50, 100]
@@ -813,6 +813,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                         footer={() => <div
                             style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                             <Pagination
+                                showQuickJumper
                                 showSizeChanger
                                 total={total}
                                 pageSizeOptions={pageSizeOptions}
@@ -882,10 +883,10 @@ const AuthSetting: React.FC = () => {
                 width={420}
                 destroyOnClose
                 afterOpenChange={open=>{
-                    open && GetHunterAuth().then(
+                    open && GetHunter().then(
                         result=>{
                             form.setFieldsValue({
-                                key: result.key,
+                                key: result.token,
                             });
                         }
                     ).catch(

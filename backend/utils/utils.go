@@ -2,15 +2,13 @@ package utils
 
 import (
 	"errors"
-	"fmt"
+	"fine/backend/logger"
 	"github.com/fasnow/ghttp"
 	"github.com/xuri/excelize/v2"
 	"golang.org/x/net/html"
 	"net/http"
 	"os"
-	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -51,19 +49,23 @@ func GetCodeAndTitle(u string) (int, string, error) {
 	client := ghttp.Client{Timeout: 3 * time.Second}
 	request, err := http.NewRequest("GET", u, nil)
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, "", err
 	}
 	resp, err := client.Do(request)
 	if err != nil {
+		logger.Info(err.Error())
 		//if _, ok := err.(*url.Error); ok {
 		return 0, "", errors.New("无法访问")
 		//}
 	} else {
 		body, err := ghttp.GetResponseBody(resp.Body)
 		if err != nil {
+			logger.Info(err.Error())
 			return 0, "", err
 		}
 		if err != nil {
+			logger.Info(err.Error())
 			return resp.StatusCode, "", nil
 		}
 		re := regexp.MustCompile("(?i)<title>(.*?)</title>")
@@ -76,29 +78,14 @@ func GetCodeAndTitle(u string) (int, string, error) {
 	}
 }
 
-func GenTimestamp() string {
-	t := time.Now()
-	// 设置时区
-	loc, _ := time.LoadLocation(t.Location().String()) //找不到指定时区会报错
-	// 转换为中国时间
-	chinaTime := t.In(loc)
-	// 格式化时间
-	formattedTime := chinaTime.Format("2006-01-02-15-04-05")
+func GenFilenameTimestamp() string {
+	formattedTime := time.Now().Format("2006-01-02-15-04-05")
 	return formattedTime
 }
 
-func FormatError(err error) error {
-	pc, _, line, ok := runtime.Caller(1)
-	if !ok {
-		return err
-	}
-	dir, e := os.Getwd()
-	if e != nil {
-		return err
-	}
-	dir = filepath.ToSlash(dir)
-	funcName := runtime.FuncForPC(pc).Name()
-	return fmt.Errorf("%s %d line: %s", funcName, line, err)
+func GenTimestampOutput() string {
+	formattedTime := time.Now().Format("2006/01/02 15:04:05")
+	return formattedTime
 }
 
 func HtmlHasID(n *html.Node, id string) bool {
@@ -128,6 +115,7 @@ func SaveToExcel(data [][]any, outputFilepath string) error {
 		row := data[i]
 		startCell, err := excelize.JoinCellName("A", i+1)
 		if err != nil {
+			logger.Info(err.Error())
 			return err
 		}
 		if i == 0 {
@@ -138,6 +126,7 @@ func SaveToExcel(data [][]any, outputFilepath string) error {
 				}
 			}
 			if err = file.SetSheetRow("Sheet1", startCell, &row); err != nil {
+				logger.Info(err.Error())
 				return err
 			}
 			continue

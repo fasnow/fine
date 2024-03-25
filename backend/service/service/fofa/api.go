@@ -71,7 +71,6 @@ type Result struct {
 //}
 
 func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
-	fmt.Println(f.email, f.key)
 	req.req.QueryParams.Set("email", f.email)
 	req.req.QueryParams.Set("key", f.key)
 	var fields = req.req.QueryParams.Get("fields")
@@ -88,7 +87,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	response, err := f.http.Do(request)
+	response, err := f.Http.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -338,8 +337,7 @@ func (f *Fofa) User() (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(f)
-	response, err := f.http.Do(request)
+	response, err := f.Http.Do(request)
 	if err != nil {
 		return nil, err
 	}

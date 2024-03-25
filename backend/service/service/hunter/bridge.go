@@ -2,10 +2,12 @@ package hunter
 
 import (
 	"fine/backend/app"
-	"fine/backend/config"
+	"fine/backend/config/v2"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
 	"fine/backend/event"
+	"fine/backend/logger"
+	"fine/backend/proxy"
 	"fine/backend/service/model/hunter"
 	"fine/backend/utils"
 	"fmt"
@@ -27,9 +29,11 @@ type Bridge struct {
 }
 
 func NewHunterBridge(app *app.App) *Bridge {
-	hunterAuth := config.GetSingleton().GetHunterAuth()
+	t := config.GetSingleton().GetHunter()
+	tt := NewClient(t.Token)
+	proxy.GetSingleton().Add(tt)
 	return &Bridge{
-		hunter:      NewClient(hunterAuth.Key),
+		hunter:      tt,
 		queryLog:    service.NewHunterQueryLog(),
 		downloadLog: service.NewDownloadLogService(),
 		dataCache:   service.NewHunterDBService(),
@@ -66,6 +70,7 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 	if total != 0 {
 		cacheItems, err := b.dataCache.GetByTaskID(taskID)
 		if err != nil {
+			logger.Info(err.Error())
 			return nil, err
 		}
 		queryResult.Total = total
@@ -90,6 +95,7 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		PortFilter(portFilter).Build()
 	result, err := b.hunter.Get(req)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
 	b.token.Add(result.RestQuota) //剩余积分添加到数据库记录
@@ -135,11 +141,12 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 func (b *Bridge) Export(taskID, page, pageSize int64) error {
 	queryLog, err := b.queryLog.GetByTaskID(taskID)
 	if err != nil {
+		logger.Info(err.Error())
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetBaseDataDir()
-	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenTimestamp())
+	dataDir := config.GetSingleton().GetDataDir()
+	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(model.DownloadLog{
 		Dir:      dataDir,
@@ -149,7 +156,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 	}, fileID)
 	go func() {
 		var retry = 10
-		interval := config.GetSingleton().GetDefaultInterval().Hunter
+		interval := config.GetSingleton().GetHunter().Interval
 		exportDataTaskID := idgen.NextId()
 		for index := int64(1); index <= page; index++ {
 			req := NewGetDataReqBuilder().
@@ -163,16 +170,18 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 				PortFilter(queryLog.PortFilter).Build()
 			result, err := b.hunter.Get(req)
 			if err != nil {
+				logger.Info(err.Error())
 				if err.Error() == "请求太多啦，稍后再试试" {
 					index--
 					retry--
-					time.Sleep(time.Duration(interval) * time.Millisecond)
+					time.Sleep(interval)
 					continue
 				}
 				if retry == 0 {
 					// retry为0可能是因为积分不足，所以不能直接返回错误，获取到多少数据就返回多少
 					cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
 					if err != nil {
+						logger.Info(err.Error())
 						return
 					}
 					exportItems := make([]*hunter.Item, 0)
@@ -180,18 +189,19 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 						exportItems = append(exportItems, cacheItem.Item)
 					}
 					if err := b.hunter.Export(exportItems, outputAbsFilepath); err != nil {
+						logger.Info(err.Error())
 						return
 					}
 					break
 				}
 				index--
 				retry--
-				time.Sleep(time.Duration(interval) * time.Millisecond)
+				time.Sleep(interval)
 				continue
 			}
 			_ = b.dataCache.BatchInsert(exportDataTaskID, result.Items)
 			b.token.Add(result.RestQuota) //剩余积分添加到数据库记录
-			time.Sleep(time.Duration(interval) * time.Millisecond)
+			time.Sleep(interval)
 		}
 		cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
 		if err != nil {
@@ -210,7 +220,9 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	if err := config.GetSingleton().SaveHunterAuth(key); err != nil {
+	hunter := config.GetSingleton().Hunter
+	hunter.Token = key
+	if err := config.GetSingleton().SaveHunter(hunter); err != nil {
 		return err
 
 	}

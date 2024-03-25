@@ -1,7 +1,7 @@
 package fofa
 
 import (
-	"github.com/fasnow/ghttp"
+	"net/http"
 )
 
 const (
@@ -126,14 +126,14 @@ var Fields = struct {
 type Fofa struct {
 	email string
 	key   string
-	http  *ghttp.Client
+	Http  *http.Client
 }
 
 func NewClient(email, key string) *Fofa {
 	return &Fofa{
 		email: email,
 		key:   key,
-		http:  &ghttp.Client{},
+		Http:  &http.Client{},
 	}
 }
 

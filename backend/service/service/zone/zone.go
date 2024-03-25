@@ -3,6 +3,7 @@ package zone
 import (
 	"encoding/json"
 	"errors"
+	"fine/backend/logger"
 	"fine/backend/service/model/zone"
 	"github.com/buger/jsonparser"
 	"github.com/fasnow/ghttp"
@@ -85,24 +86,29 @@ func (z *Zone) SetAuth(key string) {
 func (z *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
 	bytePostData, err := json.Marshal(req.req.Body)
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	postData := strings.NewReader(string(bytePostData))
 	request, err := http.NewRequest("POST", ZoneApiUrl, postData)
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	request.Header.Set("Content-Type", "application/json")
 	response, err := z.http.Do(request)
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	body, err := ghttp.GetResponseBody(response.Body)
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	message, err := jsonparser.GetString(body, "message")
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	if message != "success" {
@@ -110,10 +116,12 @@ func (z *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
 	}
 	page, err := jsonparser.GetInt(body, "page")
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	size, err := jsonparser.GetInt(body, "pagesize")
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	var total = 0
@@ -122,24 +130,29 @@ func (z *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
 	if req.req.Body.QueryType == zone.DarknetType {
 		tmpTotalInt, err = jsonparser.GetInt(body, "total")
 		if err != nil {
+			logger.Info(err.Error())
 			return 0, 0, 0, nil, err
 		}
 		total = int(tmpTotalInt)
 	} else {
 		tmpTotalStr, err = jsonparser.GetString(body, "total")
 		if err != nil {
+			logger.Info(err.Error())
 			return 0, 0, 0, nil, err
 		}
 		total, err = strconv.Atoi(tmpTotalStr)
 	}
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	if total == 0 {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	dataList, _, _, err := jsonparser.Get(body, "data")
 	if err != nil {
+		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
 	return int(page), int(size), int64(total), dataList, nil

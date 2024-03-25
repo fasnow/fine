@@ -8,13 +8,12 @@ import {RootState, setProxy} from '@/store/store';
 import { SyncOutlined } from '@ant-design/icons';
 import { errorNotification } from '@/component/Notification';
 import {
-  Get0zoneAuth,
-  GetFofaAuth, GetHunterAuth, GetProxy, GetQuakeAuth,
-  Save0zoneAuth,
+  Get0zone,
+  GetFofa, GetHunter,
+  GetProxy, GetQuake,
   SaveProxy,
-  SaveQuakeAuth
+
 } from "../../../wailsjs/go/config/Config";
-import {config} from "../../../wailsjs/go/models";
 import {SetAuth as SetHunterAuth} from "../../../wailsjs/go/hunter/Bridge";
 import {SetAuth as SetFofaAuth} from "../../../wailsjs/go/fofa/Bridge";
 import {SetAuth as Set0zoneAuth} from "../../../wailsjs/go/zone/Bridge";
@@ -155,11 +154,11 @@ const Account: React.FC = () => {
     }
 
     useEffect(() => {
-      GetFofaAuth().then(
-          (result:config.Fofa)=>{
+      GetFofa().then(
+          (result)=>{
             form.setFieldsValue({
               email: result.email,
-              key: result.key,
+              key: result.token,
             });
           }
       )
@@ -202,8 +201,8 @@ const Account: React.FC = () => {
     const [editable, setEditable] = useState(false)
     const hunterAuth = useSelector((state: RootState) => state.config.auth?.hunter)
     useEffect(() => {
-      GetHunterAuth().then(
-          (result:config.Hunter)=> form.setFieldsValue({key: result.key,})
+      GetHunter().then(
+          (result)=> form.setFieldsValue({key: result.token,})
       )
     }, []);
     function save(values: any) {
@@ -248,8 +247,8 @@ const Account: React.FC = () => {
     const [editable, setEditable] = useState(false)
     const zoneAuth = useSelector((state: RootState) => state.config.auth?.['0.zone'])
     useEffect(() => {
-      Get0zoneAuth().then(
-          (result:config.Zone)=> form.setFieldsValue({key: result.key,})
+      Get0zone().then(
+          (result)=> form.setFieldsValue({key: result.token,})
       )
     }, []);
     function save(values: any) {
@@ -293,8 +292,8 @@ const Account: React.FC = () => {
     const [form] = Form.useForm()
     const [editable, setEditable] = useState(false)
     useEffect(() => {
-      GetQuakeAuth().then(
-          (result:config.Quake)=> form.setFieldsValue({key: result.key,})
+      GetQuake().then(
+          (result)=> form.setFieldsValue({key: result.token,})
       )
     }, []);
     function save(values: any) {

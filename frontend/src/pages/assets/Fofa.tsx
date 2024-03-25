@@ -21,8 +21,8 @@ import {Export, GetUserInfo, Query, SetAuth} from "../../../wailsjs/go/fofa/Brid
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import {ItemType} from "antd/es/menu/hooks/useItems";
 
-import {GetFofaAuth} from "../../../wailsjs/go/config/Config";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
+import {GetFofa} from "../../../wailsjs/go/config/Config";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
@@ -893,6 +893,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                         rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
                         footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Pagination
+                                showQuickJumper
                                 showSizeChanger
                                 total={total}
                                 pageSizeOptions={pageSizeOptions}
@@ -1101,7 +1102,7 @@ const AuthSetting: React.FC = () => {
         setOpen(false)
         setEditable(false)
         form.setFieldsValue(values);
-        dispatch(setFofaAuth(values))
+        dispatch(setFofaAuth({email:values.email,key:values.key}))
         SetAuth(values.email,values.key).catch(
             err=>errorNotification("错误",err)
         )
@@ -1121,11 +1122,12 @@ const AuthSetting: React.FC = () => {
             width={420}
             destroyOnClose
             afterOpenChange={open=>{
-                open && GetFofaAuth().then(
+                open && GetFofa().then(
                     result=>{
+                        console.log(result)
                         form.setFieldsValue({
                             email: result.email,
-                            key: result.key,
+                            key: result.token,
                         });
                     }
                 )

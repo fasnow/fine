@@ -4,11 +4,11 @@ import (
 	"context"
 	"embed"
 	"fine/backend/app"
-	"fine/backend/config"
+	"fine/backend/config/v2"
 	"fine/backend/db/service"
 	"fine/backend/event"
+	"fine/backend/logger"
 	"fine/backend/runtime"
-	service2 "fine/backend/service/service"
 	"fine/backend/service/service/fofa"
 	"fine/backend/service/service/httpx"
 	"fine/backend/service/service/hunter"
@@ -55,11 +55,11 @@ func main() {
 		},
 		Bind: []interface{}{
 			mainApp,
+			config.GetSingleton(),
 			event.GetSingleton(),
 			runtime.NewRuntime(mainApp),
 			runtime.NewPath(),
 			httpx.NewHttpxBridge(mainApp),
-			config.GetSingleton(),
 			icp.NewICPBridge(mainApp),
 			ip138.NewIP138Bridge(mainApp),
 			fofa.NewFofaBridge(mainApp),
@@ -67,16 +67,15 @@ func main() {
 			quake.NewQuakeBridge(mainApp),
 			zone.NewZoneBridge(mainApp),
 			wechat.NewWechatBridge(mainApp),
-			//&wechat.Bridge{},
 			service.NewDownloadLogService(),
 			service.NewFofaDBService(),
-			&service2.TT{},
 		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: true,
 		},
 	}
 	if err := wails.Run(opts); err != nil {
+		logger.Info(err.Error())
 		println("Error:", err.Error())
 	}
 }

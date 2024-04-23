@@ -9,7 +9,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/fasnow/ghttp"
 	"golang.org/x/net/html"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -54,7 +54,7 @@ func (i *IP138) getToken() (string, error) {
 	if response.StatusCode != 200 {
 		return "", errors.New("maybe banned")
 	}
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Info(err.Error())
 		return "", err

@@ -1,38 +1,35 @@
 package fofa
 
 import (
-	"github.com/fasnow/ghttp"
-	"github.com/goccy/go-json"
-	"strings"
+	"fine/backend/app"
+	"fine/backend/proxy"
+	"fmt"
 	"testing"
 )
 
 func TestFofa_Get(t *testing.T) {
-	_ = ghttp.SetGlobalProxy("http://127.0.0.1:8080")
-	client := NewClient("email-email@foxmail.com", "63843efcebff1756f3a539e85cf35c0b")
-	builder := NewGetDataReqBuilder().Query("domain=baidu.com").Page(1).Size(10).Build()
-	result, err := client.Get(builder)
+	b := NewFofaBridge(app.NewApp())
+	err := proxy.GetSingleton().SetProxy("http://127.0.0.1:8080")
 	if err != nil {
-		t.Log(err)
+		fmt.Println(err)
 		return
 	}
-	for _, item := range result.Items {
-		marshal, _ := json.Marshal(item)
-		t.Log(string(marshal))
-	}
-	t.Log(strings.Repeat("-", 50))
-	builder2 := NewGetDataReqBuilder().
-		Query("domain=baidu.com").
-		Page(1).Size(10).
-		Fields("link,ip,port,title").
-		Build()
-	items2, err := client.Get(builder2)
+	userInfo, err := b.GetUserInfo()
 	if err != nil {
-		t.Log(err)
+		fmt.Println(err)
+		//return
+	}
+	fmt.Println(userInfo)
+
+	err = proxy.GetSingleton().SetProxy("")
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
-	for _, item := range items2.Items {
-		marshal, _ := json.Marshal(item)
-		t.Log(string(marshal))
+	userInfo2, err := b.GetUserInfo()
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	fmt.Println(userInfo2)
 }

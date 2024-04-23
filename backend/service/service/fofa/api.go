@@ -330,7 +330,7 @@ type User struct {
 
 func (f *Fofa) User() (*User, error) {
 	params := netUrl.Values{}
-	params.Add("Email", f.email)
+	params.Add("email", f.email)
 	params.Add("key", f.key)
 	url := fmt.Sprintf("%v?%s", FofaUserApiUrl, params.Encode())
 	request, err := http.NewRequest("GET", url, nil)

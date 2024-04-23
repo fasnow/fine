@@ -262,7 +262,7 @@ func SaveProxy(p Proxy) error {
 	t.Proxy = p
 	err := save(*t)
 	if err != nil {
-		logger.Info("can't save proxy to file")
+		logger.Info("can't store proxy to file")
 		return err
 	}
 	if p.Enable {

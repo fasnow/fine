@@ -7,21 +7,14 @@ import "@/pages/Httpx.css"
 import {GetHttpx, SaveHttpx} from "../../wailsjs/go/config/Config";
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
 import {errorNotification} from "@/component/Notification";
-import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
+
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
 import {Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit'
 import {GetAllEvents} from "../../wailsjs/go/event/Event";
-import {range} from "d3";
-import Compact from "antd/es/space/Compact";
-import {current} from "@reduxjs/toolkit";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState, setFofaUser} from "@/store/store";
-import {GetUserInfo} from "../../wailsjs/go/fofa/Bridge";
-import PointFree from "@/assets/images/point-free.svg";
-import PointBuy from "@/assets/images/point-buy.svg";
+import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 const TabContent=()=>{
     const [path,setPath] = useState<string>("")
     const [flags,setFlags] = useState<string>("")
@@ -40,6 +33,7 @@ const TabContent=()=>{
     const [length,setLength] = useState<number>(15)
     const isFirstSet = useRef<boolean>(true)
     const [messageApi, contextHolder] = message.useMessage();
+    const taskID = useRef<number>(0)
     useEffect(() => {
         //设置终端格式
         if (terminalRef.current) {
@@ -88,11 +82,17 @@ const TabContent=()=>{
         GetAllEvents().then(
             result=>{
                 EventsOn(String(result.httpxOutput),(value)=>{
+                    if (!value.taskID || value.taskID != taskID.current){
+                        return
+                    }
+                    const data = value.data
+                    console.log(data)
+
                     //将终端中的链接转为超链接实现可以点击打开浏览器
                     const urlRegex = /https?:\/\/\S+/g;
                     let match;
-                    let resultString = value;
-                    while ((match = urlRegex.exec(value)) !== null) {
+                    let resultString = data;
+                    while ((match = urlRegex.exec(data)) !== null) {
                         const matchedUri = match[0];
                         const replacement = `\x1b]8;;${matchedUri}\x07${matchedUri}\x1b]8;;\x07`;
                         resultString = resultString.replace(matchedUri, replacement);
@@ -101,7 +101,11 @@ const TabContent=()=>{
                     }
                     terminalRef.current && terminalRef.current.writeln(resultString)
                 })
-                EventsOn(String(result.httpxOutputDone),()=>{
+                EventsOn(String(result.httpxOutputDone),(value)=>{
+                    if (!value.taskID || value.taskID != taskID.current){
+                        return
+                    }
+                    taskID.current=0
                     setRunning(false)
                     terminalRef.current && terminalRef.current.write("$$$ Finished")
                     terminalRef.current && terminalRef.current.write("")
@@ -143,14 +147,20 @@ const TabContent=()=>{
         setTotal(0)
         setStart(1)
         setLength(length)
-        Run(path,flags,inputFlag,fromFile,targets).then(r => setRunning(true)).catch(err=> {
+        Run(path,flags,inputFlag,fromFile,targets).then(r => {
+            taskID.current=r
+            setRunning(true)
+        }).catch(err=> {
             errorNotification("错误", err)
             setRunning(false)
         })
     }
 
     const stop=()=>{
-        Stop().then(r => setRunning(false)).catch(err=> {
+        Stop(taskID.current).then(r => {
+            taskID.current=0
+            setRunning(false)
+        }).catch(err=> {
             errorNotification("错误", err)
         })
     }

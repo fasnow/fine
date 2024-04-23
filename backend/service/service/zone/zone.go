@@ -18,7 +18,7 @@ const (
 
 type Zone struct {
 	key     string
-	http    *ghttp.Client
+	Http    *ghttp.Client
 	Site    *site
 	Apk     *apk
 	Domain  *domain
@@ -58,7 +58,7 @@ type aim struct {
 func NewClient(key string) *Zone {
 	zoneClient := &Zone{
 		key:     key,
-		http:    &ghttp.Client{},
+		Http:    &ghttp.Client{},
 		Site:    &site{},
 		Apk:     &apk{},
 		Domain:  &domain{},
@@ -96,7 +96,7 @@ func (z *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
 		return 0, 0, 0, nil, err
 	}
 	request.Header.Set("Content-Type", "application/json")
-	response, err := z.http.Do(request)
+	response, err := z.Http.Do(request)
 	if err != nil {
 		logger.Info(err.Error())
 		return 0, 0, 0, nil, err

@@ -27,16 +27,17 @@ type Bridge struct {
 }
 
 func NewFofaBridge(app *app.App) *Bridge {
-	t := config.GetFofa()
-	tt := NewClient(t.Email, t.Token)
+	//t := config.GetFofa()
+	//tt := NewClient(t.Email, t.Token)
+	tt := NewClient("t.Email", "t.Token")
 	proxy.GetSingleton().Add(tt)
 	return &Bridge{
-		fofa:        tt,
-		queryLog:    service.NewFOFAQueryLog(),
-		downloadLog: service.NewDownloadLogService(),
-		dataCache:   service.NewFofaDBService(),
-		cacheTotal:  service.NewCacheTotal(),
-		app:         app,
+		fofa: tt,
+		//queryLog:    service.NewFOFAQueryLog(),
+		//downloadLog: service.NewDownloadLogService(),
+		//dataCache:   service.NewFofaDBService(),
+		//cacheTotal:  service.NewCacheTotal(),
+		app: app,
 	}
 }
 

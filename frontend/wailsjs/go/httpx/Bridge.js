@@ -6,6 +6,6 @@ export function Run(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['httpx']['Bridge']['Run'](arg1, arg2, arg3, arg4, arg5);
 }
 
-export function Stop() {
-  return window['go']['httpx']['Bridge']['Stop']();
+export function Stop(arg1) {
+  return window['go']['httpx']['Bridge']['Stop'](arg1);
 }

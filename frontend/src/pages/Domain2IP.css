@@ -1,0 +1,10 @@
+.domain2ip-left {
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.domain2ip-right {
+    padding-left: 10px;
+}

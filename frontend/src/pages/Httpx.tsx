@@ -18,8 +18,6 @@ import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 const TabContent=()=>{
     const [path,setPath] = useState<string>("")
     const [flags,setFlags] = useState<string>("")
-    const [inputFlag,setInputFlag] = useState<string>("")
-    const [fromFile,setFromFile] = useState<boolean>(false)
     const [output,setOutput] = useState<string>("")
     const [running,setRunning] = useState<boolean>(false)
     const [targets,setTargets] = useState<string>("")
@@ -34,6 +32,7 @@ const TabContent=()=>{
     const isFirstSet = useRef<boolean>(true)
     const [messageApi, contextHolder] = message.useMessage();
     const taskID = useRef<number>(0)
+    const outputRef = useRef<HTMLDivElement>(null)
     useEffect(() => {
         //设置终端格式
         if (terminalRef.current) {
@@ -51,7 +50,7 @@ const TabContent=()=>{
                 }
             })
 
-            const elem = document.getElementById('output')
+            const elem = outputRef.current
             if(elem){
                 terminalRef.current.open(elem);
                 terminalRef.current.loadAddon(fitAddon.current)
@@ -73,8 +72,6 @@ const TabContent=()=>{
             result=>{
                 setPath(result.path)
                 setFlags(result.flags)
-                setInputFlag(result.input_flag)
-                setFromFile(result.from_file)
             }
         )
 
@@ -115,16 +112,8 @@ const TabContent=()=>{
         )
     }, []);
 
-    useEffect(() => {
-        if(isFirstSet.current) {
-            isFirstSet.current=false
-            return
-        }
-        saveHttpx()
-    }, [fromFile]);
-
     const saveHttpx=()=>{
-        SaveHttpx({path:path,flags:flags,input_flag:inputFlag,from_file:fromFile})
+        SaveHttpx({path:path,flags:flags})
     }
 
     const setHttpxPath=()=>{
@@ -132,7 +121,7 @@ const TabContent=()=>{
             result=>{
                 if(result){
                     setPath(result)
-                    SaveHttpx({path:result  ,flags:flags,input_flag:inputFlag,from_file:fromFile})
+                    SaveHttpx({path:result  ,flags:flags})
                 }
             }
         ).catch(
@@ -142,12 +131,12 @@ const TabContent=()=>{
         )
     }
 
-    const exec=()=>{
+    const run=()=>{
         urls.current=[]
         setTotal(0)
         setStart(1)
         setLength(length)
-        Run(path,flags,inputFlag,fromFile,targets).then(r => {
+        Run(path,flags,targets).then(r => {
             taskID.current=r
             setRunning(true)
         }).catch(err=> {
@@ -192,26 +181,14 @@ const TabContent=()=>{
                 </span>
                 <span style={{display:"flex",gap:"5px"}}>
                     <span>程序参数</span>
-                    <Input value={flags} size={"small"} style={{width:"200px"}}
-                           onChange={e=>setFlags(e.target.value)}
-                           onBlur={saveHttpx}
-                    />
+                    <Tooltip title={"请勿添加-l或-u"} placement={"bottom"}>
+                        <Input value={flags} size={"small"} style={{width:"200px"}}
+                               onChange={e=>setFlags(e.target.value)}
+                               onBlur={saveHttpx}
+                        />
+                    </Tooltip>
                 </span>
-                <span style={{display:"flex",gap:"5px"}}>
-                    <span>输入参数</span>
-                    <Input value={inputFlag} size={"small"} style={{width:"50px"}}
-                           onChange={e=>setInputFlag(e.target.value)}
-                           onBlur={saveHttpx}
-                    />
-                </span>
-
-                <Tooltip title={"配合-l参数使用,否则请使用-u参数"} placement={"bottom"} >
-                    <span style={{display:"flex",gap:"5px"}}>
-                        <span>从文件读取</span>
-                        <Checkbox checked={fromFile} onChange={(e)=>setFromFile(e.target.checked)}/>
-                    </span>
-                </Tooltip>
-                {!running && <Button size={"small"} onClick={exec}>执行</Button>}
+                {!running && <Button size={"small"} onClick={run}>执行</Button>}
                 {running && <Button size={"small"} onClick={stop} icon={<SyncOutlined spin={running}/>}>终止</Button>}
             </div>
             <Space style={{display:"flex",justifyContent:"center"}} size={20}>
@@ -237,7 +214,7 @@ const TabContent=()=>{
                         {/*<TextArea value={output} autoSize style={{maxHeight:"calc(100vh - 120px)"}}*/}
                         {/*          onChange={e=>setOutput(e.target.value)}*/}
                         {/*/>*/}
-                        <div id="output" style={{height:"100%"}}/>
+                        <div ref={outputRef} style={{height:"100%"}}/>
                     </Allotment.Pane>
                 </Allotment>
             </div>
@@ -255,17 +232,19 @@ type TabType = {
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const Httpx =()=>{
-    const [activeKey,setActiveKey]=useState<string>("")
+    const [activeKey,setActiveKey]=useState<string>("1")
     const [items,setItems]=useState<TabType[]>([])
-    const tabCount=useRef<number>(0)
+    const newTabIndex=useRef<number>(0)
 
     useEffect(() => {
-        setItems([{
-            label: "1",
-            key: "1",
-            children: <TabContent/>,
-        }])
-        setActiveKey("1")
+        const newActiveKey = `${++newTabIndex.current}`;
+        setItems([
+            {
+                label: newActiveKey,
+                key: newActiveKey,
+                children: <TabContent />,
+            }
+        ],)
     }, []);
 
 
@@ -274,32 +253,23 @@ const Httpx =()=>{
     };
 
     const addTab = (input: string) => {
-        const newActiveKey = `${++items.length}`;
-        const newPanes = [
-            ...items,
-            {
-                label: newActiveKey,
-                key: newActiveKey,
-                children: <TabContent/>,
-            },
-        ];
-        setItems(newPanes)
-        setActiveKey(newActiveKey)
+        const newActiveKey = `${++newTabIndex.current}`;
+        setItems([...items, {
+            label: newActiveKey,
+            key: newActiveKey,
+            children: <TabContent />,
+        }]);
+        setActiveKey(newActiveKey);
     };
 
     const removeTab = (targetKey: TargetKey) => {
-        let newActiveKey = activeKey;
-        const lastIndex = -1;
-        const newPanes = items.filter((item) => item.key !== targetKey);
-        if (newPanes.length && newActiveKey === targetKey) {
-            if (lastIndex >= 0) {
-                newActiveKey = newPanes[lastIndex].key;
-            } else {
-                newActiveKey = newPanes[0].key;
-            }
+        const targetIndex = items.findIndex((pane) => pane.key === targetKey);
+        const newPanes = items.filter((pane) => pane.key !== targetKey);
+        if (newPanes.length && targetKey === activeKey) {
+            const { key } = newPanes[targetIndex === newPanes.length ? targetIndex - 1 : targetIndex];
+            setActiveKey(key);
         }
-        setItems(items)
-        setActiveKey(newActiveKey)
+        setItems(newPanes);
     };
 
     const onEditTab = (

@@ -7,8 +7,8 @@ import (
 	"fine/backend/service/service"
 	"fine/backend/utils"
 	"github.com/buger/jsonparser"
-	"github.com/fasnow/ghttp"
 	"github.com/goccy/go-json"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -286,7 +286,7 @@ func (f *faviconSimilarityData) Get(faviconHash string, similar float64, size in
 	if err != nil {
 		return nil, err
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -558,7 +558,7 @@ func (q *Quake) send(request *http.Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

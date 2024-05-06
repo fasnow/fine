@@ -29,29 +29,25 @@ func NewHttpxBridge(app *app.App) *Bridge {
 
 var cache = utils.NewCache() //存储正在运行的任务
 
-func (r *Bridge) Run(path, flags, inputFlag string, isFile bool, targets string) (int64, error) {
+func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 	var args []string
 	var tmpFilename string
-	if path == "" || inputFlag == "" {
+	if path == "" {
 		return 0, errors.New("未指定程序或输入参数")
 	}
-	if isFile {
-		file, err := os.CreateTemp("", "temp*.txt")
-		if err != nil {
-			logger.Info(err.Error())
-			return 0, err
-		}
-		_, err = file.WriteString(targets)
-		if err != nil {
-			logger.Info(err.Error())
-			return 0, err
-		}
-		tmpFilename = file.Name()
-		file.Close()
-		args = strings.Fields(fmt.Sprintf("%s %s %s %s", path, flags, inputFlag, file.Name()))
-	} else {
-		args = strings.Fields(fmt.Sprintf("%s %s %s %s", path, flags, inputFlag, strings.Join(strings.Split(targets, "\n"), ",")))
+	file, err := os.CreateTemp("", "temp*.txt")
+	if err != nil {
+		logger.Info(err.Error())
+		return 0, err
 	}
+	_, err = file.WriteString(targets)
+	if err != nil {
+		logger.Info(err.Error())
+		return 0, err
+	}
+	tmpFilename = file.Name()
+	file.Close()
+	args = strings.Fields(fmt.Sprintf("%s %s %s %s", path, flags, "-l", tmpFilename))
 	cmd := exec.Command(args[0], args[1:]...)
 	runtime.HideCmdWindow(cmd)
 	stdout, _ := cmd.StdoutPipe()
@@ -102,8 +98,6 @@ func (r *Bridge) Run(path, flags, inputFlag string, isFile bool, targets string)
 
 func (r *Bridge) Stop(taskID int64) error {
 	taskIDStr := strconv.Itoa(int(taskID))
-	fmt.Println(cache)
-	fmt.Println(taskIDStr)
 	value, ok1 := cache.Get(taskIDStr)
 	if !ok1 {
 		logger.Info("无效taskID")

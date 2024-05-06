@@ -45,10 +45,12 @@ type Wechat struct {
 }
 
 type Httpx struct {
-	Path      string `ini:"path" json:"path"`
-	Flags     string `ini:"flags" json:"flags" comment:"程序参数（不包括目标输入参数标志）"`
-	InputFlag string `ini:"input_flag" json:"input_flag" comment:"目标输入参数标志，input_flag=-l和from_file=true搭配或者input_flag=-u和from_file=false搭配"`
-	FromFile  bool   `ini:"from_file" json:"from_file" comment:"是否从文件读取，input_flag=-l和from_file=true搭配或者input_flag=-u和from_file=false搭配"`
+	Path  string `ini:"path" json:"path"`
+	Flags string `ini:"flags" json:"flags" comment:"程序参数（不包括目标输入参数标志）"`
+}
+
+type DNS struct {
+	Value []string `delim:"," ini:"value" json:"value"`
 }
 
 type Config struct {
@@ -60,6 +62,7 @@ type Config struct {
 	Zone           Zone `ini:"0.zone"`
 	Wechat         Wechat
 	Httpx          Httpx
+	DNS            DNS    `comment:"获取IP和判断CDN时会用到"`
 	baseDir        string `ini:"-"`
 	dataDir        string `ini:"-"`
 	filePath       string `ini:"-"`
@@ -72,7 +75,7 @@ var (
 		SkipUnrecognizableLines:  true, //跳过无法识别的行
 		SpaceBeforeInlineComment: true,
 	}
-	instance      *Config
+	GlobalConfig  *Config
 	defaultConfig = &Config{
 		Timeout: 20 * time.Second,
 		Proxy: Proxy{
@@ -96,11 +99,10 @@ var (
 			Interval: 1000 * time.Millisecond,
 		},
 		Httpx: Httpx{
-			Path:      "",
-			Flags:     "-sc -cl -title",
-			InputFlag: "-l",
-			FromFile:  true,
+			Path:  "",
+			Flags: "-sc -cl -title",
 		},
+		DNS: DNS{Value: []string{"223.5.5.5"}}, //AliDNS
 	}
 )
 
@@ -143,7 +145,7 @@ func init() {
 		}
 	}
 
-	instance = defaultConfig
+	GlobalConfig = defaultConfig
 	ini.PrettyFormat = false
 	if deprecatedCfg != nil {
 		tt := defaultConfig
@@ -156,8 +158,6 @@ func init() {
 		tt.Proxy.Pass = deprecatedCfg.Proxy.Pass
 		tt.Httpx.Path = deprecatedCfg.Httpx.Path
 		tt.Httpx.Flags = deprecatedCfg.Httpx.Flags
-		tt.Httpx.InputFlag = deprecatedCfg.Httpx.InputFlag
-		tt.Httpx.FromFile = deprecatedCfg.Httpx.FromFile
 		tt.Fofa.Email = deprecatedCfg.Auth.Fofa.Email
 		tt.Fofa.Token = deprecatedCfg.Auth.Fofa.Key
 		tt.Fofa.Interval = time.Duration(deprecatedCfg.Interval.Fofa) * time.Millisecond
@@ -179,7 +179,7 @@ func init() {
 			logger.Info("can't save deprecated config to a new one: " + err.Error())
 			os.Exit(0)
 		}
-		instance = tt
+		GlobalConfig = tt
 	} else {
 		if _, err := os.Stat(defaultConfig.filePath); os.IsNotExist(err) {
 			logger.Info("config file not found, generating default config file...")
@@ -197,7 +197,7 @@ func init() {
 			logger.Info("generate default config file successfully, locate at " + defaultConfig.filePath + ", run with default config")
 
 			//超时
-			proxy.GetSingleton().SetTimeout(instance.Timeout)
+			proxy.GetSingleton().SetTimeout(GlobalConfig.Timeout)
 			logger.Info(fmt.Sprintf("set timeout %fs", proxy.GetSingleton().GetTimeout().Seconds()))
 
 			return
@@ -207,7 +207,7 @@ func init() {
 			logger.Info("can't open config file:" + err.Error())
 			os.Exit(0)
 		}
-		err = cfg.MapTo(instance)
+		err = cfg.MapTo(GlobalConfig)
 		if err != nil {
 			logger.Info("can't map to config file:" + err.Error())
 			os.Exit(0)
@@ -215,12 +215,12 @@ func init() {
 	}
 
 	//代理
-	if instance.Proxy.Enable {
+	if GlobalConfig.Proxy.Enable {
 		var p string
-		if instance.Proxy.User != "" && instance.Proxy.Pass != "" {
-			p = fmt.Sprintf("%s://%s:%s@%s:%s", instance.Proxy.Type, instance.Proxy.User, instance.Proxy.Pass, instance.Proxy.Host, instance.Proxy.Port)
+		if GlobalConfig.Proxy.User != "" && GlobalConfig.Proxy.Pass != "" {
+			p = fmt.Sprintf("%s://%s:%s@%s:%s", GlobalConfig.Proxy.Type, GlobalConfig.Proxy.User, GlobalConfig.Proxy.Pass, GlobalConfig.Proxy.Host, GlobalConfig.Proxy.Port)
 		} else {
-			p = fmt.Sprintf("%s://%s:%s", instance.Proxy.Type, instance.Proxy.Host, instance.Proxy.Port)
+			p = fmt.Sprintf("%s://%s:%s", GlobalConfig.Proxy.Type, GlobalConfig.Proxy.Host, GlobalConfig.Proxy.Port)
 		}
 		if err := proxy.GetSingleton().SetProxy(p); err != nil {
 			logger.Info("set proxy error: " + err.Error())
@@ -229,12 +229,12 @@ func init() {
 	}
 
 	//超时
-	proxy.GetSingleton().SetTimeout(instance.Timeout)
+	proxy.GetSingleton().SetTimeout(GlobalConfig.Timeout)
 	logger.Info(fmt.Sprintf("set timeout %fs", proxy.GetSingleton().GetTimeout().Seconds()))
 }
 
 func GetSingleton() *Config {
-	return instance
+	return GlobalConfig
 }
 
 func save(config Config) error {
@@ -249,16 +249,16 @@ func save(config Config) error {
 		logger.Info("can't generate default config file: " + err.Error())
 		return err
 	}
-	*instance = config
+	*GlobalConfig = config
 	return nil
 }
 
 func GetProxy() Proxy {
-	return instance.Proxy
+	return GlobalConfig.Proxy
 }
 
 func SaveProxy(p Proxy) error {
-	t := instance
+	t := GlobalConfig
 	t.Proxy = p
 	err := save(*t)
 	if err != nil {
@@ -285,27 +285,27 @@ func SaveProxy(p Proxy) error {
 }
 
 func GetFofa() Fofa {
-	return instance.Fofa
+	return GlobalConfig.Fofa
 }
 
 func GetBaseDir() string {
-	return instance.baseDir
+	return GlobalConfig.baseDir
 }
 
 func SaveWechatDataPath(path string) {
-	instance.wechatDataPath = path
+	GlobalConfig.wechatDataPath = path
 }
 
 func GetWechatDataPath() string {
-	return instance.wechatDataPath
+	return GlobalConfig.wechatDataPath
 }
 
 func GetDataDir() string {
-	return instance.dataDir
+	return GlobalConfig.dataDir
 }
 
 func SaveFofa(fofa Fofa) error {
-	t := instance
+	t := GlobalConfig
 	t.Fofa = fofa
 	err := save(*t)
 	if err != nil {
@@ -316,11 +316,11 @@ func SaveFofa(fofa Fofa) error {
 }
 
 func GetHunter() Hunter {
-	return instance.Hunter
+	return GlobalConfig.Hunter
 }
 
 func SaveHunter(hunter Hunter) error {
-	t := instance
+	t := GlobalConfig
 	t.Hunter = hunter
 	err := save(*t)
 	if err != nil {
@@ -331,11 +331,11 @@ func SaveHunter(hunter Hunter) error {
 }
 
 func GetQuake() Quake {
-	return instance.Quake
+	return GlobalConfig.Quake
 }
 
 func SaveQuake(quake Quake) error {
-	t := instance
+	t := GlobalConfig
 	t.Quake = quake
 	err := save(*t)
 	if err != nil {
@@ -346,11 +346,11 @@ func SaveQuake(quake Quake) error {
 }
 
 func Get0zone() Zone {
-	return instance.Zone
+	return GlobalConfig.Zone
 }
 
 func Save0zone(zone Zone) error {
-	t := instance
+	t := GlobalConfig
 	t.Zone = zone
 	err := save(*t)
 	if err != nil {
@@ -361,19 +361,19 @@ func Save0zone(zone Zone) error {
 }
 
 func GetDBFile() string {
-	return instance.dbFilePath
+	return GlobalConfig.dbFilePath
 }
 
 func GetConfigFilePath() string {
-	return instance.filePath
+	return GlobalConfig.filePath
 }
 
 func GetHttpx() Httpx {
-	return instance.Httpx
+	return GlobalConfig.Httpx
 }
 
 func SaveHttpx(httpx Httpx) error {
-	t := instance
+	t := GlobalConfig
 	t.Httpx = httpx
 	err := save(*t)
 	if err != nil {
@@ -384,15 +384,30 @@ func SaveHttpx(httpx Httpx) error {
 }
 
 func GetWechat() Wechat {
-	return instance.Wechat
+	return GlobalConfig.Wechat
 }
 
 func SaveWechat(wechat Wechat) error {
-	t := instance
+	t := GlobalConfig
 	t.Wechat = wechat
 	err := save(*t)
 	if err != nil {
 		logger.Info("can't save wechat to file")
+		return err
+	}
+	return nil
+}
+
+func GetDNS() DNS {
+	return GlobalConfig.DNS
+}
+
+func SaveDNS(dns DNS) error {
+	t := GlobalConfig
+	t.DNS = dns
+	err := save(*t)
+	if err != nil {
+		logger.Info("can't save dns to file")
 		return err
 	}
 	return nil

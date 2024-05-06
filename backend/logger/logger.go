@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Info(msg string) {
+func Info(msg ...any) {
 	logDir, _ := filepath.Abs(filepath.Join("log"))
 	logFile := filepath.Join(logDir, time.Now().Format("2006-01-02")+".txt")
 
@@ -23,7 +23,7 @@ func Info(msg string) {
 		defer file.Close()
 	}
 	pc, _, line, _ := runtime.Caller(1)
-	msg = fmt.Sprintf("[%s %s %d] %s\n", time.Now().Format("2006/01/02 15:04:05"), runtime.FuncForPC(pc).Name(), line, msg)
-	_, err = file.WriteString(msg)
-	fmt.Print(msg)
+	output := fmt.Sprintf("[%s %s %d] %v\n", time.Now().Format("2006/01/02 15:04:05"), runtime.FuncForPC(pc).Name(), line, msg)
+	_, err = file.WriteString(output)
+	fmt.Print(output)
 }

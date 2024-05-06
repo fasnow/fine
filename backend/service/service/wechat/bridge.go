@@ -309,3 +309,7 @@ func (f FileInfoSlice) Less(i, j int) bool {
 func (f FileInfoSlice) Swap(i, j int) {
 	f[i], f[j] = f[j], f[i]
 }
+
+func (r *Bridge) extract() {
+
+}

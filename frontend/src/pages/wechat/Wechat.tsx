@@ -119,7 +119,6 @@ export const MiniProgram: React.FC = () => {
         resetTreeData(items)
     }
 
-
     const resetTreeData=(items:wechat.MiniProgram[])=>{
         const data = []
         for (const item of items) {
@@ -192,7 +191,6 @@ export const MiniProgram: React.FC = () => {
             }
         )
     }
-
 
     const onExpand: DirectoryTreeProps['onExpand'] = (keys, info) => {
         console.log('Trigger Expand', keys, info);
@@ -297,6 +295,30 @@ export const MiniProgram: React.FC = () => {
                                         treeData={treeData}
                                     />
                                 </Spin>
+                            </div>
+                        </Allotment.Pane>
+                        <Allotment.Pane  className={"httpx-right"}>
+                            <div style={{
+                                position:"static",
+                                margin:"10px",
+                                display:"flex",
+                                // justifyContent:"center",
+                                flexDirection:"column",
+                                // alignItems:"center",
+                                gap:10,
+                                gridAutoFlow:'column',
+                                height:"calc(100%)"
+                            }}>
+                                <Button size={"small"} onClick={
+                                    async () => {
+                                        OpenFolder(await Join([dataCachePath.current, wxId, version]))
+                                    }
+                                }>打开反编译后的文件夹</Button>
+                                <TextArea
+                                    value={decompileResult}
+                                    onChange={(e)=>setDecompileResult(e.target.value)}
+                                    style={{maxHeight:"calc(100% - 80px)",flex: 1}}
+                                />
                             </div>
                         </Allotment.Pane>
                         <Allotment.Pane  className={"httpx-right"}>

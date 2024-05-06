@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	service2 "fine/backend/service/service"
+	"io"
 
 	"fine/backend/service/model/fofa"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/buger/jsonparser"
-	"github.com/fasnow/ghttp"
 	"net/http"
 	netUrl "net/url"
 	"strconv"
@@ -94,7 +94,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 	if response.StatusCode != 200 {
 		return nil, service2.NonStatusOK
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +341,7 @@ func (f *Fofa) User() (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

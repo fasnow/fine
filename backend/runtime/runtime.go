@@ -3,18 +3,16 @@ package runtime
 import (
 	"encoding/base64"
 	"fine/backend/app"
+	"fine/backend/proxy"
 	"github.com/buger/jsonparser"
-	"github.com/fasnow/ghttp"
 	"github.com/pkg/errors"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"time"
 )
 
 type Runtime struct {
@@ -79,13 +77,23 @@ func (r *Runtime) OpenFile(dir, filename string) error {
 	return cmd.Start()
 }
 
+type UpdateHttpClient struct {
+	Client *http.Client
+}
+
 func (r *Runtime) CheckUpdate() (map[string]string, error) {
-	httpClient := ghttp.Client{Timeout: 10 * time.Second}
+	client := UpdateHttpClient{
+		Client: &http.Client{},
+	}
+	err := proxy.GetSingleton().Add(&client)
+	if err != nil {
+		return nil, err
+	}
 	request, err := http.NewRequest("GET", "https://api.github.com/repos/fasnow/fine/releases/latest", nil)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := httpClient.Do(request)
+	resp, err := client.Client.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +102,7 @@ func (r *Runtime) CheckUpdate() (map[string]string, error) {
 		if err != nil {
 		}
 	}(resp.Body)
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
 		return nil, errors.New(string(body))
 	}

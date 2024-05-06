@@ -10,6 +10,8 @@ export function GetConfigFilePath():Promise<string>;
 
 export function GetDBFile():Promise<string>;
 
+export function GetDNS():Promise<config.DNS>;
+
 export function GetDataDir():Promise<string>;
 
 export function GetFofa():Promise<config.Fofa>;
@@ -27,6 +29,8 @@ export function GetWechat():Promise<config.Wechat>;
 export function GetWechatDataPath():Promise<string>;
 
 export function Save0zone(arg1:config.Zone):Promise<void>;
+
+export function SaveDNS(arg1:config.DNS):Promise<void>;
 
 export function SaveFofa(arg1:config.Fofa):Promise<void>;
 

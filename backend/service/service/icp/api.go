@@ -10,9 +10,9 @@ import (
 	"fine/backend/service/model/icp"
 	"fine/backend/service/service"
 	"fmt"
-	"github.com/fasnow/ghttp"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -111,7 +111,7 @@ func (i *ICP) getToken() (string, error) {
 		logger.Info(err.Error())
 		return "", err
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Info(err.Error())
 		return "", err
@@ -201,7 +201,7 @@ func (i *ICP) Query(unitName string) (*Result, error) {
 		logger.Info(err.Error())
 		return nil, err
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func (i *ICP) GetImage() (*icp.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	body, err := ghttp.GetResponseBody(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +307,7 @@ func (i *ICP) CheckImage(pointJson string) (sign, smallImage string, err error) 
 	if err != nil {
 		return "", "", err
 	}
-	body, err := ghttp.GetResponseBody(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", "", err
 	}

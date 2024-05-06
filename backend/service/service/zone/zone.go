@@ -6,7 +6,7 @@ import (
 	"fine/backend/logger"
 	"fine/backend/service/model/zone"
 	"github.com/buger/jsonparser"
-	"github.com/fasnow/ghttp"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,7 +18,7 @@ const (
 
 type Zone struct {
 	key     string
-	Http    *ghttp.Client
+	Http    *http.Client
 	Site    *site
 	Apk     *apk
 	Domain  *domain
@@ -58,7 +58,7 @@ type aim struct {
 func NewClient(key string) *Zone {
 	zoneClient := &Zone{
 		key:     key,
-		Http:    &ghttp.Client{},
+		Http:    &http.Client{},
 		Site:    &site{},
 		Apk:     &apk{},
 		Domain:  &domain{},
@@ -101,7 +101,7 @@ func (z *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
 		logger.Info(err.Error())
 		return 0, 0, 0, nil, err
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Info(err.Error())
 		return 0, 0, 0, nil, err

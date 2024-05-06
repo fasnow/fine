@@ -27,6 +27,8 @@ type Value struct {
 	HttpxOutputDone               EventName `json:"httpxOutputDone"`
 	DecompileWxMiniProgramOutput  EventName `json:"decompileWxMiniProgram"`
 	DecompileWxMiniProgramDone    EventName `json:"decompileWxMiniProgramDone"`
+	Domain2IPOutput               EventName `json:"domain2IPOutput"`
+	Domain2IPDown                 EventName `json:"domain2IPDown"`
 }
 
 type Event struct {
@@ -58,6 +60,8 @@ func GetSingleton() *Event {
 				HttpxOutputDone:               EventName(idgen.NextId()),
 				DecompileWxMiniProgramOutput:  EventName(idgen.NextId()),
 				DecompileWxMiniProgramDone:    EventName(idgen.NextId()),
+				Domain2IPOutput:               EventName(idgen.NextId()),
+				Domain2IPDown:                 EventName(idgen.NextId()),
 			},
 		}
 	})

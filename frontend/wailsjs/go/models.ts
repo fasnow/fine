@@ -1,5 +1,17 @@
 export namespace config {
 	
+	export class DNS {
+	    value: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new DNS(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.value = source["value"];
+	    }
+	}
 	export class Fofa {
 	    email: string;
 	    token: string;
@@ -19,8 +31,6 @@ export namespace config {
 	export class Httpx {
 	    path: string;
 	    flags: string;
-	    input_flag: string;
-	    from_file: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Httpx(source);
@@ -30,8 +40,6 @@ export namespace config {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.path = source["path"];
 	        this.flags = source["flags"];
-	        this.input_flag = source["input_flag"];
-	        this.from_file = source["from_file"];
 	    }
 	}
 	export class Hunter {
@@ -131,6 +139,8 @@ export namespace event {
 	    httpxOutputDone: number;
 	    decompileWxMiniProgram: number;
 	    decompileWxMiniProgramDone: number;
+	    domain2IPOutput: number;
+	    domain2IPDown: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Event(source);
@@ -153,6 +163,8 @@ export namespace event {
 	        this.httpxOutputDone = source["httpxOutputDone"];
 	        this.decompileWxMiniProgram = source["decompileWxMiniProgram"];
 	        this.decompileWxMiniProgramDone = source["decompileWxMiniProgramDone"];
+	        this.domain2IPOutput = source["domain2IPOutput"];
+	        this.domain2IPDown = source["domain2IPDown"];
 	    }
 	}
 

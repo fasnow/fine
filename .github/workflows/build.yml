@@ -136,8 +136,10 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 修复HTTPX模块已知问题;
-            2. 添加默认请求头;
+            1. 修复HTTPX模块已知问题,优化配置;
+            2. 修复代理问题;
+            3. 添加接口默认请求头;
+            4. 适配低分辨率;
 
         env:
           GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}

@@ -1,20 +1,16 @@
 package utils
 
 import (
-	"errors"
 	"fine/backend/logger"
-	"github.com/fasnow/ghttp"
 	"github.com/xuri/excelize/v2"
 	"golang.org/x/net/html"
-	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func RemoveEmptyAndDuplicateStrings(list []string) []string {
+func RemoveEmptyAndDuplicateString(list []string) []string {
 	uniqueMap := make(map[string]bool)
 	var result []string
 	for _, str := range list {
@@ -38,44 +34,11 @@ func RemoveEmptyStrings(slice []string) []string {
 }
 
 func RemoveEmptyAndDuplicateAndJoinStrings(list []string, sep string) string {
-	list = RemoveEmptyAndDuplicateStrings(list)
+	list = RemoveEmptyAndDuplicateString(list)
 	if len(list) == 0 {
 		return ""
 	}
 	return strings.Join(list, sep)
-}
-
-func GetCodeAndTitle(u string) (int, string, error) {
-	client := ghttp.Client{Timeout: 3 * time.Second}
-	request, err := http.NewRequest("GET", u, nil)
-	if err != nil {
-		logger.Info(err.Error())
-		return 0, "", err
-	}
-	resp, err := client.Do(request)
-	if err != nil {
-		logger.Info(err.Error())
-		//if _, ok := err.(*url.Error); ok {
-		return 0, "", errors.New("无法访问")
-		//}
-	} else {
-		body, err := ghttp.GetResponseBody(resp.Body)
-		if err != nil {
-			logger.Info(err.Error())
-			return 0, "", err
-		}
-		if err != nil {
-			logger.Info(err.Error())
-			return resp.StatusCode, "", nil
-		}
-		re := regexp.MustCompile("(?i)<title>(.*?)</title>")
-		matches := re.FindStringSubmatch(string(body))
-		if len(matches) > 1 {
-			return resp.StatusCode, matches[1], nil
-		} else {
-			return resp.StatusCode, "", nil
-		}
-	}
 }
 
 func GenFilenameTimestamp() string {

@@ -1,0 +1,1 @@
+{"component":true,"usingComponents":{"fs-wja-coupon":"./component/FsWjaCoupon/index","fs-vcy-coupon":"./component/FsVcyCoupon/index","fs-lz-coupon":"./component/FsLzCoupon/index","fs-banner":"./component/FsBanner/index","fs-popup":"./component/FsPopup/index","fs-coupon":"./component/FsCoupon/index","fs-combine":"./component/FsCombine/index"}}

@@ -7,13 +7,14 @@ require (
 	github.com/fasnow/ghttp v0.0.0-20240210111335-7479a60de093
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
+	github.com/miekg/dns v1.1.59
 	github.com/pkg/errors v0.9.1
 	github.com/tidwall/gjson v1.9.3
 	github.com/wailsapp/wails/v2 v2.8.0
 	github.com/xuri/excelize/v2 v2.8.0
 	github.com/yitter/idgenerator-go v1.3.3
-	golang.org/x/crypto v0.19.0
-	golang.org/x/net v0.21.0
+	golang.org/x/crypto v0.21.0
+	golang.org/x/net v0.22.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/sqlite v1.5.5
@@ -53,7 +54,9 @@ require (
 	github.com/xuri/efp v0.0.0-20230802181842-ad255f2331ca // indirect
 	github.com/xuri/nfp v0.0.0-20230819163627-dc951e3ffe1a // indirect
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/mod v0.16.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/tools v0.19.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

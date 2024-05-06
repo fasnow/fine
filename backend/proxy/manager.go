@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fine/backend/logger"
+	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -62,17 +63,18 @@ func GetSingleton() *Manager {
 }
 
 // Add 添加一个需要使用代理的类，该类必须具有一个导出的http.client或者*http.client属性
-func (r *Manager) Add(client ...any) {
+func (r *Manager) Add(client ...any) error {
 	for _, c := range client {
 		// 获取值的类型
 		t := reflect.TypeOf(c)
-
-		if t.Kind() == reflect.Ptr {
-			// 获取指针指向的类型
-			t = t.Elem()
+		if t.Kind() != reflect.Ptr {
+			return errors.New("传入的参数必须是指针类型")
 		}
+
+		// 获取指针指向的类型
+		t = t.Elem()
 		if t.Kind() != reflect.Struct {
-			return
+			return errors.New("传入的参数必须是结构体指针类型")
 		}
 
 		// 遍历结构体的字段
@@ -85,6 +87,7 @@ func (r *Manager) Add(client ...any) {
 			}
 		}
 	}
+	return nil
 }
 
 // SetTimeout 小于等于0则为默认

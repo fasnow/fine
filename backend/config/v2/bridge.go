@@ -81,3 +81,11 @@ func (r *Config) GetWechat() Wechat {
 func (r *Config) SaveWechat(wechat Wechat) error {
 	return SaveWechat(wechat)
 }
+
+func (r *Config) GetDNS() DNS {
+	return r.DNS
+}
+
+func (r *Config) SaveDNS(dns DNS) error {
+	return SaveDNS(dns)
+}

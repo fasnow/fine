@@ -7,7 +7,6 @@ import (
 	"fine/backend/utils"
 	"fmt"
 	"github.com/buger/jsonparser"
-	"github.com/fasnow/ghttp"
 	"golang.org/x/net/html"
 	"io"
 	"net/http"
@@ -141,7 +140,7 @@ func (d *domain) GetHistoryIP(domain string) ([]*IPItem, error) {
 	if response.StatusCode == 502 {
 		return nil, errors.New("可能被ban了")
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -176,7 +175,7 @@ func (d *domain) read() (map[string]string, error) {
 	if response.StatusCode == 502 {
 		return nil, errors.New("可能被ban了")
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -223,7 +222,7 @@ func (d *domain) write() (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return -1, err
 	}
@@ -256,7 +255,7 @@ func (d *domain) getLocation(ip, sign string) (string, error) {
 	if response.StatusCode == 500 {
 		return "", errors.New("可能被ban了")
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", err
 	}
@@ -325,7 +324,7 @@ func (i *ip) GetCurrentDomain(ip string) ([]*DomainItem, error) {
 	if response.StatusCode == 502 {
 		return nil, errors.New("可能被ban了")
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

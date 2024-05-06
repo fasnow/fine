@@ -18,6 +18,10 @@ export function GetDBFile() {
   return window['go']['config']['Config']['GetDBFile']();
 }
 
+export function GetDNS() {
+  return window['go']['config']['Config']['GetDNS']();
+}
+
 export function GetDataDir() {
   return window['go']['config']['Config']['GetDataDir']();
 }
@@ -52,6 +56,10 @@ export function GetWechatDataPath() {
 
 export function Save0zone(arg1) {
   return window['go']['config']['Config']['Save0zone'](arg1);
+}
+
+export function SaveDNS(arg1) {
+  return window['go']['config']['Config']['SaveDNS'](arg1);
 }
 
 export function SaveFofa(arg1) {

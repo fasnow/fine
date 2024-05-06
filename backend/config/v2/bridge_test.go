@@ -5,6 +5,5 @@ import (
 )
 
 func TestGetSingleton(t *testing.T) {
-
 	GetSingleton()
 }

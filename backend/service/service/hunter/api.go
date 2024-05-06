@@ -7,8 +7,8 @@ import (
 	"fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
-	"github.com/fasnow/ghttp"
 	"github.com/goccy/go-json"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -71,7 +71,7 @@ func (h *Hunter) Get(req *GetDataReq) (*Result, error) {
 	if response.StatusCode != 200 {
 		return nil, service.NonStatusOK
 	}
-	body, err := ghttp.GetResponseBody(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err

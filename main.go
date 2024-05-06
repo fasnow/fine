@@ -9,6 +9,7 @@ import (
 	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/runtime"
+	"fine/backend/service/service/domain2ip"
 	"fine/backend/service/service/fofa"
 	"fine/backend/service/service/httpx"
 	"fine/backend/service/service/hunter"
@@ -22,6 +23,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	runtime2 "runtime"
 )
 
@@ -29,11 +31,13 @@ import (
 var assets embed.FS
 
 func main() {
+	defaultWidth := 1200
+	defaultHeight := 768
 	mainApp := app.NewApp()
 	opts := &options.App{
 		Title:     "Fine",
-		Width:     1200,
-		Height:    768,
+		Width:     defaultWidth,
+		Height:    defaultHeight,
 		Frameless: runtime2.GOOS != "darwin",
 		AssetServer: &assetserver.Options{
 			Assets: assets,
@@ -52,6 +56,22 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			mainApp.SetContext(ctx)
 			event.SetContext(ctx)
+
+			//适配小屏
+			screens, _ := wailsRuntime.ScreenGetAll(ctx)
+			for _, screen := range screens {
+				if screen.IsCurrent {
+					width := screen.Size.Width
+					height := screen.Size.Height
+					if width > defaultWidth {
+						width = width * 4 / 5
+					}
+					if height > defaultHeight {
+						height = height * 4 / 5
+					}
+					wailsRuntime.WindowSetSize(ctx, width, defaultHeight)
+				}
+			}
 		},
 		Bind: []interface{}{
 			mainApp,
@@ -69,6 +89,7 @@ func main() {
 			wechat.NewWechatBridge(mainApp),
 			service.NewDownloadLogService(),
 			service.NewFofaDBService(),
+			domain2ip.NewDomain2IPBridge(mainApp),
 		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: true,

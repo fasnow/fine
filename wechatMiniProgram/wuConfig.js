@@ -46,16 +46,18 @@ function doConfig(configFile, cb) {
                     root = root.substring(1);
                 }
                 let newPages = [];
-                if(subPackage.pages) for (let page of subPackage.pages) {
-                    let items = page.replace(root, '');
-                    newPages.push(items);
-                    let subIndex = pages.indexOf(root + items);
-                    if (subIndex !== -1) {
-                        pages.splice(subIndex, 1);
+                if(subPackage.pages){
+                    for (let page of subPackage.pages) {
+                        let items = page.replace(root, '');
+                        newPages.push(items);
+                        let subIndex = pages.indexOf(root + items);
+                        if (subIndex !== -1) {
+                            pages.splice(subIndex, 1);
+                        }
                     }
+                    subPackage.pages = newPages;
                 }
                 subPackage.root = root;
-                subPackage.pages = newPages;
                 subPackages.push(subPackage);
             }
             app.subPackages = subPackages;

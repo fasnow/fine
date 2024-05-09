@@ -23,7 +23,6 @@ function doWxss(dir, cb, mainDir, nowDir) {
     for (let i = 0; i < 300; i++) GwxCfg.prototype["$gwx" + i] = GwxCfg.prototype.$gwx;
     let runList = {}, pureData = {}, result = {}, actualPure = {}, importCnt = {}, frameName = "", onlyTest = true,
         blockCss = [];//custom block css file which won't be imported by others.(no extension name)
-        let commonStyle = {};//some global css
     function cssRebuild(data) {//need to bind this as {cssFile:__name__} before call
 		let cssFile;
 
@@ -33,10 +32,8 @@ function doWxss(dir, cb, mainDir, nowDir) {
 				else ++importCnt[id];
 			}
 
-            if (typeof data === "number") return addStat(data);  
-            if (data != undefined) {
-                for (let content of data) if (typeof content === "object" && content[0] == 2) addStat(content[1]);
-            }
+            if (typeof data === "number") return addStat(data);
+           if(data) for (let content of data) if (typeof content === "object" && content[0] == 2) addStat(content[1]);
         }
 
         function makeup(data) {
@@ -62,24 +59,6 @@ function doWxss(dir, cb, mainDir, nowDir) {
 				}
 			}
             let exactData = isPure ? pureData[data] : data;
-            if (typeof data === 'string') {
-              let styleData = commonStyle[data]
-              let fileStyle = ''
-              if (styleData != undefined) {
-                for (let content of styleData) {
-                  if (typeof content === 'string') {
-                    if (content != '1') {
-                      fileStyle += content
-                    }
-                  } else {
-                    if (content.length != 1) {
-                      fileStyle += content[1] + 'rpx'
-                    }
-                  }
-                }
-              }
-              exactData = fileStyle
-            }
             for (let content of exactData)
                 if (typeof content === "object") {
                     switch (content[0]) {
@@ -253,33 +232,22 @@ function doWxss(dir, cb, mainDir, nowDir) {
                 ';\nvar __mainPageFrameReady__ = window.__mainPageFrameReady__ || function(){};var __WXML_GLOBAL__={entrys:{},defines:{},modules:{},ops:[],wxs_nf_init:undefined,total_ops:0};var __vd_version_info__=__vd_version_info__||{}' +
                 ";\n" + scriptCode;
 
-                if (code.indexOf('__COMMON_STYLESHEETS__') != -1) {
-                  let commonStyles = code.slice(
-                    code.indexOf('__COMMON_STYLESHEETS__||{}') + 26,
-                    code.indexOf(
-                      'var setCssToHead = function(file, _xcInvalid, info)'
-                    )
-                  )
-                  commonStyles =
-                    ';var __COMMON_STYLESHEETS__ = __COMMON_STYLESHEETS__||{};' +
-                    commonStyles +
-                    ';__COMMON_STYLESHEETS__;'
-                //   commonStyle = new VM().run(commonStyles)
-                }
-
             //remove setCssToHead function
             mainCode = mainCode.replace('var setCssToHead = function', 'var setCssToHead2 = function');
 
+            // code = code.slice(code.lastIndexOf('var setCssToHead = function(file, _xcInvalid'));
+            // code = code.slice(code.lastIndexOf('\nvar _C= ') + 1);
+            // code = code.slice(0, code.indexOf('\n'));
+            //fix _C error
             code = code.slice(code.lastIndexOf('var setCssToHead = function(file, _xcInvalid'));
             code = code.replace('__COMMON_STYLESHEETS__', '[]');
-            
-            if (code.indexOf('_C =') == -1) {
+            if (code.indexOf('_C =') === -1) {
                 code = code.slice(code.lastIndexOf('\nvar _C= ') + 1);
             } else {
                 code = code.slice(code.lastIndexOf('\nvar _C = ') + 1);
             }
-
             code = code.slice(0, code.indexOf('\n'));
+
             let vm = new VM({sandbox: {}});
             pureData = vm.run(code + "\n_C");
 

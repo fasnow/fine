@@ -133,7 +133,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             input: props.onContextMenu?.input || "",
             inputCache: '',
             checkedFields: props.checkedColsValue || defaultCheckedColsValue,
-            isWeb: 1,
+            isWeb: 3,
             statusCode: "",
             portFilter: false,
             dateRange: []
@@ -750,7 +750,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             >
                 <label style={{fontSize: "14px", marginRight: "5px"}}>资产类型 <Select size="small"
                                                                                        style={{width: "110px"}}
-                                                                                       defaultValue={1 as 1 | 2 | 3}
+                                                                                       defaultValue={3 as 1 | 2 | 3}
                                                                                        options={[{label: "web资产", value: 1}, {label: "非web资产", value: 2}, {label: "全部", value: 3},]}
                                                                                        onChange={(value) => this.setState({isWeb: value})}/></label>
 

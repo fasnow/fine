@@ -15,10 +15,11 @@ import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit'
 import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState, setHttpx} from "@/store/store";
 const TabContent=()=>{
     const [path,setPath] = useState<string>("")
     const [flags,setFlags] = useState<string>("")
-    const [output,setOutput] = useState<string>("")
     const [running,setRunning] = useState<boolean>(false)
     const [targets,setTargets] = useState<string>("")
     const terminalRef = useRef<Terminal>(new Terminal({
@@ -29,10 +30,12 @@ const TabContent=()=>{
     const [total,setTotal] = useState<number>(0)
     const [start,setStart] = useState<number>(1)
     const [length,setLength] = useState<number>(15)
-    const isFirstSet = useRef<boolean>(true)
     const [messageApi, contextHolder] = message.useMessage();
     const taskID = useRef<number>(0)
     const outputRef = useRef<HTMLDivElement>(null)
+    const httpxConfig = useSelector((state: RootState) => state.config.httpx)
+    const dispatch = useDispatch()
+
     useEffect(() => {
         //设置终端格式
         if (terminalRef.current) {
@@ -72,6 +75,7 @@ const TabContent=()=>{
             result=>{
                 setPath(result.path)
                 setFlags(result.flags)
+                dispatch(setHttpx({path:result.path,flags:result.flags}))
             }
         )
 
@@ -112,8 +116,14 @@ const TabContent=()=>{
         )
     }, []);
 
+    useEffect(()=>{
+        setPath(httpxConfig.path)
+        setFlags(httpxConfig.flags)
+    },[httpxConfig])
+
     const saveHttpx=()=>{
         SaveHttpx({path:path,flags:flags})
+        dispatch(setHttpx({path:path,flags:flags}))
     }
 
     const setHttpxPath=()=>{
@@ -121,7 +131,8 @@ const TabContent=()=>{
             result=>{
                 if(result){
                     setPath(result)
-                    SaveHttpx({path:result  ,flags:flags})
+                    SaveHttpx({path:result,flags:flags})
+                    dispatch(setHttpx({path:result,flags:flags}))
                 }
             }
         ).catch(
@@ -174,7 +185,6 @@ const TabContent=()=>{
                         <Input value={path} size={"small"} style={{width:"400px"}}
                                onChange={e=>setPath(e.target.value)}
                                onBlur={saveHttpx}
-
                         />
                         <Button size={"small"} onClick={setHttpxPath}>选择</Button>
                     </Space.Compact>
@@ -203,7 +213,7 @@ const TabContent=()=>{
             {/*<div style={{justifyContent:"center",display:"flex"}}>*/}
             {/*    */}
             {/*</div>*/}
-            <div style={{height:"calc(100vh)"}}>
+            <div style={{height:"calc(100%)"}}>
                 <Allotment onChange={()=>fitAddon.current.fit()} >
                     <Allotment.Pane preferredSize={"350"}  className={"httpx-left"}>
                         <TextArea  value={targets} size={"small"} placeholder={"每行一个"} autoSize style={{maxHeight:"100%"}}

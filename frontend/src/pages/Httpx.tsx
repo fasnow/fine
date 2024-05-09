@@ -176,7 +176,7 @@ const TabContent=()=>{
     }
 
     return (
-        <div style={{display:"flex",flexDirection:"column",gap:"10px",height:"calc(100vh - 100px)"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:"10px",height:"calc(100vh - 80px)"}}>
             {contextHolder}
             <div style={{display:"flex",justifyContent:"center",gap:"10px"}}>
                 <span style={{display:"flex",gap:"5px"}}>

@@ -176,7 +176,7 @@ const items: TabsProps['items'] = [
     {
         key: '2',
         label: 'HTTPX',
-        children: <div style={{padding:"10px 10px 0px 10px"}}><Httpx/></div>,
+        children: <div style={{padding:"0 10px"}}><Httpx/></div>,
     },
     {
         key: '3',

@@ -117,6 +117,9 @@ func init() {
 	defaultConfig.dataDir = filepath.Join(baseDir, "data")
 	defaultConfig.dbFilePath = filepath.Join(defaultConfig.dataDir, "data.db")
 	defaultConfig.wechatDataPath = filepath.Join(defaultConfig.dataDir, "wechatMiniProgram")
+
+	logger.DataDir = filepath.Join(baseDir, "log")
+
 	if err := os.MkdirAll(filepath.Join(baseDir, "bin"), 0750); err != nil {
 		return
 	}

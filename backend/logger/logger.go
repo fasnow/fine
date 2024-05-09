@@ -8,8 +8,10 @@ import (
 	"time"
 )
 
+var DataDir = "log"
+
 func Info(msg ...any) {
-	logDir, _ := filepath.Abs(filepath.Join("log"))
+	logDir, _ := filepath.Abs(DataDir)
 	logFile := filepath.Join(logDir, time.Now().Format("2006-01-02")+".txt")
 
 	if _, err := os.Stat(logDir); os.IsNotExist(err) {

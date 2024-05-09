@@ -553,21 +553,6 @@ const Bar: React.FC = () => {
         t()
     }, [])
 
-    const handleQuit = () => {
-        confirm({
-            title: '确定退出?',
-            onOk() {
-                Quit()
-            },
-            onCancel() {},
-            style:{top:"20%"},
-            okButtonProps:{size:"small"},
-            cancelButtonProps:{size:"small"},
-            maskClosable:false,
-            closable:false,
-            width:300,
-        })
-    }
     return (
         <div
             id="drag"
@@ -650,7 +635,7 @@ const Bar: React.FC = () => {
                                 icon={<CloseOutlined />}
                                 size="small"
                                 className="exit-button"
-                                onClick={handleQuit}
+                                onClick={Quit}
                             />
                         </div>
                     }

@@ -35,9 +35,19 @@ func main() {
 	defaultHeight := 768
 	mainApp := app.NewApp()
 	opts := &options.App{
-		Title:     "Fine",
-		Width:     defaultWidth,
-		Height:    defaultHeight,
+		Title:  "Fine",
+		Width:  defaultWidth,
+		Height: defaultHeight,
+		OnBeforeClose: func(ctx context.Context) (prevent bool) {
+			close, _ := wailsRuntime.MessageDialog(ctx, wailsRuntime.MessageDialogOptions{
+				Type:          wailsRuntime.WarningDialog,
+				Title:         "确定退出吗？",
+				Buttons:       []string{"确认", "取消"},
+				DefaultButton: "确认",
+				CancelButton:  "取消",
+			})
+			return close == "取消"
+		},
 		Frameless: runtime2.GOOS != "darwin",
 		AssetServer: &assetserver.Options{
 			Assets: assets,

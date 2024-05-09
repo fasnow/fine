@@ -12,6 +12,7 @@ import (
 type EventName int
 
 type Value struct {
+	BeforeAppClose                EventName `json:"beforeAppClose"`
 	WindowSizeChange              EventName `json:"windowSizeChange"`
 	HasNewFofaDownloadItem        EventName `json:"hasNewFofaDownloadItem"`
 	HasNewDownloadItem            EventName `json:"hasNewDownloadItem"`
@@ -62,6 +63,7 @@ func GetSingleton() *Event {
 				DecompileWxMiniProgramDone:    EventName(idgen.NextId()),
 				Domain2IPOutput:               EventName(idgen.NextId()),
 				Domain2IPDown:                 EventName(idgen.NextId()),
+				BeforeAppClose:                EventName(idgen.NextId()),
 			},
 		}
 	})

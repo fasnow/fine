@@ -113,6 +113,6 @@ typings/
 **/*.yaml
 !.github/workflows/*.yaml
 **/.idea
-**/decompile*
+backend/service/service/wechat/decompile
 **/log
 **/*.ini

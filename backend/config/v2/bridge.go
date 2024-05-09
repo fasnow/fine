@@ -23,7 +23,7 @@ func (r *Config) GetFofa() Fofa {
 }
 
 func (r *Config) GetConfigBaseDir() string {
-	return r.dbFilePath
+	return r.baseDir
 }
 
 func (r *Config) GetDataDir() string {

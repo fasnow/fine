@@ -737,7 +737,7 @@ const SiteTabContent = forwardRef((props, ref) => {
             onItemClick={(key) => {
                 handleMenuItemClick(key as MenuItemsKey)
             }}
-        // toInvisible={() => { setOpenMenu(false) }}
+            hidden={pageData.length === 0}
         >
             <Table
                 // locale={{ emptyText: "暂无数据" }}

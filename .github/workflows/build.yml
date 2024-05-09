@@ -143,5 +143,5 @@ jobs:
             4. 适配低分辨率;
 
         env:
-          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
-#         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

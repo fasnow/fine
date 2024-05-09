@@ -84,6 +84,7 @@ function mkdirs(dir, cb) {
 
 function save(name, content) {
     ioEvent.encount();
+    name = name.replace(/plugin-private:/g,"plugin-private") //fix private: error
     mkdirs(path.dirname(name), () => ioLimit.runWithCb(fs.writeFile.bind(fs), name, content, err => {
         if (err) {
             if (platform.indexOf('win') != -1) {

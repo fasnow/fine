@@ -97,7 +97,7 @@ function save(name, content) {
     }));
 }
 
-function get(name, cb, opt = { encoding: 'utf8' }) {
+function get(name, cb, opt = {encoding: 'utf8'}) {
     ioEvent.encount();
     ioLimit.runWithCb(fs.readFile.bind(fs), name, opt, (err, data) => {
         if (err) throw Error("Read file error: " + err);

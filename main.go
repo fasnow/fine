@@ -39,14 +39,25 @@ func main() {
 		Width:  defaultWidth,
 		Height: defaultHeight,
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {
-			close, _ := wailsRuntime.MessageDialog(ctx, wailsRuntime.MessageDialogOptions{
+			if runtime2.GOOS == "windows" {
+				r, _ := wailsRuntime.MessageDialog(ctx, wailsRuntime.MessageDialogOptions{
+					Type:          wailsRuntime.QuestionDialog,
+					Title:         "退出",
+					Message:       "确认退出吗？",
+					Buttons:       []string{"确认", "取消"},
+					DefaultButton: "确认",
+					CancelButton:  "取消",
+				})
+				return r != "Yes"
+			}
+			r, _ := wailsRuntime.MessageDialog(ctx, wailsRuntime.MessageDialogOptions{
 				Type:          wailsRuntime.WarningDialog,
 				Title:         "确定退出吗？",
 				Buttons:       []string{"确认", "取消"},
 				DefaultButton: "确认",
 				CancelButton:  "取消",
 			})
-			return close == "取消"
+			return r == "取消"
 		},
 		Frameless: runtime2.GOOS != "darwin",
 		AssetServer: &assetserver.Options{

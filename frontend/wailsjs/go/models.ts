@@ -124,7 +124,6 @@ export namespace config {
 export namespace event {
 	
 	export class Event {
-	    beforeAppClose: number;
 	    windowSizeChange: number;
 	    hasNewFofaDownloadItem: number;
 	    hasNewDownloadItem: number;
@@ -149,7 +148,6 @@ export namespace event {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.beforeAppClose = source["beforeAppClose"];
 	        this.windowSizeChange = source["windowSizeChange"];
 	        this.hasNewFofaDownloadItem = source["hasNewFofaDownloadItem"];
 	        this.hasNewDownloadItem = source["hasNewDownloadItem"];

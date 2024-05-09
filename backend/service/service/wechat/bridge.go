@@ -219,7 +219,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram) error {
 					}
 					targetFiles = append(targetFiles, targetFile)
 				}
-				cmd := exec.Command(exePath, filepath.Join(outputDir, "__APP__.wxapkg"))
+				cmd := exec.Command(exePath, filepath.Join(outputDir, "__APP__.wxapkg"), "-d")
 				runtime.HideCmdWindow(cmd)
 
 				//反编译程序内部出错但是此时可能已经成功反编译,所以只能其他错误再返回

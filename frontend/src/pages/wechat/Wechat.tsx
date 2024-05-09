@@ -1,20 +1,19 @@
 
 import React, {useEffect, useRef, useState} from 'react';
-import {Button, Input, MenuProps, message, Popconfirm, Space, Spin, Tooltip, Tree} from 'antd';
+import {Button, Input, Popconfirm, Space, Spin, Tooltip, Tree} from 'antd';
 import type { GetProps, TreeDataNode } from 'antd';
 import {FolderOpenOutlined,FileZipFilled} from "@ant-design/icons";
-import {GetAbsSubDirByDir, Join, RemoveAll} from "../../../wailsjs/go/runtime/Path";
+import {Join} from "../../../wailsjs/go/runtime/Path";
 import {Allotment} from "allotment";
 import TextArea from "antd/es/input/TextArea";
 import {FitAddon} from "xterm-addon-fit";
-
+import "@/pages/wechat/Wechat.css"
 import {EventsOn} from "../../../wailsjs/runtime";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 import {GetPlatform, OpenDirectoryDialog, OpenFolder} from "../../../wailsjs/go/runtime/Runtime";
 import {GetWechat, GetWechatDataPath, SaveWechat} from "../../../wailsjs/go/config/Config";
 import {wechat} from "../../../wailsjs/go/models";
 import {errorNotification} from "@/component/Notification";
-import Icon from "antd/es/icon";
 import {
     ClearApplet,
     ClearDecompiled,
@@ -232,15 +231,15 @@ export const MiniProgram: React.FC = () => {
                     <Button size={"small"} onClick={configAppletPath}>选择</Button>
                     {
                         auto?
-                        < Button size={"small"} onClick={()=> {
-                            setAuto(false)
-                            autoRef.current=false
-                        }} style={{backgroundColor:"red",color:"white"}}>停用自动反编译</Button>
-                        :
-                        < Button size={"small"} onClick={()=> {
-                            setAuto(true)
-                            autoRef.current=true
-                        }} style={{backgroundColor:"green",color:"white"}}>启用自动反编译</Button>
+                            < Button size={"small"} onClick={()=> {
+                                setAuto(false)
+                                autoRef.current=false
+                            }} style={{backgroundColor:"red",color:"white"}}>停用自动反编译</Button>
+                            :
+                            < Button size={"small"} onClick={()=> {
+                                setAuto(true)
+                                autoRef.current=true
+                            }} style={{backgroundColor:"green",color:"white"}}>启用自动反编译</Button>
                     }
                     <Popconfirm
                         placement="bottom"
@@ -283,7 +282,7 @@ export const MiniProgram: React.FC = () => {
                 <Button size={"small"} type={"text"}>建议先执行清空Applet目录以避免无法回溯是哪个小程序</Button>
                 <div style={{height:"100%"}}>
                     <Allotment onChange={()=>fitAddon.current.fit()} >
-                        <Allotment.Pane preferredSize={"350"}  className={"httpx-left"} >
+                        <Allotment.Pane preferredSize={"350"}  className={"wechat-left"} >
                             <div >
                                 <Spin spinning={isClearing}>
                                     <Tree
@@ -297,31 +296,7 @@ export const MiniProgram: React.FC = () => {
                                 </Spin>
                             </div>
                         </Allotment.Pane>
-                        <Allotment.Pane  className={"httpx-right"}>
-                            <div style={{
-                                position:"static",
-                                margin:"10px",
-                                display:"flex",
-                                // justifyContent:"center",
-                                flexDirection:"column",
-                                // alignItems:"center",
-                                gap:10,
-                                gridAutoFlow:'column',
-                                height:"calc(100%)"
-                            }}>
-                                <Button size={"small"} onClick={
-                                    async () => {
-                                        OpenFolder(await Join([dataCachePath.current, wxId, version]))
-                                    }
-                                }>打开反编译后的文件夹</Button>
-                                <TextArea
-                                    value={decompileResult}
-                                    onChange={(e)=>setDecompileResult(e.target.value)}
-                                    style={{maxHeight:"calc(100% - 80px)",flex: 1}}
-                                />
-                            </div>
-                        </Allotment.Pane>
-                        <Allotment.Pane  className={"httpx-right"}>
+                        <Allotment.Pane  className={"wechat-right"}>
                             <div style={{
                                 position:"static",
                                 margin:"10px",

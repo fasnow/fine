@@ -10,7 +10,7 @@ require (
 	github.com/miekg/dns v1.1.59
 	github.com/pkg/errors v0.9.1
 	github.com/tidwall/gjson v1.9.3
-	github.com/wailsapp/wails/v2 v2.8.0
+	github.com/wailsapp/wails/v2 v2.8.1
 	github.com/xuri/excelize/v2 v2.8.0
 	github.com/yitter/idgenerator-go v1.3.3
 	golang.org/x/crypto v0.21.0

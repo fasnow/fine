@@ -84,10 +84,10 @@ func main() {
 				if screen.IsCurrent {
 					width := screen.Size.Width
 					height := screen.Size.Height
-					if width > defaultWidth {
+					if width < defaultWidth {
 						width = width * 4 / 5
 					}
-					if height > defaultHeight {
+					if height < defaultHeight {
 						height = height * 4 / 5
 					}
 					wailsRuntime.WindowSetSize(ctx, width, defaultHeight)

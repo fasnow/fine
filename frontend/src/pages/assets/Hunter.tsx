@@ -792,7 +792,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 onItemClick={(key: string) => {
                     handleMenuItemClick(key as MenuItemsKey)
                 }}
-                // toInvisible={() => { this.setState({ open: false }) }}
+                hidden={pageData.length === 0}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <Table

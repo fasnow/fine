@@ -14,13 +14,12 @@ import Icp from "@/pages/domain/Icp";
 import Hunter from "@/pages/assets/Hunter";
 import Quake from "@/pages/assets/Quake";
 import {useDispatch} from "react-redux";
-import {setFofaAuth, setProxy} from "@/store/store";
+import {setProxy} from "@/store/store";
 import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
 import {MiniProgram} from "@/pages/wechat/Wechat";
 import Domain2IP from "@/pages/Domain2IP";
-// import {doFile} from "./pages/wxMiniProgram/wuWxapkg"
 
 const { Header } = Lay;
 const headerStyle: React.CSSProperties = {
@@ -203,10 +202,10 @@ const items: TabsProps['items'] = [
         label: '小程序反编译',
         children: <div ><MiniProgram/></div>,
     },
-    {
-        key: '7',
-        label: 'Domain2IP',
-        children: <div ><Domain2IP/></div>,
-    },
+    // {
+    //     key: '7',
+    //     label: 'Domain2IP',
+    //     children: <div ><Domain2IP/></div>,
+    // },
 ];
 

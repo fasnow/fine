@@ -49,6 +49,7 @@ const initialFofaUserState: fofa.User = {
 const initialHunterUserState: HunterUserType = {
     restToken: 0
 }
+
 const initialQuakeUserState: QuakeUserType = {
     id: "",
     user: {
@@ -99,6 +100,12 @@ const initialQuakeUserState: QuakeUserType = {
     role: []
 }
 
+const initialDownloadLogState: DownloadLogItem[] = []
+
+const initialHttpxState: config.Httpx = {
+    path:"",
+    flags:""
+}
 
 const configSlice = createSlice({
     //切片名称
@@ -106,7 +113,8 @@ const configSlice = createSlice({
     //初始值
     initialState: {
         auth: initialAuthState,
-        proxy: initialProxyState
+        proxy: initialProxyState,
+        httpx: initialHttpxState,
     } ,
     //方法
     reducers: {
@@ -138,6 +146,9 @@ const configSlice = createSlice({
         },
         setProxy: (state, action: { payload: config.Proxy, type: string }) => {
             state.proxy = action.payload
+        },
+        setHttpx: (state, action: { payload: config.Httpx, type: string }) => {
+            state.httpx = action.payload
         },
     }
 })
@@ -173,8 +184,6 @@ const userSlice = createSlice({
         },
     }
 })
-
-const initialDownloadLogState: DownloadLogItem[] = []
 
 const downloadLogSlice = createSlice({
     //切片名称
@@ -213,12 +222,16 @@ const serverStatusSlice = createSlice({
     }
 })
 
-export const { setAuth, setFofaAuth, setHunterAuth, setZoneAuth, setQuakeAuth, setProxy } = configSlice.actions
+export const { setAuth, setFofaAuth, setHunterAuth, setZoneAuth, setQuakeAuth, setProxy,setHttpx } = configSlice.actions
+
 export const { setDownloadLog, addDownloadLog,setHasNewLogItem } = downloadLogSlice.actions
+
 export const { setFofaUser,setHunterUser,
     setQuakeUser
 } = userSlice.actions
+
 export const { setServerStarted } = serverStatusSlice.actions
+
 const store = configureStore({
     reducer: {
         config: configSlice.reducer,

@@ -32,7 +32,7 @@ var assets embed.FS
 
 func main() {
 	defaultWidth := 1200
-	defaultHeight := 768
+	defaultHeight := 800
 	mainApp := app.NewApp()
 	opts := &options.App{
 		Title:  "Fine",
@@ -82,15 +82,15 @@ func main() {
 			screens, _ := wailsRuntime.ScreenGetAll(ctx)
 			for _, screen := range screens {
 				if screen.IsCurrent {
-					width := screen.Size.Width
-					height := screen.Size.Height
-					if width < defaultWidth {
-						width = width * 4 / 5
+					width := defaultWidth
+					height := defaultHeight
+					if width >= screen.Size.Width {
+						width = screen.Size.Width * 4 / 5
 					}
-					if height < defaultHeight {
-						height = height * 4 / 5
+					if height >= screen.Size.Height {
+						height = screen.Size.Height * 4 / 5
 					}
-					wailsRuntime.WindowSetSize(ctx, width, defaultHeight)
+					wailsRuntime.WindowSetSize(ctx, width, height)
 				}
 			}
 		},

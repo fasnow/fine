@@ -7,6 +7,7 @@ import (
 	"embed"
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/db/model"
 	"fine/backend/db/service"
 	"fine/backend/event"
 	"fine/backend/logger"
@@ -18,13 +19,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	runtime2 "runtime"
 	"sort"
 	"sync"
 	"time"
 )
 
-func GetDecompileExe() (string, error) {
+func generateDecompileExe() (string, error) {
 	filename := filepath.Join(config.GetBaseDir(), "bin", "decompile.exe")
 	if runtime2.GOOS != "windows" {
 		filename = filepath.Join(config.GetBaseDir(), "bin", "decompile")
@@ -34,12 +36,10 @@ func GetDecompileExe() (string, error) {
 	}
 	data, err := decompile.ReadFile("decompile")
 	if err != nil {
-		logger.Info(err.Error())
 		return "", err
 	}
 	err = utils.WriteFile(filename, data, 0755)
 	if err != nil {
-		logger.Info(err.Error())
 		return "", err
 	}
 	return filename, nil
@@ -154,7 +154,7 @@ var wg sync.WaitGroup
 var semaphore = make(chan struct{}, 3) // 限制并发的通道
 
 func (r *Bridge) Decompile(items []wechat.MiniProgram) error {
-	exePath, err := GetDecompileExe()
+	exePath, err := generateDecompileExe()
 	if err != nil {
 		logger.Info(err.Error())
 		return err
@@ -207,7 +207,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram) error {
 						event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 读取wxapkg文件时出错：%s\n", appid, version, err.Error()))
 						return
 					}
-					t, err := Decrypt(bytes, appid, "saltiest", "the iv: 16 bytes")
+					t, err := decrypt(bytes, appid, "saltiest", "the iv: 16 bytes")
 					if err != nil {
 						event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 解密wxapkg文件时出错：%s\n", appid, version, err.Error()))
 						return
@@ -261,7 +261,7 @@ func (r *Bridge) ClearDecompiled() error {
 	return r.dbService.DeleteAll()
 }
 
-func Decrypt(dataByte []byte, wxid, salt, iv string) ([]byte, error) {
+func decrypt(dataByte []byte, wxid, salt, iv string) ([]byte, error) {
 	dk := pbkdf2.Key([]byte(wxid), []byte(salt), 1000, 32, sha1.New)
 	block, _ := aes.NewCipher(dk)
 	blockMode := cipher.NewCBCDecrypter(block, []byte(iv))
@@ -310,6 +310,64 @@ func (f FileInfoSlice) Swap(i, j int) {
 	f[i], f[j] = f[j], f[i]
 }
 
-func (r *Bridge) extract() {
+var cache2 = utils.NewCache() //存储正在反编译的文件任务
+var wg2 sync.WaitGroup
+var semaphore2 = make(chan struct{}, 3) // 限制并发的通道
 
+func (r *Bridge) extract(appid string, versionID int64) {
+	fmt.Println(appid, versionID)
+	//version := strconv.Itoa(int(versionID))
+	//targetDir := filepath.Join(config.GlobalConfig.WechatDataPath, appid, version)
+	targetDir := "C:\\Users\\fasnow\\Desktop\\Fine-amd64\\data\\wechatMiniProgram\\wx25f982a55e60a540\\365"
+	semaphore2 <- struct{}{} // 往通道中放入信号量
+	wg.Add(1)
+
+	regexPattern := "https"
+	regex, err := regexp.Compile(regexPattern)
+	if err != nil {
+		logger.Info(err)
+		return
+	}
+
+	go func(dir string) {
+		defer wg2.Done()
+		defer func() { <-semaphore2 }() // 任务完成后释放通道中的信号量
+		item := model.MatchedString{
+			WxID:    appid,
+			Version: versionID,
+		}
+		id, err := r.dbService.InsertMatchStringTask(item)
+		if err != nil {
+			logger.Info(err)
+			return
+		}
+		item.ID = id
+		var matched []string
+		err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				logger.Info(err)
+				return nil
+			}
+			if !info.IsDir() {
+				// 读取文件内容
+				content, err := os.ReadFile(path)
+				if err != nil {
+					logger.Info(err)
+					return nil
+				}
+				matches := regex.FindAllStringSubmatch(string(content), -1)
+				for _, match := range matches {
+					matched = append(matched, match[0])
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			logger.Info(err)
+		}
+		fmt.Println(matched)
+	}(targetDir)
+	go func() {
+		wg2.Wait()
+	}()
 }

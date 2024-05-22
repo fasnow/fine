@@ -67,7 +67,7 @@ type Config struct {
 	dataDir        string `ini:"-"`
 	filePath       string `ini:"-"`
 	dbFilePath     string `ini:"-"`
-	wechatDataPath string `ini:"-"`
+	WechatDataPath string `ini:"-"`
 }
 
 var (
@@ -116,16 +116,18 @@ func init() {
 	defaultConfig.filePath = filepath.Join(defaultConfig.baseDir, "config.ini")
 	defaultConfig.dataDir = filepath.Join(baseDir, "data")
 	defaultConfig.dbFilePath = filepath.Join(defaultConfig.dataDir, "data.db")
-	defaultConfig.wechatDataPath = filepath.Join(defaultConfig.dataDir, "wechatMiniProgram")
+	defaultConfig.WechatDataPath = filepath.Join(defaultConfig.dataDir, "wechatMiniProgram")
 
 	logger.DataDir = filepath.Join(baseDir, "log")
 
 	if err := os.MkdirAll(filepath.Join(baseDir, "bin"), 0750); err != nil {
+		logger.Info(err)
 		return
 	}
 
 	//创建最长路径即可
-	if err := os.MkdirAll(defaultConfig.wechatDataPath, 0750); err != nil {
+	if err := os.MkdirAll(defaultConfig.WechatDataPath, 0750); err != nil {
+		logger.Info(err)
 		return
 	}
 
@@ -296,11 +298,11 @@ func GetBaseDir() string {
 }
 
 func SaveWechatDataPath(path string) {
-	GlobalConfig.wechatDataPath = path
+	GlobalConfig.WechatDataPath = path
 }
 
 func GetWechatDataPath() string {
-	return GlobalConfig.wechatDataPath
+	return GlobalConfig.WechatDataPath
 }
 
 func GetDataDir() string {

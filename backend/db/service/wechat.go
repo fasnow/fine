@@ -6,6 +6,7 @@ import (
 	"fine/backend/service/model/wechat"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"strings"
 )
 
 type WechatDBService struct {
@@ -56,4 +57,29 @@ func (r *WechatDBService) UpdateUnpackedStatus(appid, version string, unpacked b
 
 func (r *WechatDBService) DeleteAll() error {
 	return r.dbConn.Select(clause.Associations).Where("1 = 1").Delete(&model.MiniProgram{}).Error
+}
+
+func (r *WechatDBService) InsertMatchStringTask(item model.MatchedString) (uint, error) {
+	result := r.dbConn.Create(&item)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return item.ID, nil
+}
+
+func (r *WechatDBService) FindMatchedString(appid string, version int64) model.MatchedString {
+	result := model.MatchedString{}
+	//没处理错误
+	r.dbConn.Model(&model.MatchedString{}).Where("app_id = ? AND version = ?", appid, version).First(&result)
+	return result
+}
+
+func (r *WechatDBService) UpdateMatchStringTask(id int64, taskDown bool, matched []string) error {
+	result := model.MatchedString{}
+	if err := r.dbConn.Model(&model.MiniProgram{}).Where("id = ?", id).First(&result).Error; err != nil {
+		return err
+	}
+	result.TaskDown = taskDown
+	result.Matched = strings.Join(matched, "")
+	return r.dbConn.Model(&result).Updates(&result).Error
 }

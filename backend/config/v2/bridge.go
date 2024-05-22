@@ -3,7 +3,7 @@ package config
 //wails调用
 
 func (r *Config) GetWechatDataPath() string {
-	return r.wechatDataPath
+	return r.WechatDataPath
 }
 
 func (r *Config) SaveWechatDataPath(path string) {

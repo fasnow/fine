@@ -136,10 +136,12 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 微信小程序反编译自动查询小程序信息;
-            2. 微信小程序反编译自动提取敏感信息;
-            3. 修复当Hunter返回数据为空时程序出错的BUG。
+            1. 修复当Hunter返回数据为空时程序出错的BUG。
+            2. 微信小程序反编译自动查询小程序信息;
+            3. 微信小程序反编译自动提取敏感信息;
+            4. 微信小程序反编译支持darwin;
+            
 
         env:
-          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
-#         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

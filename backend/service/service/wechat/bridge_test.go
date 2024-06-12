@@ -22,7 +22,7 @@ func TestDecrypt(t *testing.T) {
 	if err != nil {
 		return
 	}
-	if err := utils.WriteFile("1.wxapkg", decrypt, 0666); err != nil {
+	if err := utils.WriteFile("1.wxapkg", decrypt, 0766); err != nil {
 		t.Error(err)
 		return
 	}

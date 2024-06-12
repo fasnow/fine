@@ -5,14 +5,19 @@ import (
 )
 
 type MiniProgram struct {
-	*BaseModel
+	BaseModel
 	wechat.MiniProgram
 }
 
 type MatchedString struct {
-	*BaseModel
-	WxID     string
-	Version  int64
-	TaskDown bool
-	Matched  string
+	BaseModel
+	AppID    string `json:"appid"`
+	Version  string `json:"version"`
+	TaskDown bool   `json:"taskDown"`
+	Matched  string `json:"matched"`
+}
+
+type Info struct {
+	BaseModel
+	wechat.Info
 }

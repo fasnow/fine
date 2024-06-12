@@ -94,6 +94,7 @@ export namespace config {
 	}
 	export class Wechat {
 	    applet: string;
+	    rules: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Wechat(source);
@@ -102,6 +103,7 @@ export namespace config {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.applet = source["applet"];
+	        this.rules = source["rules"];
 	    }
 	}
 	export class Zone {
@@ -139,6 +141,8 @@ export namespace event {
 	    httpxOutputDone: number;
 	    decompileWxMiniProgram: number;
 	    decompileWxMiniProgramDone: number;
+	    extractWxMiniProgramInfoOutput: number;
+	    extractWxMiniProgramInfoDone: number;
 	    domain2IPOutput: number;
 	    domain2IPDown: number;
 	
@@ -163,6 +167,8 @@ export namespace event {
 	        this.httpxOutputDone = source["httpxOutputDone"];
 	        this.decompileWxMiniProgram = source["decompileWxMiniProgram"];
 	        this.decompileWxMiniProgramDone = source["decompileWxMiniProgramDone"];
+	        this.extractWxMiniProgramInfoOutput = source["extractWxMiniProgramInfoOutput"];
+	        this.extractWxMiniProgramInfoDone = source["extractWxMiniProgramInfoDone"];
 	        this.domain2IPOutput = source["domain2IPOutput"];
 	        this.domain2IPDown = source["domain2IPDown"];
 	    }
@@ -763,6 +769,50 @@ export namespace model {
 		    return a;
 		}
 	}
+	export class MatchedString {
+	    id: number;
+	    // Go type: time
+	    createdAt: any;
+	    // Go type: gorm
+	    deletedAt: any;
+	    appid: string;
+	    version: string;
+	    taskDown: boolean;
+	    matched: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new MatchedString(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.createdAt = this.convertValues(source["createdAt"], null);
+	        this.deletedAt = this.convertValues(source["deletedAt"], null);
+	        this.appid = source["appid"];
+	        this.version = source["version"];
+	        this.taskDown = source["taskDown"];
+	        this.matched = source["matched"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 
@@ -1157,6 +1207,30 @@ export namespace quake {
 
 export namespace wechat {
 	
+	export class Info {
+	    nickname: string;
+	    username: string;
+	    description: string;
+	    avatar: string;
+	    uses_count: string;
+	    principal_name: string;
+	    appid: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Info(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.nickname = source["nickname"];
+	        this.username = source["username"];
+	        this.description = source["description"];
+	        this.avatar = source["avatar"];
+	        this.uses_count = source["uses_count"];
+	        this.principal_name = source["principal_name"];
+	        this.appid = source["appid"];
+	    }
+	}
 	export class Version {
 	    number: string;
 	    unpacked: boolean;
@@ -1173,8 +1247,54 @@ export namespace wechat {
 	        this.update_date = source["update_date"];
 	    }
 	}
+	export class InfoToFront {
+	    appid: string;
+	    update_date: string;
+	    versions: Version[];
+	    nickname: string;
+	    username: string;
+	    description: string;
+	    avatar: string;
+	    uses_count: string;
+	    principal_name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new InfoToFront(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.appid = source["appid"];
+	        this.update_date = source["update_date"];
+	        this.versions = this.convertValues(source["versions"], Version);
+	        this.nickname = source["nickname"];
+	        this.username = source["username"];
+	        this.description = source["description"];
+	        this.avatar = source["avatar"];
+	        this.uses_count = source["uses_count"];
+	        this.principal_name = source["principal_name"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class MiniProgram {
-	    app_id: string;
+	    appid: string;
 	    update_date: string;
 	    versions: Version[];
 	
@@ -1184,7 +1304,7 @@ export namespace wechat {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.app_id = source["app_id"];
+	        this.appid = source["appid"];
 	        this.update_date = source["update_date"];
 	        this.versions = this.convertValues(source["versions"], Version);
 	    }

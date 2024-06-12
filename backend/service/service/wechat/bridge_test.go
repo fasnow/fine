@@ -1,6 +1,8 @@
 package wechat
 
 import (
+	"fine/backend/app"
+	"fine/backend/db"
 	"fine/backend/logger"
 	"fine/backend/utils"
 	"fmt"
@@ -62,4 +64,15 @@ func TestBridge_extract(t *testing.T) {
 		logger.Info(err)
 	}
 	fmt.Println(matched)
+}
+
+func TestBridge_QueryAppID(t *testing.T) {
+	db.SetDBAbsFilepath("data.db")
+	b := NewWechatBridge(app.NewApp())
+	err, info := b.QueryAppID("wxa8da525af05281f3")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(info)
 }

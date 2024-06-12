@@ -28,7 +28,7 @@ func (d *DownloadLogService) Insert(item model.DownloadLog, fileID int64) error 
 
 func (d *DownloadLogService) MarkAsDeleted(fileId int64) {
 	var logItem = &model.DownloadLog{}
-	if err := d.dbConn.Where("file_id = ?", fileId).First(logItem).Error; err != nil {
+	if err := d.dbConn.Where("file_id = ?", fileId).Limit(1).Find(logItem).Error; err != nil {
 		logger.Info(err.Error())
 		return
 	}

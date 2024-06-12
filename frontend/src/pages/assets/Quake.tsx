@@ -4,8 +4,7 @@ import { SearchOutlined, QuestionOutlined, UserOutlined, CloudDownloadOutlined, 
 import { errorNotification } from '@/component/Notification';
 import { QUERY_FIRST, MenuItemsKey, RangePresets, copy } from '@/type';
 import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
-import ColumnsFilter, { DataSourceItemType } from '../../component/ColumnFilter';
-import { CheckboxValueType } from 'antd/es/checkbox/Group';
+import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../../component/ColumnFilter';
 import ContextMenu from '../../component/ContextMenu';
 import {RootState, setQuakeAuth, setQuakeUser} from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,10 +27,10 @@ import {
   SetAuth
 } from "../../../wailsjs/go/quake/Bridge";
 import {quake} from "../../../wailsjs/go/models";
-import {ItemType} from "antd/es/menu/hooks/useItems";
 import {GetQuake} from "../../../wailsjs/go/config/Config";
 import {GetRestToken} from "../../../wailsjs/go/hunter/Bridge";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
+import {ItemType} from "antd/es/menu/interface";
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;

@@ -28,6 +28,8 @@ export function GetWechat():Promise<config.Wechat>;
 
 export function GetWechatDataPath():Promise<string>;
 
+export function GetWechatMatchRules():Promise<Array<string>>;
+
 export function Save0zone(arg1:config.Zone):Promise<void>;
 
 export function SaveDNS(arg1:config.DNS):Promise<void>;
@@ -45,3 +47,5 @@ export function SaveQuake(arg1:config.Quake):Promise<void>;
 export function SaveWechat(arg1:config.Wechat):Promise<void>;
 
 export function SaveWechatDataPath(arg1:string):Promise<void>;
+
+export function SaveWechatMatchRules(arg1:Array<string>):Promise<void>;

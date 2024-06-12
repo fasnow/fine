@@ -4,8 +4,7 @@ import { SearchOutlined, QuestionOutlined, UserOutlined, SyncOutlined, CloudDown
 import { errorNotification } from '@/component/Notification';
 import { QUERY_FIRST, MenuItemsKey, copy } from '@/type';
 import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
-import ColumnsFilter, { DataSourceItemType } from '@/component/ColumnFilter';
-import { CheckboxValueType } from 'antd/es/checkbox/Group';
+import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '@/component/ColumnFilter';
 import ContextMenu from '@/component/ContextMenu';
 import { RootState, setFofaAuth, setFofaUser } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,10 +18,10 @@ import { buttonProps, authFormProps } from '../setting/Setting';
 import {fofa} from "../../../wailsjs/go/models";
 import {Export, GetUserInfo, Query, SetAuth} from "../../../wailsjs/go/fofa/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
-import {ItemType} from "antd/es/menu/hooks/useItems";
 
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
 import {GetFofa} from "../../../wailsjs/go/config/Config";
+import {ItemType} from "antd/es/menu/interface";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 

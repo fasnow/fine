@@ -12,23 +12,25 @@ import (
 type EventName int
 
 type Value struct {
-	WindowSizeChange              EventName `json:"windowSizeChange"`
-	HasNewFofaDownloadItem        EventName `json:"hasNewFofaDownloadItem"`
-	HasNewDownloadItem            EventName `json:"hasNewDownloadItem"`
-	HasNewHunterDownloadItem      EventName `json:"hasNewHunterDownloadItem"`
-	HunterQueryFinished           EventName `json:"hunterQueryFinished"`
-	HasNewIcpDownloadItem         EventName `json:"hasNewIcpDownloadItem"`
-	HasNewQuakeDownloadItem       EventName `json:"hasNewQuakeDownloadItem"`
-	HasNew0zoneSiteDownloadItem   EventName `json:"hasNew0ZoneSiteDownloadItem"`
-	HasNew0zoneMemberDownloadItem EventName `json:"hasNew0ZoneMemberDownloadItem"`
-	HasNew0zoneEmailDownloadItem  EventName `json:"hasNew0ZoneEmailDownloadItem"`
-	HasNew0zoneDomainDownloadItem EventName `json:"hasNew0ZoneDomainDownloadItem"`
-	HttpxOutput                   EventName `json:"httpxOutput"`
-	HttpxOutputDone               EventName `json:"httpxOutputDone"`
-	DecompileWxMiniProgramOutput  EventName `json:"decompileWxMiniProgram"`
-	DecompileWxMiniProgramDone    EventName `json:"decompileWxMiniProgramDone"`
-	Domain2IPOutput               EventName `json:"domain2IPOutput"`
-	Domain2IPDown                 EventName `json:"domain2IPDown"`
+	WindowSizeChange               EventName `json:"windowSizeChange"`
+	HasNewFofaDownloadItem         EventName `json:"hasNewFofaDownloadItem"`
+	HasNewDownloadItem             EventName `json:"hasNewDownloadItem"`
+	HasNewHunterDownloadItem       EventName `json:"hasNewHunterDownloadItem"`
+	HunterQueryFinished            EventName `json:"hunterQueryFinished"`
+	HasNewIcpDownloadItem          EventName `json:"hasNewIcpDownloadItem"`
+	HasNewQuakeDownloadItem        EventName `json:"hasNewQuakeDownloadItem"`
+	HasNew0zoneSiteDownloadItem    EventName `json:"hasNew0ZoneSiteDownloadItem"`
+	HasNew0zoneMemberDownloadItem  EventName `json:"hasNew0ZoneMemberDownloadItem"`
+	HasNew0zoneEmailDownloadItem   EventName `json:"hasNew0ZoneEmailDownloadItem"`
+	HasNew0zoneDomainDownloadItem  EventName `json:"hasNew0ZoneDomainDownloadItem"`
+	HttpxOutput                    EventName `json:"httpxOutput"`
+	HttpxOutputDone                EventName `json:"httpxOutputDone"`
+	DecompileWxMiniProgramOutput   EventName `json:"decompileWxMiniProgram"`
+	DecompileWxMiniProgramDone     EventName `json:"decompileWxMiniProgramDone"`
+	ExtractWxMiniProgramInfoOutput EventName `json:"extractWxMiniProgramInfoOutput"`
+	ExtractWxMiniProgramInfoDone   EventName `json:"extractWxMiniProgramInfoDone"`
+	Domain2IPOutput                EventName `json:"domain2IPOutput"`
+	Domain2IPDown                  EventName `json:"domain2IPDown"`
 }
 
 type Event struct {
@@ -46,22 +48,24 @@ func GetSingleton() *Event {
 	once.Do(func() {
 		event = &Event{
 			Value{
-				WindowSizeChange:              EventName(idgen.NextId()),
-				HasNewFofaDownloadItem:        EventName(idgen.NextId()),
-				HasNewDownloadItem:            EventName(idgen.NextId()),
-				HasNewHunterDownloadItem:      EventName(idgen.NextId()),
-				HunterQueryFinished:           EventName(idgen.NextId()),
-				HasNewIcpDownloadItem:         EventName(idgen.NextId()),
-				HasNewQuakeDownloadItem:       EventName(idgen.NextId()),
-				HasNew0zoneSiteDownloadItem:   EventName(idgen.NextId()),
-				HasNew0zoneMemberDownloadItem: EventName(idgen.NextId()),
-				HasNew0zoneEmailDownloadItem:  EventName(idgen.NextId()),
-				HttpxOutput:                   EventName(idgen.NextId()),
-				HttpxOutputDone:               EventName(idgen.NextId()),
-				DecompileWxMiniProgramOutput:  EventName(idgen.NextId()),
-				DecompileWxMiniProgramDone:    EventName(idgen.NextId()),
-				Domain2IPOutput:               EventName(idgen.NextId()),
-				Domain2IPDown:                 EventName(idgen.NextId()),
+				WindowSizeChange:               EventName(idgen.NextId()),
+				HasNewFofaDownloadItem:         EventName(idgen.NextId()),
+				HasNewDownloadItem:             EventName(idgen.NextId()),
+				HasNewHunterDownloadItem:       EventName(idgen.NextId()),
+				HunterQueryFinished:            EventName(idgen.NextId()),
+				HasNewIcpDownloadItem:          EventName(idgen.NextId()),
+				HasNewQuakeDownloadItem:        EventName(idgen.NextId()),
+				HasNew0zoneSiteDownloadItem:    EventName(idgen.NextId()),
+				HasNew0zoneMemberDownloadItem:  EventName(idgen.NextId()),
+				HasNew0zoneEmailDownloadItem:   EventName(idgen.NextId()),
+				HttpxOutput:                    EventName(idgen.NextId()),
+				HttpxOutputDone:                EventName(idgen.NextId()),
+				DecompileWxMiniProgramOutput:   EventName(idgen.NextId()),
+				DecompileWxMiniProgramDone:     EventName(idgen.NextId()),
+				ExtractWxMiniProgramInfoOutput: EventName(idgen.NextId()),
+				ExtractWxMiniProgramInfoDone:   EventName(idgen.NextId()),
+				Domain2IPOutput:                EventName(idgen.NextId()),
+				Domain2IPDown:                  EventName(idgen.NextId()),
 			},
 		}
 	})

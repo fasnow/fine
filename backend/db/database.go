@@ -79,7 +79,12 @@ func GetDBConnect() *gorm.DB {
 			logger.Info(err.Error())
 			panic(err)
 		}
-		if err = dbConn.AutoMigrate(&model.MiniProgram{}, &wechat.Version{}); err != nil {
+		if err = dbConn.AutoMigrate(
+			&model.MiniProgram{},
+			&wechat.Version{},
+			&model.MatchedString{},
+			&model.Info{},
+		); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}

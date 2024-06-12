@@ -37,6 +37,9 @@ func (s *site) Get(req *GetDataReq) (*SiteResult, error) {
 			return nil, err
 		}
 	}
+	if siteDataItems == nil {
+		siteDataItems = make([]zone.SiteItem, 0)
+	}
 	result.Items = siteDataItems
 	for i := 0; i < len(result.Items); i++ {
 		item := &result.Items[i]
@@ -111,6 +114,9 @@ func (d *domain) Get(req *GetDataReq) (*DomainResult, error) {
 		logger.Info(err.Error())
 		return nil, err
 	}
+	if domainDataItems == nil {
+		domainDataItems = make([]zone.DomainItem, 0)
+	}
 	result.Items = domainDataItems
 	return &result, nil
 }
@@ -167,6 +173,9 @@ func (m *member) Get(req *GetDataReq) (*MemberResult, error) {
 		}
 		memberDataItems = append(memberDataItems, tmp)
 	}
+	if memberDataItems == nil {
+		memberDataItems = make([]zone.MemberItem, 0)
+	}
 	result.Items = memberDataItems
 	return &result, nil
 }
@@ -219,6 +228,9 @@ func (e *email) Get(req *GetDataReq) (*EmailResult, error) {
 	err = json.Unmarshal(marshal, &emailDataItems)
 	if err != nil {
 		return nil, err
+	}
+	if emailDataItems == nil {
+		emailDataItems = make([]zone.EmailItem, 0)
 	}
 	result.Items = emailDataItems
 	return &result, nil
@@ -321,6 +333,9 @@ func (a *apk) Get(req *GetDataReq) (*ApkResult, error) {
 		default:
 			//要是有其他类型呢？
 		}
+	}
+	if apkDataItems == nil {
+		apkDataItems = make([]zone.ApkItem, 0)
 	}
 	result.Items = apkDataItems
 	return &result, nil

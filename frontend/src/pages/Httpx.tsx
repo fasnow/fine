@@ -218,6 +218,7 @@ const TabContent=()=>{
                     <Allotment.Pane preferredSize={"350"}  className={"httpx-left"}>
                         <TextArea  value={targets} size={"small"} placeholder={"每行一个"} autoSize style={{maxHeight:"100%"}}
                                    onChange={e=>setTargets(e.target.value)}
+                                   allowClear
                         />
                     </Allotment.Pane>
                     <Allotment.Pane  className={"httpx-right"}>

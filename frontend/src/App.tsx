@@ -18,7 +18,7 @@ import {setProxy} from "@/store/store";
 import Zone from "@/pages/assets/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
-import {MiniProgram} from "@/pages/wechat/Wechat";
+import {MiniProgram} from "@/pages/Wechat";
 import Domain2IP from "@/pages/Domain2IP";
 
 const { Header } = Lay;
@@ -47,6 +47,14 @@ const contentStyle: React.CSSProperties = {
 const App: React.FC = () => {
     const dispatch = useDispatch()
     useEffect(() => {
+        window.onerror = function(message, source, lineno, colno, error) {
+            //   message：错误信息（字符串）。可用于HTML onerror=""处理程序中的event。
+            //   source：发生错误的脚本URL（字符串）
+            //   lineno：发生错误的行号（数字）
+            //   colno：发生错误的列号（数字）
+            //   error：Error对象
+            console.error(error)
+        }
         const currentDate = new Date();
         const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
         const bodyElement = document.body;

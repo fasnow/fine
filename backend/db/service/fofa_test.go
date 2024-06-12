@@ -27,11 +27,7 @@ func TestFofaDBService_BatchInsert(t *testing.T) {
 func TestFofaDBService_GetByTaskID(t *testing.T) {
 	db.SetDBAbsFilepath("data.db")
 	service := NewFofaDBService()
-	items, err := service.GetByTaskID(504280213479493)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	items := service.GetByTaskID(504280213479493)
 	for _, item := range items {
 		t.Log(item.Link)
 	}

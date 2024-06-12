@@ -4,8 +4,7 @@ import { SearchOutlined, QuestionOutlined, UserOutlined, CloudDownloadOutlined, 
 import { errorNotification } from '@/component/Notification';
 import { MenuItemsKey, HunterUserType, RangePresets, copy } from '@/type';
 import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
-import ColumnsFilter, { DataSourceItemType } from '../../component/ColumnFilter';
-import { CheckboxValueType } from 'antd/es/checkbox/Group';
+import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../../component/ColumnFilter';
 import ContextMenu from '../../component/ContextMenu';
 import { RootState, setHunterAuth, setHunterUser } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,10 +19,10 @@ import {hunter} from "../../../wailsjs/go/models";
 import {Export, GetRestToken, Query, SetAuth} from "../../../wailsjs/go/hunter/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import ResizableTitle from "@/component/ResizableTitle";
-import {ItemType} from "antd/es/menu/hooks/useItems";
 import type { Tab } from 'rc-tabs/lib/interface';
 import {GetHunter} from "../../../wailsjs/go/config/Config";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
+import {ItemType} from "antd/es/menu/interface";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const pageSizeOptions = [10, 20, 50, 100]
 const defaultCheckedColsValue: string[] = [
@@ -710,7 +709,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             }
         }
         const onFieldsChange = (fields: CheckboxValueType[]) => {
-            console.log(fields)
             const tmpCols = defaultColumns.filter(col => fields.includes((col as any)["dataIndex"]))
             const tmp = tmpCols.map(col => ({...col}));
             // if (tmp.length > 0) {
@@ -792,7 +790,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 onItemClick={(key: string) => {
                     handleMenuItemClick(key as MenuItemsKey)
                 }}
-                hidden={pageData.length === 0}
+                hidden={pageData?.length === 0}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <Table

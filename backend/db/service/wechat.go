@@ -37,8 +37,7 @@ func (r *WechatDBService) AppendVersionByAppID(appid string, version ...wechat.V
 
 func (r *WechatDBService) FindByAppId(appid string) model.MiniProgram {
 	result := model.MiniProgram{}
-	//没处理错误
-	r.dbConn.Model(&model.MiniProgram{}).Where("app_id = ?", appid).Preload("Versions").First(&result)
+	r.dbConn.Model(&model.MiniProgram{}).Where("app_id = ?", appid).Preload("Versions").Limit(1).Find(&result)
 	return result
 }
 
@@ -67,19 +66,38 @@ func (r *WechatDBService) InsertMatchStringTask(item model.MatchedString) (uint,
 	return item.ID, nil
 }
 
-func (r *WechatDBService) FindMatchedString(appid string, version int64) model.MatchedString {
+func (r *WechatDBService) FindMatchedString(appid, version string) model.MatchedString {
 	result := model.MatchedString{}
-	//没处理错误
-	r.dbConn.Model(&model.MatchedString{}).Where("app_id = ? AND version = ?", appid, version).First(&result)
+	r.dbConn.Model(&model.MatchedString{}).Where("app_id = ? AND version = ?", appid, version).Limit(1).Order("id desc").Find(&result)
 	return result
 }
 
-func (r *WechatDBService) UpdateMatchStringTask(id int64, taskDown bool, matched []string) error {
+func (r *WechatDBService) UpdateMatchStringTask(id uint, taskDown bool, matched []string) error {
 	result := model.MatchedString{}
-	if err := r.dbConn.Model(&model.MiniProgram{}).Where("id = ?", id).First(&result).Error; err != nil {
-		return err
-	}
 	result.TaskDown = taskDown
-	result.Matched = strings.Join(matched, "")
-	return r.dbConn.Model(&result).Updates(&result).Error
+	result.Matched = strings.Join(matched, "\n")
+	return r.dbConn.Model(&result).Where("id = ?", id).Updates(&result).Error
+}
+
+func (r *WechatDBService) InsertInfo(info model.Info) error {
+	result := &model.Info{}
+	r.dbConn.Model(&model.Info{}).Where("app_id = ?", info.AppID).Limit(1).Find(result)
+	if result.ID != 0 {
+		result.Info = info.Info
+		r.dbConn.Updates(result)
+		return nil
+	}
+	return r.dbConn.Create(&info).Error
+}
+
+func (r *WechatDBService) FindInfoByAppID(appid string) (model.Info, error) {
+	result := model.Info{}
+	if err := r.dbConn.Model(&model.Info{}).Where("app_id = ?", appid).Limit(1).Find(&result).Error; err != nil {
+		return result, err
+	}
+	return result, nil
+}
+
+func (r *WechatDBService) DeleteAllInfo() error {
+	return r.dbConn.Where("1 = 1").Delete(&model.Info{}).Error
 }

@@ -199,21 +199,21 @@ export const MiniProgram: React.FC = () => {
             position: "relative",
         }}>
             {
-                platform != "windows" && <div
-                    style={{
-                        position: "fixed",
-                        display:"flex",
-                        justifyContent:"center",
-                        alignItems:"center",
-                        margin:"0px",
-                        width: "100%",
-                        height: "100%",
-                        backgroundColor: "rgba(242, 242, 242, 0.5)", /* 半透明背景颜色 */
-                        zIndex: 999, /* 确保覆盖整个页面内容 */
-                        fontSize:"20px",
-                        color:"rgba(72, 72, 72,0.5)"
-                    }}
-                >暂只支持Windows平台</div>
+                // platform != "windows" && <div
+                //     style={{
+                //         position: "fixed",
+                //         display:"flex",
+                //         justifyContent:"center",
+                //         alignItems:"center",
+                //         margin:"0px",
+                //         width: "100%",
+                //         height: "100%",
+                //         backgroundColor: "rgba(242, 242, 242, 0.5)", /* 半透明背景颜色 */
+                //         zIndex: 999, /* 确保覆盖整个页面内容 */
+                //         fontSize:"20px",
+                //         color:"rgba(72, 72, 72,0.5)"
+                //     }}
+                // >暂只支持Windows平台</div>
             }
             <Flex vertical gap={10}
                 style={{

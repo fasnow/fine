@@ -108,7 +108,7 @@ var (
 		Wechat: Wechat{Rules: []string{
 			"baseUrl: \".*?\"",
 			"server: \".*?\"",
-			"http(s)://.*?[/,\"\\s\\n]",
+			"http(s)://.*?[/\\,\"\\s\\n]",
 			"post\\(\".*?\"\\)",
 			"get\\(\".*?\"\\)",
 			"url: \".*?\"",
@@ -209,7 +209,7 @@ func init() {
 					logger.Info(err)
 					os.Exit(1)
 				}
-				defaultConfig.Wechat.Applet = filepath.Join("/Users", homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
+				defaultConfig.Wechat.Applet = filepath.Join(homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
 			}
 			err := ini.ReflectFrom(cfg, defaultConfig)
 			if err != nil {
@@ -239,14 +239,6 @@ func init() {
 		if cfg.Section("Wechat").HasKey("rule") {
 			GlobalConfig.Wechat.Rules = nil
 		}
-		if runtime.GOOS != "windows" { // darwin下微信小程序固定目录
-			homeDir, err := os.UserHomeDir()
-			if err != nil {
-				logger.Info(err)
-				os.Exit(1)
-			}
-			GlobalConfig.Wechat.Applet = filepath.Join("/Users", homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
-		}
 		if cfg.Section("DNS").HasKey("rule") {
 			GlobalConfig.DNS.Value = nil
 		}
@@ -255,6 +247,14 @@ func init() {
 		if err != nil {
 			logger.Info("can't map to config file:" + err.Error())
 			os.Exit(0)
+		}
+		if runtime.GOOS != "windows" { // darwin下微信小程序固定目录
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				logger.Info(err)
+				os.Exit(1)
+			}
+			GlobalConfig.Wechat.Applet = filepath.Join(homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
 		}
 		save(*GlobalConfig)
 	}

@@ -44,7 +44,7 @@ func generateDecompileExe() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	err = utils.WriteFile(filename, data, 0755)
+	err = utils.WriteFile(filename, data, 0766)
 	if err != nil {
 		return "", err
 	}
@@ -297,7 +297,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 						}
 
 						var targetFile = filepath.Join(outputDir, sourceFileName)
-						if err := utils.WriteFile(targetFile, bytes, 0666); err != nil {
+						if err := utils.WriteFile(targetFile, bytes, 0766); err != nil {
 							event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 无法写入解密后的文件到指定位置：%s\n", appid, version, err.Error()))
 							continue
 						}

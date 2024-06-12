@@ -24,17 +24,16 @@ wails https://wails.io/docs/gettingstarted/installation
 第二步：初始化。
 
 ```
-git clone https://github.com/fasnow/fine.git && cd fine && go mod tidy && cd ../frontend && npm install --force  
+git clone https://github.com/fasnow/fine.git && cd fine && go mod tidy && cd frontend && npm install --force  
 ```
 
-第三步。
+第三步：将编译好的可执行文件重命名为`decompile`放入`backend/service/service/wechat`目录下。
 
 ```
-cd fine/wechatMiniProgram && npm install --force && npm build
+cd fine/wechatMiniProgram && npm install --force && npm run build
 # 如果提示pkg不存在先执行npm install pkg --force后再执行上述命令
 ```
 
-将编译好的可执行文件重命名为`decompile`放入`backend/service/service/wechat`目录下。
 
 第四步：生成的可执行文件在`fine/build/bin`目录下。
 

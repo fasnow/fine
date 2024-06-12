@@ -18,7 +18,7 @@
     "xml": "node wuWxml.js",
     "js": "node wuJs.js",
     "cfg": "node wuConfig.js",
-    "build": "pkg . -o decompile"
+    "build": "pkg . -o ../backend/service/service/wechat/decompile"
   },
   "homepage": "https://github.com/qwerty472123/wxappUnpacker#readme",
   "dependencies": {

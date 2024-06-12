@@ -27,7 +27,7 @@ wails https://wails.io/docs/gettingstarted/installation
 git clone https://github.com/fasnow/fine.git && cd fine && go mod tidy && cd frontend && npm install --force  
 ```
 
-第三步：将编译好的可执行文件重命名为`decompile`放入`backend/service/service/wechat`目录下。
+第三步：微信小程序反编译相关。
 
 ```
 cd fine/wechatMiniProgram && npm install --force && npm run build

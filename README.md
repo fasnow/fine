@@ -12,6 +12,8 @@ sudo xattr -d com.apple.quarantine Fine.app
 ```
 # 自主编译
 
+不要在ide控制台执行下面命令，会出现奇怪的问题，建议在项目目录下打开terminal执行。
+
 第一步：环境。
 
 ```

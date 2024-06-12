@@ -4,13 +4,12 @@ go 1.21.6
 
 require (
 	github.com/buger/jsonparser v1.1.1
-	github.com/fasnow/ghttp v0.0.0-20240210111335-7479a60de093
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
 	github.com/miekg/dns v1.1.59
 	github.com/pkg/errors v0.9.1
 	github.com/tidwall/gjson v1.9.3
-	github.com/wailsapp/wails/v2 v2.8.1
+	github.com/wailsapp/wails/v2 v2.8.0
 	github.com/xuri/excelize/v2 v2.8.0
 	github.com/yitter/idgenerator-go v1.3.3
 	golang.org/x/crypto v0.21.0

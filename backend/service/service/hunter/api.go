@@ -121,6 +121,9 @@ func (h *Hunter) Get(req *GetDataReq) (*Result, error) {
 	result.PageSize = size
 	result.Total = tmpResponse.Data.Total
 	result.Items = tmpResponse.Data.Arr
+	if result.Items == nil {
+		result.Items = make([]*hunter.Item, 0)
+	}
 	return &result, nil
 }
 

@@ -78,6 +78,14 @@ func (r *Config) GetWechat() Wechat {
 	return r.Wechat
 }
 
+func (r *Config) SaveWechatMatchRules(rules []string) error {
+	return SaveWechatMatchRules(rules)
+}
+
+func (r *Config) GetWechatMatchRules() []string {
+	return r.Wechat.Rules
+}
+
 func (r *Config) SaveWechat(wechat Wechat) error {
 	return SaveWechat(wechat)
 }

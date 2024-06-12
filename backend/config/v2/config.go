@@ -41,7 +41,8 @@ type Proxy struct {
 }
 
 type Wechat struct {
-	Applet string `ini:"applet" json:"applet"`
+	Applet string   `ini:"applet" json:"applet"`
+	Rules  []string `ini:"rule,,allowshadow" json:"rules" `
 }
 
 type Httpx struct {
@@ -50,7 +51,7 @@ type Httpx struct {
 }
 
 type DNS struct {
-	Value []string `delim:"," ini:"value" json:"value"`
+	Value []string `ini:"value,,allowshadow" json:"value"`
 }
 
 type Config struct {
@@ -74,6 +75,7 @@ var (
 	options = ini.LoadOptions{
 		SkipUnrecognizableLines:  true, //跳过无法识别的行
 		SpaceBeforeInlineComment: true,
+		AllowShadows:             true,
 	}
 	GlobalConfig  *Config
 	defaultConfig = &Config{
@@ -103,6 +105,18 @@ var (
 			Flags: "-sc -cl -title",
 		},
 		DNS: DNS{Value: []string{"223.5.5.5"}}, //AliDNS
+		Wechat: Wechat{Rules: []string{
+			"baseUrl: \".*?\"",
+			"server: \".*?\"",
+			"http(s)://.*?[/,\"\\s\\n]",
+			"post\\(\".*?\"\\)",
+			"get\\(\".*?\"\\)",
+			"url: \".*?\"",
+			"secret: \".*?\"",
+			"accessToken: \".*?\"",
+			"appid: \".*?\"",
+			"appsecret: \".*?\"",
+		}},
 	}
 )
 
@@ -189,6 +203,14 @@ func init() {
 		if _, err := os.Stat(defaultConfig.filePath); os.IsNotExist(err) {
 			logger.Info("config file not found, generating default config file...")
 			cfg := ini.Empty(options)
+			if runtime.GOOS != "windows" {
+				homeDir, err := os.UserHomeDir()
+				if err != nil {
+					logger.Info(err)
+					os.Exit(1)
+				}
+				defaultConfig.Wechat.Applet = filepath.Join("/Users", homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
+			}
 			err := ini.ReflectFrom(cfg, defaultConfig)
 			if err != nil {
 				logger.Info("can't reflect default config struct: " + err.Error())
@@ -212,12 +234,31 @@ func init() {
 			logger.Info("can't open config file:" + err.Error())
 			os.Exit(0)
 		}
+
+		//迭代配置,避免添加额外数据
+		if cfg.Section("Wechat").HasKey("rule") {
+			GlobalConfig.Wechat.Rules = nil
+		}
+		if runtime.GOOS != "windows" { // darwin下微信小程序固定目录
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				logger.Info(err)
+				os.Exit(1)
+			}
+			GlobalConfig.Wechat.Applet = filepath.Join("/Users", homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
+		}
+		if cfg.Section("DNS").HasKey("rule") {
+			GlobalConfig.DNS.Value = nil
+		}
+
 		err = cfg.MapTo(GlobalConfig)
 		if err != nil {
 			logger.Info("can't map to config file:" + err.Error())
 			os.Exit(0)
 		}
+		save(*GlobalConfig)
 	}
+	logger.Info(*GlobalConfig)
 
 	//代理
 	if GlobalConfig.Proxy.Enable {
@@ -398,6 +439,17 @@ func SaveWechat(wechat Wechat) error {
 	err := save(*t)
 	if err != nil {
 		logger.Info("can't save wechat to file")
+		return err
+	}
+	return nil
+}
+
+func SaveWechatMatchRules(rules []string) error {
+	t := GlobalConfig
+	t.Wechat.Rules = rules
+	err := save(*t)
+	if err != nil {
+		logger.Info("can't save wechat match rules to file")
 		return err
 	}
 	return nil

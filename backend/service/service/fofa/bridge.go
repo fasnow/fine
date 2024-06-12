@@ -54,11 +54,7 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 	//获取缓存
 	total, q := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := r.dataCache.GetByTaskID(taskID)
-		if err != nil {
-			logger.Info(err.Error())
-			return nil, err
-		}
+		cacheItems := r.dataCache.GetByTaskID(taskID)
 		queryResult.Query = q
 		queryResult.Total = total
 		queryResult.Page = int(page)
@@ -131,11 +127,7 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 				logger.Info(err2.Error())
 				if retry == 0 {
 					// retry为0可能是因为积分不足，所以不能直接返回错误，获取到多少数据就返回多少
-					cacheItems, err := r.dataCache.GetByTaskID(exportDataTaskID)
-					if err != nil {
-						logger.Info("fofa 导出失败: " + err.Error())
-						return
-					}
+					cacheItems := r.dataCache.GetByTaskID(exportDataTaskID)
 					exportItems := make([]*fofa.Item, 0)
 					for _, cacheItem := range cacheItems {
 						exportItems = append(exportItems, cacheItem.Item)
@@ -155,11 +147,7 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 			time.Sleep(interval)
 		}
 
-		cacheItems, err := r.dataCache.GetByTaskID(exportDataTaskID)
-		if err != nil {
-			logger.Info(err.Error())
-			return
-		}
+		cacheItems := r.dataCache.GetByTaskID(exportDataTaskID)
 		exportItems := make([]*fofa.Item, 0)
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)

@@ -1,6 +1,6 @@
 import React, { LegacyRef } from "react"
 import { Dropdown, MenuProps, message } from "antd";
-import { ItemType } from "antd/es/menu/hooks/useItems";
+import {ItemType} from "antd/es/menu/interface";
 
 interface MenuContextProps extends React.HTMLAttributes<HTMLDivElement> {
     items: ItemType[],

@@ -35,31 +35,6 @@ func TestBridge_Run(t *testing.T) {
 
 }
 
-func TestBridge_Stop(t *testing.T) {
-	type fields struct {
-		cmd *exec.Cmd
-		app *app.App
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &Bridge{
-				cmd: tt.fields.cmd,
-				app: tt.fields.app,
-			}
-			if err := r.Stop(); (err != nil) != tt.wantErr {
-				t.Errorf("Stop() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestNewHttpxBridge(t *testing.T) {
 	type args struct {
 		app *app.App

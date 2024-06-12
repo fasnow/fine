@@ -54,6 +54,10 @@ export function GetWechatDataPath() {
   return window['go']['config']['Config']['GetWechatDataPath']();
 }
 
+export function GetWechatMatchRules() {
+  return window['go']['config']['Config']['GetWechatMatchRules']();
+}
+
 export function Save0zone(arg1) {
   return window['go']['config']['Config']['Save0zone'](arg1);
 }
@@ -88,4 +92,8 @@ export function SaveWechat(arg1) {
 
 export function SaveWechatDataPath(arg1) {
   return window['go']['config']['Config']['SaveWechatDataPath'](arg1);
+}
+
+export function SaveWechatMatchRules(arg1) {
+  return window['go']['config']['Config']['SaveWechatMatchRules'](arg1);
 }

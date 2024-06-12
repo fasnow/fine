@@ -1,16 +1,18 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
 import { Checkbox, Button, Divider, Popover, ConfigProvider, Tag } from "antd";
-import { CheckboxOptionType, CheckboxValueType } from "antd/es/checkbox/Group";
+import {CheckboxOptionType} from "antd/es/checkbox/Group";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import ScrollBar from "./ScrollBar";
 import { SettingOutlined } from "@ant-design/icons";
 
 export type DataSourceItemType = { label: string, value: string, comment?: string }
 
-interface ColumnsFilterProps {
+export type CheckboxValueType = string | number | boolean;
+
+interface ColumnsFilterProps <T = any> {
     dataSource: DataSourceItemType[];
     checkedSource: string[]
-    onChange: (checkedItems: CheckboxValueType[]) => void;
+    onChange: (checkedItems: T[]) => void;
     icon?: React.ReactNode
     minWidth?: string | number
 }
@@ -79,7 +81,6 @@ const ColumnsFilter: React.FC<ColumnsFilterProps> = (props: PropsWithChildren<Co
         props.onChange(defaultCheckedValues)
     };
 
-
     return (
         <>
             <Popover
@@ -121,8 +122,6 @@ const ColumnsFilter: React.FC<ColumnsFilterProps> = (props: PropsWithChildren<Co
                 )}
             >
                 <Button type="text" size="small" icon={props.icon ? props.icon : <SettingOutlined />} />
-
-
             </Popover>
         </>
     );

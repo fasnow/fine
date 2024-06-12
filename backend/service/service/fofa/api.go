@@ -134,6 +134,9 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 	size, _ := strconv.Atoi(req.req.QueryParams.Get("size"))
 	resp.Size = size
 	resp.Total = tmpResponse.Size
+	if resp.Items == nil {
+		resp.Items = make([]*fofa.Item, 0)
+	}
 	return &resp, nil
 }
 

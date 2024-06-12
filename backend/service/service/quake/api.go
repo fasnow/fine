@@ -106,12 +106,16 @@ func (r *realtimeData) Service(req *GetRealtimeDataReq) (*RSDQueryResult, error)
 		logger.Info(err.Error())
 		return nil, err
 	}
-	return &RSDQueryResult{
+	result := &RSDQueryResult{
 		Items: resultItems,
 		Page:  page,
 		Size:  size,
 		Total: total,
-	}, nil
+	}
+	if result.Items == nil {
+		result.Items = make([]quake.RealtimeServiceItem, 0)
+	}
+	return result, nil
 }
 
 type RHDQueryResult struct {
@@ -198,12 +202,16 @@ func (r *realtimeData) Host(req *GetRealtimeDataReq) (*RHDQueryResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RHDQueryResult{
+	result := &RHDQueryResult{
 		Items: resultItems,
 		Page:  page,
 		Size:  size,
 		Total: total,
-	}, nil
+	}
+	if result.Items == nil {
+		result.Items = make([]*quake.RealtimeHostItem, 0)
+	}
+	return result, nil
 }
 
 func (d *deepData) Service() {

@@ -32,20 +32,15 @@ func (f *FofaDBService) BatchInsert(taskID int64, items []*fofa.Item) error {
 	return nil
 }
 
-func (f *FofaDBService) GetByTaskID(taskID int64) ([]*model.Fofa, error) {
+func (f *FofaDBService) GetByTaskID(taskID int64) []*model.Fofa {
 	items := make([]*model.Fofa, 0)
-	if err := f.dbConn.Where("task_id = ?", taskID).Find(&items).Error; err != nil {
-		logger.Info(err.Error())
-		return items, err
-	}
-	return items, nil
+	f.dbConn.Where("task_id = ?", taskID).Find(&items)
+	return items
 }
 
-func (f *FofaDBService) GetByPaginationAndTaskID(taskID int64, page, pageSize int) ([]*model.Fofa, error) {
+func (f *FofaDBService) GetByPaginationAndTaskID(taskID int64, page, pageSize int) []*model.Fofa {
 	var offset = (page - 1) * pageSize
 	var items = make([]*model.Fofa, 0)
-	if err := f.dbConn.Model(&model.Fofa{}).Limit(pageSize).Offset(offset).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
-		return nil, err
-	}
-	return items, nil
+	f.dbConn.Model(&model.Fofa{}).Limit(pageSize).Offset(offset).Where("task_id = ?", taskID).Find(&items)
+	return items
 }

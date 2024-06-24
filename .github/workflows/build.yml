@@ -33,7 +33,7 @@ jobs:
           npm install pkg
           npm install --force
           npm run build
-#          mv decompile.exe ../backend/service/service/wechat/decompile
+          cd ../backend/service/service/wechat && mv decompile.exe decompile
 
 
       - name: Install Frontend dependencies
@@ -87,7 +87,6 @@ jobs:
           npm install pkg
           npm install --force
           npm run build
-#          mv decompile ../backend/service/service/wechat/decompile
 
       - name: Install Frontend dependencies
         run: |
@@ -140,5 +139,5 @@ jobs:
             
 
         env:
-#         GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
-         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
+#         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

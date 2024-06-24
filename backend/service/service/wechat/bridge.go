@@ -32,24 +32,8 @@ import (
 	"time"
 )
 
-func generateDecompileExe() (string, error) {
-	filename := filepath.Join(config.GetBaseDir(), "bin", "decompile.exe")
-	if runtime2.GOOS != "windows" {
-		filename = filepath.Join(config.GetBaseDir(), "bin", "decompile")
-	}
-	if utils.FileExist(filename) {
-		return filename, nil
-	}
-	data, err := decompile.ReadFile("decompile")
-	if err != nil {
-		return "", err
-	}
-	err = utils.WriteFile(filename, data, 0766)
-	if err != nil {
-		return "", err
-	}
-	return filename, nil
-}
+//go:embed decompile
+var decompile embed.FS
 
 type Bridge struct {
 	app       *app.App
@@ -181,9 +165,6 @@ func (r *Bridge) SetAppletPath(path string) error {
 	}
 	return nil
 }
-
-//go:embed decompile
-var decompile embed.FS
 
 var cache = utils.NewCache() //存储正在反编译的文件任务
 var wg sync.WaitGroup
@@ -477,4 +458,23 @@ func (r *Bridge) QueryAppID(appid string) (error, wechat.Info) {
 	result.UsesCount = gjson.Get(string(bytes), "data.uses_count").String()
 	result.PrincipalName = gjson.Get(string(bytes), "data.principal_name").String()
 	return nil, result
+}
+
+func generateDecompileExe() (string, error) {
+	filename := filepath.Join(config.GetBaseDir(), "bin", "decompile.exe")
+	if runtime2.GOOS != "windows" {
+		filename = filepath.Join(config.GetBaseDir(), "bin", "decompile")
+	}
+	if utils.FileExist(filename) {
+		return filename, nil
+	}
+	data, err := decompile.ReadFile("decompile")
+	if err != nil {
+		return "", err
+	}
+	err = utils.WriteFile(filename, data, 0766)
+	if err != nil {
+		return "", err
+	}
+	return filename, nil
 }

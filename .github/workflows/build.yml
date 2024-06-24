@@ -139,5 +139,5 @@ jobs:
             
 
         env:
-         GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
-#         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+#         GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

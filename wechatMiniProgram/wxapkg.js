@@ -28,15 +28,18 @@ if (process.argv.length <= 2) {
   return
 }
 
+if (options.help){
+  program.outputHelp();
+  return
+}
+
 let output = options.output
 let decrypt = options.decrypt
 let target = options.target
 
-
 if (!output) {
   output = process.cwd()
 }
-
 
 if (decrypt) {
   console.log(`${"-".repeat(50)}\n解密的文件...: ${decrypt}\n保存至文件夹..: ${output}\n${"-".repeat(50)}`);
@@ -53,11 +56,13 @@ if (decrypt) {
     return
   }
   let version = path.basename(target)
-  let appid = path.basename(path.dirname(target))
+  let t = path.dirname(target);
+  let appid = path.basename(t)
+  if (!appid || appid.startsWith("wx")) {
+    appid = ""
+  }
   if (!isEmpty(version) && !isEmpty(appid)) {
     output = path.resolve(output, `${appid}_${version}`)
-  } else {
-    output = path.resolve(output, formatDate(new Date()))
   }
   console.log(`${"-".repeat(50)}\n反编译的文件夹...: ${target}\n保存至文件夹.....: ${output}\n${"-".repeat(50)}`);
 } else {

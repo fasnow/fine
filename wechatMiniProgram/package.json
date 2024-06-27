@@ -1,9 +1,34 @@
 {
-  "name": "wxapp-unpacker",
+  "name": "fine-wxapp-unpacker",
   "version": "1.0.0",
   "description": "",
   "main": "wxapkg.js",
-  "devDependencies": {
+  "repository": {
+    "url": "https://github.com/fasnow/fine/tree/main/wechatMiniProgram"
+  },
+  "scripts": {
+    "build": "pkg . -o ../backend/service/service/wechat/decompile",
+    "publish": "pkg . -o decompile"
+  },
+  "pkg": {
+    "assets": [
+      "**/node_modules/cheerio/**/*",
+      "**/node_modules/css-tree/**/*",
+      "**/node_modules/cssbeautify/**/*",
+      "**/node_modules/escodegen/**/*",
+      "**/node_modules/esprima/**/*",
+      "**/node_modules/js-beautify/**/*",
+      "**/node_modules/uglify-es/**/*",
+      "**/node_modules/vm2/**/*"
+    ]
+  },
+  "bin": {
+    "your-command": "wxapkg.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
     "cheerio": "^1.0.0-rc.12",
     "commander": "^12.1.0",
     "css-tree": "^2.3.1",
@@ -15,13 +40,5 @@
     "pkg": "^5.8.1",
     "uglify-es": "^3.3.9",
     "vm2": "^3.9.19"
-  },
-  "scripts": {
-    "build": "pkg . -o ../backend/service/service/wechat/decompile",
-    "publish": "pkg . -o decompile"
-  },
-  "bin": "wxapkg.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }

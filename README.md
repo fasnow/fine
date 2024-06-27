@@ -29,10 +29,11 @@ wails https://wails.io/docs/gettingstarted/installation
 git clone https://github.com/fasnow/fine.git && cd fine && go mod tidy && cd frontend && npm install --force  
 ```
 
-第三步：微信小程序反编译相关。
+第三步：微信小程序反编译相关，重构了js代码，该可执行文件可单独使用。
 
 ```
 cd fine/wechatMiniProgram && npm install --force && npm run build
+windows 额外执行 cd ../backend/service/service/wechat && mv decompile.exe decompile
 # 如果提示pkg不存在先执行npm install pkg --force后再执行上述命令
 ```
 

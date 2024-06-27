@@ -1,17 +1,15 @@
-const wu = require("./wuLib.js");
 const path = require("path");
-const fs = require("fs");
-const {VM} = require('vm2');
+const fs = require("fs-extra");
+const { VM } = require('vm2');
 const cssbeautify = require('cssbeautify');
 const csstree = require('css-tree');
 const cheerio = require('cheerio');
+const { getAllFileByExt, writeFile, changeFileExtension, getUniquePath, toDir } = require("./lib");
 
-function doWxss(dir, cb, mainDir, nowDir) {
-    let saveDir = dir;
-    let isSubPkg = mainDir && mainDir.length > 0;
-    if (isSubPkg) {
-        saveDir = mainDir
-    }
+
+
+async function doWxss(output, workDir) {
+    let saveDir = output;
 
     function GwxCfg() {
     }
@@ -44,15 +42,15 @@ function doWxss(dir, cb, mainDir, nowDir) {
                     if (data.length == 1 && data[0][0] == 2) data = data[0][1];
 					else return "";
 				}
-                if (!actualPure[data] && !blockCss.includes(wu.changeExt(wu.toDir(cssFile, frameName), ""))) {
-                    console.log("Regard " + cssFile + " as pure import file.");
+                if (!actualPure[data] && !blockCss.includes(changeFileExtension(toDir(cssFile, frameName), ""))) {
+                    console.log("regard " + cssFile + " as pure import file.");
                     actualPure[data] = cssFile;
 				}
 				return "";
 			}
             let res = [], attach = "";
             if (isPure && actualPure[data] != cssFile) {
-                if (actualPure[data]) return '@import "' + wu.changeExt(wu.toDir(actualPure[data], cssFile), ".wxss") + '";\n';
+                if (actualPure[data]) return '@import "' + changeFileExtension(toDir(actualPure[data], cssFile), ".wxss") + '";\n';
                 else {
                     res.push("/*! Import by _C[" + data + "], whose real path we cannot found. */");
                     attach = "/*! Import end */";
@@ -104,24 +102,25 @@ function doWxss(dir, cb, mainDir, nowDir) {
         }
     }
 
-    function preRun(dir, frameFile, mainCode, files, cb) {
-		wu.addIO(cb);
-        runList[path.resolve(dir, "./app.wxss")] = mainCode;
+    function preRun(workDir, frameFile, mainCode, files) {
+        runList[path.resolve(workDir, "./app.wxss")] = mainCode;
 
         for (let name of files) {
             if (name != frameFile) {
-                wu.get(name, code => {
+               fs.readFile(name,"utf-8").then(
+                code=>{
                     code = code.replace(/display:-webkit-box;display:-webkit-flex;/gm, '');
                     code = code.slice(0, code.indexOf("\n"));
                     if (code.indexOf("setCssToHead(") > -1) {
                         let lastName = name;
-                        let dirSplit = name.split(nowDir + '/');
+                        let dirSplit = name.split(output + '/');
                         if (dirSplit.length > 1) {
                             lastName = path.resolve(saveDir, dirSplit[1]);
                         }
                         runList[lastName] = code.slice(code.indexOf("setCssToHead("));
                     }
-                });
+                }
+               )
             }
         }
     }
@@ -144,7 +143,7 @@ function doWxss(dir, cb, mainDir, nowDir) {
             if (node.children) {
                 const removeType = ["webkit", "moz", "ms", "o"];
                 let list = {};
-                node.children.each((son, item) => {
+                node.children.forEach((son, item) => {
                     if (son.type == "Declaration") {
                         if (list[son.property]) {
                             let a = item, b = list[son.property], x = son, y = b.data, ans = null;
@@ -189,106 +188,100 @@ function doWxss(dir, cb, mainDir, nowDir) {
         return cssbeautify(csstree.generate(ast), {indent: '    ', autosemicolon: true});
     }
 
-    wu.scanDirByExt(dir, ".html", files => {
-        let frameFile = "";
-        if (fs.existsSync(path.resolve(dir, "page-frame.html")))
-            frameFile = path.resolve(dir, "page-frame.html");
-        else if (fs.existsSync(path.resolve(dir, "app-wxss.js")))
-            frameFile = path.resolve(dir, "app-wxss.js");
-        else if (fs.existsSync(path.resolve(dir, "page-frame.js")))
-            frameFile = path.resolve(dir, "page-frame.js");
-		else throw Error("page-frame-like file is not found in the package by auto.");
-        wu.get(frameFile, code => {
-            code = code.replace(/display:-webkit-box;display:-webkit-flex;/gm, '');
-            let scriptCode = code;
-            //extract script content from html
-            if (frameFile.endsWith(".html")) {
-                try {
-                    const $ = cheerio.load(code);
-                    scriptCode = [].join.apply($('html').find('script').map(function (item) {
-                        return $(this).html();
-                    }, "\n"));
-                } catch (e) {
-                    //ignore
-                }
+
+    let files = await getAllFileByExt(workDir, "html")
+    let frameFile = "";
+    if (fs.existsSync(path.resolve(workDir, "page-frame.html"))) {
+        frameFile = path.resolve(workDir, "page-frame.html");
+    } else if (fs.existsSync(path.resolve(workDir, "app-wxss.js"))) {
+        frameFile = path.resolve(workDir, "app-wxss.js");
+    } else if (fs.existsSync(path.resolve(workDir, "page-frame.js"))) {
+        frameFile = path.resolve(workDir, "page-frame.js");
+    } else {
+        throw Error("page-frame-like file is not found in the package by auto.");
+    }
+
+    let code = await fs.readFile(frameFile, "utf-8")
+    code = code.replace(/display:-webkit-box;display:-webkit-flex;/gm, '');
+    let scriptCode = code;
+    if (frameFile.endsWith(".html")) {
+        try {
+            const $ = cheerio.load(code);
+            scriptCode = [].join.apply($('html').find('script').map(function (item) {
+                return $(this).html();
+            }, "\n"));
+        } catch (e) {
+            //ignore
+        }
+    }
+
+    let window = {
+        screen: {
+            width: 720,
+            height: 1028,
+            orientation: {
+                type: 'vertical'
             }
+        }
+    };
+    let navigator = {
+        userAgent: "iPhone"
+    };
 
-            let window = {
-                screen: {
-                    width: 720,
-                    height: 1028,
-                    orientation: {
-                        type: 'vertical'
-                    }
-                }
-            };
-            let navigator = {
-                userAgent: "iPhone"
-            };
+    scriptCode = scriptCode.slice(scriptCode.lastIndexOf('window.__wcc_version__'));
+    let mainCode = 'window= ' + JSON.stringify(window) +
+        ';\nnavigator=' + JSON.stringify(navigator) +
+        ';\nvar __mainPageFrameReady__ = window.__mainPageFrameReady__ || function(){};var __WXML_GLOBAL__={entrys:{},defines:{},modules:{},ops:[],wxs_nf_init:undefined,total_ops:0};var __vd_version_info__=__vd_version_info__||{}' +
+        ";\n" + scriptCode;
 
-            scriptCode = scriptCode.slice(scriptCode.lastIndexOf('window.__wcc_version__'));
-            let mainCode = 'window= ' + JSON.stringify(window) +
-                ';\nnavigator=' + JSON.stringify(navigator) +
-                ';\nvar __mainPageFrameReady__ = window.__mainPageFrameReady__ || function(){};var __WXML_GLOBAL__={entrys:{},defines:{},modules:{},ops:[],wxs_nf_init:undefined,total_ops:0};var __vd_version_info__=__vd_version_info__||{}' +
-                ";\n" + scriptCode;
+    mainCode = mainCode.replace('var setCssToHead = function', 'var setCssToHead2 = function');
 
-            //remove setCssToHead function
-            mainCode = mainCode.replace('var setCssToHead = function', 'var setCssToHead2 = function');
+    code = code.slice(code.lastIndexOf('var setCssToHead = function(file, _xcInvalid'));
+    code = code.replace('__COMMON_STYLESHEETS__', '[]');
+    if (code.indexOf('_C =') === -1) {
+        code = code.slice(code.lastIndexOf('\nvar _C= ') + 1);
+    } else {
+        code = code.slice(code.lastIndexOf(' var _C = ') + 1);
+    }
+    code = code.slice(0, code.indexOf('\n'));
 
-            // code = code.slice(code.lastIndexOf('var setCssToHead = function(file, _xcInvalid'));
-            // code = code.slice(code.lastIndexOf('\nvar _C= ') + 1);
-            // code = code.slice(0, code.indexOf('\n'));
-            //fix _C error
-            code = code.slice(code.lastIndexOf('var setCssToHead = function(file, _xcInvalid'));
-            code = code.replace('__COMMON_STYLESHEETS__', '[]');
-            if (code.indexOf('_C =') === -1) {
-                code = code.slice(code.lastIndexOf('\nvar _C= ') + 1);
-            } else {
-                code = code.slice(code.lastIndexOf('\nvar _C = ') + 1);
-            }
-            code = code.slice(0, code.indexOf('\n'));
+    let vm = new VM({ sandbox: {} });
+    pureData = vm.run(code + "\n_C");
 
-            let vm = new VM({sandbox: {}});
-            pureData = vm.run(code + "\n_C");
+    console.log("guess wxss(first turn)...");
+    preRun(workDir, frameFile, mainCode, files);
+    frameName = frameFile;
+    onlyTest = true;
+    runOnce();
+    onlyTest = false;
+    console.log("import count info: %j", importCnt);
+    for (let id in pureData) if (!actualPure[id]) {
+        if (!importCnt[id]) importCnt[id] = 0;
+        if (importCnt[id] <= 1) {
+            console.log("can't find pure import for _C[" + id + "] which is only imported " + importCnt[id] + " times. Let importing become copying.");
+        } else {
+            let newFile = path.resolve(saveDir, "__wuBaseWxss__/" + id + ".wxss");
+            console.log("can't find pure import for _C[" + id + "], force to save it in (" + newFile + ").");
+            id = Number.parseInt(id);
+            actualPure[id] = newFile;
+            cssRebuild.call({ cssFile: newFile }, id)();
+        }
+    }
+    console.log("guess wxss(first turn) done.\ngenerate wxss(second turn)...");
+    runOnce();
+    console.log("generate wxss(second turn) done.\nsave wxss...");
 
-			console.log("Guess wxss(first turn)...");
-            preRun(dir, frameFile, mainCode, files, () => {
-                frameName = frameFile;
-                onlyTest = true;
-				runOnce();
-                onlyTest = false;
-                console.log("Import count info: %j", importCnt);
-                for (let id in pureData) if (!actualPure[id]) {
-                    if (!importCnt[id]) importCnt[id] = 0;
-                    if (importCnt[id] <= 1) {
-                        console.log("Cannot find pure import for _C[" + id + "] which is only imported " + importCnt[id] + " times. Let importing become copying.");
-                    } else {
-                        let newFile = path.resolve(saveDir, "__wuBaseWxss__/" + id + ".wxss");
-                        console.log("Cannot find pure import for _C[" + id + "], force to save it in (" + newFile + ").");
-                        id = Number.parseInt(id);
-                        actualPure[id] = newFile;
-                        cssRebuild.call({cssFile: newFile}, id)();
-					}
-				}
-				console.log("Guess wxss(first turn) done.\nGenerate wxss(second turn)...");
-				runOnce()
-				console.log("Generate wxss(second turn) done.\nSave wxss...");
-
-                console.log('saveDir: ' + saveDir);
-                for (let name in result) {
-                    let pathFile = path.resolve(saveDir, wu.changeExt(name, ".wxss"));
-                    wu.save(pathFile, transformCss(result[name]));
-                }
-                let delFiles = {};
-                for (let name of files) delFiles[name] = 8;
-                delFiles[frameFile] = 4;
-				cb(delFiles);
-			});
-		});
-	});
+    console.log('save to: ' + saveDir);
+    for (let name in result) {
+        let pathFile = path.resolve(saveDir, changeFileExtension(name, "wxss"));
+        writeFile(pathFile, transformCss(result[name]));
+    }
+    let delFiles = {};
+    for (let name of files) {
+        delFiles[name] = 8;
+    }
+    delFiles[frameFile] = 4;
+    return delFiles
 }
 
-module.exports = {doWxss: doWxss};
-if (require.main === module) {
-    wu.commandExecute(doWxss, "Restore wxss files.\n\n<dirs...>\n\n<dirs...> restore wxss file from a unpacked directory(Have page-frame.html (or app-wxss.js) and other html file).");
-}
+module.exports = { doWxss };

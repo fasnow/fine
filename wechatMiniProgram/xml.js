@@ -1,10 +1,9 @@
-const wu = require("./wuLib.js");
-const {getZ} = require("./wuRestoreZ.js");
-const {wxsBeautify} = require("./wuJs.js");
-const fs = require('fs');
+const { writeFile, codeBeautify, getUniquePath } = require("./lib.js");
+const { getZ } = require("./restore.js");
+const fs = require("fs-extra");
 const path = require("path");
 const esprima = require('esprima');
-const {VM} = require('vm2');
+const { VM } = require('vm2');
 const escodegen = require('escodegen');
 
 function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
@@ -47,7 +46,7 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                                 let gen = namePool[f.arguments[1].name];
                                 if (gen.tag == "gen") {
                                     let ret = gen.func.body.body.pop().argument.name;
-                                    anaRecursion(gen.func.body.body, {[ret]: obj});
+                                    anaRecursion(gen.func.body.body, { [ret]: obj });
                                 }
                                 obj.v["wx:for"] = data;
                                 if (index != "index") obj.v["wx:for-index"] = index;
@@ -64,7 +63,7 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                                 let gen = namePool[f.arguments[2].name];
                                 if (gen.tag == "gen") {
                                     let ret = gen.func.body.body.pop().argument.name;
-                                    anaRecursion(gen.func.body.body, {[ret]: obj});
+                                    anaRecursion(gen.func.body.body, { [ret]: obj });
                                 }
                                 obj.v["wx:for"] = data;
                                 if (index != "index") obj.v["wx:for-index"] = index;
@@ -76,7 +75,7 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                                 pushSon(f.arguments[5].name, {
                                     tag: "include",
                                     son: [],
-                                    v: {src: xPool[f.arguments[0].property.value]}
+                                    v: { src: xPool[f.arguments[0].property.value] }
                                 });
                                 break;
                             case "_ai": {//template import
@@ -84,7 +83,7 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                                 if (to) pushSon(to, {
                                     tag: "import",
                                     son: [],
-                                    v: {src: xPool[f.arguments[1].property.value]}
+                                    v: { src: xPool[f.arguments[1].property.value] }
                                 });
                                 else throw Error("Unexpected fake pool");
                             }
@@ -109,10 +108,10 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                     if (dec.init.type == "CallExpression") {
                         switch (dec.init.callee.name) {
                             case "_n":
-                                push(dec.id.name, {tag: dec.init.arguments[0].value, son: [], v: {}});
+                                push(dec.id.name, { tag: dec.init.arguments[0].value, son: [], v: {} });
                                 break;
                             case "_v":
-                                push(dec.id.name, {tag: "block", son: [], v: {}});
+                                push(dec.id.name, { tag: "block", son: [], v: {} });
                                 break;
                             case "_o":
                                 push(dec.id.name, {
@@ -149,7 +148,7 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                                         name = null;
                                     }
                                 }
-                                push(dec.id.name, {tag: dec.init.arguments[0].value, son: [], v: mv});
+                                push(dec.id.name, { tag: dec.init.arguments[0].value, son: [], v: mv });
                             }
                                 break;
                             case "_mz": {
@@ -160,45 +159,50 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                                 for (let x of dec.init.arguments[2].elements) {
                                     let v = x.value;
                                     if (!v && typeof v != "number") {
-                                        if (x.type == "UnaryExpression" && x.operator == "-") v = -x.argument.value;
-                                        else throw Error("Unknown type of object in _mz attrs array: " + x.type);
+                                        if (x.type == "UnaryExpression" && x.operator == "-") {
+                                            v = -x.argument.value;
+                                        } else {
+                                            throw Error("Unknown type of object in _mz attrs array: " + x.type);
+                                        }
                                     }
                                     if (name === null) {
                                         name = v;
                                     } else {
-                                        if (base + v < 0) mv[name] = null; else {
+                                        if (base + v < 0) {
+                                            mv[name] = null;
+                                        } else {
                                             mv[name] = z.mul[zMulName][base + v];
                                             if (base == 0) base = v;
                                         }
                                         name = null;
                                     }
                                 }
-                                push(dec.id.name, {tag: dec.init.arguments[1].value, son: [], v: mv});
+                                push(dec.id.name, { tag: dec.init.arguments[1].value, son: [], v: mv });
                             }
                                 break;
                             case "_gd"://template use/is
-                            {
-                                let is = namePool[dec.init.arguments[1].name].content;
-                                let data = null, obj = null;
-                                ei++;
-                                for (let e of core[ei].consequent.body) {
-                                    if (e.type == "VariableDeclaration") {
-                                        for (let f of e.declarations) {
-                                            if (f.init.type == "LogicalExpression" && f.init.left.type == "CallExpression") {
-                                                if (f.init.left.callee.name == "_1") data = z[f.init.left.arguments[0].value];
-                                                else if (f.init.left.callee.name == "_1z") data = z.mul[zMulName][f.init.left.arguments[1].value];
+                                {
+                                    let is = namePool[dec.init.arguments[1].name].content;
+                                    let data = null, obj = null;
+                                    ei++;
+                                    for (let e of core[ei].consequent.body) {
+                                        if (e.type == "VariableDeclaration") {
+                                            for (let f of e.declarations) {
+                                                if (f.init.type == "LogicalExpression" && f.init.left.type == "CallExpression") {
+                                                    if (f.init.left.callee.name == "_1") data = z[f.init.left.arguments[0].value];
+                                                    else if (f.init.left.callee.name == "_1z") data = z.mul[zMulName][f.init.left.arguments[1].value];
+                                                }
+                                            }
+                                        } else if (e.type == "ExpressionStatement") {
+                                            let f = e.expression;
+                                            if (f.type == "AssignmentExpression" && f.operator == "=" && f.left.property && f.left.property.name == "wxXCkey") {
+                                                obj = f.left.object.name;
                                             }
                                         }
-                                    } else if (e.type == "ExpressionStatement") {
-                                        let f = e.expression;
-                                        if (f.type == "AssignmentExpression" && f.operator == "=" && f.left.property && f.left.property.name == "wxXCkey") {
-                                            obj = f.left.object.name;
-                                        }
                                     }
+                                    namePool[obj].tag = "template";
+                                    Object.assign(namePool[obj].v, { is: is, data: data });
                                 }
-                                namePool[obj].tag = "template";
-                                Object.assign(namePool[obj].v, {is: is, data: data});
-                            }
                                 break;
                             default: {
                                 let funName = dec.init.callee.name;
@@ -208,7 +212,7 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                             }
                         }
                     } else if (dec.init.type == "FunctionExpression") {
-                        push(dec.id.name, {tag: "gen", func: dec.init});
+                        push(dec.id.name, { tag: "gen", func: dec.init });
                     } else if (dec.init.type == "MemberExpression") {
                         if (dec.init.object.type == "MemberExpression" && dec.init.object.object.name == "e_" && dec.init.object.property.type == "MemberExpression" && dec.init.object.property.object.name == "x") {
                             if (dec.init.property.name == "j") {//include
@@ -229,20 +233,20 @@ function analyze(core, z, namePool, xPool, fakePool = {}, zMulName = "0") {
                     }
 
                     let vname = e.consequent.body[0].expression.left.object.name;
-                    let nif = {tag: "block", v: {"wx:if": parse_OFun(e)}, son: []};
-                    anaRecursion(e.consequent.body, {[vname]: nif});
+                    let nif = { tag: "block", v: { "wx:if": parse_OFun(e) }, son: [] };
+                    anaRecursion(e.consequent.body, { [vname]: nif });
                     pushSon(vname, nif);
                     if (e.alternate) {
                         while (e.alternate && e.alternate.type == "IfStatement") {
                             e = e.alternate;
-                            nif = {tag: "block", v: {"wx:elif": parse_OFun(e)}, son: []};
-                            anaRecursion(e.consequent.body, {[vname]: nif});
+                            nif = { tag: "block", v: { "wx:elif": parse_OFun(e) }, son: [] };
+                            anaRecursion(e.consequent.body, { [vname]: nif });
                             pushSon(vname, nif);
                         }
                         if (e.alternate && e.alternate.type == "BlockStatement") {
                             e = e.alternate;
-                            nif = {tag: "block", v: {"wx:else": null}, son: []};
-                            anaRecursion(e.body, {[vname]: nif});
+                            nif = { tag: "block", v: { "wx:else": null }, son: [] };
+                            anaRecursion(e.body, { [vname]: nif });
                             pushSon(vname, nif);
                         }
                     }
@@ -329,8 +333,8 @@ function elemToString(elem, dep, moreInfo = false) {
 function doWxml(state, dir, name, code, z, xPool, rDs, wxsList, moreInfo) {
     let rname = code.slice(code.lastIndexOf("return") + 6).replace(/[\;\}]/g, "").trim();
     code = code.slice(code.indexOf("\n"), code.lastIndexOf("return")).trim();
-    let r = {son: []};
-    analyze(esprima.parseScript(code).body, z, {[rname]: r}, xPool, {[rname]: r});
+    let r = { son: [] };
+    analyze(esprima.parseScript(code).body, z, { [rname]: r }, xPool, { [rname]: r });
     let ans = [];
     for (let elem of r.son) ans.push(elemToString(elem, 0, moreInfo));
     let result = [ans.join("")];
@@ -338,89 +342,104 @@ function doWxml(state, dir, name, code, z, xPool, rDs, wxsList, moreInfo) {
         state[0] = v;
         let oriCode = rDs[v].toString();
         let rname = oriCode.slice(oriCode.lastIndexOf("return") + 6).replace(/[\;\}]/g, "").trim();
-        let tryPtr = oriCode.indexOf("\ntry{");
-        let zPtr = oriCode.indexOf("var z=gz$gwx");
-        let code = oriCode.slice(tryPtr + 5, oriCode.lastIndexOf("\n}catch(")).trim();
+        let tryPtr = oriCode.indexOf("try {");
+        let zPtr = oriCode.indexOf("var z = gz$gwx");
+        let code = oriCode.slice(tryPtr + 5, oriCode.lastIndexOf("} catch (")).trim();
         if (zPtr != -1 && tryPtr > zPtr) {
             let attach = oriCode.slice(zPtr);
             attach = attach.slice(0, attach.indexOf("()")) + "()\n";
             code = attach + code;
         }
-        let r = {tag: "template", v: {name: v}, son: []};
-        analyze(esprima.parseScript(code).body, z, {[rname]: r}, xPool, {[rname]: r});
+        let r = { tag: "template", v: { name: v }, son: [] };
+        analyze(esprima.parseScript(code).body, z, { [rname]: r }, xPool, { [rname]: r });
         result.unshift(elemToString(r, 0, moreInfo));
     }
     name = path.resolve(dir, name);
     if (wxsList[name]) result.push(wxsList[name]);
-    wu.save(name, result.join(""));
+    writeFile(name, result.join(""));
 }
 
-function tryWxml(dir, name, code, z, xPool, rDs, ...args) {
-    console.log("Decompile " + name + "...");
+function tryWxml(output, name, code, z, xPool, rDs, ...args) {
+    console.log("decompile " + name + "...");
     let state = [null];
     try {
-        doWxml(state, dir, name, code, z, xPool, rDs, ...args);
-        console.log("Decompile success!");
+        doWxml(state, output, name, code, z, xPool, rDs, ...args);
+        console.log("decompile success!");
     } catch (e) {
         console.log("error on " + name + "(" + (state[0] === null ? "Main" : "Template-" + state[0]) + ")\nerr: ", e);
-        if (state[0] === null) wu.save(path.resolve(dir, name + ".ori.js"), code);
-        else wu.save(path.resolve(dir, name + ".tem-" + state[0] + ".ori.js"), rDs[state[0]].toString());
+        if (state[0] === null) writeFile(path.resolve(output, name + ".ori.js"), code);
+        else writeFile(path.resolve(output, name + ".tem-" + state[0] + ".ori.js"), rDs[state[0]].toString());
     }
 }
 
 function doWxs(code, name) {
     name = name || '';
     name = name.substring(0, name.lastIndexOf('/') + 1);
-    const before = 'nv_module={nv_exports:{}};';
-    return wxsBeautify(code.slice(code.indexOf(before) + before.length, code.lastIndexOf('return nv_module.nv_exports;}')).replace(eval('/' + ('p_' + name).replace(/\//g, '\\/') + '/g'), '').replace(/nv\_/g, '').replace(/(require\(.*?\))\(\)/g,'$1'));
+    const before = 'var nv_module = {               nv_exports: {}             };';
+    let start = code.indexOf(before) + before.length;
+    let end = code.lastIndexOf('return nv_module.nv_exports;\n           }')
+    code = code.slice(start, end)
+    code = code.replace(eval('/' + ('p_' + name)
+        .replace(/\//g, '\\/') + '/g'), '')
+        .replace(/nv\_/g, '')
+        .replace(/(require\(.*?\))\(\)/g, '$1')
+    return codeBeautify("wxs", code);
 }
 
-function doFrame(name, cb, order, mainDir) {
-    let moreInfo = order.includes("m");
-    wxsList = {};
-    wu.get(name, code => {
-        getZ(code, z => {
-            const before = "\nvar nv_require=function(){var nnm=";
-            code = code.slice(code.lastIndexOf(before) + before.length, code.lastIndexOf("if(path&&e_[path]){"));
-            json = code.slice(0, code.indexOf("};") + 1);
-            let endOfRequire = code.indexOf("()\r\n") + 4;
-            if (endOfRequire == 4 - 1) endOfRequire = code.indexOf("()\n") + 3;
-            code = code.slice(endOfRequire);
-            let rD = {}, rE = {}, rF = {}, requireInfo = {}, x, vm = new VM({
-                sandbox: {
-                    d_: rD, e_: rE, f_: rF, _vmRev_(data) {
-                        [x, requireInfo] = data;
-                    }, nv_require(path) {
-                        return () => path;
-                    }
-                }
-            });
-            let vmCode = code + "\n_vmRev_([x," + json + "])";
-            vm.run(vmCode);
-            let dir = mainDir || path.dirname(name), pF = [];
-            for (let info in rF) if (typeof rF[info] == "function") {
-                let name = path.resolve(dir, (info[0] == '/' ? '.' : '') + info), ref = rF[info]();
-                pF[ref] = info;
-                wu.save(name, doWxs(requireInfo[ref].toString(), info));
+async function doFrame(name, output) {
+    // let moreInfo = order.includes("m");
+    let moreInfo = false;
+    let wxsList = {};
+    let code = (await fs.readFile(name, "utf-8"));
+    let result = getZ(code);
+
+    // 从文件读取的内容是美化过后的内容，匹配字符串做了修改
+    let before = "var nv_require = function() {\n\t    var nnm =";
+    let index = code.lastIndexOf(before)
+    if (index<0){
+        before = "var nv_require = function() {\n         var nnm =";
+        index = code.lastIndexOf(before)
+    }
+    let start = code.lastIndexOf(before) + before.length;
+    let end = code.lastIndexOf("if (path && e_[path]) {");
+    code = code.slice(start, end);
+    json = code.slice(0, code.indexOf("};") + 1);
+    let endOfRequire = code.indexOf("()\n") + 4;
+
+    code = code.slice(endOfRequire);
+    let rD = {}, rE = {}, rF = {}, requireInfo = {}, x, vm = new VM({
+        sandbox: {
+            d_: rD, e_: rE, f_: rF, _vmRev_(data) {
+                [x, requireInfo] = data;
+            }, nv_require(path) {
+                return () => path;
             }
-            for (let info in rF) if (typeof rF[info] == "object") {
-                let name = path.resolve(dir, (info[0] == '/' ? '.' : '') + info);
-                let res = [], now = rF[info];
-                for (let deps in now) {
-                    let ref = now[deps]();
-                    if (ref.includes(":")) res.push("<wxs module=\"" + deps + "\">\n" + doWxs(requireInfo[ref].toString()) + "\n</wxs>");
-                    else if (pF[ref]) res.push("<wxs module=\"" + deps + "\" src=\"" + wu.toDir(pF[ref], info) + "\" />");
-                    else res.push("<wxs module=\"" + deps + "\" src=\"" + wu.toDir(ref.slice(2), info) + "\" />");
-                    wxsList[name] = res.join("\n");
-                }
-            }
-            for (let name in rE) tryWxml(dir, name, rE[name].f.toString(), z, x, rD[name], wxsList, moreInfo);
-            cb({[name]: 4});
-        });
+        }
     });
+    let vmCode = code + "\n_vmRev_([x," + json + "])";
+    vm.run(vmCode);
+    let dir = output || path.dirname(name), pF = [];
+    for (let info in rF) if (typeof rF[info] == "function") {
+        let name = path.resolve(dir, (info[0] == '/' ? '.' : '') + info), ref = rF[info]();
+        pF[ref] = info;
+        writeFile(name, doWxs(requireInfo[ref].toString(), info));
+    }
+    for (let info in rF) if (typeof rF[info] == "object") {
+        let name = path.resolve(dir, (info[0] == '/' ? '.' : '') + info);
+        let res = [], now = rF[info];
+        for (let deps in now) {
+            let ref = now[deps]();
+            if (ref.includes(":")) res.push("<wxs module=\"" + deps + "\">\n" + doWxs(requireInfo[ref].toString()) + "\n</wxs>");
+            else if (pF[ref]) res.push("<wxs module=\"" + deps + "\" src=\"" + getUniquePath(pF[ref], info) + "\" />");
+            else res.push("<wxs module=\"" + deps + "\" src=\"" + getUniquePath(ref.slice(2), info) + "\" />");
+            wxsList[name] = res.join("\n");
+        }
+    }
+    for (let name in rE) tryWxml(dir, name, rE[name].f.toString(), result, x, rD[name], wxsList, moreInfo);
+    return { [name]: 4 }
 }
 
-module.exports = {doFrame: doFrame};
+module.exports = { doFrame: doFrame };
 if (require.main === module) {
     wu.commandExecute(doFrame, "Restore wxml files.\n\n<files...>\n\n<files...> restore wxml file from page-frame.html or app-wxss.js.");
 }

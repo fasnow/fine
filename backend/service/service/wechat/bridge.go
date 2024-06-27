@@ -284,7 +284,9 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 						}
 						targetFiles = append(targetFiles, targetFile)
 					}
-					cmd := exec.Command(exePath, filepath.Join(outputDir, "__APP__.wxapkg"), "-d")
+					logger.Info(targetFiles)
+					cmd := exec.Command(exePath, "-t", outputDir, "-o", outputDir)
+					logger.Info(cmd)
 					runtime.HideCmdWindow(cmd)
 
 					//反编译程序内部出错但是此时可能已经成功反编译,所以只能其他错误再返回
@@ -399,6 +401,7 @@ func (r *Bridge) extractInfo(appid, version string) {
 		regex, err := regexp.Compile(regexPattern)
 		if err != nil {
 			logger.Info(err)
+			logger.Info(regexPattern)
 			continue
 		}
 		err = filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
@@ -466,7 +469,13 @@ func generateDecompileExe() (string, error) {
 		filename = filepath.Join(config.GetBaseDir(), "bin", "decompile")
 	}
 	if utils.FileExist(filename) {
-		return filename, nil
+		currentDate := time.Now()
+
+		//2024/06/28
+		comparisonDate := time.Date(2024, 6, 28, 0, 0, 0, 0, time.Local)
+		if currentDate.After(comparisonDate) {
+			return filename, nil
+		}
 	}
 	data, err := decompile.ReadFile("decompile")
 	if err != nil {

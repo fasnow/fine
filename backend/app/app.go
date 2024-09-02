@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // App struct
@@ -40,6 +41,10 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) Fetch(url string) ([]byte, error) {
+	url = strings.TrimSpace(url)
+	if url == "" {
+		return nil, errors.New("目标地址不能为空")
+	}
 	request, _ := http.NewRequest("GET", url, nil)
 	response, err := a.HttpClient.Do(request)
 	if err != nil {

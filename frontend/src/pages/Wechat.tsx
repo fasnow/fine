@@ -331,8 +331,7 @@ export const MiniProgram: React.FC = () => {
                                     itemLayout="vertical"
                                     dataSource={data}
                                     renderItem={(item) => (
-                                        <List.Item
-                                            key={item.appid}
+                                        <List.Item key={item.appid}
                                         >
                                             <Flex vertical gap={5}>
                                                 <Flex gap={5}>
@@ -367,7 +366,7 @@ export const MiniProgram: React.FC = () => {
                                                     }
                                                     {
                                                         item.versions.map((i)=>{
-                                                            return <Flex gap={5}>
+                                                            return <Flex gap={5} key={`${item.appid}-${i.number}`}>
                                                                 <Tag bordered={false} color="cyan" ><span title={i.unpacked?"已反编译":"未反编译"}><FileZipOutlined style={{color:i.unpacked ? "green" : "black"}}/>{i.number}</span></Tag>
                                                                 <Space.Compact size={"small"} >
                                                                     <Tooltip title={"反编译"}>

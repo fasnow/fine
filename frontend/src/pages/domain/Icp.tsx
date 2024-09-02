@@ -9,19 +9,21 @@ import {
 import {Button, Input, MenuProps, message, Modal, Pagination, Space, Spin, Table, Tabs} from 'antd';
 import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import type {ColumnsType} from 'antd/es/table';
-import {copy, MenuItemsKey, QUERY_FIRST} from "@/type";
+import {QUERY_FIRST} from "@/component/type";
 import {errorNotification} from '@/component/Notification';
 import {useDispatch} from 'react-redux';
 import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '../../component/ResizableTitle';
 import ContextMenu from '../../component/ContextMenu';
-import {sleep} from '@/utils/utils';
+import {copy, sleep} from '@/util/util';
 import * as CryptoJS from 'crypto-js';
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 
 import {icp} from "../../../wailsjs/go/models";
 import {CheckImage, Export, GetImage, IsSignExpired, Query} from "../../../wailsjs/go/icp/Bridge";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
+import {MenuItem} from "@/component/MenuItem";
+import {MenuItemType} from "antd/es/menu/interface";
 
 type dataCacheType = {
     [key: number]: icp.Item[];
@@ -34,27 +36,11 @@ let selectedRow: { item: icp.Item | undefined, rowIndex: number | undefined, col
 }
 
 
-const menuItems: MenuProps['items'] = [
-    {
-        label: '浏览器打开域名',
-        key: MenuItemsKey.OpenDomain,
-        icon: <GlobalOutlined />
-    },
-    {
-        label: '复制单元格',
-        key: MenuItemsKey.CopyCell,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制行',
-        key: MenuItemsKey.CopyRow,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制列',
-        key: MenuItemsKey.CopyCol,
-        icon: <CopyOutlined />
-    },
+const menuItems: MenuItemType[] = [
+    MenuItem.OpenDomain,
+    MenuItem.CopyCell,
+    MenuItem.CopyRow,
+    MenuItem.CopyCol,
 ];
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
@@ -490,12 +476,12 @@ const IcpContent: React.FC = () => {
 
     const handleMenuItemClick = (key: string) => {
         switch (key) {
-            case MenuItemsKey.OpenDomain:
+            case MenuItem.OpenDomain.key:
                 if (selectedRow.item?.domain) {
                     BrowserOpenURL("http://" + selectedRow.item?.domain)
                 }
                 break
-            case MenuItemsKey.CopyCell:
+            case MenuItem.CopyCell.key:
                 {
                     const item = selectedRow.item
                     for (const key in item) {
@@ -506,10 +492,10 @@ const IcpContent: React.FC = () => {
                     }
                 }
                 break
-            case MenuItemsKey.CopyRow:
+            case MenuItem.CopyRow.key:
                 copy(selectedRow)
                 break
-            case MenuItemsKey.CopyCol:
+            case MenuItem.CopyCol.key:
                 {
                     const colValues = dataCache[currentPage].map(item => {
                         for (const key in item) {
@@ -558,7 +544,7 @@ const IcpContent: React.FC = () => {
             hidden={getPageData().length === 0}
         >
             <Table
-                locale={{ emptyText: "暂无数据" }}
+                // locale={{ emptyText: "暂无数据" }}
                 showSorterTooltip={false}
                 scroll={{ y: 'calc(100vh - 195px)', scrollToFirstRowOnChange: true }}
                 bordered
@@ -572,7 +558,7 @@ const IcpContent: React.FC = () => {
                 loading={loading}
                 size="small"
                 pagination={false}
-                footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                footer={() => <div style={{ height:'100%', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Pagination
                         showQuickJumper
                         showSizeChanger

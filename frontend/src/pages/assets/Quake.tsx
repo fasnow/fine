@@ -1,14 +1,33 @@
 import React, {CSSProperties, ReactNode, useEffect, useRef, useState} from 'react';
-import { Button, Col, DatePicker, Divider, Form, Input, InputNumber, MenuProps, Modal, Pagination, Row, Select, Space, Switch, Table, Tabs, TabsProps, Tooltip, message } from 'antd';
+import {
+  Button,
+  Col,
+  DatePicker,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  MenuProps,
+  Modal,
+  Pagination,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Table,
+  Tabs,
+  TabsProps,
+  Tooltip,
+  message,
+  Dropdown
+} from 'antd';
 import { SearchOutlined, QuestionOutlined, UserOutlined, CloudDownloadOutlined, LoadingOutlined, ExclamationCircleOutlined, SyncOutlined, CrownOutlined, CrownTwoTone, CloudOutlined, CopyOutlined, GlobalOutlined } from '@ant-design/icons';
 import { errorNotification } from '@/component/Notification';
-import { QUERY_FIRST, MenuItemsKey, RangePresets, copy } from '@/type';
+import { QUERY_FIRST} from '@/component/type';
 import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../../component/ColumnFilter';
-import ContextMenu from '../../component/ContextMenu';
 import {RootState, setQuakeAuth, setQuakeUser} from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { LocationType, UserType } from '@/type/quake';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import PointBuy from "@/assets/images/point-buy.svg"
@@ -17,7 +36,7 @@ import { ResizeCallbackData } from 'react-resizable';
 import ResizableTitle from '../../component/ResizableTitle';
 import { ExportDataPanelProps } from './Props';
 import { buttonProps, authFormProps } from '../setting/Setting';
-import { localeCompare } from '@/utils/utils';
+import {copy, localeCompare, RangePresets} from '@/util/util';
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import RealtimeServiceItem = quake.RealtimeServiceItem;
 import {
@@ -30,7 +49,8 @@ import {quake} from "../../../wailsjs/go/models";
 import {GetQuake} from "../../../wailsjs/go/config/Config";
 import {GetRestToken} from "../../../wailsjs/go/hunter/Bridge";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
-import {ItemType} from "antd/es/menu/interface";
+import {ItemType, MenuItemType} from "antd/es/menu/interface";
+import {MenuItem} from "@/component/MenuItem";
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
@@ -38,6 +58,27 @@ type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const optionCssStyle: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
+}
+
+export type  LocationType = {
+  owner: string
+  province_cn: string
+  province_en: string
+  isp: string     //运营商
+  country_en: string
+  district_cn: string
+  gps: number[]
+  street_cn: string
+  city_en: string
+  district_en: string
+  country_cn: string
+  street_en: string
+  city_cn: string
+  country_code: string
+  asname: string
+  scene_cn: string
+  scene_en: string
+  radius: number
 }
 
 const vipIcon = <CrownTwoTone twoToneColor="red" />
@@ -134,37 +175,13 @@ type TabContentState = {
 }
 
 let selectedRow: { item: RealtimeServiceItem, rowIndex: number, colKey: string } | undefined
-const menuItems: ItemType[] = [
-  {
-    label: '浏览器打开域名',
-    key: MenuItemsKey.OpenUrl,
-    icon: <GlobalOutlined />
-  },
-  {
-    label: '查询C段',
-    key: MenuItemsKey.IpCidr,
-    icon: <CloudOutlined />
-  },
-  {
-    label: '查询IP',
-    key: MenuItemsKey.Ip,
-    icon: <CloudOutlined />
-  },
-  {
-    label: '复制单元格',
-    key: MenuItemsKey.CopyCell,
-    icon: <CopyOutlined />
-  },
-  {
-    label: '复制行',
-    key: MenuItemsKey.CopyRow,
-    icon: <CopyOutlined />
-  },
-  {
-    label: '复制列',
-    key: MenuItemsKey.CopyCol,
-    icon: <CopyOutlined />
-  },
+const defaultMenuItems: MenuItemType[] = [
+  MenuItem.OpenUrl,
+  MenuItem.QueryIpCidr,
+  MenuItem.QueryIP,
+  MenuItem.CopyCell,
+  MenuItem.CopyRow,
+  MenuItem.CopyCol,
 ];
 
 const AuthSetting: React.FC = () => {
@@ -446,14 +463,14 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '序号', dataIndex: "index", width: 52, ellipsis: true, fixed: "left", onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  ( selectedRow = { item: record, rowIndex: index, colKey: "index", }) }
+            onContextMenu: () => { index  &&  ( selectedRow = { item: record, rowIndex: index, colKey: "index", }) }
           }
         }
       },
       {
         title: 'IP', dataIndex: "ip", ellipsis: true, width: 120, fixed: "left", sorter: ((a, b) => localeCompare(a.ip, b.ip)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "ip", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "ip", }) },
             onClick: () => copyCell(record.ip)
           }
         }
@@ -461,7 +478,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '域名', dataIndex: "domain", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.domain, b.domain)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "domain", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "domain", }) },
             onClick: () => copyCell(record.domain)
           }
         }
@@ -469,7 +486,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '端口', dataIndex: "port", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.port, b.port)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "port", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "port", }) },
             onClick: () => copyCell(record.port)
           }
         }
@@ -477,7 +494,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '协议', dataIndex: "protocol", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a?.service?.name, b?.service?.name)), render: (value, record) => (record?.service?.name), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "protocol", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "protocol", }) },
             onClick: () => copyCell(record?.service?.name)
           }
         }
@@ -485,7 +502,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '网站标题', dataIndex: "web_title", ellipsis: true, width: 400, sorter: ((a, b) => localeCompare(a?.service?.http?.title, b?.service?.http?.title)), render: (value, record) => (record?.service?.http?.title), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "web_title", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "web_title", }) },
             onClick: () => copyCell(record?.service?.http?.title)
           }
         }
@@ -493,7 +510,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '响应码', dataIndex: "status_code", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a?.service?.http?.status_code, b?.service?.http?.status_code)), render: (value, record) => (record?.service?.http?.status_code), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "status_code", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "status_code", }) },
             onClick: () => copyCell(record?.service?.http?.status_code)
           }
         }
@@ -501,7 +518,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '产品应用', dataIndex: "component", ellipsis: true, width: 100, onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "component", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "component", }) },
             onClick: () => copyCell(record.ip)
           }
         }
@@ -509,7 +526,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '网站服务器', dataIndex: "os_name", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.os_name, b.os_name)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "os_name", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "os_name", }) },
             onClick: () => copyCell(record.os_name)
           }
         }
@@ -517,7 +534,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '网站路径', dataIndex: "path", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a?.service?.http?.path, b?.service?.http?.path)), render: (value, record) => (record?.service?.http?.path), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "path", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "path", }) },
             onClick: () => copyCell(record?.service?.http?.path)
           }
         }
@@ -553,7 +570,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             location.push(record.location.street_cn)
           }
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "location", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "location", }) },
             onClick: () => copyCell(location.join(" "))
           }
         }
@@ -561,7 +578,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '更新时间', dataIndex: "time", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.time, b.time)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "time", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "time", }) },
             onClick: () => copyCell(record.time)
           }
         }
@@ -569,7 +586,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: 'ASN', dataIndex: "asn", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.asn, b.asn)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "asn", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "asn", }) },
             onClick: () => copyCell(record.asn)
           }
         }
@@ -577,7 +594,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '运营商', dataIndex: "isp", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a?.location?.isp, b?.location?.isp)), render: (value, record) => (record?.location?.isp), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index != undefined &&  (selectedRow = { item: record, rowIndex: index, colKey: "isp", }) },
+            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "isp", }) },
             onClick: () => copyCell(record?.location?.isp)
           }
         }
@@ -593,6 +610,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
     const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
     const { input, checkedColsValue } = this.state
     const dispatch = useDispatch()
+    const [openContextMenu, setOpenContextMenu] = useState(false);
+    const [menuItems,setMenuItems] = useState(defaultMenuItems)
 
     useEffect(() => {
       const init = async () => {
@@ -659,12 +678,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       }));
     }
 
-    const handleMenuItemClick = (key: MenuItemsKey) => {
+    const handleMenuItemClick : MenuProps['onClick'] = (e) => {
       if(!selectedRow){
         return
       }
-      switch (key) {
-        case MenuItemsKey.CopyCell:
+      switch (e.key) {
+        case MenuItem.CopyCell.key:
           {
             const item = selectedRow.item as RealtimeServiceItem
             for (const key in item) {
@@ -675,13 +694,13 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             }
           }
           break
-        case MenuItemsKey.IpCidr:
+        case MenuItem.QueryIpCidr.key:
           this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip + "/24")
           break
-        case MenuItemsKey.Ip:
+        case MenuItem.QueryIP.key:
           this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip)
           break
-        case MenuItemsKey.OpenUrl:
+        case MenuItem.OpenUrl.key:
           {
             const domain = selectedRow.item.domain
             const schema = selectedRow.item.service?.name
@@ -695,10 +714,10 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             }
             break
           }
-        case MenuItemsKey.CopyRow:
+        case MenuItem.CopyRow.key:
           copy(selectedRow)
           break
-        case MenuItemsKey.CopyCol:
+        case MenuItem.CopyCol.key:
           {
             const colValues = pageData.map(item => {
               for (const key in item) {
@@ -960,16 +979,15 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         </Space>
       </Space>
 
-      <ContextMenu
-        // open={open}
-        // event={event}
-        items={menuItems}
-        onItemClick={(key) => {
-          handleMenuItemClick(key as MenuItemsKey)
-        }}
-        hidden={pageData.length === 0}
+      <Dropdown
+          menu={{ items: menuItems, onClick: handleMenuItemClick }}
+          trigger={['contextMenu']}
+          open={openContextMenu}
+          onOpenChange={(v)=> {
+            setOpenContextMenu(v ? pageData.length > 0 : false)
+          }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div >
           <Table
             // locale={{ emptyText: "暂无数据" }}
             showSorterTooltip={false}
@@ -1009,7 +1027,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
           />
         </div>
-      </ContextMenu>
+      </Dropdown>
 
     </div >
   }

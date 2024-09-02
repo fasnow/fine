@@ -2,7 +2,7 @@ import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
-import {Button, Checkbox, Divider, Input, InputNumber, message, Select, Space, Tabs, Tooltip} from "antd";
+import { Button, Dropdown, Input, InputNumber, MenuProps, Space, Table, Tabs, Tooltip } from "antd";
 import "@/pages/Httpx.css"
 import {GetHttpx, SaveHttpx} from "../../wailsjs/go/config/Config";
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
@@ -10,65 +10,78 @@ import {errorNotification} from "@/component/Notification";
 
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
-import {Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit'
 import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState, setHttpx} from "@/store/store";
+import {ResizeCallbackData} from "react-resizable";
+import {ColumnsType} from "antd/es/table";
+import ResizableTitle from "@/component/ResizableTitle";
+import {Chrome} from "@/component/Icon";
+import {copy, strSplit} from "@/util/util";
+import {MenuItem} from "@/component/MenuItem";
+import {fofa, hunter} from "../../wailsjs/go/models";
+
+const items: MenuProps['items'] = [
+    MenuItem.CopyCell,
+    MenuItem.CopyRow,
+    MenuItem.CopyCol,
+    MenuItem.CopyAll,
+];
+const onCell=(index:any, record:any, colKey:any) => {
+    return {
+        onContextMenu: () => {
+            index  &&  (selectedRow = {record: record, rowIndex: index, colKey: colKey,})
+        },
+        onClick: () => copy(record[colKey])
+    }
+}
+let selectedRow:any
+const defaultColumns:ColumnsType = [
+    {
+        title: '序号', dataIndex: "index", ellipsis: true, width: 50, onCell: (record, index) => onCell(index, record, "index")
+    },
+    {
+        title: '链接', dataIndex: "url", ellipsis: {showTitle: false}, width: 300, sorter: ((a: any, b: any) => a.url.localeCompare(b.url)),
+        render: (text:any) => (
+            <span style={{gap:"10"}}>
+                    <Chrome onClick={() => { BrowserOpenURL(text); }} /> {text}
+                </span>
+
+        ),
+        onCell: (record, index) => onCell(index, record, "url")
+    },
+    {
+        title: '其他信息', dataIndex: "detail", ellipsis: true, sorter: ((a: any, b: any) => a.detail.localeCompare(b.detail)),
+        onCell: (record, index) => onCell(index, record, "detail")
+    },
+]
 const TabContent=()=>{
+
     const [path,setPath] = useState<string>("")
     const [flags,setFlags] = useState<string>("")
     const [running,setRunning] = useState<boolean>(false)
     const [targets,setTargets] = useState<string>("")
-    const terminalRef = useRef<Terminal>(new Terminal({
-        scrollback: 99999, // 增加滚动缓冲区大小
-    }));
     const fitAddon = useRef<FitAddon>(new  FitAddon());
-    const urls = useRef<string[]>([])
-    const [total,setTotal] = useState<number>(0)
-    const [start,setStart] = useState<number>(1)
-    const [length,setLength] = useState<number>(15)
-    const [messageApi, contextHolder] = message.useMessage();
+    // const [total,setTotal] = useState<number>(0)
+    const [offset,setOffset] = useState<number>(1)
+    const [limit,setLimit] = useState<number>(15)
     const taskID = useRef<number>(0)
-    const outputRef = useRef<HTMLDivElement>(null)
+    useRef<HTMLDivElement>(null);
     const httpxConfig = useSelector((state: RootState) => state.config.httpx)
     const dispatch = useDispatch()
+    const [height, setHeight] = useState(window.innerHeight - 200)
+    const [dataList,setDataList] = useState<{"index":number,"url":string,"detail":string}[]>([])
+    const [columns, setColumns] = useState(defaultColumns)
+    const tblRef: Parameters<typeof Table>[0]['ref'] = React.useRef(null);
+    const [open, setOpen] = useState(false)
 
     useEffect(() => {
-        //设置终端格式
-        if (terminalRef.current) {
-            //全选、复制
-            terminalRef.current.onKey(e => {
-                if (e.domEvent.ctrlKey && e.domEvent.key === 'c' && terminalRef.current.hasSelection()) {
-                    navigator.clipboard.writeText(terminalRef.current.getSelection())
-                    messageApi.success("复制成功", 0.5)
-                    e.domEvent.preventDefault()
-                }else if(e.domEvent.ctrlKey && e.domEvent.key === 'a' ){
-                    terminalRef.current.selectAll()
-                    navigator.clipboard.writeText(terminalRef.current.getSelection())
-                    messageApi.success("复制成功", 0.5)
-                    e.domEvent.preventDefault()
-                }
-            })
-
-            const elem = outputRef.current
-            if(elem){
-                terminalRef.current.open(elem);
-                terminalRef.current.loadAddon(fitAddon.current)
-                terminalRef.current.options.linkHandler={
-                    activate: (event, text, range)=> {
-                        BrowserOpenURL(text)
-                    }
-                }
-                fitAddon.current.fit()
-                window.addEventListener("resize", ()=>{
-                    fitAddon.current.fit()
-                })
-            }
-
-        }
+        window.addEventListener("resize",()=>{
+            setHeight(window.innerHeight - 200)
+        })
 
         //设置httpx配置
         GetHttpx().then(
@@ -83,34 +96,24 @@ const TabContent=()=>{
         GetAllEvents().then(
             result=>{
                 EventsOn(String(result.httpxOutput),(value)=>{
-                    if (!value.taskID || value.taskID != taskID.current){
+                    if (!value.taskID || value.taskID !== taskID.current){
                         return
                     }
-                    const data = value.data
-                    console.log(data)
-
-                    //将终端中的链接转为超链接实现可以点击打开浏览器
-                    const urlRegex = /https?:\/\/\S+/g;
-                    let match;
-                    let resultString = data;
-                    while ((match = urlRegex.exec(data)) !== null) {
-                        const matchedUri = match[0];
-                        const replacement = `\x1b]8;;${matchedUri}\x07${matchedUri}\x1b]8;;\x07`;
-                        resultString = resultString.replace(matchedUri, replacement);
-                        urls.current.push(matchedUri)
-                        setTotal(urls.current.length)
+                    let data = value.data
+                    data = data.replaceAll(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
+                    if(!data.startsWith("http")){
+                        return;
                     }
-                    terminalRef.current && terminalRef.current.writeln(resultString)
+                    console.log(data)
+                    let t = strSplit(data, ' ', 2)
+                    setDataList((prevState)=>{return [...prevState, {index:++prevState.length,url:t[0],detail:t[1]}]})
                 })
                 EventsOn(String(result.httpxOutputDone),(value)=>{
-                    if (!value.taskID || value.taskID != taskID.current){
+                    if (!value.taskID || value.taskID !== taskID.current){
                         return
                     }
                     taskID.current=0
                     setRunning(false)
-                    terminalRef.current && terminalRef.current.write("$$$ Finished")
-                    terminalRef.current && terminalRef.current.write("")
-                    console.log(urls.current)
                 })
             }
         )
@@ -143,10 +146,9 @@ const TabContent=()=>{
     }
 
     const run=()=>{
-        urls.current=[]
-        setTotal(0)
-        setStart(1)
-        setLength(length)
+        setDataList([])
+        setOffset(1)
+        setLimit(limit)
         Run(path,flags,targets).then(r => {
             taskID.current=r
             setRunning(true)
@@ -166,18 +168,87 @@ const TabContent=()=>{
     }
 
     const BrowserOpenMultiUrl=()=>{
-        if(!urls.current || urls.current.length==0)return
-        for (const url of urls.current.slice(start-1, start-1+length)) {
-            BrowserOpenURL(url)
+        const total = dataList?.length
+        if(!total)return
+        for (const data of dataList.slice(offset-1, offset-1+limit)) {
+            BrowserOpenURL(data.url)
         }
-        const nextStart = start+length
-        setLength(nextStart>urls.current.length?0:length)
-        setStart(nextStart>urls.current.length?urls.current.length:nextStart)
+        const nextOffset = offset+limit
+        setLimit(nextOffset > total ? 0 : limit)
+        setOffset(nextOffset > total ? total : nextOffset)
     }
+
+    const handleHeaderResize =
+        (index: number) => (_: React.SyntheticEvent<Element>, { size }: ResizeCallbackData) => {
+            const newColumns = [...columns];
+            newColumns[index] = {
+                ...newColumns[index],
+                width: size.width,
+            };
+            setColumns(newColumns)
+        };
+
+    const getMergeColumns = () => {
+
+        if (!columns) {
+            return defaultColumns
+        }
+
+        return columns?.map((col:any, index:any) => ({
+            ...col,
+            onHeaderCell: (column:any) => ({
+                width: column.width,
+                onResize: handleHeaderResize(index) as React.ReactEventHandler<any>,
+            }),
+        }));
+    }
+
+    const handleSortChange = (pagination:any, filters:any, sorter:any) => {
+        const { order, field } = sorter;
+        if(order === 'ascend' || order === 'descend'){
+            const sortedData = [...dataList].sort((a:any, b:any) => {
+                return order === 'ascend' ? a[field].localeCompare(b.url) : b[field].localeCompare(a.url);
+            });
+            setDataList(sortedData);
+        }
+        const sortedData = [...dataList].sort((a:any, b:any) => {
+            return a.index - b.index;
+        });
+        setDataList(sortedData);
+    };
+
+    const handleMenuItemClick : MenuProps['onClick'] = (e) => {
+        switch (e.key) {
+            case MenuItem.CopyAll.key:
+                let t = "";
+                for (const item of dataList) {
+                    t += `${item.index}\t${item.url}\t${item.detail}\n`
+                }
+                copy(t)
+                break
+            case MenuItem.OpenUrl.key:
+                selectedRow.record?.url && BrowserOpenURL(selectedRow.record.url)
+                break
+            case MenuItem.CopyCell.key:
+                copy(selectedRow?.record[selectedRow["colKey"]])
+                break
+            case MenuItem.CopyRow.key:
+                copy(`${selectedRow.record.index}\t${selectedRow.record.url}\t${selectedRow.record.detail}`)
+                break
+            case MenuItem.CopyCol.key:
+            {
+                const colValues = dataList.map((item:any)=>{
+                    return item[selectedRow["colKey"]]
+                })
+                copy(colValues)
+                break
+            }
+        }
+        selectedRow = undefined
+    };
 
     return (
         <div style={{display:"flex",flexDirection:"column",gap:"10px",height:"calc(100vh - 80px)"}}>
-            {contextHolder}
             <div style={{display:"flex",justifyContent:"center",gap:"10px"}}>
                 <span style={{display:"flex",gap:"5px"}}>
                     <span>Httpx路径</span>
@@ -203,29 +274,54 @@ const TabContent=()=>{
             </div>
             <Space style={{display:"flex",justifyContent:"center"}} size={20}>
                 <Space.Compact size={"small"}>
-                    <InputNumber style={{width:"150px"}} prefix={<div>总数:</div>} value={total}/>
-                    <InputNumber style={{width:"150px"}} prefix={<div>起始:</div>} min={1} value={start} onChange={(value)=>value&&setStart(value)} />
-                    <InputNumber style={{width:"150px"}} prefix={<div>长度:</div>} value={length} onChange={(value)=>value&&setLength(value)}/>
+                    <InputNumber style={{width:"150px"}} prefix={<div>总数:</div>} value={dataList.length}/>
+                    <InputNumber style={{width:"150px"}} prefix={<div>起始:</div>} min={1} value={offset} onChange={(value)=>value&&setOffset(value)} />
+                    <InputNumber style={{width:"150px"}} prefix={<div>长度:</div>} value={limit} onChange={(value)=>value&&setLimit(value)}/>
                     <Button onClick={BrowserOpenMultiUrl}>默认浏览器打开下一组</Button>
                 </Space.Compact>
-                <Button size={"small"} onClick={()=>terminalRef.current.reset()}>清空终端</Button>
             </Space>
-            {/*<div style={{justifyContent:"center",display:"flex"}}>*/}
-            {/*    */}
-            {/*</div>*/}
             <div style={{height:"calc(100%)"}}>
                 <Allotment onChange={()=>fitAddon.current.fit()} >
                     <Allotment.Pane preferredSize={"350"}  className={"httpx-left"}>
-                        <TextArea  value={targets} size={"small"} placeholder={"每行一个"} autoSize style={{maxHeight:"100%"}}
-                                   onChange={e=>setTargets(e.target.value)}
-                                   allowClear
+                        <TextArea
+                            size={"small"}
+                            value={targets}
+                            allowClear
+                            onChange={e=>setTargets(e.target.value)}
+                            placeholder={"每行一个"}
+                            autoSize={{ minRows: 10, maxRows: 10 }}
                         />
                     </Allotment.Pane>
                     <Allotment.Pane  className={"httpx-right"}>
-                        {/*<TextArea value={output} autoSize style={{maxHeight:"calc(100vh - 120px)"}}*/}
-                        {/*          onChange={e=>setOutput(e.target.value)}*/}
-                        {/*/>*/}
-                        <div ref={outputRef} style={{height:"100%"}}/>
+                        <Dropdown
+                            menu={{ items, onClick: handleMenuItemClick}}
+                            trigger={['contextMenu']}
+                            open={open}
+                            onOpenChange={(v)=> {
+                                setOpen(v ? dataList.length > 0 : false)
+                            }}
+                        ><div>
+                            <Table
+                                ref={tblRef}
+                                virtual
+                                showSorterTooltip={false}
+                                columns={getMergeColumns()}
+                                components={{
+                                    header: {
+                                        cell: ResizableTitle,
+                                    },
+                                }}
+                                bordered
+                                sticky={{ offsetHeader: 0 }}
+                                scroll={{x:1,y:height}}
+                                size={"small"}
+                                dataSource={dataList}
+                                pagination={false}
+                                rowKey={"dataIndex"}
+                                onChange={handleSortChange}
+                            />
+                        </div>
+                        </Dropdown>
                     </Allotment.Pane>
                 </Allotment>
             </div>

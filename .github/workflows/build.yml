@@ -135,7 +135,8 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. 修复或者添加了功能 #1 #5 #6 。
+            1. hunter/fofa支持icon搜索；
+            2. 更改了httpx输出格式。
             
 
         env:

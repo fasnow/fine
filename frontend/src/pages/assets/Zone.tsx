@@ -1,8 +1,30 @@
 import React, { ReactNode, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Badge, Button, ConfigProvider, Empty, Input, InputNumber, List as AdList, Modal, Pagination, Popover, Space, Spin, Table, Tabs, Tag, Tooltip, MenuProps, TabsProps, Form, message } from 'antd';
+import {
+    Badge,
+    Button,
+    ConfigProvider,
+    Empty,
+    Input,
+    InputNumber,
+    List as AdList,
+    Modal,
+    Pagination,
+    Popover,
+    Space,
+    Spin,
+    Table,
+    Tabs,
+    Tag,
+    Tooltip,
+    MenuProps,
+    TabsProps,
+    Form,
+    message,
+    Dropdown
+} from 'antd';
 import { SearchOutlined, QuestionOutlined, LoadingOutlined, CloudDownloadOutlined, CopyOutlined, FullscreenOutlined, CloudOutlined, GlobalOutlined, UserOutlined } from '@ant-design/icons';
 import { errorNotification } from '@/component/Notification';
-import { QUERY_FIRST, MsgOfWechatType, MenuItemsKey, MsgOfMiniProgramType, MsgOfApkType, ZoneEmailItemType, ZoneMemberItemType, copy } from '@/type';
+import { QUERY_FIRST, MsgOfWechatType, MsgOfMiniProgramType, MsgOfApkType, ZoneEmailItemType, ZoneMemberItemType } from '@/component/type';
 import { ColumnsType } from 'antd/es/table';
 import ContextMenu from '../../component/ContextMenu';
 import AdVirtualList from 'rc-virtual-list';
@@ -20,7 +42,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {RootState, setZoneAuth} from '@/store/store';
 import { ExportDataPanelProps as ExportDataPanelProps } from './Props';
 import { buttonProps, authFormProps } from '../setting/Setting';
-import { localeCompare } from '@/utils/utils';
+import {copy, localeCompare} from '@/util/util';
 import {
     ExportDomain, ExportEmail,
     ExportMember,
@@ -38,6 +60,8 @@ import {fofa, zone} from "../../../wailsjs/go/models";
 import {current} from "@reduxjs/toolkit";
 import {Get0zone} from "../../../wailsjs/go/config/Config";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
+import {MenuItem} from "@/component/MenuItem";
+import {MenuItemType} from "antd/es/menu/interface";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 interface TabType {
@@ -408,31 +432,14 @@ const TabContent: React.FC = () => {
     )
 }
 
-const siteMenuItems: MenuProps['items'] = [
-    {
-        label: '浏览器打开URL',
-        key: MenuItemsKey.OpenUrl,
-        icon: <GlobalOutlined />
-    },
-    {
-        label: '复制单元格',
-        key: MenuItemsKey.CopyCell,
-        icon: <CloudOutlined />
-    },
-    {
-        label: '复制行',
-        key: MenuItemsKey.CopyRow,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制列',
-        key: MenuItemsKey.CopyCol,
-        icon: <CopyOutlined />
-    },
+const siteMenuItems: MenuItemType[] = [
+    MenuItem.OpenUrl,
+    MenuItem.CopyCell,
+    MenuItem.CopyRow,
+    MenuItem.CopyCol,
 ];
 
 const SiteTabContent = forwardRef((props, ref) => {
-    const [messageApi, contextHolder] = message.useMessage();
     const selectedRow = useRef<{ item: zone.SiteItem|undefined, rowIndex: number|undefined, colKey: string|undefined }>({item:undefined,rowIndex:undefined,colKey:undefined})
     interface PageDataType extends zone.SiteItem{
         index:number
@@ -449,7 +456,7 @@ const SiteTabContent = forwardRef((props, ref) => {
             title: 'URL', dataIndex: "url", ellipsis: true, width: 200, fixed: "left", sorter: ((a, b) => localeCompare(a.url, b.url)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "url", }; },
-                    onClick: () => copyCell(record.url)
+                    onClick: () => copy(record.url)
                 }
             }
         },
@@ -457,7 +464,7 @@ const SiteTabContent = forwardRef((props, ref) => {
             title: 'IP', dataIndex: "ip", ellipsis: true, width: 120, sorter: ((a, b) => localeCompare(a.ip, b.ip)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "ip", }; },
-                    onClick: () => copyCell(record.ip)
+                    onClick: () => copy(record.ip)
                 }
             }
         },
@@ -465,7 +472,7 @@ const SiteTabContent = forwardRef((props, ref) => {
             title: '端口', dataIndex: "port", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.port, b.port)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "port", }; },
-                    onClick: () => copyCell(record.port)
+                    onClick: () => copy(record.port)
                 }
             }
         },
@@ -473,7 +480,7 @@ const SiteTabContent = forwardRef((props, ref) => {
             title: '网站标题', dataIndex: "title", ellipsis: true, width: 400, sorter: ((a, b) => localeCompare(a.title, b.title)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "title", }; },
-                    onClick: () => copyCell(record.title)
+                    onClick: () => copy(record.title)
                 }
             }
         },
@@ -489,7 +496,7 @@ const SiteTabContent = forwardRef((props, ref) => {
             title: 'CMS', dataIndex: "cms", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.cms, b.cms)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "cms", }; },
-                    onClick: () => copyCell(record.cms)
+                    onClick: () => copy(record.cms)
                 }
             }
         },
@@ -561,18 +568,12 @@ const SiteTabContent = forwardRef((props, ref) => {
     const [loading, setLoading] = useState(false)
     const [isExporting, setIsExporting] = useState<boolean>(false)
     const dispatch = useDispatch()
+    const [openContextMenu, setOpenContextMenu] = useState(false);
+
 
     useImperativeHandle(ref, () => ({
         query: (input: string,pageSize:number)=>handleFirstQuery(input,pageSize),
     }));
-
-    const copyCell = (value: string | number | boolean) => {
-        if (!value) {
-            return
-        }
-        copy(value)
-        messageApi.success("复制成功", 0.5)
-    }
 
     useEffect(() => {
         GetAllEvents().then(
@@ -670,15 +671,15 @@ const SiteTabContent = forwardRef((props, ref) => {
             )
     }
 
-    const handleMenuItemClick = (key: MenuItemsKey) => {
+    const handleMenuItemClick : MenuProps['onClick'] = (e) => {
         if(!selectedRow.current.item)return
-        switch (key) {
-            case MenuItemsKey.OpenUrl:
+        switch (e.key) {
+            case MenuItem.OpenUrl.key:
                 if (selectedRow.current.item.url) {
                     BrowserOpenURL(selectedRow.current.item.url)
                 }
                 break
-            case MenuItemsKey.CopyCell:
+            case MenuItem.CopyCell.key:
                 {
                     const item = selectedRow.current.item as zone.SiteItem
                     for (const key in item) {
@@ -688,10 +689,10 @@ const SiteTabContent = forwardRef((props, ref) => {
                     }
                 }
                 break
-            case MenuItemsKey.CopyRow:
+            case MenuItem.CopyRow.key:
                 copy(selectedRow.current.item)
                 break
-            case MenuItemsKey.CopyCol:
+            case MenuItem.CopyCol.key:
                 {
                     const values = pageData.map(item => {
                         for (const key in item) {
@@ -729,16 +730,15 @@ const SiteTabContent = forwardRef((props, ref) => {
     }
 
     return (<div >
-        {contextHolder}
-        <ContextMenu
-            // open={openMenu}
-            // event={event}
-            items={siteMenuItems}
-            onItemClick={(key) => {
-                handleMenuItemClick(key as MenuItemsKey)
+        <Dropdown
+            menu={{ items: siteMenuItems, onClick: handleMenuItemClick }}
+            trigger={['contextMenu']}
+            open={openContextMenu}
+            onOpenChange={(v)=> {
+                setOpenContextMenu(v ? pageData.length > 0 : false)
             }}
-            hidden={pageData.length === 0}
         >
+            <div>
             <Table
                 // locale={{ emptyText: "暂无数据" }}
                 showSorterTooltip={false}
@@ -783,36 +783,16 @@ const SiteTabContent = forwardRef((props, ref) => {
                 sticky
                 rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
             />
-        </ContextMenu>
+            </div>
+        </Dropdown>
     </div>)
 })
 
-const doaminMenuItems: MenuProps['items'] = [
-    {
-        label: '浏览器打开域名',
-        key: MenuItemsKey.OpenDomain,
-        icon: <GlobalOutlined />
-    },
-    // {
-    //     label: '查询C段',
-    //     key: MenuItemsKey.IpCidr,
-    //     icon: <CloudOutlined />
-    // },
-    {
-        label: '复制单元格',
-        key: MenuItemsKey.CopyCell,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制行',
-        key: MenuItemsKey.CopyRow,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制列',
-        key: MenuItemsKey.CopyCol,
-        icon: <CopyOutlined />
-    },
+const doaminMenuItems: MenuItemType[] = [
+    MenuItem.OpenDomain,
+    MenuItem.CopyCell,
+    MenuItem.CopyRow,
+    MenuItem.CopyCol,
 
 ];
 
@@ -833,7 +813,7 @@ const DomainTabContent = forwardRef((props, ref) => {
             title: '域名', dataIndex: "url", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.url, b.url)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "url", }; },
-                    onClick: () => copyCell(record.url)
+                    onClick: () => copy(record.url)
                 }
             }
         },
@@ -841,7 +821,7 @@ const DomainTabContent = forwardRef((props, ref) => {
             title: 'IP', dataIndex: "ip", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.ip, b.ip)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "ip", }; },
-                    onClick: () => copyCell(record.ip)
+                    onClick: () => copy(record.ip)
                 }
             }
         },
@@ -849,7 +829,7 @@ const DomainTabContent = forwardRef((props, ref) => {
             title: '所属企业', dataIndex: "company", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.company, b.company)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "company", }; },
-                    onClick: () => copyCell(record.company)
+                    onClick: () => copy(record.company)
                 }
             }
         },
@@ -857,7 +837,7 @@ const DomainTabContent = forwardRef((props, ref) => {
             title: '备案', dataIndex: "icp", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.icp, b.icp)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "icp", }; },
-                    onClick: () => copyCell(record.icp)
+                    onClick: () => copy(record.icp)
                 }
             }
         },
@@ -874,14 +854,8 @@ const DomainTabContent = forwardRef((props, ref) => {
     const [loading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const [isExporting, setIsExporting] = useState<boolean>(false)
-    const [messageApi, contextHolder] = message.useMessage();
-    const copyCell = (value: string | number | boolean) => {
-        if (!value) {
-            return
-        }
-        copy(value)
-        messageApi.success("复制成功", 0.5)
-    }
+    const [openContextMenu, setOpenContextMenu] = useState(false);
+
     useImperativeHandle(ref, () => ({
         query: (input: string,pageSize:number)=>handleFirstQuery(input,pageSize),
     }));
@@ -977,10 +951,10 @@ const DomainTabContent = forwardRef((props, ref) => {
             )
     }
 
-    const handleMenuItemClick = (key: MenuItemsKey) => {
+    const handleMenuItemClick : MenuProps['onClick'] = (e)=> {
         if(!selectedRow.current.item)return
-        switch (key) {
-            case MenuItemsKey.OpenDomain:
+        switch (e.key) {
+            case MenuItem.OpenDomain.key:
                 {
                     const url = selectedRow.current.item.url
                     if (url) {
@@ -988,7 +962,7 @@ const DomainTabContent = forwardRef((props, ref) => {
                     }
                     break
                 }
-            case MenuItemsKey.CopyCell:
+            case MenuItem.CopyCell.key:
                 {
                     const item = selectedRow.current.item as zone.DomainItem
                     for (const key in item) {
@@ -998,10 +972,10 @@ const DomainTabContent = forwardRef((props, ref) => {
                     }
                 }
                 break
-            case MenuItemsKey.CopyRow:
+            case MenuItem.CopyRow.key:
                 copy(selectedRow.current)
                 break
-            case MenuItemsKey.CopyCol:
+            case MenuItem.CopyCol.key:
                 {
                     const values = pageData.map(item => {
                         for (const key in item) {
@@ -1038,15 +1012,15 @@ const DomainTabContent = forwardRef((props, ref) => {
         }));
     }
     return (<div >
-        {contextHolder}
-        <ContextMenu
-            // open={openMenu}
-            // event={event}
-            items={doaminMenuItems}
-            onItemClick={key => handleMenuItemClick(key as MenuItemsKey)}
-        // toInvisible={() => { setOpenMenu(false) }}
+        <Dropdown
+            menu={{ items: doaminMenuItems, onClick: handleMenuItemClick }}
+            trigger={['contextMenu']}
+            open={openContextMenu}
+            onOpenChange={(v)=> {
+                setOpenContextMenu(v ? pageData.length > 0 : false)
+            }}
         >
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div>
             <Table
                 // locale={{ emptyText: "暂无数据" }}
                 showSorterTooltip={false}
@@ -1089,7 +1063,7 @@ const DomainTabContent = forwardRef((props, ref) => {
                 rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
             />
             </div>
-        </ContextMenu>
+        </Dropdown>
     </div>)
 })
 
@@ -1102,28 +1076,28 @@ const ApkTabContent = forwardRef((props, ref) => {
         {
             title: '应用名称', dataIndex: "title", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.title, b.title)), onCell: (record, index) => {
                 return {
-                    onClick: () => copyCell(record.title)
+                    onClick: () => copy(record.title)
                 }
             }
         },
         { title: '所属企业', dataIndex: "company", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.company, b.company)), onCell: (record, index) => {
             return {
-                onClick: () => copyCell(record.company)
+                onClick: () => copy(record.company)
             }
         } },
         { title: '应用类型', dataIndex: "type", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.type, b.type)), onCell: (record, index) => {
             return {
-                onClick: () => copyCell(record.type)
+                onClick: () => copy(record.type)
             }
         } },
         { title: '数据来源', dataIndex: "source", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.source, b.source)), onCell: (record, index) => {
             return {
-                onClick: () => copyCell(record.source)
+                onClick: () => copy(record.source)
             }
         } },
         { title: '更新时间', dataIndex: "timestamp", ellipsis: true, sorter: ((a, b) => localeCompare(a.timestamp, b.timestamp)), onCell: (record, index) => {
             return {
-                onClick: () => copyCell(record.timestamp)
+                onClick: () => copy(record.timestamp)
             }
         } },
     ])
@@ -1139,14 +1113,7 @@ const ApkTabContent = forwardRef((props, ref) => {
     const [loading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const [isExporting, setIsExporting] = useState<boolean>(false)
-    const [messageApi, contextHolder] = message.useMessage();
-    const copyCell = (value: string | number | boolean) => {
-        if (!value) {
-            return
-        }
-        copy(value)
-        messageApi.success("复制成功", 0.5)
-    }
+
     useImperativeHandle(ref, () => ({
         query: (input: string,pageSize:number)=>handleFirstQuery(input,pageSize),
     }));
@@ -1272,7 +1239,6 @@ const ApkTabContent = forwardRef((props, ref) => {
     }
 
     return (<div >
-        {contextHolder}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Table
             // locale={{ emptyText: "暂无数据" }}
@@ -1393,22 +1359,10 @@ const ApkTabContent = forwardRef((props, ref) => {
 })
 
 
-const emailMenuItems: MenuProps['items'] = [
-    {
-        label: '复制单元格',
-        key: MenuItemsKey.CopyCell,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制行',
-        key: MenuItemsKey.CopyRow,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制列',
-        key: MenuItemsKey.CopyCol,
-        icon: <CopyOutlined />
-    },
+const emailMenuItems: MenuItemType[] = [
+    MenuItem.CopyCell,
+    MenuItem.CopyRow,
+    MenuItem.CopyCol,
 
 ];
 
@@ -1429,7 +1383,7 @@ const EmailTabContent = forwardRef((props, ref) => {
             title: '邮箱', dataIndex: "email", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.email, b.email)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "email", }; },
-                    onClick: () => copyCell(record.email)
+                    onClick: () => copy(record.email)
                 }
             }
         },
@@ -1437,7 +1391,7 @@ const EmailTabContent = forwardRef((props, ref) => {
             title: '所属企业', dataIndex: "group", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.group, b.group)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "group", }; },
-                    onClick: () => copyCell(record.group)
+                    onClick: () => copy(record.group)
                 }
             }
         },
@@ -1445,7 +1399,7 @@ const EmailTabContent = forwardRef((props, ref) => {
             title: '来源', dataIndex: "source", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.source, b.source)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "source", }; },
-                    onClick: () => copyCell(record.source?.join(" "))
+                    onClick: () => copy(record.source?.join(" "))
                 }
             }
         },
@@ -1453,7 +1407,7 @@ const EmailTabContent = forwardRef((props, ref) => {
             title: '更新时间', dataIndex: "timestamp", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.timestamp, b.timestamp)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "timestamp", }; },
-                    onClick: () => copyCell(record.timestamp)
+                    onClick: () => copy(record.timestamp)
                 }
             }
         },
@@ -1470,14 +1424,8 @@ const EmailTabContent = forwardRef((props, ref) => {
     const [loading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const [isExporting, setIsExporting] = useState<boolean>(false)
-    const [messageApi, contextHolder] = message.useMessage();
-    const copyCell = (value: string | number | boolean) => {
-        if (!value) {
-            return
-        }
-        copy(value)
-        messageApi.success("复制成功", 0.5)
-    }
+    const [openContextMenu, setOpenContextMenu] = useState(false);
+
     useImperativeHandle(ref, () => ({
         query: (input: string,pageSize:number)=>handleQuery(input,pageSize),
     }));
@@ -1599,9 +1547,9 @@ const EmailTabContent = forwardRef((props, ref) => {
         }));
     }
 
-    const handleMenuItemClick = (key: MenuItemsKey) => {
-        switch (key) {
-            case MenuItemsKey.CopyCell:
+    const handleMenuItemClick : MenuProps['onClick'] = (e) => {
+        switch (e.key) {
+            case MenuItem.CopyCell.key:
                 {
                     const item = selectedRow.current.item as ZoneEmailItemType
                     for (const key in item) {
@@ -1611,10 +1559,10 @@ const EmailTabContent = forwardRef((props, ref) => {
                     }
                 }
                 break
-            case MenuItemsKey.CopyRow:
+            case MenuItem.CopyRow.key:
                 copy(selectedRow.current.item)
                 break
-            case MenuItemsKey.CopyCol:
+            case MenuItem.CopyCol.key:
                 {
                     const values = pageData.map(item => {
                         for (const key in item) {
@@ -1631,15 +1579,15 @@ const EmailTabContent = forwardRef((props, ref) => {
         selectedRow.current = {item:undefined,rowIndex:undefined,colKey:undefined}
     };
     return (<div >
-        {contextHolder}
-        <ContextMenu
-            // open={openMenu}
-            // event={event}
-            items={emailMenuItems}
-            onItemClick={key => handleMenuItemClick(key as MenuItemsKey)}
-        // toInvisible={() => { setOpenMenu(false) }}
+        <Dropdown
+            menu={{ items: emailMenuItems, onClick: handleMenuItemClick }}
+            trigger={['contextMenu']}
+            open={openContextMenu}
+            onOpenChange={(v)=> {
+                setOpenContextMenu(v ? pageData.length > 0 : false)
+            }}
         >
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div>
             <Table
                 // locale={{ emptyText: "暂无数据" }}
                 showSorterTooltip={false}
@@ -1682,26 +1630,14 @@ const EmailTabContent = forwardRef((props, ref) => {
                 rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
             />
             </div>
-        </ContextMenu>
+        </Dropdown>
     </div>)
 })
 
-const memberMenuItems: MenuProps['items'] = [
-    {
-        label: '复制单元格',
-        key: MenuItemsKey.CopyCell,
-        icon: <CloudOutlined />
-    },
-    {
-        label: '复制行',
-        key: MenuItemsKey.CopyRow,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制列',
-        key: MenuItemsKey.CopyCol,
-        icon: <CopyOutlined />
-    },
+const memberMenuItems: MenuItemType[] = [
+    MenuItem.CopyCell,
+    MenuItem.CopyRow,
+    MenuItem.CopyCol,
 ];
 
 const MemberTabContent = forwardRef((props, ref) => {
@@ -1720,7 +1656,7 @@ const MemberTabContent = forwardRef((props, ref) => {
             title: '姓名', dataIndex: "name", ellipsis: true, width: 100, onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "name", }; },
-                    onClick: () => copyCell(record.name)
+                    onClick: () => copy(record.name)
                 }
             }
         },
@@ -1728,7 +1664,7 @@ const MemberTabContent = forwardRef((props, ref) => {
             title: '职位', dataIndex: "position", ellipsis: true, width: 200, render: (text, record: ZoneMemberItemType, index) => record.position?.join(" "), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "position", }; },
-                    onClick: () => copyCell(record.position?.join(" "))
+                    onClick: () => copy(record.position?.join(" "))
                 }
             }
         },
@@ -1736,7 +1672,7 @@ const MemberTabContent = forwardRef((props, ref) => {
             title: '简介', dataIndex: "introduction", ellipsis: true, width: 200, onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "introduction", }; },
-                    onClick: () => copyCell(record.introduction)
+                    onClick: () => copy(record.introduction)
                 }
             }
         },
@@ -1744,7 +1680,7 @@ const MemberTabContent = forwardRef((props, ref) => {
             title: '来源', dataIndex: "source", ellipsis: true, width: 100, onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "source", }; },
-                    onClick: () => copyCell(record.source)
+                    onClick: () => copy(record.source)
                 }
             }
         },
@@ -1752,7 +1688,7 @@ const MemberTabContent = forwardRef((props, ref) => {
             title: '所属企业', dataIndex: "company", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.company, b.company)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "company", }; },
-                    onClick: () => copyCell(record.company)
+                    onClick: () => copy(record.company)
                 }
             }
         },
@@ -1760,7 +1696,7 @@ const MemberTabContent = forwardRef((props, ref) => {
             title: '更新时间', dataIndex: "timestamp", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.timestamp, b.timestamp)), onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow.current = { item: record, rowIndex: index, colKey: "timestamp", }; },
-                    onClick: () => copyCell(record.timestamp)
+                    onClick: () => copy(record.timestamp)
                 }
             }
         },
@@ -1779,14 +1715,8 @@ const MemberTabContent = forwardRef((props, ref) => {
     const dispatch = useDispatch()
     const selectedRow = useRef<{ item: zone.MemberItem|undefined, rowIndex: number|undefined, colKey: string|undefined }>({item:undefined,rowIndex:undefined,colKey:undefined})
     const [isExporting, setIsExporting] = useState<boolean>(false)
-    const [messageApi, contextHolder] = message.useMessage();
-    const copyCell = (value: string | number | boolean) => {
-        if (!value) {
-            return
-        }
-        copy(value)
-        messageApi.success("复制成功", 0.5)
-    }
+    const [openContextMenu, setOpenContextMenu] = useState(false);
+
     useImperativeHandle(ref, () => ({
         query: (input: string,pageSize:number)=>handlFirstQuery(input,pageSize),
     }));
@@ -1902,9 +1832,9 @@ const MemberTabContent = forwardRef((props, ref) => {
         }));
     }
 
-    const handleMenuItemClick = (key: MenuItemsKey) => {
-        switch (key) {
-            case MenuItemsKey.CopyCell:
+    const handleMenuItemClick : MenuProps['onClick'] = (e) => {
+        switch (e.key) {
+            case MenuItem.CopyCell.key:
                 {
                     const item = selectedRow.current.item as zone.MemberItem
                     for (const key in item) {
@@ -1914,10 +1844,10 @@ const MemberTabContent = forwardRef((props, ref) => {
                     }
                 }
                 break
-            case MenuItemsKey.CopyRow:
+            case MenuItem.CopyRow.key:
                 copy(selectedRow.current.item)
                 break
-            case MenuItemsKey.CopyCol:
+            case MenuItem.CopyCol.key:
                 {
                     const values = pageData.map(item => {
                         for (const key in item) {
@@ -1934,12 +1864,15 @@ const MemberTabContent = forwardRef((props, ref) => {
         selectedRow.current = {item:undefined,rowIndex:undefined,colKey:undefined}
     }
     return (<div >
-        {contextHolder}
-        <ContextMenu
-            items={memberMenuItems}
-            onItemClick={key => handleMenuItemClick(key as MenuItemsKey)}
+        <Dropdown
+            menu={{ items: memberMenuItems, onClick: handleMenuItemClick }}
+            trigger={['contextMenu']}
+            open={openContextMenu}
+            onOpenChange={(v)=> {
+                setOpenContextMenu(v ? pageData.length > 0 : false)
+            }}
         >
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div>
             <Table
                 // locale={{ emptyText: "暂无数据" }}
                 showSorterTooltip={false}
@@ -1981,7 +1914,7 @@ const MemberTabContent = forwardRef((props, ref) => {
                 rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
             />
             </div>
-        </ContextMenu>
+        </Dropdown>
     </div>)
 })
 

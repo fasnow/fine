@@ -1,3 +1,7 @@
+import copyToClipboard from "copy-to-clipboard";
+import dayjs, {Dayjs} from "dayjs";
+import {message} from "antd";
+
 export const dataFormat = (date: string, fmt: string): string => {
     if (date && fmt) {
         const _date = new Date(date);
@@ -52,3 +56,59 @@ export const localeCompare=(a:any,b:any)=>{
         return a - b;
       }
 }
+
+export const strSplit=(str:string, delimiter:string, limit:number)=>{
+    let parts = str.split(delimiter);
+    if (parts.length > limit) {
+        return [parts[0], parts.slice(1).join(delimiter)];
+    }
+    return parts;
+}
+
+export const copy = (value: any) => {
+    if (!value) {
+        copyToClipboard(value)
+        return
+    }
+    const valueType = typeof value
+    if (valueType === "string") {
+        copyToClipboard(value)
+    } else if (valueType === "number" || valueType === "boolean") {
+        copyToClipboard(value.toString())
+    } else if (value instanceof Array) {
+        const values = value.map((item) => {
+            if (!item) {
+                return ""
+            }
+            const itemType = typeof item
+            if (itemType === "string") {
+                return item
+            } else if (itemType === "number" || itemType === "boolean") {
+                return item.toString()
+            } else {
+                return JSON.stringify(item)
+            }
+        })
+        copyToClipboard(values.join("\n"))
+    }
+    else {
+        copyToClipboard(JSON.stringify(value))
+    }
+    message.success("复制成功",0.8)
+}
+
+interface Preset {
+    label: string;
+    value: [Dayjs, Dayjs];
+}
+
+export const RangePresets: Preset[] = [
+    { label: '最近7天', value: [dayjs().add(-7, 'd'), dayjs()] },
+    { label: '最近15天', value: [dayjs().add(-14, 'd'), dayjs()] },
+    { label: '最近一月', value: [dayjs().add(-1, 'month'), dayjs()] },
+    { label: '最近三月', value: [dayjs().add(-3, 'month'), dayjs()] },
+    { label: '最近六月', value: [dayjs().add(-6, 'month'), dayjs()] },
+    { label: '最近一年', value: [dayjs().add(-1, 'year'), dayjs()] },
+    { label: '最近两年', value: [dayjs().add(-2, 'year'), dayjs()] },
+    { label: '最近三年', value: [dayjs().add(-3, 'year'), dayjs()] },
+];

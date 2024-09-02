@@ -1,33 +1,71 @@
 import React, {ReactNode, useEffect, useRef, useState} from 'react';
-import { Button, Col, Collapse, DatePicker, Divider, Form, Input, InputNumber, List, Modal, Pagination, Popover, Row, Select, Space, Switch, Table, Tabs, Tooltip, message } from 'antd';
-import { SearchOutlined, QuestionOutlined, UserOutlined, CloudDownloadOutlined, LoadingOutlined, ExclamationCircleOutlined, CloudOutlined, CopyOutlined, GlobalOutlined } from '@ant-design/icons';
-import { errorNotification } from '@/component/Notification';
-import { MenuItemsKey, HunterUserType, RangePresets, copy } from '@/type';
-import { ColumnGroupType, ColumnType, ColumnsType } from 'antd/es/table';
+import {
+    Button,
+    Col,
+    Collapse,
+    DatePicker,
+    Divider,
+    Form,
+    Input,
+    InputNumber,
+    List,
+    Modal,
+    Pagination,
+    Popover,
+    Row,
+    Select,
+    Space,
+    Switch,
+    Table,
+    Tabs,
+    Tooltip,
+    message,
+    Upload,
+    Flex,
+    Spin,
+    Dropdown, MenuProps
+} from 'antd';
+import {
+    SearchOutlined,
+    InboxOutlined,
+    QuestionOutlined,
+    UserOutlined,
+    CloudDownloadOutlined,
+    LoadingOutlined,
+    ExclamationCircleOutlined,
+    CloudOutlined,
+    CopyOutlined,
+    GlobalOutlined
+} from '@ant-design/icons';
+import {errorNotification} from '@/component/Notification';
+import {ColumnGroupType, ColumnType, ColumnsType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../../component/ColumnFilter';
-import ContextMenu from '../../component/ContextMenu';
-import { RootState, setHunterAuth, setHunterUser } from '@/store/store';
-import { useDispatch, useSelector } from 'react-redux';
+import {HunterUserType, RootState, setHunterAuth, setHunterUser} from '@/store/store';
+import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import dayjs from 'dayjs';
-import { ResizeCallbackData } from 'react-resizable';
-import { HunterComponentType } from '@/type/hunter';
-import { ExportDataPanelProps } from './Props';
-import { buttonProps, authFormProps } from '../setting/Setting';
-import { localeCompare } from '@/utils/utils';
-import {hunter} from "../../../wailsjs/go/models";
+import {ResizeCallbackData} from 'react-resizable';
+import {ExportDataPanelProps} from './Props';
+import {buttonProps, authFormProps} from '../setting/Setting';
+import {copy, localeCompare, RangePresets} from '@/util/util';
+import {fofa, hunter} from "../../../wailsjs/go/models";
 import {Export, GetRestToken, Query, SetAuth} from "../../../wailsjs/go/hunter/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 import ResizableTitle from "@/component/ResizableTitle";
-import type { Tab } from 'rc-tabs/lib/interface';
+import type {Tab} from 'rc-tabs/lib/interface';
 import {GetHunter} from "../../../wailsjs/go/config/Config";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
-import {ItemType} from "antd/es/menu/interface";
+import {Dots} from "@/component/Icon";
+import {md5} from "js-md5"
+import {Fetch} from "../../../wailsjs/go/app/App";
+import {toUint8Array} from "js-base64";
+import {MenuItem} from "@/component/MenuItem";
+import {MenuItemType} from "antd/es/menu/interface";
+
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const pageSizeOptions = [10, 20, 50, 100]
-const defaultCheckedColsValue: string[] = [
+const defaultCheckedColsDataIndex: string[] = [
     "index",
-    "url",
     "ip",
     "port",
     "domain",
@@ -37,27 +75,31 @@ const defaultCheckedColsValue: string[] = [
     "company"
 ]
 
+interface HunterComponentType {
+    name: string,//组件名称
+    version: string,//组件版本
+}
 
 const columnFilterDataSource: DataSourceItemType[] = [
-    { label: '序号', value: "index" },
-    { label: 'IP', value: "ip" },
-    { label: '域名', value: "domain" },
-    { label: '端口', value: "port" },
-    { label: '协议', value: "protocol" },
-    { label: '网站标题', value: "web_title" },
-    { label: 'URL', value: "url" },
-    { label: '响应码', value: "status_code" },
-    { label: '组件', value: "component", },
-    { label: '操作系统', value: "os", },
-    { label: '备案单位', value: "company", },
-    { label: '城市', value: "city", },
-    { label: '更新时间', value: "updated_at", },
-    { label: 'web应用', value: "is_web", },
-    { label: 'Banner', value: "banner", },
-    { label: '风险资产', value: "is_risk", },
-    { label: '备案号', value: "number", },
-    { label: '注册机构', value: "as_org", },
-    { label: '运营商', value: "isp", },
+    {label: '序号', value: "index"},
+    {label: 'IP', value: "ip"},
+    {label: '域名', value: "domain"},
+    {label: '端口', value: "port"},
+    {label: '协议', value: "protocol"},
+    {label: '网站标题', value: "web_title"},
+    {label: 'URL', value: "url"},
+    {label: '响应码', value: "status_code"},
+    {label: '组件', value: "component",},
+    {label: '操作系统', value: "os",},
+    {label: '备案单位', value: "company",},
+    {label: '城市', value: "city",},
+    {label: '更新时间', value: "updated_at",},
+    {label: 'web应用', value: "is_web",},
+    {label: 'Banner', value: "banner",},
+    {label: '风险资产', value: "is_risk",},
+    {label: '备案号', value: "number",},
+    {label: '注册机构', value: "as_org",},
+    {label: '运营商', value: "isp",},
 ]
 type TabContentProps = {
     user?: HunterUserType
@@ -80,42 +122,19 @@ type TabContentState = {
     dateRange: string[]
 }
 
-const menuItems: ItemType[] = [
-    {
-        label: '浏览器打开URL',
-        key: MenuItemsKey.OpenUrl,
-        icon: <GlobalOutlined />
-    },
-    {
-        label: '查询C段',
-        key: MenuItemsKey.IpCidr,
-        icon: <CloudOutlined />
-    },
-    {
-        label: '查询IP',
-        key: MenuItemsKey.Ip,
-        icon: <CloudOutlined />
-    },
-    {
-        label: '复制单元格',
-        key: MenuItemsKey.CopyCell,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制行',
-        key: MenuItemsKey.CopyRow,
-        icon: <CopyOutlined />
-    },
-    {
-        label: '复制列',
-        key: MenuItemsKey.CopyCol,
-        icon: <CopyOutlined />
-    },
-
+const defaultMenuItems = [
+    MenuItem.OpenUrl,
+    MenuItem.QueryIP,
+    MenuItem.QueryIpCidr,
+    MenuItem.QueryTitle,
+    MenuItem.CopyCell,
+    MenuItem.CopyRow,
+    MenuItem.CopyCol,
+    MenuItem.CopyUrlCol
 ];
 
-interface PageDataType extends hunter.Item{
-    index:number
+interface PageDataType extends hunter.Item {
+    index: number
 }
 
 
@@ -124,46 +143,21 @@ let selectedRow: { item: hunter.Item | undefined, rowIndex: number, colKey: stri
     rowIndex: 0,
     colKey: ''
 }
-class TabContent extends React.Component<TabContentProps, TabContentState>{
+
+class TabContent extends React.Component<TabContentProps, TabContentState> {
     constructor(props: TabContentProps) {
         super(props);
         this.state = {
-            checkedColsValue: props.checkedColsValue || defaultCheckedColsValue,
+            checkedColsValue: props.checkedColsValue || defaultCheckedColsDataIndex,
             input: props.onContextMenu?.input || "",
             inputCache: '',
-            checkedFields: props.checkedColsValue || defaultCheckedColsValue,
+            checkedFields: props.checkedColsValue || defaultCheckedColsDataIndex,
             isWeb: 3,
             statusCode: "",
             portFilter: false,
             dateRange: []
         }
     }
-
-
-
-    // async componentDidMount() {
-    //     window.addEventListener("resize", this.handleResize);
-    //     this.handleResize()
-    //     let tmpCols: (ColumnGroupType<HunterItemType> | ColumnType<HunterItemType>)[]
-    //     let tmp: (ColumnGroupType<HunterItemType> | ColumnType<HunterItemType>)[]
-    //     if (this.props.checkedColsValue) {
-    //         tmpCols = defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
-    //         tmp = tmpCols.map(col => ({ ...col }));
-    //     } else {
-    //         tmpCols = defaultColumns.filter(col => defaultCheckedColsValue.includes((col as any)["dataIndex"]))
-    //         tmp = tmpCols.map(col => ({ ...col }));
-
-    //     }
-    //     // if (tmp.length > 0) {
-    //     //     delete tmp[tmp.length - 1]["width"]
-    //     // }
-    //     await this.setState({ columns: tmp })//需要使用await，不然在query中的columns还没更新
-    //     if (this.props.onContextMenu?.input) {
-    //         this.query()
-    //     }
-    // }
-
-
 
     getCheckedFields = () => {
         return this.state.checkedFields;
@@ -172,8 +166,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
     getInput = () => {
         return this.state.inputCache
     }
-
-
 
     private ExportDataPanel = (props: { id: number, total: number, currentPageSize: number }) => {
         const user = useSelector((state: RootState) => state.user.hunter)
@@ -185,12 +177,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         const [isExporting, setIsExporting] = useState<boolean>(false)
         const [exportable, setExportable] = useState<boolean>(false)
         const dispatch = useDispatch()
-        const [disable,setDisable] = useState<boolean>(false)
-        const exportData =  (page: number) => {
+        const [disable, setDisable] = useState<boolean>(false)
+        const exportData = (page: number) => {
             setIsExporting(true)
             setDisable(true)
             Export(props.id, page, pageSize).then().catch(
-                err=> {
+                err => {
                     errorNotification("错误", err)
                     setIsExporting(false)
                     setDisable(false)
@@ -199,13 +191,13 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         }
         useEffect(() => {
             GetAllEvents().then(
-                result=>{
-                    EventsOn(String(result.hasNewHunterDownloadItem), function(){
+                result => {
+                    EventsOn(String(result.hasNewHunterDownloadItem), function () {
                         setIsExporting(false)
                         setDisable(false)
                         GetRestToken().then(
-                            result=>{
-                                dispatch(setHunterUser({restToken:result}))
+                            result => {
+                                dispatch(setHunterUser({restToken: result}))
                             }
                         )
                     })
@@ -218,16 +210,16 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             if (page >= maxPage) {
                 setPage(maxPage)
                 setCost(props.total)
-              }else{
-                setCost(page*pageSize)
-              }
+            } else {
+                setCost(page * pageSize)
+            }
         }, [pageSize, props.total])
         return <>
             <Button
                 disabled={disable}
                 size="small"
                 onClick={() => setExportable(true)}
-                icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}
+                icon={isExporting ? <LoadingOutlined/> : <CloudDownloadOutlined/>}
             >
                 {isExporting ? "正在导出" : "导出结果"}
             </Button>
@@ -245,11 +237,20 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                     setExportable(false)
                     exportData(page)
                 }}
-                onCancel={() => { setExportable(false); setStatus("") }}
+                onCancel={() => {
+                    setExportable(false);
+                    setStatus("")
+                }}
             >
-                <span style={{ display: 'grid', gap: "3px" }}>
+                <span style={{display: 'grid', gap: "3px"}}>
                     <Row>
-                        <span style={{ display: 'flex', flexDirection: "row", gap: "10px", backgroundColor: '#f3f3f3', width: "100%" }}>当前积分: <span style={{ color: "red" }}>{user.restToken}</span></span>
+                        <span style={{
+                            display: 'flex',
+                            flexDirection: "row",
+                            gap: "10px",
+                            backgroundColor: '#f3f3f3',
+                            width: "100%"
+                        }}>当前积分: <span style={{color: "red"}}>{user.restToken}</span></span>
                     </Row>
                     <Row>
                         <Col span={10}>
@@ -258,9 +259,9 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                         <Col span={14}>
                             <Select
                                 size='small'
-                                style={{ width: '80px' }}
+                                style={{width: '80px'}}
                                 defaultValue={pageSize}
-                                options={pageSizeOptions.map(size => ({ label: size.toString(), value: size }))}
+                                options={pageSizeOptions.map(size => ({label: size.toString(), value: size}))}
                                 onChange={(size) => {
                                     setPageSize(size)
                                 }}
@@ -269,7 +270,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                     </Row>
                     <Row>
                         <Col span={10}>
-                            <span style={{ display: 'flex', whiteSpace: 'nowrap' }}>导出页数(max:{maxPage})</span>
+                            <span style={{display: 'flex', whiteSpace: 'nowrap'}}>导出页数(max:{maxPage})</span>
                         </Col>
                         <Col span={14}>
                             <InputNumber
@@ -277,8 +278,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                                 status={status}
                                 value={page}
                                 min={0}
-                                onChange={(value: number|null) => {
-                                    if(value){
+                                onChange={(value: number | null) => {
+                                    if (value) {
                                         if (value >= maxPage) {
                                             setPage(maxPage);
                                             setCost(props.total)
@@ -291,7 +292,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                                 keyboard={true}
                             />=
                             <Input
-                                style={{ width: '100px' }}
+                                style={{width: '100px'}}
                                 size='small'
                                 value={cost}
                                 suffix={"积分"}
@@ -305,86 +306,155 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
     Content = () => {
         const defaultColumns: ColumnsType<hunter.Item> = [
             {
-                title: '序号', dataIndex: "index", width: 52, ellipsis: true, fixed: "left", onCell: (record, index) => {
+                title: '序号',
+                dataIndex: "index",
+                width: 52,
+                ellipsis: true,
+                fixed: "left",
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "index",})
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "index",};
+                                beforeContextMenuOpen();
+                            }
                         }
                     }
                 }
             },
             {
-                title: 'URL', dataIndex: "url", ellipsis: true, width: 250, fixed: "left", sorter: ((a, b) => localeCompare(a.url, b.url)), onCell: (record, index) => {
+                title: 'URL',
+                dataIndex: "url",
+                ellipsis: true,
+                width: 250,
+                fixed: "left",
+                sorter: ((a, b) => localeCompare(a.url, b.url)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "url",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "url",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.url)
+                        onClick: () => copy(record.url)
                     }
                 }
             },
             {
-                title: '域名', dataIndex: "domain", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.domain, b.domain)), onCell: (record, index) => {
+                title: '域名',
+                dataIndex: "domain",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.domain, b.domain)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "domain",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "domain",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.domain)
+                        onClick: () => copy(record.domain)
                     }
                 }
             },
             {
-                title: 'IP', dataIndex: "ip", ellipsis: true, width: 90, sorter: ((a, b) => localeCompare(a.ip, b.ip)), onCell: (record, index) => {
+                title: 'IP',
+                dataIndex: "ip",
+                ellipsis: true,
+                width: 90,
+                sorter: ((a, b) => localeCompare(a.ip, b.ip)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "ip",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "ip",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.ip)
+                        onClick: () => copy(record.ip)
                     }
                 }
             },
             {
-                title: '端口', dataIndex: "port", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.port, b.port)), onCell: (record, index) => {
+                title: '端口',
+                dataIndex: "port",
+                ellipsis: true,
+                width: 80,
+                sorter: ((a, b) => localeCompare(a.port, b.port)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "port",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "port",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.port)
+                        onClick: () => copy(record.port)
                     }
                 }
             },
             {
-                title: '协议', dataIndex: "protocol", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.protocol, b.protocol)), onCell: (record, index) => {
+                title: '协议',
+                dataIndex: "protocol",
+                ellipsis: true,
+                width: 80,
+                sorter: ((a, b) => localeCompare(a.protocol, b.protocol)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "protocol",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "protocol",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.protocol)
+                        onClick: () => copy(record.protocol)
                     }
                 }
             },
             {
-                title: '网站标题', dataIndex: "web_title", ellipsis: true, width: 200, sorter: ((a, b) => localeCompare(a.web_title, b.web_title)), onCell: (record, index) => {
+                title: '网站标题',
+                dataIndex: "web_title",
+                ellipsis: true,
+                width: 200,
+                sorter: ((a, b) => localeCompare(a.web_title, b.web_title)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "web_title",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "web_title",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.web_title)
+                        onClick: () => copy(record.web_title)
                     }
                 }
             },
             {
-                title: '响应码', dataIndex: "status_code", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.status_code, b.status_code)), onCell: (record, index) => {
+                title: '响应码',
+                dataIndex: "status_code",
+                ellipsis: true,
+                width: 80,
+                sorter: ((a, b) => localeCompare(a.status_code, b.status_code)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "status_code",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "status_code",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.status_code)
+                        onClick: () => copy(record.status_code)
                     }
                 }
             },
             {
-                title: '组件', dataIndex: "component", ellipsis: true, width: 100, render: (components: HunterComponentType[]) => {
+                title: '组件',
+                dataIndex: "component",
+                ellipsis: true,
+                width: 100,
+                render: (components: HunterComponentType[]) => {
                     const tmp = components?.map((component) => {
                         return component.name + component.version
                     })
@@ -393,45 +463,73 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                             tmp?.join(" | ")
                         }
                     </>
-                }, onCell: (record, index) => {
+                },
+                onCell: (record, index) => {
                     const tmp = record.component?.map((component) => {
                         return component.name + component.version
                     })
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "component",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "component",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(tmp?.join(" | "))
+                        onClick: () => copy(tmp?.join(" | "))
                     }
                 }
             },
             {
-                title: '操作系统', dataIndex: "os", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.os, b.os)), onCell: (record, index) => {
+                title: '操作系统',
+                dataIndex: "os",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.os, b.os)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "os",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "os",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.os)
+                        onClick: () => copy(record.os)
                     }
                 }
             },
             {
-                title: '备案单位', dataIndex: "company", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.company, b.company)), onCell: (record, index) => {
+                title: '备案单位',
+                dataIndex: "company",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.company, b.company)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "company",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "company",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.company)
+                        onClick: () => copy(record.company)
                     }
                 }
             },
             {
-                title: '城市', dataIndex: "city", ellipsis: true, sorter: ((a, b) => localeCompare(a.city, b.city)), width: 100, onCell: (record, index) => {
+                title: '城市',
+                dataIndex: "city",
+                ellipsis: true,
+                sorter: ((a, b) => localeCompare(a.city, b.city)),
+                width: 100,
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "city",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "city",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.city)
+                        onClick: () => copy(record.city)
                     }
                 }
             },
@@ -439,19 +537,30 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: '更新时间', dataIndex: "updated_at", ellipsis: true, width: 100, onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "updated_at",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "updated_at",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.updated_at)
+                        onClick: () => copy(record.updated_at)
                     }
                 }
             },
             {
-                title: 'web应用', dataIndex: "is_web", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.is_web, b.is_web)), onCell: (record, index) => {
+                title: 'web应用',
+                dataIndex: "is_web",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.is_web, b.is_web)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "is_web",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "is_web",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.is_web)
+                        onClick: () => copy(record.is_web)
                     }
                 }
             },
@@ -459,56 +568,91 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 title: 'Banner', dataIndex: "banner", ellipsis: true, width: 100, onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "banner",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "banner",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.banner)
+                        onClick: () => copy(record.banner)
                     }
                 }
             },
             {
-                title: '风险资产', dataIndex: "is_risk", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.is_risk, b.is_risk)), onCell: (record, index) => {
+                title: '风险资产',
+                dataIndex: "is_risk",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.is_risk, b.is_risk)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "is_risk",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "is_risk",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.is_risk)
+                        onClick: () => copy(record.is_risk)
                     }
                 }
             },
             {
-                title: '备案号', dataIndex: "number", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.number, b.number)), onCell: (record, index) => {
+                title: '备案号',
+                dataIndex: "number",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.number, b.number)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "number",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "number",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.number)
+                        onClick: () => copy(record.number)
                     }
                 }
             },
             {
-                title: '注册机构', dataIndex: "as_org", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.as_org, b.as_org)), onCell: (record, index) => {
+                title: '注册机构',
+                dataIndex: "as_org",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.as_org, b.as_org)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "as_org",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "as_org",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.as_org)
+                        onClick: () => copy(record.as_org)
                     }
                 }
             },
             {
-                title: '运营商', dataIndex: "isp", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.isp, b.isp)), onCell: (record, index) => {
+                title: '运营商',
+                dataIndex: "isp",
+                ellipsis: true,
+                width: 100,
+                sorter: ((a, b) => localeCompare(a.isp, b.isp)),
+                onCell: (record, index) => {
                     return {
                         onContextMenu: () => {
-                            index != undefined &&  (selectedRow = {item: record, rowIndex: index, colKey: "isp",});
+                            if (index) {
+                                selectedRow = {item: record, rowIndex: index, colKey: "isp",};
+                                beforeContextMenuOpen();
+                            }
                         },
-                        onClick: () => copyCell(record.isp)
+                        onClick: () => copy(record.isp)
                     }
                 }
             },
         ];
-        const [messageApi, contextHolder] = message.useMessage();
         const [columns, setColumns] = useState<ColumnsType<hunter.Item>>(defaultColumns)
         const [loading, setLoading] = useState<boolean>(false)
+        const [loading2, setLoading2] = useState<boolean>(false)
         const [pageData, setPageData] = useState<PageDataType[]>([])
         const pageIDMap = useRef<{ [key: number]: number }>({})
         const dispatch = useDispatch()
@@ -516,15 +660,25 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         const [currentPage, setCurrentPage] = useState<number>(1)
         const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
         const {input, checkedColsValue} = this.state
+        const [clicked, setClicked] = useState(false);
+        const [hovered, setHovered] = useState(false);
+        const [faviconUrl, setFaviconUrl] = useState("");
+        const [openContextMenu, setOpenContextMenu] = useState(false);
+        const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 234)
+        const [menuItems, setMenuItems] = useState(defaultMenuItems)
+
 
         useEffect(() => {
+            window.addEventListener("resize", () => {
+                setTableScrollHeight(window.innerHeight - 234)
+            })
             let tmpCols: (ColumnGroupType<hunter.Item> | ColumnType<hunter.Item>)[]
             let tmp: (ColumnGroupType<hunter.Item> | ColumnType<hunter.Item>)[]
             if (this.props.checkedColsValue) {
                 tmpCols = defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
                 tmp = tmpCols.map(col => ({...col}));
             } else {
-                tmpCols = defaultColumns.filter(col => defaultCheckedColsValue.includes((col as any)["dataIndex"]))
+                tmpCols = defaultColumns.filter(col => defaultCheckedColsDataIndex.includes((col as any)["dataIndex"]))
                 tmp = tmpCols.map(col => ({...col}));
 
             }
@@ -533,16 +687,23 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             // }
             setColumns(tmp)
             if (this.props.onContextMenu?.input) {
-                handleFirstQuery( currentPageSize)
+                handleFirstQuery(currentPageSize)
             }
+
+            let index = 0;
+            // setPageData(result?.map((item) => {
+            //     const instance = new hunter.Item(item)
+            //     const {convertValues, ...reset} = instance
+            //     return {index: ++index, ...item, convertValues, ...reset}
+            // }))
         }, [])
         useEffect(() => {
             GetAllEvents().then(
-                result=>{
-                    EventsOn(String(result.hasNewHunterDownloadItem), function(){
+                result => {
+                    EventsOn(String(result.hasNewHunterDownloadItem), function () {
                         GetRestToken().then(
-                            result=>{
-                                dispatch(setHunterUser({restToken:result}))
+                            result => {
+                                dispatch(setHunterUser({restToken: result}))
                             }
                         )
                     })
@@ -550,12 +711,26 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             )
         }, []);
 
-        const handleMenuItemClick = (key: MenuItemsKey) => {
-            if (!this.props.onContextMenu || selectedRow == undefined || !selectedRow.item || !selectedRow.colKey) {
+        const handleMenuItemClick: MenuProps['onClick'] = (e) => {
+            if (!this.props.onContextMenu || !selectedRow || !selectedRow.item || !selectedRow.colKey) {
                 return
             }
-            switch (key) {
-                case MenuItemsKey.CopyCell: {
+            switch (e.key) {
+                case MenuItem.QueryTitle.key:
+                    this.props?.onContextMenu.addTab("web.title=" + selectedRow.item.web_title)
+                    break
+                case MenuItem.QueryIpCidr.key:
+                    this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip + "/24")
+                    break
+                case MenuItem.QueryIP.key:
+                    this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip)
+                    break
+                case MenuItem.OpenUrl.key:
+                    if (selectedRow.item.url) {
+                        BrowserOpenURL(selectedRow.item.url)
+                    }
+                    break
+                case MenuItem.CopyCell.key: {
                     const item = selectedRow.item
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.colKey) {
@@ -565,21 +740,22 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                     }
                 }
                     break
-                case MenuItemsKey.IpCidr:
-                    this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip + "/24")
-                    break
-                case MenuItemsKey.Ip:
-                    this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip)
-                    break
-                case MenuItemsKey.OpenUrl:
-                    if (selectedRow.item.url) {
-                        BrowserOpenURL(selectedRow.item.url)
-                    }
-                    break
-                case MenuItemsKey.CopyRow:
+                case MenuItem.CopyRow.key:
                     copy(selectedRow)
                     break
-                case MenuItemsKey.CopyCol: {
+                case MenuItem.CopyUrlCol.key: {
+                    const colValues = pageData.map(item => {
+                        for (const key in item) {
+                            if (Object.prototype.hasOwnProperty.call(item, key) && key === 'url') {
+                                return item[key as keyof hunter.Item]
+                            }
+                        }
+                        return ""
+                    })
+                    copy(colValues)
+                    break
+                }
+                case MenuItem.CopyCol.key: {
                     const colValues = pageData.map(item => {
                         for (const key in item) {
                             if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow?.colKey) {
@@ -594,6 +770,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             }
             selectedRow = undefined
         };
+
         const handleHeaderResize =
             (index: number) => (_: React.SyntheticEvent<Element>, {size}: ResizeCallbackData) => {
                 const newColumns = [...columns];
@@ -603,6 +780,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 };
                 setColumns(newColumns)
             };
+
         const getMergeColumns = (): ColumnsType<hunter.Item> => {
 
             if (!columns) {
@@ -646,7 +824,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                     setLoading(false)
                     pageIDMap.current[1] = result.id
                     dispatch(setHunterUser({
-                            restToken:result.restQuota
+                        restToken: result.restQuota
                     }))
                 }
             ).catch(
@@ -657,6 +835,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 }
             )
         }
+
         const handlePaginationChange = async (newPage: number, newSize: number) => {
             const {isWeb, statusCode, portFilter, dateRange, inputCache} = this.state
 
@@ -677,7 +856,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                         setTotal(result.total)
                         pageIDMap.current[newPage] = result.id
                         dispatch(setHunterUser({
-                            restToken:result.restQuota
+                            restToken: result.restQuota
                         }))
                         setLoading(false)
                     }
@@ -708,6 +887,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 handleFirstQuery(newSize)
             }
         }
+
         const onFieldsChange = (fields: CheckboxValueType[]) => {
             const tmpCols = defaultColumns.filter(col => fields.includes((col as any)["dataIndex"]))
             const tmp = tmpCols.map(col => ({...col}));
@@ -719,16 +899,72 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 checkedFields: tmp.map(item => (item as any).dataIndex)
             })
         }
-        const copyCell = (value: string | number | boolean) => {
-            if (!value) {
+
+        const hide = () => {
+            setClicked(false);
+            setHovered(false);
+        };
+
+        const handleHoverChange = (open: boolean) => {
+            setHovered(open);
+            setClicked(false);
+        };
+
+        const handleClickChange = (open: boolean) => {
+            setHovered(false);
+            setClicked(open);
+        };
+
+        const beforeContextMenuOpen = () => {
+            if (!selectedRow || !selectedRow.item) {
                 return
             }
-            copy(value)
-            messageApi.success("复制成功", 0.5)
+            let t: MenuItemType[] = []
+            for (const key in menuItems) {
+                const tt = menuItems[key]
+                switch (menuItems[key].key) {
+                    case MenuItem.OpenUrl.key:
+                        tt["disabled"] = !selectedRow.item.url;
+                        break;
+                    case MenuItem.CopyCell.key:
+                        tt["disabled"] = !selectedRow.item[selectedRow?.colKey as keyof hunter.Item];
+                        break;
+                    case MenuItem.QueryTitle.key:
+                        tt["disabled"] = !selectedRow.item.web_title;
+                        break;
+                }
+                t.push(tt)
+            }
+            setMenuItems(t)
+        }
+
+        const getFaviconFromUrl = () => {
+            if (!faviconUrl) {
+                return
+            }
+            setLoading2(true)
+            Fetch(faviconUrl)
+                .then(data => {
+                    // @ts-ignore
+                    queryIconHash(toUint8Array(data).buffer)
+                })
+                .catch(error => {
+                    errorNotification("获取favicon出现错误", error);
+                }).finally(() => {
+                setLoading2(false)
+            })
+
+        }
+        const queryIconHash = (iconArrayBuffer: string | ArrayBuffer | null | undefined) => {
+            if (iconArrayBuffer instanceof ArrayBuffer) {
+                const hash = md5(iconArrayBuffer)
+                this.setState({input: `web.icon="${hash}"`})
+                handleFirstQuery(currentPageSize)
+                hide()
+            }
         }
         return <div>
-            {contextHolder}
-            <div style={{display: "flex", justifyContent: 'center', alignItems: "center", marginBottom: "5px"}}>
+            <Flex justify={"center"} style={{marginBottom: "5px"}}>
                 <Input
                     style={{width: "600px"}}
                     size="small"
@@ -736,23 +972,85 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                     value={input}
                     onPressEnter={() => handleFirstQuery(currentPageSize)}
                     onChange={(e) => this.setState({input: e.target.value})}
+                    suffix={
+                        <Popover
+                            placement={"bottom"}
+                            style={{width: 500}}
+                            content={<Button size={"small"} type={"text"}
+                                             onClick={() => handleClickChange(true)}>icon查询</Button>}
+                            trigger="hover"
+                            open={hovered}
+                            onOpenChange={handleHoverChange}
+                        >
+                            <Popover
+                                placement={"bottom"}
+                                title={"填入Icon URL或上传文件"}
+                                content={
+                                    <Spin spinning={loading2}>
+                                        <Flex vertical gap={5} style={{width: "600px"}}>
+                                            <Input
+                                                onChange={e => setFaviconUrl(e.target.value)}
+                                                size={"small"}
+                                                placeholder={"icon地址"}
+                                                suffix={<Button type='text' size="small" icon={<SearchOutlined/>}
+                                                                onClick={getFaviconFromUrl}/>}
+                                            />
+                                            <Upload.Dragger
+                                                showUploadList={false}
+                                                multiple={false}
+                                                customRequest={(options) => {
+                                                    const {file, onError} = options;
+                                                    ;
+                                                    if (file instanceof Blob) {
+                                                        const reader = new FileReader();
+                                                        reader.onload = (e) => {
+                                                            const arrayBuffer = e.target?.result;
+                                                            queryIconHash(arrayBuffer)
+                                                        };
+                                                        reader.readAsArrayBuffer(file);
+                                                    }
+                                                }
+                                                }
+                                            >
+                                                <p className="ant-upload-drag-icon">
+                                                    <InboxOutlined/>
+                                                </p>
+                                                <p className="ant-upload-hint">
+                                                    点击或拖拽文件
+                                                </p>
+                                            </Upload.Dragger>
+                                        </Flex>
+                                    </Spin>
+                                }
+                                trigger="click"
+                                open={clicked}
+                                onOpenChange={handleClickChange}
+                            >
+                                <Button size={"small"} type={"text"} icon={<Dots/>}/>
+                            </Popover>
+                        </Popover>
+                    }
                     placeholder='Search...'
                 />
                 <Button type='text' size="small" icon={<SearchOutlined/>}
                         onClick={() => handleFirstQuery(currentPageSize)}/>
                 <Help/>
-            </div>
+            </Flex>
             <Space
                 style={{display: "flex", justifyContent: 'center', alignItems: "center", marginBottom: "5px"}}
                 split={<Divider type="vertical" style={{margin: "0px"}}/>}
             >
-                <label style={{fontSize: "14px", marginRight: "5px"}}>资产类型 <Select size="small"
-                                                                                       style={{width: "110px"}}
-                                                                                       defaultValue={3 as 1 | 2 | 3}
-                                                                                       options={[{label: "web资产", value: 1}, {label: "非web资产", value: 2}, {label: "全部", value: 3},]}
-                                                                                       onChange={(value) => this.setState({isWeb: value})}/></label>
-
-
+                <label style={{fontSize: "14px", marginRight: "5px"}}>
+                    资产类型
+                    <Select size="small"
+                            style={{width: "110px"}}
+                            defaultValue={3 as 1 | 2 | 3}
+                            options={[{label: "web资产", value: 1}, {label: "非web资产", value: 2}, {
+                                label: "全部",
+                                value: 3
+                            },]}
+                            onChange={(value) => this.setState({isWeb: value})}/>
+                </label>
                 <DatePicker.RangePicker
                     presets={[
                         ...RangePresets,
@@ -783,20 +1081,19 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                         onChange={(checkedList: CheckboxValueType[]) => onFieldsChange(checkedList)}/>
                 </div>
             </Space>
-            <ContextMenu
-                // open={open}
-                // event={event}
-                items={menuItems}
-                onItemClick={(key: string) => {
-                    handleMenuItemClick(key as MenuItemsKey)
+            <Dropdown
+                menu={{items: menuItems, onClick: handleMenuItemClick}}
+                trigger={['contextMenu']}
+                open={openContextMenu}
+                onOpenChange={(v) => {
+                    setOpenContextMenu(v ? pageData.length > 0 : false)
                 }}
-                hidden={pageData?.length === 0}
             >
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div>
                     <Table
                         // locale={{ emptyText: "暂无数据" }}
                         showSorterTooltip={false}
-                        scroll={{y: 'calc(100vh - 229px)', scrollToFirstRowOnChange: true}}
+                        scroll={{y: tableScrollHeight, scrollToFirstRowOnChange: true}}
                         bordered
                         columns={getMergeColumns()}
                         components={{
@@ -809,7 +1106,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                         size="small"
                         pagination={false}
                         footer={() => <div
-                            style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                            style={{
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
                             <Pagination
                                 showQuickJumper
                                 showSizeChanger
@@ -825,21 +1127,106 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                             <this.ExportDataPanel id={pageIDMap.current[1]} total={total}
                                                   currentPageSize={currentPageSize}/>
                         </div>}
-                        // onRow={(record) => {
-                        //     return {
-                        //         onContextMenu: (event) => { selectedRow = record },
-                        //     };
-                        // }}
-                        sticky
                         rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
                     />
                 </div>
-            </ContextMenu>
+            </Dropdown>
 
         </div>
+        // const result = Array.from({ length: 100 }, ()=>{
+        //     return {
+        //         is_risk: "1",
+        //         url: "baidu.com",
+        //         ip: "string",
+        //         port: 8080,
+        //         web_title: "string",
+        //         domain: "string",
+        //         is_risk_protocol: "string",
+        //         protocol: "string",
+        //         base_protocol: "string",
+        //         status_code: 200,
+        //         component: [],
+        //         os: "string",
+        //         company: "string",
+        //         number: "string",
+        //         country: "string",
+        //         province: "string",
+        //         city: "string",
+        //         updated_at: "string",
+        //         is_web: "string",
+        //         as_org: "string",
+        //         isp: "string",
+        //         banner: "string",
+        //     };
+        // })
+        // return <div style={{maxHeight:"calc(100vh - 110px)",overflow:"scroll"}}>
+        //     <Table
+        //         sticky={{ offsetHeader: 0 }}
+        //         summary={() => (
+        //             <Table.Summary fixed={'bottom'}>
+        //                 <Table.Summary.Row>
+        //                     <Table.Summary.Cell index={0} colSpan={columns.length}>
+        //                         <div
+        //                             style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        //                             <Pagination
+        //                                 showQuickJumper
+        //                                 showSizeChanger
+        //                                 total={total}
+        //                                 pageSizeOptions={pageSizeOptions}
+        //                                 defaultPageSize={pageSizeOptions[0]}
+        //                                 defaultCurrent={1}
+        //                                 current={currentPage}
+        //                                 showTotal={(total) => `${total} items`}
+        //                                 size="small"
+        //                                 onChange={(page, size) => handlePaginationChange(page, size)}
+        //                             />
+        //                             <this.ExportDataPanel id={pageIDMap.current[1]} total={total}
+        //                                                   currentPageSize={currentPageSize}/>
+        //                         </div>
+        //                     </Table.Summary.Cell>
+        //                 </Table.Summary.Row>
+        //             </Table.Summary>
+        //         )}
+        //
+        //         // locale={{ emptyText: "暂无数据" }}
+        //         showSorterTooltip={false}
+        //         // scroll={{y: 'calc(100vh - 229px)', scrollToFirstRowOnChange: true}}
+        //         // scroll={{y: 1500, scrollToFirstRowOnChange: true}}
+        //         bordered
+        //         columns={getMergeColumns()}
+        //         components={{
+        //             header: {
+        //                 cell: ResizableTitle,
+        //             },
+        //         }}
+        //         dataSource={pageData}
+        //         loading={loading}
+        //         size="small"
+        //         pagination={false}
+        //         // footer={() => <div
+        //         //     style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        //         //     <Pagination
+        //         //         showQuickJumper
+        //         //         showSizeChanger
+        //         //         total={total}
+        //         //         pageSizeOptions={pageSizeOptions}
+        //         //         defaultPageSize={pageSizeOptions[0]}
+        //         //         defaultCurrent={1}
+        //         //         current={currentPage}
+        //         //         showTotal={(total) => `${total} items`}
+        //         //         size="small"
+        //         //         onChange={(page, size) => handlePaginationChange(page, size)}
+        //         //     />
+        //         //     <this.ExportDataPanel id={pageIDMap.current[1]} total={total}
+        //         //                           currentPageSize={currentPageSize}/>
+        //         // </div>}
+        //         rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
+        //     />
+        // </div>
     }
+
     render() {
-        return <this.Content />
+        return <this.Content/>
     }
 }
 
@@ -857,18 +1244,20 @@ const AuthSetting: React.FC = () => {
     useSelector((state: RootState) => state.config.auth?.hunter);
     const [open, setOpen] = useState<boolean>(false)
     const dispatch = useDispatch()
+
     function save(values: any) {
         setOpen(false)
         setEditable(false)
         form.setFieldsValue(values);
         dispatch(setHunterAuth(values))
         SetAuth(values.key).catch(
-            err=>errorNotification("错误",err)
+            err => errorNotification("错误", err)
         )
     }
+
     return (
         <><Tooltip title="设置">
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
+            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
             <Modal
                 open={open}
@@ -880,15 +1269,15 @@ const AuthSetting: React.FC = () => {
                 closeIcon={null}
                 width={420}
                 destroyOnClose
-                afterOpenChange={open=>{
+                afterOpenChange={open => {
                     open && GetHunter().then(
-                        result=>{
+                        result => {
                             form.setFieldsValue({
                                 key: result.token,
                             });
                         }
                     ).catch(
-                        err=>errorNotification("错误",err)
+                        err => errorNotification("错误", err)
                     )
                 }}
             >
@@ -896,22 +1285,27 @@ const AuthSetting: React.FC = () => {
                     {...authFormProps}
                     form={form}
                     disabled={!editable}
-                    onFinish={(values) => { save(values); }}
+                    onFinish={(values) => {
+                        save(values);
+                    }}
                 >
                     <Form.Item name="key">
-                        <Input.Password placeholder="token" />
+                        <Input.Password placeholder="token"/>
                     </Form.Item>
                 </Form>
-                <div style={{ display: 'flex', justifyContent: "flex-end" }}>
+                <div style={{display: 'flex', justifyContent: "flex-end"}}>
                     {!editable ?
                         <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
                         :
                         <>
                             <Button {...buttonProps} htmlType="submit"
-                                onClick={() => form.submit()}
+                                    onClick={() => form.submit()}
                             >保存</Button>
                             <Button {...buttonProps} htmlType="submit"
-                                onClick={() => { setEditable(false); setOpen(false) }}
+                                    onClick={() => {
+                                        setEditable(false);
+                                        setOpen(false)
+                                    }}
                             >取消</Button>
                         </>}
                 </div>
@@ -944,20 +1338,20 @@ class Hunter extends React.Component {
                 children: <TabContent
                     ref={(r: TabContent) => {
                         if (r) {
-                            this.setState({ tabRefs: [r] });
+                            this.setState({tabRefs: [r]});
                         }
                     }}
                     onContextMenu={{
                         addTab: (i) => this.addTab(i),
                         input: "",
                     }}
-                 checkedColsValue={defaultCheckedColsValue}/>,
+                    checkedColsValue={defaultCheckedColsDataIndex}/>,
             }],
         });
     }
 
     onTabChange = (newActiveKey: string) => {
-        this.setState({ activeKey: newActiveKey });
+        this.setState({activeKey: newActiveKey});
     };
 
     addTab = (input: string) => {
@@ -972,7 +1366,7 @@ class Hunter extends React.Component {
                 children: <TabContent
                     ref={(r: TabContent) => {
                         if (r) {
-                            this.setState({ tabRefs: [r] });
+                            this.setState({tabRefs: [r]});
                         }
                     }}
                     checkedColsValue={checkedFields}
@@ -984,7 +1378,7 @@ class Hunter extends React.Component {
 
             },
         ];
-        this.setState({ items: newPanes, activeKey: newActiveKey });
+        this.setState({items: newPanes, activeKey: newActiveKey});
     };
 
     removeTab = (targetKey: TargetKey) => {
@@ -998,7 +1392,7 @@ class Hunter extends React.Component {
                 newActiveKey = newPanes[0].key;
             }
         }
-        this.setState({ items: newPanes, activeKey: newActiveKey });
+        this.setState({items: newPanes, activeKey: newActiveKey});
     };
 
     onEditTab = (
@@ -1021,8 +1415,8 @@ class Hunter extends React.Component {
             alignItems: "center",
             backgroundColor: "#f1f3f4"
         }}>
-            <AuthSetting />
-            <Divider type="vertical" />
+            <AuthSetting/>
+            <Divider type="vertical"/>
             <Space>
                 <Tooltip title="剩余总积分">
                     <div style={{
@@ -1031,12 +1425,12 @@ class Hunter extends React.Component {
                         alignItems: "center",
                         color: "#f5222d"
                     }}>
-                        <img src={PointBuy} />
+                        <img src={PointBuy}/>
                         {user.restToken}
                     </div>
                 </Tooltip>
                 <Tooltip title="查询后自动获取">
-                    <Button size="small" shape="circle" type="text" icon={<ExclamationCircleOutlined />} />
+                    <Button size="small" shape="circle" type="text" icon={<ExclamationCircleOutlined/>}/>
                 </Tooltip>
             </Space>
 
@@ -1049,7 +1443,7 @@ class Hunter extends React.Component {
             <Tabs
                 size="small"
                 tabBarExtraContent={{
-                    left: <this.UserPanel />
+                    left: <this.UserPanel/>
                 }}
                 type="editable-card"
                 onChange={this.onTabChange}
@@ -1069,9 +1463,9 @@ interface AdvancedHelpDataType {
 }
 
 const advancedHelpColumns: ColumnsType<AdvancedHelpDataType> = [
-    { title: '序号', dataIndex: "index", width: 50 },
-    { title: '连接符', dataIndex: "connector", width: 100 },
-    { title: '查询含义', dataIndex: "description", },
+    {title: '序号', dataIndex: "index", width: 50},
+    {title: '连接符', dataIndex: "connector", width: 100},
+    {title: '查询含义', dataIndex: "description",},
 ];
 
 const advancedHelpData: AdvancedHelpDataType[] = [
@@ -1114,594 +1508,704 @@ type ExampleHelpDataType = {
 }
 
 const exampleHelpColumns: ColumnsType<ExampleHelpDataType> = [
-    { title: '序号', dataIndex: "index", width: 50 },
-    { title: '语法内容', dataIndex: "example", width: 300 },
-    { title: '语法说明', dataIndex: "description" },
+    {title: '序号', dataIndex: "index", width: 50},
+    {title: '语法内容', dataIndex: "example", width: 300},
+    {title: '语法说明', dataIndex: "description"},
 ];
 
 const exampleHelpDataTabs: Tab[] = [
     {
-        key: "1", label: "hot热门语法", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: <>ip.tag="CDN"</>,
-                    description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                            content={<List size='small' split={false} dataSource={["云厂商", "CDN", "蜜罐"]}
-                                renderItem={(item) => (
-                                    <List.Item>
-                                        {item}
-                                    </List.Item>
-                                )}
-                            />}
-                            trigger="hover">
-                            <Button size='small' type='link'>(查看枚举值)</Button>
-                        </Popover>
-                        </>
-                },
-                {
-                    index: 2, example: <>web.similar="baidu.com:443"</>,
-                    description: <>查询与baidu.com:443网站的特征相似的资产</>
-                },
-                {
-                    index: 3, example: <>web.similar_icon=="17262739310191283300"</>,
-                    description: <>查询网站icon与该icon相似的资产</>
-                },
-                {
-                    index: 4, example: <>web.similar_id="3322dfb483ea6fd250b29de488969b35"</>,
-                    description: <>查询与该网页相似的资产</>
-                },
-                {
-                    index: 5, example: <>web.tag="登录页面"</>,
-                    description:
-                        <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                            content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                                dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                                footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span style={{ display: "flex", justifyContent: "center", color: "#bfbfbf" }}>最多展示top30</span></span>}
-                            />}
-                            trigger="hover">
-                            <Button size='small' type='link'>(查看枚举值)</Button>
-                        </Popover>
-                        </>
-                },
-                {
-                    index: 6, example: <>domain.suffix="qianxin.com"</>,
-                    description: "搜索主域为\"qianxin.com\"的网站"
-                },
-                {
-                    index: 7, example: <>web.icon="22eeab765346f14faf564a4709f98548"</>,
-                    description: "查询网站icon与该icon相同的资产"
-                },
-                {
-                    index: 8, example: "ip.port_count>\"2\"",
-                    description: "搜索开放端口大于2的IP（支持等于、大于、小于）"
-                },
-                {
-                    index: 9, example: "is_web=true",
-                    description: "is_web=true"
-                },
-                {
-                    index: 10, example: "cert.is_trust=true",
-                    description: "cert.is_trust=true"
-                },
-            ]}
+        key: "1",
+        label: "hot热门语法",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: <>ip.tag="CDN"</>,
+                                 description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
+                                                                                  content={<List size='small'
+                                                                                                 split={false}
+                                                                                                 dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                                 renderItem={(item) => (
+                                                                                                     <List.Item>
+                                                                                                         {item}
+                                                                                                     </List.Item>
+                                                                                                 )}
+                                                                                  />}
+                                                                                  trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                             {
+                                 index: 2, example: <>web.similar="baidu.com:443"</>,
+                                 description: <>查询与baidu.com:443网站的特征相似的资产</>
+                             },
+                             {
+                                 index: 3, example: <>web.similar_icon=="17262739310191283300"</>,
+                                 description: <>查询网站icon与该icon相似的资产</>
+                             },
+                             {
+                                 index: 4, example: <>web.similar_id="3322dfb483ea6fd250b29de488969b35"</>,
+                                 description: <>查询与该网页相似的资产</>
+                             },
+                             {
+                                 index: 5, example: <>web.tag="登录页面"</>,
+                                 description:
+                                     <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
+                                                                                content={<List size='small'
+                                                                                               split={false} style={{
+                                                                                    maxHeight: "200px",
+                                                                                    overflowY: "scroll"
+                                                                                }} renderItem={(item) => (
+                                                                                    <List.Item>{item}</List.Item>)}
+                                                                                               dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                               footer={<span><Divider
+                                                                                                   style={{margin: "0px 0 10px 0"}}/><span
+                                                                                                   style={{
+                                                                                                       display: "flex",
+                                                                                                       justifyContent: "center",
+                                                                                                       color: "#bfbfbf"
+                                                                                                   }}>最多展示top30</span></span>}
+                                                                                />}
+                                                                                trigger="hover">
+                                         <Button size='small' type='link'>(查看枚举值)</Button>
+                                     </Popover>
+                                     </>
+                             },
+                             {
+                                 index: 6, example: <>domain.suffix="qianxin.com"</>,
+                                 description: "搜索主域为\"qianxin.com\"的网站"
+                             },
+                             {
+                                 index: 7, example: <>web.icon="22eeab765346f14faf564a4709f98548"</>,
+                                 description: "查询网站icon与该icon相同的资产"
+                             },
+                             {
+                                 index: 8, example: "ip.port_count>\"2\"",
+                                 description: "搜索开放端口大于2的IP（支持等于、大于、小于）"
+                             },
+                             {
+                                 index: 9, example: "is_web=true",
+                                 description: "is_web=true"
+                             },
+                             {
+                                 index: 10, example: "cert.is_trust=true",
+                                 description: "cert.is_trust=true"
+                             },
+                         ]}
         />
     },
     {
-        key: "2", label: "new新上语法", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "is_domain.cname=true",
-                    description: "搜索含有cname解析记录的网站"
-                },
-                {
-                    index: 2, example: "domain.cname=\"a6c56dbcc1f22283.qaxanyu.com\"",
-                    description: "搜索cname包含“a6c56dbcc1f22283.qaxanyu.com”的网站"
-                },
-                {
-                    index: 3, example: "domain.status=\"clientDeleteProhibited\"",
-                    description: <>搜索域名状态为"client Delete Prohibited"的网站<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                },
-                {
-                    index: 4, example: "domain.whois_server=\"whois.markmonitor.com\"",
-                    description: "搜索whois服务器为\"whois.markmonitor.com\"的网站"
-                },
-                {
-                    index: 5, example: "domain.name_server=\"ns1.qq.com\"",
-                    description: "domain.name_server=\"ns1.qq.com\""
-                },
-                {
-                    index: 6, example: "domain.created_date=\"2022-06-01\"",
-                    description: "搜索域名创建时间为\"2022-06-01\"的网站"
-                },
-                {
-                    index: 7, example: "domain.expires_date=\"2022-06-01\"",
-                    description: "搜索域名到期时间为\"2022-06-01\"的网站"
-                },
-                {
-                    index: 8, example: "domain.updated_date=\"2022-06-01\"",
-                    description: "搜索域名更新时间为\"2022-06-01\"的网站"
-                },
-                {
-                    index: 9, example: "cert.subject.suffix=\"qianxin.com\"",
-                    description: "搜索证书使用者为qianxin.com的资产"
-                },
-                {
-                    index: 10, example: "icp.industry=\"软件和信息技术服务业\"",
-                    description: <>搜索ICP备案行业为“软件和信息技术服务业”的资产<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={
-                                ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
-                            }
-                            footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span style={{ display: "flex", justifyContent: "center", color: "#bfbfbf" }}>最多展示top30</span></span>}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                },
-                {
-                    index: 11, example: "ip.tag=\"CDN\"",
-                    description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} dataSource={["云厂商", "CDN", "蜜罐"]}
-                            renderItem={(item) => (
-                                <List.Item>
-                                    {item}
-                                </List.Item>
-                            )}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                },
-                {
-                    index: 12, example: "is_web=true",
-                    description: "搜索web资产"
-                },
-                {
-                    index: 13, example: "tls-jarm.hash=\"21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5\"",
-                    description: "搜索tls-jarm哈希为21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5的资产"
-                },
-                {
-                    index: 14, example: "tls-jarm.ans=\"c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017\"",
-                    description: "搜索tls-jarmANS为c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017的资产"
-                },
-                {
-                    index: 15, example: "web.tag=\"登录页面\"",
-                    description: <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                            footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span style={{ display: "flex", justifyContent: "center", color: "#bfbfbf" }}>最多展示top30</span></span>}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                },
-                {
-                    index: 16, example: "web.is_vul=true",
-                    description: "查询存在历史漏洞的资产"
-                },
-            ]}
+        key: "2",
+        label: "new新上语法",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "is_domain.cname=true",
+                                 description: "搜索含有cname解析记录的网站"
+                             },
+                             {
+                                 index: 2, example: "domain.cname=\"a6c56dbcc1f22283.qaxanyu.com\"",
+                                 description: "搜索cname包含“a6c56dbcc1f22283.qaxanyu.com”的网站"
+                             },
+                             {
+                                 index: 3, example: "domain.status=\"clientDeleteProhibited\"",
+                                 description: <>搜索域名状态为"client Delete Prohibited"的网站<Popover
+                                     destroyTooltipOnHide
+                                     content={<List size='small' split={false}
+                                                    style={{maxHeight: "200px", overflowY: "scroll"}}
+                                                    renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                                    dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
+                                     />}
+                                     trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                             {
+                                 index: 4, example: "domain.whois_server=\"whois.markmonitor.com\"",
+                                 description: "搜索whois服务器为\"whois.markmonitor.com\"的网站"
+                             },
+                             {
+                                 index: 5, example: "domain.name_server=\"ns1.qq.com\"",
+                                 description: "domain.name_server=\"ns1.qq.com\""
+                             },
+                             {
+                                 index: 6, example: "domain.created_date=\"2022-06-01\"",
+                                 description: "搜索域名创建时间为\"2022-06-01\"的网站"
+                             },
+                             {
+                                 index: 7, example: "domain.expires_date=\"2022-06-01\"",
+                                 description: "搜索域名到期时间为\"2022-06-01\"的网站"
+                             },
+                             {
+                                 index: 8, example: "domain.updated_date=\"2022-06-01\"",
+                                 description: "搜索域名更新时间为\"2022-06-01\"的网站"
+                             },
+                             {
+                                 index: 9, example: "cert.subject.suffix=\"qianxin.com\"",
+                                 description: "搜索证书使用者为qianxin.com的资产"
+                             },
+                             {
+                                 index: 10, example: "icp.industry=\"软件和信息技术服务业\"",
+                                 description: <>搜索ICP备案行业为“软件和信息技术服务业”的资产<Popover
+                                     destroyTooltipOnHide
+                                     content={<List size='small' split={false}
+                                                    style={{maxHeight: "200px", overflowY: "scroll"}}
+                                                    renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                                    dataSource={
+                                                        ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
+                                                    }
+                                                    footer={<span><Divider style={{margin: "0px 0 10px 0"}}/><span
+                                                        style={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            color: "#bfbfbf"
+                                                        }}>最多展示top30</span></span>}
+                                     />}
+                                     trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                             {
+                                 index: 11, example: "ip.tag=\"CDN\"",
+                                 description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
+                                                                                  content={<List size='small'
+                                                                                                 split={false}
+                                                                                                 dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                                 renderItem={(item) => (
+                                                                                                     <List.Item>
+                                                                                                         {item}
+                                                                                                     </List.Item>
+                                                                                                 )}
+                                                                                  />}
+                                                                                  trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                             {
+                                 index: 12, example: "is_web=true",
+                                 description: "搜索web资产"
+                             },
+                             {
+                                 index: 13,
+                                 example: "tls-jarm.hash=\"21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5\"",
+                                 description: "搜索tls-jarm哈希为21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5的资产"
+                             },
+                             {
+                                 index: 14,
+                                 example: "tls-jarm.ans=\"c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017\"",
+                                 description: "搜索tls-jarmANS为c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017的资产"
+                             },
+                             {
+                                 index: 15, example: "web.tag=\"登录页面\"",
+                                 description: <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
+                                                                                         content={<List size='small'
+                                                                                                        split={false}
+                                                                                                        style={{
+                                                                                                            maxHeight: "200px",
+                                                                                                            overflowY: "scroll"
+                                                                                                        }}
+                                                                                                        renderItem={(item) => (
+                                                                                                            <List.Item>{item}</List.Item>)}
+                                                                                                        dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                                        footer={
+                                                                                                            <span><Divider
+                                                                                                                style={{margin: "0px 0 10px 0"}}/><span
+                                                                                                                style={{
+                                                                                                                    display: "flex",
+                                                                                                                    justifyContent: "center",
+                                                                                                                    color: "#bfbfbf"
+                                                                                                                }}>最多展示top30</span></span>}
+                                                                                         />}
+                                                                                         trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                             {
+                                 index: 16, example: "web.is_vul=true",
+                                 description: "查询存在历史漏洞的资产"
+                             },
+                         ]}
         />
     },
     {
-        key: "3", label: "char特色语法", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "web.similar=\"baidu.com:443\"",
-                    description: "通过网络特征搜索资产"
-                },
-                {
-                    index: 2, example: "web.similar_id=\"3322dfb483ea6fd250b29de488969b35\"",
-                    description: "搜索相似网站"
-                },
-                {
-                    index: 3, example: "web.similar_icon==\"17262739310191283300\"",
-                    description: "搜索相似网站icon搜索资产"
-                },
-                {
-                    index: 4, example: "web.tag=\"登录页面\"",
-                    description:
-                        <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                            content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                                dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                                footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span style={{ display: "flex", justifyContent: "center", color: "#bfbfbf" }}>最多展示top30</span></span>}
-                            />}
-                            trigger="hover">
-                            <Button size='small' type='link'>(查看枚举值)</Button>
-                        </Popover>
-                        </>
-                },
-                {
-                    index: 5, example: "ip.tag=\"CDN\"",
-                    description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} dataSource={["云厂商", "CDN", "蜜罐"]}
-                            renderItem={(item) => (
-                                <List.Item>
-                                    {item}
-                                </List.Item>
-                            )}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                },
-            ]}
+        key: "3",
+        label: "char特色语法",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "web.similar=\"baidu.com:443\"",
+                                 description: "通过网络特征搜索资产"
+                             },
+                             {
+                                 index: 2, example: "web.similar_id=\"3322dfb483ea6fd250b29de488969b35\"",
+                                 description: "搜索相似网站"
+                             },
+                             {
+                                 index: 3, example: "web.similar_icon==\"17262739310191283300\"",
+                                 description: "搜索相似网站icon搜索资产"
+                             },
+                             {
+                                 index: 4, example: "web.tag=\"登录页面\"",
+                                 description:
+                                     <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
+                                                                                content={<List size='small'
+                                                                                               split={false} style={{
+                                                                                    maxHeight: "200px",
+                                                                                    overflowY: "scroll"
+                                                                                }} renderItem={(item) => (
+                                                                                    <List.Item>{item}</List.Item>)}
+                                                                                               dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                               footer={<span><Divider
+                                                                                                   style={{margin: "0px 0 10px 0"}}/><span
+                                                                                                   style={{
+                                                                                                       display: "flex",
+                                                                                                       justifyContent: "center",
+                                                                                                       color: "#bfbfbf"
+                                                                                                   }}>最多展示top30</span></span>}
+                                                                                />}
+                                                                                trigger="hover">
+                                         <Button size='small' type='link'>(查看枚举值)</Button>
+                                     </Popover>
+                                     </>
+                             },
+                             {
+                                 index: 5, example: "ip.tag=\"CDN\"",
+                                 description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
+                                                                                  content={<List size='small'
+                                                                                                 split={false}
+                                                                                                 dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                                 renderItem={(item) => (
+                                                                                                     <List.Item>
+                                                                                                         {item}
+                                                                                                     </List.Item>
+                                                                                                 )}
+                                                                                  />}
+                                                                                  trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                         ]}
         />
     },
     {
-        key: "4", label: "IP", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "ip.city=\"北京\"",
-                    description: "搜索IP对应主机所在城市为”北京“市的资产"
-                },
-                {
-                    index: 2, example: "ip.isp=\"电信\"",
-                    description: "搜索运营商为”中国电信”的资产"
-                },
-                {
-                    index: 3, example: "ip.os=\"Windows\"",
-                    description: "搜索操作系统标记为”Windows“的资产"
-                },
-                {
-                    index: 4, example: "app=\"Hikvision 海康威视 Firmware 5.0+\" && ip.ports=\"8000\"",
-                    description: "检索使用了Hikvision且ip开放8000端口的资产"
-                },
-                {
-                    index: 5, example: "ip.port_count>\"2\"",
-                    description: "搜索开放端口大于2的IP（支持等于、大于、小于）"
-                },
-                {
-                    index: 6, example: "ip.ports=\"80\" && ip.ports=\"443\"",
-                    description: "搜索含有cname解析记录的网站"
-                },
-                {
-                    index: 7, example: "ip.tag=\"CDN\"",
-                    description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} dataSource={["云厂商", "CDN", "蜜罐"]}
-                            renderItem={(item) => (
-                                <List.Item>
-                                    {item}
-                                </List.Item>
-                            )}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                },
-            ]}
+        key: "4",
+        label: "IP",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "ip.city=\"北京\"",
+                                 description: "搜索IP对应主机所在城市为”北京“市的资产"
+                             },
+                             {
+                                 index: 2, example: "ip.isp=\"电信\"",
+                                 description: "搜索运营商为”中国电信”的资产"
+                             },
+                             {
+                                 index: 3, example: "ip.os=\"Windows\"",
+                                 description: "搜索操作系统标记为”Windows“的资产"
+                             },
+                             {
+                                 index: 4, example: "app=\"Hikvision 海康威视 Firmware 5.0+\" && ip.ports=\"8000\"",
+                                 description: "检索使用了Hikvision且ip开放8000端口的资产"
+                             },
+                             {
+                                 index: 5, example: "ip.port_count>\"2\"",
+                                 description: "搜索开放端口大于2的IP（支持等于、大于、小于）"
+                             },
+                             {
+                                 index: 6, example: "ip.ports=\"80\" && ip.ports=\"443\"",
+                                 description: "搜索含有cname解析记录的网站"
+                             },
+                             {
+                                 index: 7, example: "ip.tag=\"CDN\"",
+                                 description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
+                                                                                  content={<List size='small'
+                                                                                                 split={false}
+                                                                                                 dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                                 renderItem={(item) => (
+                                                                                                     <List.Item>
+                                                                                                         {item}
+                                                                                                     </List.Item>
+                                                                                                 )}
+                                                                                  />}
+                                                                                  trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                         ]}
         />
     },
     {
-        key: "5", label: "domain域名", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "is_domain=true",
-                    description: "搜索域名标记不为空的资产"
-                },
-                {
-                    index: 2, example: "domain=\"qianxin.com\"",
-                    description: "搜索域名包含\"qianxin.com\"的网站"
-                },
-                {
-                    index: 3, example: "domain.suffix=\"qianxin.com\"",
-                    description: "搜索主域为\"qianxin.com\"的网站"
-                },
-                {
-                    index: 4, example: "domain.status=\"clientDeleteProhibited\"",
-                    description: <>搜索域名状态为"client Delete Prohibited"的网站<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                },
-                {
-                    index: 5, example: "domain.whois_server=\"whois.markmonitor.com\"",
-                    description: "搜索whois服务器为\"whois.markmonitor.com\"的网站"
-                },
-                {
-                    index: 6, example: "domain.name_server=\"ns1.qq.com\"",
-                    description: "搜索名称服务器为\"ns1.qq.com\"的网站"
-                },
-                {
-                    index: 7, example: "domain.created_date=\"2022-06-01\"",
-                    description: "搜索域名创建时间为\"2022-06-01\"的网站"
-                },
-                {
-                    index: 8, example: "domain.expires_date=\"2022-06-01\"",
-                    description: "搜索域名到期时间为\"2022-06-01\"的网站"
-                },
-                {
-                    index: 9, example: "domain.updated_date=\"2022-06-01\"",
-                    description: "搜索域名更新时间为\"2022-06-01\"的网站"
-                },
-                {
-                    index: 10, example: "domain.cname=\"a6c56dbcc1f22283.qaxanyu.com\"",
-                    description: "搜索cname包含“a6c56dbcc1f22283.qaxanyu.com”的网站"
-                },
-                {
-                    index: 11, example: "is_domain.cname=true",
-                    description: "搜索含有cname解析记录的网站"
-                }
-            ]}
+        key: "5",
+        label: "domain域名",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "is_domain=true",
+                                 description: "搜索域名标记不为空的资产"
+                             },
+                             {
+                                 index: 2, example: "domain=\"qianxin.com\"",
+                                 description: "搜索域名包含\"qianxin.com\"的网站"
+                             },
+                             {
+                                 index: 3, example: "domain.suffix=\"qianxin.com\"",
+                                 description: "搜索主域为\"qianxin.com\"的网站"
+                             },
+                             {
+                                 index: 4, example: "domain.status=\"clientDeleteProhibited\"",
+                                 description: <>搜索域名状态为"client Delete Prohibited"的网站<Popover
+                                     destroyTooltipOnHide
+                                     content={<List size='small' split={false}
+                                                    style={{maxHeight: "200px", overflowY: "scroll"}}
+                                                    renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                                    dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
+                                     />}
+                                     trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             },
+                             {
+                                 index: 5, example: "domain.whois_server=\"whois.markmonitor.com\"",
+                                 description: "搜索whois服务器为\"whois.markmonitor.com\"的网站"
+                             },
+                             {
+                                 index: 6, example: "domain.name_server=\"ns1.qq.com\"",
+                                 description: "搜索名称服务器为\"ns1.qq.com\"的网站"
+                             },
+                             {
+                                 index: 7, example: "domain.created_date=\"2022-06-01\"",
+                                 description: "搜索域名创建时间为\"2022-06-01\"的网站"
+                             },
+                             {
+                                 index: 8, example: "domain.expires_date=\"2022-06-01\"",
+                                 description: "搜索域名到期时间为\"2022-06-01\"的网站"
+                             },
+                             {
+                                 index: 9, example: "domain.updated_date=\"2022-06-01\"",
+                                 description: "搜索域名更新时间为\"2022-06-01\"的网站"
+                             },
+                             {
+                                 index: 10, example: "domain.cname=\"a6c56dbcc1f22283.qaxanyu.com\"",
+                                 description: "搜索cname包含“a6c56dbcc1f22283.qaxanyu.com”的网站"
+                             },
+                             {
+                                 index: 11, example: "is_domain.cname=true",
+                                 description: "搜索含有cname解析记录的网站"
+                             }
+                         ]}
         />
     },
     {
-        key: "6", label: "header请求头", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "header.server==\"Microsoft-IIS/10\"",
-                    description: "搜索server全名为“Microsoft-IIS/10”的服务器"
-                },
-                {
-                    index: 2, example: "header.content_length=\"691\"",
-                    description: "搜索HTTP消息主体的大小为691的网站"
-                },
-                {
-                    index: 3, example: "header.status_code=\"402\"",
-                    description: "搜索HTTP请求返回状态码为”402”的资产"
-                },
-                {
-                    index: 4, example: "header=\"elastic\"",
-                    description: "搜索HTTP请求头中含有”elastic“的资产"
-                }
-            ]}
+        key: "6",
+        label: "header请求头",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "header.server==\"Microsoft-IIS/10\"",
+                                 description: "搜索server全名为“Microsoft-IIS/10”的服务器"
+                             },
+                             {
+                                 index: 2, example: "header.content_length=\"691\"",
+                                 description: "搜索HTTP消息主体的大小为691的网站"
+                             },
+                             {
+                                 index: 3, example: "header.status_code=\"402\"",
+                                 description: "搜索HTTP请求返回状态码为”402”的资产"
+                             },
+                             {
+                                 index: 4, example: "header=\"elastic\"",
+                                 description: "搜索HTTP请求头中含有”elastic“的资产"
+                             }
+                         ]}
         />
     },
     {
-        key: "7", label: "web网站信息", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "is_web=true",
-                    description: "搜索web资产"
-                },
-                {
-                    index: 2, example: "web.title=\"北京\"",
-                    description: "从网站标题中搜索“北京”"
-                },
-                {
-                    index: 3, example: "web.body=\"网络空间测绘\"",
-                    description: "搜索网站正文包含”网络空间测绘“的资产"
-                },
-                {
-                    index: 4, example: "after=\"2021-01-01\" && before=\"2021-12-31\"",
-                    description: "搜索2021年的资产"
-                }
-                ,
-                {
-                    index: 5, example: "web.similar=\"baidu.com:443\"",
-                    description: "查询与baidu.com:443网站的特征相似的资产"
-                }
-                ,
-                {
-                    index: 6, example: "web.similar_icon==\"17262739310191283300\"",
-                    description: "查询网站icon与该icon相似的资产"
-                }
-                ,
-                {
-                    index: 7, example: "web.icon=\"22eeab765346f14faf564a4709f98548\"",
-                    description: "查询网站icon与该icon相同的资产"
-                },
-                {
-                    index: 8, example: "web.similar_id=\"3322dfb483ea6fd250b29de488969b35\"",
-                    description: "查询与该网页相似的资产"
-                }
-                ,
-                {
-                    index: 9, example: "web.tag=\"登录页面\"",
-                    description:
-                        <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                            content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                                dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                                footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span style={{ display: "flex", justifyContent: "center", color: "#bfbfbf" }}>最多展示top30</span></span>}
-                            />}
-                            trigger="hover">
-                            <Button size='small' type='link'>(查看枚举值)</Button>
-                        </Popover>
-                        </>
-                }
+        key: "7",
+        label: "web网站信息",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "is_web=true",
+                                 description: "搜索web资产"
+                             },
+                             {
+                                 index: 2, example: "web.title=\"北京\"",
+                                 description: "从网站标题中搜索“北京”"
+                             },
+                             {
+                                 index: 3, example: "web.body=\"网络空间测绘\"",
+                                 description: "搜索网站正文包含”网络空间测绘“的资产"
+                             },
+                             {
+                                 index: 4, example: "after=\"2021-01-01\" && before=\"2021-12-31\"",
+                                 description: "搜索2021年的资产"
+                             }
+                             ,
+                             {
+                                 index: 5, example: "web.similar=\"baidu.com:443\"",
+                                 description: "查询与baidu.com:443网站的特征相似的资产"
+                             }
+                             ,
+                             {
+                                 index: 6, example: "web.similar_icon==\"17262739310191283300\"",
+                                 description: "查询网站icon与该icon相似的资产"
+                             }
+                             ,
+                             {
+                                 index: 7, example: "web.icon=\"22eeab765346f14faf564a4709f98548\"",
+                                 description: "查询网站icon与该icon相同的资产"
+                             },
+                             {
+                                 index: 8, example: "web.similar_id=\"3322dfb483ea6fd250b29de488969b35\"",
+                                 description: "查询与该网页相似的资产"
+                             }
+                             ,
+                             {
+                                 index: 9, example: "web.tag=\"登录页面\"",
+                                 description:
+                                     <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
+                                                                                content={<List size='small'
+                                                                                               split={false} style={{
+                                                                                    maxHeight: "200px",
+                                                                                    overflowY: "scroll"
+                                                                                }} renderItem={(item) => (
+                                                                                    <List.Item>{item}</List.Item>)}
+                                                                                               dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                               footer={<span><Divider
+                                                                                                   style={{margin: "0px 0 10px 0"}}/><span
+                                                                                                   style={{
+                                                                                                       display: "flex",
+                                                                                                       justifyContent: "center",
+                                                                                                       color: "#bfbfbf"
+                                                                                                   }}>最多展示top30</span></span>}
+                                                                                />}
+                                                                                trigger="hover">
+                                         <Button size='small' type='link'>(查看枚举值)</Button>
+                                     </Popover>
+                                     </>
+                             }
 
-            ]}
+                         ]}
         />
     },
     {
-        key: "8", label: "icp备案信息", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "icp.number=\"京ICP备16020626号-8\"",
-                    description: "搜索通过域名关联的ICP备案号为”京ICP备16020626号-8”的网站资产"
-                },
-                {
-                    index: 2, example: "icp.web_name=\"奇安信\"",
-                    description: "搜索ICP备案网站名中含有“奇安信”的资产"
-                },
-                {
-                    index: 3, example: "icp.name=\"奇安信\"",
-                    description: "搜索ICP备案单位名中含有“奇安信”的资产"
-                },
-                {
-                    index: 4, example: "icp.type=\"企业\"",
-                    description: "搜索ICP备案主体为“企业”的资产"
-                }
-                ,
-                {
-                    index: 5, example: "icp.industry=\"软件和信息技术服务业\"",
-                    description: <>搜索ICP备案行业为“软件和信息技术服务业”的资产<Popover destroyTooltipOnHide
-                        content={<List size='small' split={false} style={{ maxHeight: "200px", overflowY: "scroll" }} renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={
-                                ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
-                            }
-                            footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span style={{ display: "flex", justifyContent: "center", color: "#bfbfbf" }}>最多展示top30</span></span>}
-                        />}
-                        trigger="hover">
-                        <Button size='small' type='link'>(查看枚举值)</Button>
-                    </Popover>
-                    </>
-                }
-            ]}
+        key: "8",
+        label: "icp备案信息",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "icp.number=\"京ICP备16020626号-8\"",
+                                 description: "搜索通过域名关联的ICP备案号为”京ICP备16020626号-8”的网站资产"
+                             },
+                             {
+                                 index: 2, example: "icp.web_name=\"奇安信\"",
+                                 description: "搜索ICP备案网站名中含有“奇安信”的资产"
+                             },
+                             {
+                                 index: 3, example: "icp.name=\"奇安信\"",
+                                 description: "搜索ICP备案单位名中含有“奇安信”的资产"
+                             },
+                             {
+                                 index: 4, example: "icp.type=\"企业\"",
+                                 description: "搜索ICP备案主体为“企业”的资产"
+                             }
+                             ,
+                             {
+                                 index: 5, example: "icp.industry=\"软件和信息技术服务业\"",
+                                 description: <>搜索ICP备案行业为“软件和信息技术服务业”的资产<Popover
+                                     destroyTooltipOnHide
+                                     content={<List size='small' split={false}
+                                                    style={{maxHeight: "200px", overflowY: "scroll"}}
+                                                    renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                                    dataSource={
+                                                        ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
+                                                    }
+                                                    footer={<span><Divider style={{margin: "0px 0 10px 0"}}/><span
+                                                        style={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            color: "#bfbfbf"
+                                                        }}>最多展示top30</span></span>}
+                                     />}
+                                     trigger="hover">
+                                     <Button size='small' type='link'>(查看枚举值)</Button>
+                                 </Popover>
+                                 </>
+                             }
+                         ]}
         />
     },
     {
-        key: "9", label: "protocol协议/端口响应", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "protocol=\"http\"",
-                    description: "搜索协议为”http“的资产"
-                },
-                {
-                    index: 2, example: "protocol.transport=\"udp\"",
-                    description: "搜索传输层协议为”udp“的资产"
-                },
-                {
-                    index: 3, example: "protocol.banner=\"nginx\"",
-                    description: "查询端口响应中包含\"nginx\"的资产"
-                },
-            ]}
+        key: "9",
+        label: "protocol协议/端口响应",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "protocol=\"http\"",
+                                 description: "搜索协议为”http“的资产"
+                             },
+                             {
+                                 index: 2, example: "protocol.transport=\"udp\"",
+                                 description: "搜索传输层协议为”udp“的资产"
+                             },
+                             {
+                                 index: 3, example: "protocol.banner=\"nginx\"",
+                                 description: "查询端口响应中包含\"nginx\"的资产"
+                             },
+                         ]}
         />
     },
     {
-        key: "10", label: "app组件信息", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "app.name=\"小米 Router\"",
-                    description: "搜索标记为”小米 Router“的资产"
-                },
-                {
-                    index: 2, example: "app.type=\"开发与运维\"",
-                    description: "查询包含组件分类为\"开发与运维\"的资产"
-                },
-                {
-                    index: 3, example: "app.vendor=\"PHP\"",
-                    description: "查询包含组件厂商为\"PHP\"的资产"
-                },
-                {
-                    index: 4, example: "app.version=\"1.8.1\"",
-                    description: "查询包含组件版本为\"1.8.1\"的资产"
-                },
-            ]}
+        key: "10",
+        label: "app组件信息",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "app.name=\"小米 Router\"",
+                                 description: "搜索标记为”小米 Router“的资产"
+                             },
+                             {
+                                 index: 2, example: "app.type=\"开发与运维\"",
+                                 description: "查询包含组件分类为\"开发与运维\"的资产"
+                             },
+                             {
+                                 index: 3, example: "app.vendor=\"PHP\"",
+                                 description: "查询包含组件厂商为\"PHP\"的资产"
+                             },
+                             {
+                                 index: 4, example: "app.version=\"1.8.1\"",
+                                 description: "查询包含组件版本为\"1.8.1\"的资产"
+                             },
+                         ]}
         />
     },
     {
-        key: "11", label: "cert证书", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "cert=\"baidu\"",
-                    description: "搜索证书中带有baidu的资产"
-                },
-                {
-                    index: 2, example: "cert.subject=\"qianxin.com\"",
-                    description: "搜索证书使用者包含qianxin.com的资产"
-                },
-                {
-                    index: 3, example: "cert.subject.suffix=\"qianxin.com\"",
-                    description: "搜索证书使用者为qianxin.com的资产"
-                },
-                {
-                    index: 4, example: "cert.subject_org=\"奇安信科技集团股份有限公司\"",
-                    description: "搜索证书使用者组织是奇安信科技集团股份有限公司的资产"
-                },
-                {
-                    index: 5, example: "cert.issuer=\"Let's Encrypt Authority X3\"",
-                    description: "搜索证书颁发者是Let's Encrypt Authority X3的资产"
-                },
-                {
-                    index: 6, example: "cert.issuer_org=\"Let's Encrypt\"",
-                    description: "搜索证书颁发者组织是Let's Encrypt的资产"
-                },
-                {
-                    index: 7, example: "cert.sha-1=\"be7605a3b72b60fcaa6c58b6896b9e2e7442ec50\"",
-                    description: "搜索证书签名哈希算法sha1为be7605a3b72b60fcaa6c58b6896b9e2e7442ec50的资产"
-                },
-                {
-                    index: 8, example: "cert.sha-256=\"4e529a65512029d77a28cbe694c7dad1e60f98b5cb89bf2aa329233acacc174e\"",
-                    description: "搜索证书签名哈希算法sha256为4e529a65512029d77a28cbe694c7dad1e60f98b5cb89bf2aa329233acacc174e的资产"
-                },
-                {
-                    index: 9, example: "cert.sha-md5=\"aeedfb3c1c26b90d08537523bbb16bf1\"",
-                    description: "搜索证书签名哈希算法shamd5为aeedfb3c1c26b90d08537523bbb16bf1的资产"
-                },
-                {
-                    index: 10, example: "cert.serial_number=\"35351242533515273557482149369\"",
-                    description: "搜索证书序列号是35351242533515273557482149369的资产"
-                },
-                {
-                    index: 11, example: "cert.is_expired=true",
-                    description: "搜索证书已过期的资产"
-                },
-                {
-                    index: 12, example: "cert.is_trust=true",
-                    description: "搜索证书可信的资产"
-                },
-            ]}
+        key: "11",
+        label: "cert证书",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "cert=\"baidu\"",
+                                 description: "搜索证书中带有baidu的资产"
+                             },
+                             {
+                                 index: 2, example: "cert.subject=\"qianxin.com\"",
+                                 description: "搜索证书使用者包含qianxin.com的资产"
+                             },
+                             {
+                                 index: 3, example: "cert.subject.suffix=\"qianxin.com\"",
+                                 description: "搜索证书使用者为qianxin.com的资产"
+                             },
+                             {
+                                 index: 4, example: "cert.subject_org=\"奇安信科技集团股份有限公司\"",
+                                 description: "搜索证书使用者组织是奇安信科技集团股份有限公司的资产"
+                             },
+                             {
+                                 index: 5, example: "cert.issuer=\"Let's Encrypt Authority X3\"",
+                                 description: "搜索证书颁发者是Let's Encrypt Authority X3的资产"
+                             },
+                             {
+                                 index: 6, example: "cert.issuer_org=\"Let's Encrypt\"",
+                                 description: "搜索证书颁发者组织是Let's Encrypt的资产"
+                             },
+                             {
+                                 index: 7, example: "cert.sha-1=\"be7605a3b72b60fcaa6c58b6896b9e2e7442ec50\"",
+                                 description: "搜索证书签名哈希算法sha1为be7605a3b72b60fcaa6c58b6896b9e2e7442ec50的资产"
+                             },
+                             {
+                                 index: 8,
+                                 example: "cert.sha-256=\"4e529a65512029d77a28cbe694c7dad1e60f98b5cb89bf2aa329233acacc174e\"",
+                                 description: "搜索证书签名哈希算法sha256为4e529a65512029d77a28cbe694c7dad1e60f98b5cb89bf2aa329233acacc174e的资产"
+                             },
+                             {
+                                 index: 9, example: "cert.sha-md5=\"aeedfb3c1c26b90d08537523bbb16bf1\"",
+                                 description: "搜索证书签名哈希算法shamd5为aeedfb3c1c26b90d08537523bbb16bf1的资产"
+                             },
+                             {
+                                 index: 10, example: "cert.serial_number=\"35351242533515273557482149369\"",
+                                 description: "搜索证书序列号是35351242533515273557482149369的资产"
+                             },
+                             {
+                                 index: 11, example: "cert.is_expired=true",
+                                 description: "搜索证书已过期的资产"
+                             },
+                             {
+                                 index: 12, example: "cert.is_trust=true",
+                                 description: "搜索证书可信的资产"
+                             },
+                         ]}
         />
     },
     {
-        key: "12", label: "vul漏洞信息", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "vul.gev=\"GEV-2021-1075\"",
-                    description: "查询存在该专项漏洞的资产"
-                },
-                {
-                    index: 2, example: "vul.cve=\"CVE-2021-2194\"",
-                    description: "查询存在该漏洞的资产"
-                },
-                {
-                    index: 3, example: "vul.gev=\"GEV-2021-1075\" && vul.state=\"已修复\"",
-                    description: "查询存在该专项漏洞资产中，已修复漏洞的资产"
-                },
-                {
-                    index: 4, example: "web.is_vul=true",
-                    description: "web.is_vul=true"
-                },
-            ]}
-            footer={() => <span style={{ color: "red" }}>该语法仅监管用户可用</span>}
+        key: "12",
+        label: "vul漏洞信息",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "vul.gev=\"GEV-2021-1075\"",
+                                 description: "查询存在该专项漏洞的资产"
+                             },
+                             {
+                                 index: 2, example: "vul.cve=\"CVE-2021-2194\"",
+                                 description: "查询存在该漏洞的资产"
+                             },
+                             {
+                                 index: 3, example: "vul.gev=\"GEV-2021-1075\" && vul.state=\"已修复\"",
+                                 description: "查询存在该专项漏洞资产中，已修复漏洞的资产"
+                             },
+                             {
+                                 index: 4, example: "web.is_vul=true",
+                                 description: "web.is_vul=true"
+                             },
+                         ]}
+                         footer={() => <span style={{color: "red"}}>该语法仅监管用户可用</span>}
         />
     },
     {
-        key: "13", label: "AS", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "as.number=\"136800\"",
-                    description: "搜索asn为\"136800\"的资产"
-                },
-                {
-                    index: 2, example: "as.name=\"CLOUDFLARENET\"",
-                    description: "搜索asn名称为\"CLOUDFLARENET\"的资产"
-                },
-                {
-                    index: 3, example: "as.org=\"PDR\"",
-                    description: "搜索asn注册机构为\"PDR\"的资产"
-                }
-            ]}
+        key: "13",
+        label: "AS",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1, example: "as.number=\"136800\"",
+                                 description: "搜索asn为\"136800\"的资产"
+                             },
+                             {
+                                 index: 2, example: "as.name=\"CLOUDFLARENET\"",
+                                 description: "搜索asn名称为\"CLOUDFLARENET\"的资产"
+                             },
+                             {
+                                 index: 3, example: "as.org=\"PDR\"",
+                                 description: "搜索asn注册机构为\"PDR\"的资产"
+                             }
+                         ]}
         />
     },
     {
-        key: "14", label: "tls-jarm", children: <Table scroll={{ y: 400 }} size='small' pagination={false} columns={exampleHelpColumns}
-            dataSource={[
-                {
-                    index: 1, example: "tls-jarm.hash=\"21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5\"",
-                    description: "搜索tls-jarm哈希为21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5的资产"
-                },
-                {
-                    index: 2, example: "tls-jarm.ans=\"c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017\"",
-                    description: "搜索tls-jarmANS为c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017的资产"
-                },
-            ]}
+        key: "14",
+        label: "tls-jarm",
+        children: <Table scroll={{y: 400}} size='small' pagination={false} columns={exampleHelpColumns}
+                         dataSource={[
+                             {
+                                 index: 1,
+                                 example: "tls-jarm.hash=\"21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5\"",
+                                 description: "搜索tls-jarm哈希为21d19d00021d21d21c21d19d21d21da1a818a999858855445ec8a8fdd38eb5的资产"
+                             },
+                             {
+                                 index: 2,
+                                 example: "tls-jarm.ans=\"c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017\"",
+                                 description: "搜索tls-jarmANS为c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017的资产"
+                             },
+                         ]}
         />
     },
 ]
@@ -1710,11 +2214,11 @@ const Help: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     return <>
         <Tooltip title='帮助信息' placement='bottom'>
-            <Button type='text' size="small" icon={<QuestionOutlined />} onClick={() => setOpen(true)} />
+            <Button type='text' size="small" icon={<QuestionOutlined/>} onClick={() => setOpen(true)}/>
         </Tooltip>
         <Modal
-            style={{ top: "10%" }}
-            bodyStyle={{ overflowY: 'scroll', height: window.innerHeight - 160 }}
+            style={{top: "10%"}}
+            bodyStyle={{overflowY: 'scroll', height: window.innerHeight - 160}}
             width={800}
             mask={false}
             maskClosable={true}
@@ -1726,15 +2230,14 @@ const Help: React.FC = () => {
         >
             <Collapse expandIconPosition={"end"} items={[{
                 key: "1", label: "搜索技巧",
-                children: <Table scroll={{ y: 500 }} size="small" columns={advancedHelpColumns} dataSource={advancedHelpData} pagination={false} rowKey={"index"} />
+                children: <Table scroll={{y: 500}} size="small" columns={advancedHelpColumns}
+                                 dataSource={advancedHelpData} pagination={false} rowKey={"index"}/>
             }]} defaultActiveKey={['1']}
             />
-            <Divider style={{ marginTop: "20px", marginBottom: "20px" }} />
-            <div ><Tabs items={exampleHelpDataTabs} tabPosition='left' size='small' tabBarGutter={0} /></div>
+            <Divider style={{marginTop: "20px", marginBottom: "20px"}}/>
+            <div><Tabs items={exampleHelpDataTabs} tabPosition='left' size='small' tabBarGutter={0}/></div>
         </Modal></>
 }
-
-
 
 
 export default Hunter;

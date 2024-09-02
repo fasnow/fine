@@ -16,4 +16,6 @@
 
 .ant-notification-notice-description {
     margin-inline-start: 20px !important;
+    max-height: 400px;
+    overflow-y: scroll;
 }

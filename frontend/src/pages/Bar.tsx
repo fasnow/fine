@@ -3,7 +3,7 @@ import { Badge, Button, ConfigProvider, Divider, List, Modal, Popover, Space, Sp
 import React, { useEffect, useRef, useState } from "react";
 import "./Bar.css";
 import { useDispatch, useSelector } from "react-redux";
-import { GITHUB_URL, ISSUE_URL } from "@/type";
+import { GITHUB_URL, ISSUE_URL } from "@/component/type";
 import wailsJson from '../../../wails.json';
 import favicon from "../assets/images/paimon.svg"
 import { genshinLaunch } from "./op";

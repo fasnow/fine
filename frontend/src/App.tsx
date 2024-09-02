@@ -53,7 +53,7 @@ const App: React.FC = () => {
             //   lineno：发生错误的行号（数字）
             //   colno：发生错误的列号（数字）
             //   error：Error对象
-            console.error(error)
+            console.error(source,lineno,colno,error)
         }
         const currentDate = new Date();
         const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
@@ -160,7 +160,7 @@ const item2: TabsProps['items'] = [
     {
         key: '2',
         label: 'Hunter',
-        children: <Hunter/>,
+        children: <div style={{display:"flow"}}><Hunter/></div>,
     },
     {
         key: '3',

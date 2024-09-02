@@ -1,7 +1,71 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
-import { AuthType, FofaAuthType, HunterAuthType, QuakeAuthType, ZoneAuthType, DownloadLogItem, HunterUserType } from "@/type"
-import {config, fofa} from "../../wailsjs/go/models";
-import { UserType as QuakeUserType } from "../type/quake"
+import {config, fofa, quake} from "../../wailsjs/go/models";
+import UserRole = quake.UserRole;
+
+export type HunterUserType = {
+    restToken: number
+}
+
+export type QuakeUserType = {
+    id: string;
+    // Go type: struct { ID string "json:\"id\""; Username string "json:\"username\""; Fullname string "json:\"fullname\""; Email interface {} "json:\"email\""; Group []string "json:\"group\"" }
+    user: any;
+    baned: boolean;
+    ban_status: string;
+    month_remaining_credit: number;
+    constant_credit: number;
+    credit: number;
+    persistent_credit: number;
+    free_query_api_count: number;
+    avatar_id: string;
+    token: string;
+    mobile_phone: string;
+    source: string;
+    time: string;
+    // Go type: struct { DisableTime interface {} "json:\"disable_time\""; StartTime interface {} "json:\"start_time\"" }
+    disable: any;
+    // Go type: struct { QuakeLogStatus bool "json:\"quake_log_status\""; QuakeLogTime interface {} "json:\"quake_log_time\""; AnonymousModel bool "json:\"anonymous_model\""; Status bool "json:\"status\""; Time interface {} "json:\"time\"" }
+    privacy_log: any;
+    // Go type: struct { Name interface {} "json:\"name\""; Email interface {} "json:\"email\""; Status string "json:\"status\"" }
+    enterprise_information: any;
+    // Go type: struct { Code string "json:\"code\""; InviteAcquireCredit int "json:\"invite_acquire_credit\""; InviteNumber int "json:\"invite_number\"" }
+    invitation_code_info: any;
+    is_cashed_invitation_code: boolean;
+    // Go type: struct { NamingFailed interface {} "json:\"注册用户\"" }
+    role_validity: any;
+    personal_information_status: boolean;
+    role: UserRole[];
+}
+
+export type FofaAuthType = {
+    email: string
+    key: string
+}
+
+export type HunterAuthType = {
+    key: string
+}
+
+export type ZoneAuthType = {
+    key: string
+}
+
+export type QuakeAuthType = {
+    key: string
+}
+
+export type AuthType = {
+    "fofa": FofaAuthType
+    "hunter": HunterAuthType
+    "0.zone": ZoneAuthType
+    "quake": QuakeAuthType
+}
+
+export interface DownloadLogItem {
+    filename: string,
+    dir: string,
+    exist?: boolean
+}
 
 const initialAuthState: AuthType = {
     fofa: {
@@ -52,13 +116,8 @@ const initialHunterUserState: HunterUserType = {
 
 const initialQuakeUserState: QuakeUserType = {
     id: "",
-    user: {
-        id: "",
-        username: "",
-        fullname: "",
-        email: "",
-        group: []
-    },
+    // Go type: struct { ID string "json:\"id\""; Username string "json:\"username\""; Fullname string "json:\"fullname\""; Email interface {} "json:\"email\""; Group []string "json:\"group\"" }
+    user: {},
     baned: false,
     ban_status: "",
     month_remaining_credit: 0,
@@ -71,33 +130,19 @@ const initialQuakeUserState: QuakeUserType = {
     mobile_phone: "",
     source: "",
     time: "",
-    disable: {
-        disable_time: "",
-        start_time: ""
-    },
-    privacy_log: {
-        quake_log_status: false,
-        quake_log_time: "",
-        anonymous_model: false,
-        status: false,
-        time: ""
-    },
-    enterprise_information: {
-        name: "",
-        email: "",
-        status: ""
-    },
-    invitation_code_info: {
-        code: "",
-        invite_acquire_credit: 0,
-        invite_number: 0
-    },
+    // Go type: struct { DisableTime interface {} "json:\"disable_time\""; StartTime interface {} "json:\"start_time\"" }
+    disable: {},
+    // Go type: struct { QuakeLogStatus bool "json:\"quake_log_status\""; QuakeLogTime interface {} "json:\"quake_log_time\""; AnonymousModel bool "json:\"anonymous_model\""; Status bool "json:\"status\""; Time interface {} "json:\"time\"" }
+    privacy_log: {},
+    // Go type: struct { Name interface {} "json:\"name\""; Email interface {} "json:\"email\""; Status string "json:\"status\"" }
+    enterprise_information: {},
+    // Go type: struct { Code string "json:\"code\""; InviteAcquireCredit int "json:\"invite_acquire_credit\""; InviteNumber int "json:\"invite_number\"" }
+    invitation_code_info: {},
     is_cashed_invitation_code: false,
-    role_validity: {
-        注册用户: ""
-    },
+    // Go type: struct { NamingFailed interface {} "json:\"注册用户\"" }
+    role_validity: {},
     personal_information_status: false,
-    role: []
+    role: [],
 }
 
 const initialDownloadLogState: DownloadLogItem[] = []
@@ -177,7 +222,7 @@ const userSlice = createSlice({
             state.hunter = action.payload
         },
         setQuakeUser: (state, action: {
-            payload: QuakeUserType,
+            payload: quake.User,
             type: string
         }) => {
             state.quake = action.payload

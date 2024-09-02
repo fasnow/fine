@@ -4,7 +4,7 @@ import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import Copy from '../component/Copy';
 import { List, WindowScroller } from "react-virtualized"
 import TextArea from 'antd/es/input/TextArea';
-import { sleep } from '@/utils/utils';
+import { sleep } from '@/util/util';
 import {GetCurrentDomain, GetCurrentIP, GetHistoryIP} from "../../wailsjs/go/ip138/Bridge";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;

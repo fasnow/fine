@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
-import type { ResizeCallbackData } from 'react-resizable';
+import React from 'react';
 import { Resizable } from 'react-resizable';
-import { Table } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
 import "./ResizableTitle.css"
-const ResizableTitle = (
-  props: React.HTMLAttributes<any> & {
-    onResize: (e: React.SyntheticEvent<Element>, data: ResizeCallbackData) => void;
-    width: number;
-  },
-) => {
+
+// @ts-ignore
+const ResizableTitle = props => {
   const { onResize, width, ...restProps } = props;
 
   if (!width) {
@@ -20,18 +14,10 @@ const ResizableTitle = (
     <Resizable
       width={width}
       height={0}
-      // handle={
-      //   <span
-      //     className="react-resizable-handle"
-      //     onClick={(e) => {
-      //       e.stopPropagation();
-      //     }}
-      //   />
-      // }
       onResize={onResize}
       draggableOpts={{
         enableUserSelectHack: false,
-        onMouseDown: (e: any) => {
+        onMouseDown: () => {
           // fix: 修复在 Windows Chrome 和 Edge 松开鼠标依然能拖动
           if (window.getSelection) {
             const selection = window.getSelection();

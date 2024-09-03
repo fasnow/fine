@@ -139,7 +139,7 @@ func (b *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 				EndTime:     options.EndTime,
 				Include:     options.Include,
 				Exclude:     options.Exclude,
-				Latest:      false,
+				Latest:      options.Latest,
 			}, id)
 		}
 		b.cacheTotal.Add(id, result.Total, options.Query)

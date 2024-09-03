@@ -110,6 +110,7 @@ func (builder *GetRealtimeDataReqBuilder) Latest(latest bool) *GetRealtimeDataRe
 
 func (builder *GetRealtimeDataReqBuilder) Build() *GetRealtimeDataReq {
 	req := &GetRealtimeDataReq{}
+	builder.req.Body.Start = builder.req.Body.Size * (builder.req.Body.Start - 1)
 	req.req = builder.req
 	return req
 }

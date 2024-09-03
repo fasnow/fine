@@ -480,11 +480,6 @@ const DownloadHistory: React.FC = () => {
                 })
             }
         )
-
-        addEventListener("fullscreenchange", (event) => {
-            console.log(1)
-        });
-
     }, [])
     return <>
         <Proxy />

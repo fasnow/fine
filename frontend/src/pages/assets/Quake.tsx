@@ -19,7 +19,7 @@ import {
   TabsProps,
   Tooltip,
   message,
-  Dropdown
+  Dropdown, Flex
 } from 'antd';
 import { SearchOutlined, QuestionOutlined, UserOutlined, CloudDownloadOutlined, LoadingOutlined, ExclamationCircleOutlined, SyncOutlined, CrownOutlined, CrownTwoTone, CloudOutlined, CopyOutlined, GlobalOutlined } from '@ant-design/icons';
 import { errorNotification } from '@/component/Notification';
@@ -45,7 +45,7 @@ import {
   RealtimeServiceDataQuery,
   SetAuth
 } from "../../../wailsjs/go/quake/Bridge";
-import {quake} from "../../../wailsjs/go/models";
+import {hunter, quake} from "../../../wailsjs/go/models";
 import {GetQuake} from "../../../wailsjs/go/config/Config";
 import {GetRestToken} from "../../../wailsjs/go/hunter/Bridge";
 import {GetAllEvents} from "../../../wailsjs/go/event/Event";
@@ -174,12 +174,12 @@ type TabContentState = {
   ipList: string[],
 }
 
-let selectedRow: { item: RealtimeServiceItem, rowIndex: number, colKey: string } | undefined
+let selectedRow: { item: RealtimeServiceItem, rowIndex: number | undefined, colKey: string } | undefined
 const defaultMenuItems: MenuItemType[] = [
   MenuItem.OpenUrl,
-  MenuItem.QueryIpCidr,
   MenuItem.QueryIP,
-  MenuItem.CopyCell,
+  MenuItem.QueryIpCidr,
+  MenuItem.QueryTitle,
   MenuItem.CopyRow,
   MenuItem.CopyCol,
 ];
@@ -187,7 +187,6 @@ const defaultMenuItems: MenuItemType[] = [
 const AuthSetting: React.FC = () => {
   const [form] = Form.useForm()
   const [editable, setEditable] = useState(false)
-  const quakeAuth = useSelector((state: RootState) => state.config.auth?.quake)
   const dispatch = useDispatch()
   const [open, setOpen] = useState<boolean>(false)
   function save(values: any) {
@@ -275,44 +274,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
     }
   }
 
-
-  async componentDidMount() {
-    // const template = "<Option label=\"$1\" value=\"$1\"><span style={{display:\"flex\"}}>$1{vipIcon}</span></Option>";
-    // const values = [
-    //   'ip', 'port', 'hostname', 'transport', 'asn', 'org', 'service.name', 'location.country_cn',
-    //   'location.province_cn', 'location.city_cn', 'service.http.host', 'time', 'service.http.title',
-    //   'service.response', 'service.cert', 'components.product_catalog', 'components.product_type',
-    //   'components.product_level', 'components.product_vendor', 'location.country_en', 'location.province_en',
-    //   'location.city_en', 'location.district_en', 'location.district_cn', 'location.isp', 'service.http.body',
-    //   'components.product_name_cn', 'components.version', 'service.http.infomation.mail',
-    //   'service.http.favicon.hash', 'service.http.favicon.data', 'domain', 'service.http.status_code'
-    // ];
-    // values.forEach((value, index) => {
-    //   const output = template.replace(/\$1/g, value);
-    //   console.log(output);
-    // });
-    // console.log(this.state.queryFields)
-    // window.addEventListener("resize", this.handleResize);
-    // this.handleResize()
-    // let tmpCols: (ColumnGroupType<RSDItem> | ColumnType<RSDItem>)[]
-    // let tmp: (ColumnGroupType<RSDItem> | ColumnType<RSDItem>)[]
-    // if (this.props.checkedColsValue) {
-    //   tmpCols = defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
-    //   tmp = tmpCols.map(col => ({ ...col }));
-    // } else {
-    //   tmpCols = defaultColumns.filter(col => defaultCheckedColsValue.includes((col as any)["dataIndex"]))
-    //   tmp = tmpCols.map(col => ({ ...col }));
-    //
-    // }
-    // if (tmp.length > 0) {
-    //   tmp[tmp.length - 1]["width"] = 100
-    // }
-    // await this.setState({ columns: tmp })//需要使用await，不然在query中的columns还没更新
-    // if (this.props.onContextMenu.input) {
-    //   this.query()
-    // }
-  }
-
   getCheckedFields = () => {
     return this.state.checkedFields;
   };
@@ -332,6 +293,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
     const [exportable, setExportable] = useState<boolean>(false)
     const [maxPage, setMaxPage] = useState<number>(0)
     const [disable,setDisable] = useState<boolean>(false)
+
     useEffect(() => {
       const maxPage = Math.ceil(props.total / pageSize)
       setMaxPage(maxPage)
@@ -342,28 +304,32 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         setCost(page * pageSize)
       }
     }, [pageSize, props.total])
+
     useEffect(() => {
       GetAllEvents().then(
           result=>{
             EventsOn(String(result.hasNewQuakeDownloadItem), function(){
+              updateRestToken()
               setIsExporting(false)
               setDisable(false)
             })
           }
       )
     }, []);
-    const getUserInfo=()=>{
+
+    const updateRestToken=()=>{
       GetUserInfo().then(
           result=>{
             dispatch(setQuakeUser(result))
           }
       ).catch(
-          err=>errorNotification("错误",err)
+          err=>errorNotification("更新Quake剩余积分",err)
       )
     }
+
     const exportData = async (page: number) => {
       const { id } = props
-      if (id == 0) {
+      if (id === 0) {
         errorNotification("导出结果", QUERY_FIRST)
         return
       }
@@ -377,6 +343,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
           }
       )
     }
+
     return <>
       <Button disabled={disable}
         size="small"
@@ -463,79 +430,79 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       {
         title: '序号', dataIndex: "index", width: 52, ellipsis: true, fixed: "left", onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  ( selectedRow = { item: record, rowIndex: index, colKey: "index", }) }
+            onContextMenu: () => handleOnContextMenu(record,index,"index")
+          }
+        }
+      },
+      {
+        title: '域名', dataIndex: "domain", ellipsis: true, width: 130, sorter: ((a, b) => localeCompare(a.domain, b.domain)), onCell: (record, index) => {
+          return {
+            onContextMenu: () => handleOnContextMenu(record,index,"domain"),
+            onClick: () => copy(record.domain)
           }
         }
       },
       {
         title: 'IP', dataIndex: "ip", ellipsis: true, width: 120, fixed: "left", sorter: ((a, b) => localeCompare(a.ip, b.ip)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "ip", }) },
-            onClick: () => copyCell(record.ip)
-          }
-        }
-      },
-      {
-        title: '域名', dataIndex: "domain", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.domain, b.domain)), onCell: (record, index) => {
-          return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "domain", }) },
-            onClick: () => copyCell(record.domain)
+            onContextMenu: () => handleOnContextMenu(record,index,"ip"),
+            onClick: () => copy(record.ip)
           }
         }
       },
       {
         title: '端口', dataIndex: "port", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a.port, b.port)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "port", }) },
-            onClick: () => copyCell(record.port)
+            onContextMenu: () => handleOnContextMenu(record,index,"port"),
+            onClick: () => copy(record.port)
           }
         }
       },
       {
         title: '协议', dataIndex: "protocol", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a?.service?.name, b?.service?.name)), render: (value, record) => (record?.service?.name), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "protocol", }) },
-            onClick: () => copyCell(record?.service?.name)
+            onContextMenu: () => handleOnContextMenu(record,index,"protocol"),
+            onClick: () => copy(record?.service?.name)
           }
         }
       },
       {
         title: '网站标题', dataIndex: "web_title", ellipsis: true, width: 400, sorter: ((a, b) => localeCompare(a?.service?.http?.title, b?.service?.http?.title)), render: (value, record) => (record?.service?.http?.title), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "web_title", }) },
-            onClick: () => copyCell(record?.service?.http?.title)
+            onContextMenu: () => handleOnContextMenu(record,index,"web_title"),
+            onClick: () => copy(record?.service?.http?.title)
           }
         }
       },
       {
         title: '响应码', dataIndex: "status_code", ellipsis: true, width: 80, sorter: ((a, b) => localeCompare(a?.service?.http?.status_code, b?.service?.http?.status_code)), render: (value, record) => (record?.service?.http?.status_code), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "status_code", }) },
-            onClick: () => copyCell(record?.service?.http?.status_code)
+            onContextMenu: () => handleOnContextMenu(record,index,"status_code"),
+            onClick: () => copy(record?.service?.http?.status_code)
           }
         }
       },
       {
         title: '产品应用', dataIndex: "component", ellipsis: true, width: 100, onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "component", }) },
-            onClick: () => copyCell(record.ip)
+            onContextMenu: () => handleOnContextMenu(record,index,"component"),
+            onClick: () => copy(record.ip)
           }
         }
       },
       {
         title: '网站服务器', dataIndex: "os_name", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.os_name, b.os_name)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "os_name", }) },
-            onClick: () => copyCell(record.os_name)
+            onContextMenu: () => handleOnContextMenu(record,index,"os_name"),
+            onClick: () => copy(record.os_name)
           }
         }
       },
       {
         title: '网站路径', dataIndex: "path", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a?.service?.http?.path, b?.service?.http?.path)), render: (value, record) => (record?.service?.http?.path), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "path", }) },
-            onClick: () => copyCell(record?.service?.http?.path)
+            onContextMenu: () => handleOnContextMenu(record,index,"path"),
+            onClick: () => copy(record?.service?.http?.path)
           }
         }
       },
@@ -570,38 +537,37 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             location.push(record.location.street_cn)
           }
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "location", }) },
-            onClick: () => copyCell(location.join(" "))
+            onContextMenu: () => handleOnContextMenu(record,index,"location"),
+            onClick: () => copy(location.join(" "))
           }
         }
       },
       {
         title: '更新时间', dataIndex: "time", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.time, b.time)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "time", }) },
-            onClick: () => copyCell(record.time)
+            onContextMenu: () => handleOnContextMenu(record,index,"time"),
+            onClick: () => copy(record.time)
           }
         }
       },
       {
         title: 'ASN', dataIndex: "asn", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a.asn, b.asn)), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "asn", }) },
-            onClick: () => copyCell(record.asn)
+            onContextMenu: () => handleOnContextMenu(record,index,"asn"),
+            onClick: () => copy(record.asn)
           }
         }
       },
       {
         title: '运营商', dataIndex: "isp", ellipsis: true, width: 100, sorter: ((a, b) => localeCompare(a?.location?.isp, b?.location?.isp)), render: (value, record) => (record?.location?.isp), onCell: (record, index) => {
           return {
-            onContextMenu: () => { index  &&  (selectedRow = { item: record, rowIndex: index, colKey: "isp", }) },
-            onClick: () => copyCell(record?.location?.isp)
+            onContextMenu: () => handleOnContextMenu(record,index,"isp"),
+            onClick: () => copy(record?.location?.isp)
           }
         }
       },
     ];
     const [columns, setColumns] = useState<ColumnsType<RealtimeServiceItem>>(defaultColumns)
-    const [messageApi, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState<boolean>(false)
     const [pageData,setPageData]=useState<PageDataType[]>([])
     const pageIDMap = useRef<{ [key: number]: number }>({})
@@ -612,8 +578,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
     const dispatch = useDispatch()
     const [openContextMenu, setOpenContextMenu] = useState(false);
     const [menuItems,setMenuItems] = useState(defaultMenuItems)
+    const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 260)
 
     useEffect(() => {
+      window.addEventListener("resize",()=>{
+        setTableScrollHeight(window.innerHeight - 260)
+      })
       const init = async () => {
         let tmpCols: (ColumnGroupType<RealtimeServiceItem> | ColumnType<RealtimeServiceItem>)[]
         let tmp: (ColumnGroupType<RealtimeServiceItem> | ColumnType<RealtimeServiceItem>)[]
@@ -637,7 +607,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
 
     }, [])
 
-    const getUserInfo=()=>{
+    const updateRestToken=()=>{
       GetUserInfo().then(
           result=>{
             dispatch(setQuakeUser(result))
@@ -646,13 +616,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
           err=>errorNotification("错误",err)
       )
     }
-    const copyCell = (value: string | number | boolean) => {
-      if (!value) {
-        return
-      }
-      copy(value)
-      messageApi.success("复制成功", 0.5)
-    }
+
     const handleHeaderResize =
       (index: number) => (_: React.SyntheticEvent<Element>, { size }: ResizeCallbackData) => {
         const newColumns = [...columns];
@@ -678,38 +642,56 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       }));
     }
 
+    const beforeContextMenuOpen = () => {
+      if (!selectedRow || !selectedRow.item) {
+        return
+      }
+      let t: MenuItemType[] = []
+      for (const key in menuItems) {
+        const tt = menuItems[key]
+        switch (menuItems[key].key) {
+          case MenuItem.OpenUrl.key:
+            {
+              const domain = selectedRow.item.domain
+              const ip = selectedRow.item.ip
+              const schema = selectedRow.item.service?.name
+              tt["disabled"] = !(schema && schema.startsWith("http") && (domain || ip.indexOf("*") < 0));
+              break;
+            }
+          case MenuItem.QueryTitle.key:
+            tt["disabled"] = !selectedRow.item.service.http.title;
+            break;
+        }
+        t.push(tt)
+      }
+      setMenuItems(t)
+    }
+
     const handleMenuItemClick : MenuProps['onClick'] = (e) => {
       if(!selectedRow){
         return
       }
       switch (e.key) {
-        case MenuItem.CopyCell.key:
-          {
-            const item = selectedRow.item as RealtimeServiceItem
-            for (const key in item) {
-              if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.colKey) {
-                const value = item[key as keyof RealtimeServiceItem];
-                copy(value)
-              }
-            }
-          }
+        case MenuItem.QueryTitle.key:
+          this.props?.onContextMenu.addTab(`service.http.title:"${selectedRow.item.service.http.title}"`)
           break
         case MenuItem.QueryIpCidr.key:
-          this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip + "/24")
+          this.props?.onContextMenu.addTab(`ip:"${selectedRow.item.ip}/24"`)
           break
         case MenuItem.QueryIP.key:
-          this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip)
+          this.props?.onContextMenu.addTab(`ip:"${selectedRow.item.ip}"`)
           break
         case MenuItem.OpenUrl.key:
           {
             const domain = selectedRow.item.domain
+            const ip = selectedRow.item.ip
             const schema = selectedRow.item.service?.name
             const port = selectedRow.item.port
-            if (domain && schema) {
+            if (schema && schema.startsWith("http") && (domain || ip.indexOf("*") < 0)) {
               if (schema.startsWith("http/ssl")) {
-                BrowserOpenURL("https://" + selectedRow.item.domain + `${":" + port.toString()}`)
+                BrowserOpenURL(`https://${(selectedRow.item.domain || ip)}:${port.toString()}`)
               } else if (schema.startsWith("http")) {
-                BrowserOpenURL("http://" + selectedRow.item.domain + `${":" + port.toString()}`)
+                BrowserOpenURL(`http://${(selectedRow.item.domain || ip)}:${port.toString()}`)
               }
             }
             break
@@ -764,6 +746,10 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
       selectedRow = undefined
     };
 
+    const handleOnContextMenu = (item: RealtimeServiceItem, rowIndex: number | undefined, colKey: string)=>{
+      selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
+      beforeContextMenuOpen();
+    }
 
     const handleFirstQuery = async (pageSize: number) => {
       const { input, dateRange: dataRange, ignoreCache, ipList, include, exclude, latest } = this.state
@@ -793,7 +779,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         latest: latest
       }).then(
           result=>{
-            getUserInfo()
+            updateRestToken()
             let index = 0
             setPageData(result.result.items.map(item=>{
               const instance = new quake.RealtimeServiceItem(item)
@@ -814,13 +800,14 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
     }
 
     const handlePaginationChange = async (newPage: number, newSize: number) => {
-      const { inputCache, dateRange: dataRange, ignoreCache, ipList, include, exclude } = this.state
+      const { inputCache, dateRange: dataRange, ignoreCache, ipList, include, exclude, latest } = this.state
       //page发生变换
-      if (newPage != currentPage && newSize == currentPageSize) {
+      if (newPage !== currentPage && newSize === currentPageSize) {
         setLoading(true)
         let pageID = pageIDMap.current[newPage]
         pageID=pageID?pageID:0
         RealtimeServiceDataQuery(pageID,{
+          query:inputCache,
           page:newPage,
           size:currentPageSize,
           startTime: dataRange[0] ? dataRange[0] : "",
@@ -829,7 +816,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
           ipList: ipList,
           ignoreCache: ignoreCache,
           include: include,
-          exclude: exclude
+          exclude: exclude,
+          latest: latest
         })
             .then(
                 result=>{
@@ -841,7 +829,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                   }))
                   setCurrentPage(newPage)
                   pageIDMap.current[newPage] = result.id
-                  getUserInfo()
+                  updateRestToken()
                 }
             )
             .catch(
@@ -872,8 +860,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
         checkedFields: tmp.map(item => (item as any).dataIndex)
       })
     }
+
     return <div>
-      {contextHolder}
       <div style={{ display: "flex", justifyContent: 'center', alignItems: "center", marginBottom: "5px" }}>
         <Input
           style={{ width: "600px" }}
@@ -991,7 +979,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
           <Table
             // locale={{ emptyText: "暂无数据" }}
             showSorterTooltip={false}
-            scroll={{ y: 'calc(100vh - 256px)', scrollToFirstRowOnChange: true }}
+            scroll={{ y: tableScrollHeight, scrollToFirstRowOnChange: true }}
             bordered
             columns={getMergeColumns()}
             components={{
@@ -1003,7 +991,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
             loading={loading}
             size="small"
             pagination={false}
-            footer={() => <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            footer={() => <Flex justify={"space-between"} align={"center"}>
               <Pagination
                   showQuickJumper
                   showSizeChanger
@@ -1017,7 +1005,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState>{
                 onChange={(page, size) => handlePaginationChange(page, size)}
               />
               <this.ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />
-            </div>}
+            </Flex>}
             // onRow={(record) => {
             //   return {
             //     onContextMenu: (event) => { selectedRow = record },
@@ -1139,17 +1127,20 @@ class Quake extends React.Component {
     const user = useSelector((state: RootState) => state.user.quake)
     const [spin, setSpin] = useState<boolean>(false)
     const dispatch = useDispatch()
-    const getUserInfo = async () => {
+
+    useEffect(() => {
+      updateRestToken()
+    }, []);
+
+    const updateRestToken = async () => {
       try {
         const user = await GetUserInfo()
         dispatch(setQuakeUser(user))
       }catch(err) {
-          errorNotification("Quake用户信息", err)
+        errorNotification("Quake用户信息", err)
       }
     }
-    useEffect(() => {
-      getUserInfo()
-    }, []);
+
     return <div style={{
       width: "auto",
       height: "23px",
@@ -1186,7 +1177,7 @@ class Quake extends React.Component {
           <Button size="small" shape="circle" type="text" icon={<SyncOutlined spin={spin}
             onClick={async () => {
               setSpin(true)
-              await getUserInfo()
+              await updateRestToken()
               setSpin(false)
             }}
           />}></Button>

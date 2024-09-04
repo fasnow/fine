@@ -17,7 +17,7 @@ import {
 import {SetAuth as SetHunterAuth} from "../../../wailsjs/go/hunter/Bridge";
 import {SetAuth as SetFofaAuth} from "../../../wailsjs/go/fofa/Bridge";
 import {SetAuth as Set0zoneAuth} from "../../../wailsjs/go/zone/Bridge";
-import {SetAuth as SetQuakeAuth} from "../../../wailsjs/go/zone/Bridge";
+import {SetAuth as SetQuakeAuth} from "../../../wailsjs/go/quake/Bridge";
 const onChange = (key: string) => {
   console.log(key);
 };

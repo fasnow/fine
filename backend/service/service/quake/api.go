@@ -570,14 +570,11 @@ func (q *Quake) send(request *http.Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err != nil {
-		return nil, err
-	}
 	if response.StatusCode == 401 {
 		return nil, errors.New("invalid quake key")
 	}
 	if response.StatusCode != 200 {
-		return nil, errors.New(string(body))
+		return nil, errors.New(strconv.Itoa(response.StatusCode))
 	}
 	if string(body) == service.QuakeUnauthorized {
 		return nil, errors.New(service.QuakeInvalidKey)

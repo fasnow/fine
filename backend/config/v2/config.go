@@ -248,6 +248,11 @@ func init() {
 			logger.Info("can't map to config file:" + err.Error())
 			os.Exit(0)
 		}
+
+		// 对于allowshadow关键字的配置，如果内容包含逗号不能直接映射，需要单独取出后填充
+		rules := cfg.Section(`Wechat`).Key("rule").ValueWithShadows()
+		GlobalConfig.Wechat.Rules = rules
+
 		if runtime.GOOS != "windows" { // darwin下微信小程序固定目录
 			homeDir, err := os.UserHomeDir()
 			if err != nil {

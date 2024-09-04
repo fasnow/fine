@@ -135,7 +135,7 @@ jobs:
           files: |
             artifacts/*
           body: |
-            2. 修复Quake翻页BUG。
+            1. 修复Quake翻页BUG。
             
 
         env:

@@ -135,8 +135,7 @@ jobs:
           files: |
             artifacts/*
           body: |
-            1. hunter/fofa支持icon搜索；
-            2. 更改了httpx输出格式。
+            2. 修复Quake翻页BUG。
             
 
         env:

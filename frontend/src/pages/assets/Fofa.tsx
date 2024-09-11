@@ -76,7 +76,7 @@ const pageSizeOptions = [50, 100, 150, 200, 500]
 
 const defaultCheckedColsValue: string[] = [
     "index",
-    "domain",
+    "link",
     "ip",
     "port",
     "protocol",

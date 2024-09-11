@@ -208,7 +208,7 @@ func (i *ICP) Query(unitName string) (*Result, error) {
 
 	// 被ban或者服务器出错
 	if response.StatusCode != 200 {
-		return nil, errors.New(string(body))
+		return nil, errors.New("被ban或者服务器出错--" + string(body))
 	}
 
 	var tmpResponse struct {

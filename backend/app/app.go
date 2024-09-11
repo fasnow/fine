@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -52,8 +53,7 @@ func (a *App) Fetch(url string) ([]byte, error) {
 		return nil, err
 	}
 	if response.StatusCode != 200 {
-		bytes, _ := io.ReadAll(response.Body)
-		return nil, errors.New(string(bytes))
+		return nil, errors.New(strconv.Itoa(response.StatusCode))
 	}
 	bytes, err := io.ReadAll(response.Body)
 	return bytes, err

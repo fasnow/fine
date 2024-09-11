@@ -305,7 +305,7 @@ func (f *faviconSimilarityData) Get(faviconHash string, similar float64, size in
 		return nil, errors.New("invalid quake key")
 	}
 	if response.StatusCode != 200 {
-		return nil, errors.New(string(body))
+		return nil, errors.New(strconv.Itoa(response.StatusCode))
 	}
 	code, err := jsonparser.GetInt(body, "Code")
 	if err != nil && err.Error() == "Key path not found" {

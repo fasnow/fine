@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 )
 
 type Runtime struct {
@@ -104,7 +105,7 @@ func (r *Runtime) CheckUpdate() (map[string]string, error) {
 	}(resp.Body)
 	body, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		return nil, errors.New(string(body))
+		return nil, errors.New(strconv.Itoa(resp.StatusCode))
 	}
 	tagName, err := jsonparser.GetString(body, "tag_name")
 	if err != nil {

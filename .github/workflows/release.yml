@@ -34,11 +34,15 @@ jobs:
       CGO_ENABLED: 1
       GOOS: ${{ matrix.build.os }}
       GOARCH: ${{ matrix.build.arch }}
-      ARTIFACT_NAME: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
+
     steps:
       - name: Define artifact name
         run: |
-          echo "Artifact name is: ${{ ARTIFACT_NAME }}"
+          echo "ARTIFACT_NAME=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> "$GITHUB_ENV"
+
+      - name: Test artifact name
+        run: |
+          echo "Artifact name is: $ARTIFACT_NAME"
 
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -84,8 +88,8 @@ jobs:
 
       - name: Build artifact
         run: |
-          echo "Artifact name is: ${{ ARTIFACT_NAME }}"
-          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ ARTIFACT_NAME }}
+          echo "Artifact name is: $ARTIFACT_NAME"
+          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o $ARTIFACT_NAME
 
       - name: Compress artifact
         if: matrix.build.os != 'darwin'
@@ -95,13 +99,13 @@ jobs:
       - name: Zip mac artifact
         if: matrix.build.os == 'darwin'
         run: |
-          ditto -c -k build/bin/Fine.app build/bin/${{ ARTIFACT_NAME }}.zip
+          ditto -c -k build/bin/Fine.app build/bin/$ARTIFACT_NAME.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ ARTIFACT_NAME }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
-          path: build/bin/${{ ARTIFACT_NAME }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          name: $ARTIFACT_NAME${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          path: build/bin/$ARTIFACT_NAME${{ matrix.build.os == 'darwin' && '.zip' || '' }}
 
   release:
     needs: [ build ]
@@ -113,7 +117,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ ARTIFACT_NAME }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          name: $ARTIFACT_NAME${{ matrix.build.os == 'darwin' && '.zip' || '' }}
           path: ${{ github.workspace }}/artifacts
 
       - name: List artifacts

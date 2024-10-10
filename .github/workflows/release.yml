@@ -40,6 +40,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Define artifact name
+        run: |
+          if [ "${{ matrix.build.os }}" == "windows" ]; then
+              echo "artifact_name=Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}.exe" >> $GITHUB_ENV
+          else
+              echo "artifact_name=Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}.app" >> $GITHUB_ENV
+          fi
+          echo "Artifact name is: $artifact_name"
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -58,11 +67,6 @@ jobs:
         uses: crazy-max/ghaction-upx@v3
         with:
           install-only: true
-
-      - name: Define artifact name
-        run: |
-          echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> $GITHUB_ENV
-          echo "Artifact name is: ${{ env.artifact_name }}"
 
       - name: Build WxMiniProgramDecompile for Windows
         if: matrix.build.os == 'windows'

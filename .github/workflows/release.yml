@@ -63,15 +63,6 @@ jobs:
           npm run build
           mv decompile ../backend/service/service/wechat/decompile
 
-      - name: Install UPX
-        if: matrix.build.os == 'windows'
-        uses: crazy-max/ghaction-upx@v3
-        with:
-          version: latest
-          files: |
-            build/bin/*
-          args: -fq
-
       - name: Build wails
         uses: dAppServer/wails-build-action@v2.2
         id: build
@@ -83,21 +74,30 @@ jobs:
           node-version: ${{ env.node-version }}
           wails-build-webview2: embed
           nsis: false
+
+      - name: Install UPX
+        if: matrix.build.os == 'windows'
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          version: latest
+          files: |
+            */bin/*
+          args: -fq
             
       # Upload build assets
       - uses: actions/upload-artifact@v3
         with:
           name: Wails Build Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}
           path: |
-            build/bin/*
-            build\bin\*
+            */bin/*
+            *\bin\*
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            build/bin/*
-            build\bin\*
+            */bin/*
+            *\bin\*
         env:
 #          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

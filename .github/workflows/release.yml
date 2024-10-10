@@ -37,16 +37,16 @@ jobs:
     outputs:
       upload-name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app.zip') }}
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Set artifact name
         id: set_artifact_name
         run: |
           echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}"
           echo "::set-output name=artifact_name::${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}"
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -103,7 +103,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.set_artifact_name.outputs.artifact_name }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
-          path: build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}
+          path: build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
 
   release:
     needs: [ build ]

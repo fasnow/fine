@@ -23,7 +23,7 @@ jobs:
             runs-on: 'windows-latest'
           - os: "darwin"
             arch: 'amd64'
-            runs-on: 'macos-latest'
+            runs-on: 'macos-13'
           - os: "darwin"
             arch: 'arm64'
 #            platform: 'darwin/arm64'
@@ -31,7 +31,7 @@ jobs:
 
     runs-on: ${{ matrix.build.runs-on }}
     env:
-      CGO_ENABLED: 0
+      CGO_ENABLED: 1
       GOOS: ${{ matrix.os }}
       GOARCH: ${{ matrix.arch }}
     steps:

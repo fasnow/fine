@@ -123,7 +123,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            ${{ github.workspace }}/artifacts/*
+            ${{ github.workspace }}/artifacts/**
           token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |   
             1. 添加darwin/amd64支持。

@@ -41,7 +41,11 @@ jobs:
 
       - name: Use environment variable
         run: |
-          echo "The value of MY_ENV_VAR is $MY_ENV_VAR"
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            echo "The value of MY_ENV_VAR is $env:MY_ENV_VAR"
+          else
+            echo "The value of MY_ENV_VAR is $MY_ENV_VAR"
+          fi
 #      - name: Define artifact name
 #        run: |
 #          echo "ARTIFACT_NAME=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> "$GITHUB_ENV"

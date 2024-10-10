@@ -35,16 +35,13 @@ jobs:
       GOOS: ${{ matrix.build.os }}
       GOARCH: ${{ matrix.build.arch }}
     outputs:
-      artifact_name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
+      upload-name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app.zip') }}
     steps:
       - name: Set artifact name
         id: set_artifact_name
         run: |
           echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}"
           echo "::set-output name=artifact_name::${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}"
-
-      - name: Use artifact name
-        run: echo "The artifact name is ${{ steps.set_artifact_name.outputs.artifact_name }}"
 
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -90,23 +87,24 @@ jobs:
 
       - name: Build artifact
         run: |
-          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
+          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ steps.set_artifact_name.outputs.artifact_name }}
 
       - name: Compress artifact
         if: matrix.build.os != 'darwin'
         run: |
           upx build/bin/* -9
 
-      - name: Zip mac artifact
-        if: matrix.build.os == 'darwin'
-        run: |
-          ditto -c -k build/bin/Fine.app build/bin/${{ format('Fine_{0}_{1}.app', matrix.build.os, matrix.build.arch) }}.zip
+#      - name: Zip mac artifact
+#        if: matrix.build.os == 'darwin'
+#        run: |
+#          ditto -c -k build/bin/Fine.app build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
-          path: build/bin/${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
+          name: artifact
+          path: build/bin/*
+#          path: build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}
 
   release:
     needs: [ build ]
@@ -118,19 +116,19 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
-          path: ${{ github.workspace }}/artifacts
+          name: artifact
+          path: artifacts
 
       - name: List artifacts
         run: |
-          ls ${{ github.workspace }}/artifacts
+          ls -al artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            ${{ github.workspace }}/artifacts/**
+            artifacts/*
 #          token: ${{ secrets.FINE_ACCESS_TOKEN }}
           token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |   

@@ -22,19 +22,25 @@ jobs:
           - os: "windows"
             arch: 'amd64'
             runs-on: 'windows-latest'
-#          - os: "darwin"
-#            arch: 'amd64'
-#            runs-on: 'macos-13'
-#          - os: "darwin"
-#            arch: 'arm64'
-#            runs-on: 'macos-latest'
+          - os: "darwin"
+            arch: 'amd64'
+            runs-on: 'macos-13'
+          - os: "darwin"
+            arch: 'arm64'
+            runs-on: 'macos-latest'
 
     runs-on: ${{ matrix.build.runs-on }}
     env:
       CGO_ENABLED: 1
       GOOS: ${{ matrix.build.os }}
       GOARCH: ${{ matrix.build.arch }}
+    outputs:
+      artifact_name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
     steps:
+      - name: a
+        run: |
+          echo "A: ${{ jobs.build.outputs.artifact_name }}"
+
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
@@ -95,7 +101,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
-          path: build/bin/**
+          path: build/bin/${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
 
   release:
     needs: [ build ]

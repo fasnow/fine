@@ -35,15 +35,15 @@ jobs:
       GOOS: ${{ matrix.build.os }}
       GOARCH: ${{ matrix.build.arch }}
     steps:
+      - name: Define artifact name
+        run: |
+          echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> $GITHUB_ENV
+          echo "Artifact name is: $env:artifact_name"
+
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Define artifact name
-        run: |
-          echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> $GITHUB_ENV
-          echo "Artifact name is: $artifact_name"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

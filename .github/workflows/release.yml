@@ -86,6 +86,8 @@ jobs:
             
       # Upload build assets
       - uses: actions/upload-artifact@v3
+        run: |
+          ${{ format('{0}', matrix.build.os == 'windows' && 'dir' || 'ls') }}
         with:
           name: Wails Build Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}
           path: |

@@ -60,6 +60,9 @@ jobs:
         with:
           install-only: true
 
+      - name: Define artifact name
+        run: echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> $GITHUB_ENV
+
       - name: Build WxMiniProgramDecompile for Windows
         if: matrix.build.os == 'windows'
         run: |
@@ -80,7 +83,7 @@ jobs:
 
       - name: Build artifact
         run: |
-          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '') }}
+          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ env.artifact_name }}
 
       - name: Compress artifact
         if: matrix.build.os != 'darwin'
@@ -90,14 +93,13 @@ jobs:
       - name: Zip mac artifact
         if: matrix.build.os == 'darwin'
         run: |
-          ditto -c -k build/bin/Fine.app build/bin/Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}.app.zip
+          ditto -c -k build/bin/Fine.app build/bin/${{ env.artifact_name }}.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: artifacts
-          path: |
-            build/bin/*
+          name: ${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.app.zip' || '' }}
+          path: build/bin/${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.app.zip' || '' }}
 
   release:
     needs: [ build ]
@@ -106,11 +108,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Download Windows Build Artifacts
-        uses: actions/download-artifact@v3
+      - name: Download artifact
+        uses: actions/download-artifact@v4
         with:
-          name: artifacts
-          path: artifacts/
+          name: ${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.app.zip' || '' }}
+          path: ./artifacts
 
       - name: List artifacts
         run: |

@@ -97,7 +97,7 @@ jobs:
       - name: Zip mac artifact
         if: matrix.build.os == 'darwin'
         run: |
-          ditto -c -k build/bin/Fine.app build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}.zip
+          ditto -c -k --keepParent build/bin/Fine.app build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

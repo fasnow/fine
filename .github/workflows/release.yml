@@ -37,9 +37,14 @@ jobs:
     outputs:
       artifact_name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
     steps:
-      - name: a
+      - name: Set artifact name
+        id: set_artifact_name
         run: |
-          echo "A: ${{ outputs.artifact_name }}"
+          echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}"
+          echo "::set-output name=artifact_name::${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}"
+
+      - name: Use artifact name
+        run: echo "The artifact name is ${{ steps.set_artifact_name.outputs.artifact_name }}"
 
       - name: Checkout Repository
         uses: actions/checkout@v4

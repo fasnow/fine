@@ -45,21 +45,23 @@ jobs:
         with:
           node-version: ${{ env.node-version }}
 
-      - name: Build WxMiniProgramDecompile
+      - name: Build WxMiniProgramDecompile for Windows
+        if: matrix.build.os == 'windows'
         run: |
-          if (${{ matrix.build.os == 'windows' }}) {
-              cd wechatMiniProgram
-              npm install pkg
-              npm install --force
-              npm run build
-              mv decompile.exe ../backend/service/service/wechat/decompile
-          } else {
-              cd wechatMiniProgram
-              npm install pkg
-              npm install --force
-              npm run build
-              mv decompile ../backend/service/service/wechat/decompile
-          }
+          cd wechatMiniProgram
+          npm install pkg
+          npm install --force
+          npm run build
+          mv decompile.exe ../backend/service/service/wechat/decompile
+
+      - name: Build WxMiniProgramDecompile for Mac/Linux
+        if: matrix.build.os != 'windows'
+        run: |
+          cd wechatMiniProgram
+          npm install pkg
+          npm install --force
+          npm run build
+          mv decompile ../backend/service/service/wechat/decompile
 
       - name: Install UPX
         uses: crazy-max/ghaction-upx@v3

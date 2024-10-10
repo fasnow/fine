@@ -16,15 +16,15 @@ jobs:
   build:
     strategy:
       # true: 一个失败全终止
-      fail-fast: true
+      fail-fast: false
       matrix:
         build:
           - os: "windows"
             arch: 'amd64'
             runs-on: 'windows-latest'
-#          - os: "darwin"
-#            arch: 'amd64'
-#            runs-on: 'macos-13'
+          - os: "darwin"
+            arch: 'amd64'
+            runs-on: 'macos-13'
 #          - os: "darwin"
 #            arch: 'arm64'
 #            runs-on: 'macos-latest'
@@ -36,13 +36,19 @@ jobs:
       GOARCH: ${{ matrix.build.arch }}
 
     steps:
-      - name: Define artifact name
-        run: |
-          echo "ARTIFACT_NAME=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> "$GITHUB_ENV"
+      - name: Set environment variable
+        run: echo "MY_ENV_VAR=myValue" >> $GITHUB_ENV
 
-      - name: Test artifact name
+      - name: Use environment variable
         run: |
-          echo "Artifact name is: ${{ env.ARTIFACT_NAME }}"
+          echo "The value of MY_ENV_VAR is $MY_ENV_VAR"
+#      - name: Define artifact name
+#        run: |
+#          echo "ARTIFACT_NAME=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> "$GITHUB_ENV"
+#
+#      - name: Test artifact name
+#        run: |
+#          echo "Artifact name is: ${{ env.ARTIFACT_NAME }}"
 
       - name: Checkout Repository
         uses: actions/checkout@v4

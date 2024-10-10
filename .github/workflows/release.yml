@@ -98,8 +98,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.app.zip' || '' }}
-          path: build/bin/${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.app.zip' || '' }}
+          name: ${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          path: build/bin/${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
 
   release:
     needs: [ build ]

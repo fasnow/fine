@@ -54,7 +54,7 @@ jobs:
               npm run build
               mv decompile.exe ../backend/service/service/wechat/decompile
           } else {
-              cd ../wechatMiniProgram
+              cd wechatMiniProgram
               npm install pkg
               npm install --force
               npm run build

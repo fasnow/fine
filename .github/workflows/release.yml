@@ -94,17 +94,16 @@ jobs:
         run: |
           upx build/bin/* -9
 
-#      - name: Zip mac artifact
-#        if: matrix.build.os == 'darwin'
-#        run: |
-#          ditto -c -k build/bin/Fine.app build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}.zip
+      - name: Zip mac artifact
+        if: matrix.build.os == 'darwin'
+        run: |
+          ditto -c -k build/bin/Fine.app build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: artifact
-          path: build/bin/*
-#          path: build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}
+          name: ${{ steps.set_artifact_name.outputs.artifact_name }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          path: build/bin/${{ steps.set_artifact_name.outputs.artifact_name }}
 
   release:
     needs: [ build ]
@@ -116,8 +115,8 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: artifact
-          path: artifacts
+          name: ${{ needs.build.outputs.upload-name }}
+          path: ${{ github.workspace }}/artifacts
 
       - name: List artifacts
         run: |
@@ -128,7 +127,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            artifacts/*
+            artifacts/**
 #          token: ${{ secrets.FINE_ACCESS_TOKEN }}
           token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |   

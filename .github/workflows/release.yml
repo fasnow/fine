@@ -83,11 +83,16 @@ jobs:
           files: |
             $GITHUB_WORKSPACE/bin/*
           args: -fq
+
+      - if: matrix.build.os == 'windows'
+        run: |
+          dir
+      - if: matrix.build.os != 'windows'
+        run: |
+          ls
             
       # Upload build assets
       - uses: actions/upload-artifact@v3
-        run: |
-          ${{ format('{0}', matrix.build.os == 'windows' && 'dir' || 'ls') }}
         with:
           name: Wails Build Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}
           path: |

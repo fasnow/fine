@@ -16,15 +16,15 @@ jobs:
   build:
     strategy:
       # true: 一个失败全终止
-      fail-fast: false
+      fail-fast: true
       matrix:
         build:
           - os: "windows"
             arch: 'amd64'
             runs-on: 'windows-latest'
-          - os: "darwin"
-            arch: 'amd64'
-            runs-on: 'macos-13'
+#          - os: "darwin"
+#            arch: 'amd64'
+#            runs-on: 'macos-13'
 #          - os: "darwin"
 #            arch: 'arm64'
 #            runs-on: 'macos-latest'
@@ -34,23 +34,7 @@ jobs:
       CGO_ENABLED: 1
       GOOS: ${{ matrix.build.os }}
       GOARCH: ${{ matrix.build.arch }}
-
     steps:
-      - name: Set environment variable
-        run: echo "MY_ENV_VAR=myValue" >> $GITHUB_ENV
-
-      - name: Use environment variable
-        run: |
-          echo "The value of MY_ENV_VAR is ${{ matrix.build.os == 'windows' && env:MY_ENV_VAR || MY_ENV_VAR"}} 
-
-      #      - name: Define artifact name
-#        run: |
-#          echo "ARTIFACT_NAME=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> "$GITHUB_ENV"
-#
-#      - name: Test artifact name
-#        run: |
-#          echo "Artifact name is: ${{ env.ARTIFACT_NAME }}"
-
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
@@ -95,8 +79,7 @@ jobs:
 
       - name: Build artifact
         run: |
-          echo "Artifact name is: ${{ env.ARTIFACT_NAME }}"
-          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ env.ARTIFACT_NAME }}
+          wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}
 
       - name: Compress artifact
         if: matrix.build.os != 'darwin'
@@ -106,13 +89,13 @@ jobs:
       - name: Zip mac artifact
         if: matrix.build.os == 'darwin'
         run: |
-          ditto -c -k build/bin/Fine.app build/bin/${{ env.ARTIFACT_NAME }}.zip
+          ditto -c -k build/bin/Fine.app build/bin/${{ format('Fine_{0}_{1}.app', matrix.build.os, matrix.build.arch) }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
-          path: build/bin/${{ env.ARTIFACT_NAME }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          path: build/bin/**
 
   release:
     needs: [ build ]
@@ -124,7 +107,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
+          name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
           path: ${{ github.workspace }}/artifacts
 
       - name: List artifacts

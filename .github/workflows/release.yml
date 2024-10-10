@@ -15,8 +15,8 @@ env:
 jobs:
   build:
     strategy:
-      # Failure in one platform build won't impact the others
-      fail-fast: false
+      # true: 一个失败全终止
+      fail-fast: true
       matrix:
         build:
           - os: "windows"
@@ -82,6 +82,7 @@ jobs:
 
       - name: Build artifact
         run: |
+          echo "Artifact name is: ${{ env.artifact_name }}"
           wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ env.artifact_name }}
 
       - name: Compress artifact

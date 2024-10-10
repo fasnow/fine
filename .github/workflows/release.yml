@@ -42,7 +42,7 @@ jobs:
 
       - name: Test artifact name
         run: |
-          echo "Artifact name is: $ARTIFACT_NAME"
+          echo "Artifact name is: ${{ARTIFACT_NAME}}"
 
       - name: Checkout Repository
         uses: actions/checkout@v4

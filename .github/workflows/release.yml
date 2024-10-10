@@ -116,7 +116,7 @@ jobs:
 
       - name: List artifacts
         run: |
-          ls
+          ls artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v1

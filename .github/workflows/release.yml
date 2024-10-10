@@ -67,7 +67,7 @@ jobs:
         uses: dAppServer/wails-build-action@v2.2
         id: build
         with:
-          build-name: Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}
+          build-name: ${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '') }}
           build-platform: ${{ matrix.build.os }}/${{ matrix.build.arch }}
           package: false
           go-version: ${{ env.go-version }}
@@ -81,7 +81,7 @@ jobs:
         with:
           version: latest
           files: |
-            */bin/*
+            $GITHUB_WORKSPACE/bin/*
           args: -fq
             
       # Upload build assets
@@ -89,15 +89,13 @@ jobs:
         with:
           name: Wails Build Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}
           path: |
-            */bin/*
-            *\bin\*
+            $GITHUB_WORKSPACE/bin/*
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            */bin/*
-            *\bin\*
+            $GITHUB_WORKSPACE/build/bin/*
         env:
 #          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

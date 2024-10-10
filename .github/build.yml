@@ -1,4 +1,5 @@
 name: Fine Auto Release
+
 on:
   push:
     tags:
@@ -79,10 +80,10 @@ jobs:
 
       - name: Build WxMiniProgramDecompile
         run: |
-          wget https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-src.tar.xz
-          tar -zxvf upx-4.2.2-src.tar.xz
-          cd upx-4.2.2-src
-          make
+#          wget https://github.com/upx/upx/releases/download/v4.2.2/upx-4.2.2-src.tar.xz
+#          tar -zxvf upx-4.2.2-src.tar.xz
+#          cd upx-4.2.2-src
+#          make
           cd ../wechatMiniProgram
           npm install pkg
           npm install --force
@@ -96,7 +97,7 @@ jobs:
       - name: Build
         run: |
           wails build
-#          macos upx无法压缩
+#          macos upx压缩失败
 
       - name: Zip Build Artifacts
         run: |

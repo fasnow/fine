@@ -1,0 +1,94 @@
+name: Fine release
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  # Necessary for most environments as build failure can occur due to OOM issues
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  go-version: '1.22.0'
+  node-version: '18'
+
+jobs:
+  build:
+    strategy:
+      # Failure in one platform build won't impact the others
+      fail-fast: false
+      matrix:
+        build:
+          - os: "windows"
+            arch: 'amd64'
+            runs-on: 'windows-latest'
+          - os: "darwin"
+            arch: 'amd64'
+            runs-on: 'macos-latest'
+          - os: "darwin"
+            arch: 'arm64'
+#            platform: 'darwin/arm64'
+            runs-on: 'macos-latest'
+
+    runs-on: ${{ matrix.build.runs-on }}
+    env:
+      CGO_ENABLED: 0
+      GOOS: ${{ matrix.os }}
+      GOARCH: ${{ matrix.arch }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node-version }}
+
+      - name: Build WxMiniProgramDecompile
+        run: |
+          if (${{ matrix.build.os == 'windows' }}) {
+              cd wechatMiniProgram
+              npm install pkg
+              npm install --force
+              npm run build
+              mv decompile.exe ../backend/service/service/wechat/decompile
+          } else {
+              cd ../wechatMiniProgram
+              npm install pkg
+              npm install --force
+              npm run build
+              mv decompile ../backend/service/service/wechat/decompile
+          }
+
+      - name: Install UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+
+      - name: Build wails
+        uses: dAppServer/wails-build-action@v2.2
+        id: build
+        with:
+          build-name: Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}
+          build-platform: ${{ matrix.build.os }}/${{ matrix.build.arch }}
+          package: false
+          go-version: ${{ env.go-version }}
+          node-version: ${{ env.node-version }}
+            
+      # Upload build assets
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Wails Build Fine_${{ matrix.build.os }}_${{ matrix.build.arch }}
+          path: |
+            */bin/
+            *\bin\*
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            */bin/*
+        env:
+#          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

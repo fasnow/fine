@@ -7,7 +7,7 @@
     "url": "https://github.com/fasnow/fine/tree/main/wechatMiniProgram"
   },
   "scripts": {
-    "build": "pkg . -o ../backend/service/service/wechat/decompile",
+    "build": "pkg . -o decompile",
     "publish": "pkg . -o decompile"
   },
   "pkg": {

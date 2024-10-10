@@ -7,7 +7,7 @@ on:
 
 env:
   # Necessary for most environments as build failure can occur due to OOM issues
-  NODE_OPTIONS: "--max-old-space-size=4096"
+#  NODE_OPTIONS: "--max-old-space-size=4096"
   go-version: '1.22.0'
   node-version: '18'
   wails-version: 'latest'
@@ -19,15 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         build:
-#          - os: "windows"
-#            arch: 'amd64'
-#            runs-on: 'windows-latest'
-#          - os: "darwin"
-#            arch: 'amd64'
-#            runs-on: 'macos-13'
+          - os: "windows"
+            arch: 'amd64'
+            runs-on: 'windows-latest'
+          - os: "darwin"
+            arch: 'amd64'
+            runs-on: 'macos-13'
           - os: "darwin"
             arch: 'arm64'
-#            platform: 'darwin/arm64'
             runs-on: 'macos-latest'
 
     runs-on: ${{ matrix.build.runs-on }}
@@ -124,9 +123,7 @@ jobs:
         with:
           files: |
             ${{ github.workspace }}/artifacts/**
+#          token: ${{ secrets.FINE_ACCESS_TOKEN }}
           token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |   
             1. 添加darwin/amd64支持。
-#        env:
-##          GITHUB_TOKEN: ${{ secrets.FINE_ACCESS_TOKEN }}
-#             GITHUB_TOKEN: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}

@@ -22,12 +22,12 @@ jobs:
           - os: "windows"
             arch: 'amd64'
             runs-on: 'windows-latest'
-          - os: "darwin"
-            arch: 'amd64'
-            runs-on: 'macos-13'
-          - os: "darwin"
-            arch: 'arm64'
-            runs-on: 'macos-latest'
+#          - os: "darwin"
+#            arch: 'amd64'
+#            runs-on: 'macos-13'
+#          - os: "darwin"
+#            arch: 'arm64'
+#            runs-on: 'macos-latest'
 
     runs-on: ${{ matrix.build.runs-on }}
     env:
@@ -60,7 +60,9 @@ jobs:
           install-only: true
 
       - name: Define artifact name
-        run: echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> $GITHUB_ENV
+        run: |
+          echo "artifact_name=${{ format('Fine_{0}_{1}{2}', matrix.build.os, matrix.build.arch, matrix.build.os == 'windows' && '.exe' || '.app') }}" >> $GITHUB_ENV
+          echo "Artifact name is: ${{ env.artifact_name }}"
 
       - name: Build WxMiniProgramDecompile for Windows
         if: matrix.build.os == 'windows'

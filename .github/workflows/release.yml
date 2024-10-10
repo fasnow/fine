@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: a
         run: |
-          echo "A: ${{ jobs.build.outputs.artifact_name }}"
+          echo "A: ${{ outputs.artifact_name }}"
 
       - name: Checkout Repository
         uses: actions/checkout@v4

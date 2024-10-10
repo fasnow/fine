@@ -111,7 +111,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.app.zip' || '' }}
+          name: ${{ env.artifact_name }}${{ matrix.build.os == 'darwin' && '.zip' || '' }}
           path: ./artifacts
 
       - name: List artifacts

@@ -5,8 +5,8 @@ import (
 	"embed"
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/constraint"
 	"fine/backend/db/service"
-	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/runtime"
 	"fine/backend/service/service/domain2ip"
@@ -76,7 +76,7 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			mainApp.SetContext(ctx)
-			event.SetContext(ctx)
+			constraint.SetContext(ctx)
 
 			//适配小屏
 			screens, _ := wailsRuntime.ScreenGetAll(ctx)
@@ -96,8 +96,8 @@ func main() {
 		},
 		Bind: []interface{}{
 			mainApp,
-			config.GetSingleton(),
-			event.GetSingleton(),
+			config.GlobalConfig,
+			constraint.Events,
 			runtime.NewRuntime(mainApp),
 			runtime.NewPath(),
 			httpx.NewHttpxBridge(mainApp),

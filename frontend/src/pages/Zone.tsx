@@ -26,22 +26,22 @@ import { SearchOutlined, QuestionOutlined, LoadingOutlined, CloudDownloadOutline
 import { errorNotification } from '@/component/Notification';
 import { QUERY_FIRST, MsgOfWechatType, MsgOfMiniProgramType, MsgOfApkType, ZoneEmailItemType, ZoneMemberItemType } from '@/component/type';
 import { ColumnsType } from 'antd/es/table';
-import ContextMenu from '../../component/ContextMenu';
+import ContextMenu from '../component/ContextMenu';
 import AdVirtualList from 'rc-virtual-list';
 import { RadioOption } from '@/component/Rdg';
-import Copy from '../../component/Copy';
+import Copy from '../component/Copy';
 import { Light } from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import NotFound from '../Notfound';
+import NotFound from './Notfound';
 import { ResizeCallbackData } from 'react-resizable';
-import ResizableTitle from '../../component/ResizableTitle';
+import ResizableTitle from '../component/ResizableTitle';
 import { useDispatch, useSelector } from 'react-redux';
 import {RootState, setZoneAuth} from '@/store/store';
 import { ExportDataPanelProps as ExportDataPanelProps } from './Props';
-import { buttonProps, authFormProps } from '../setting/Setting';
+import { buttonProps, authFormProps } from './Setting';
 import {copy, localeCompare} from '@/util/util';
 import {
     ExportDomain, ExportEmail,
@@ -54,14 +54,14 @@ import {
     QueryMember,
     QuerySite,
     SetAuth
-} from "../../../wailsjs/go/zone/Bridge";
-import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
-import {fofa, zone} from "../../../wailsjs/go/models";
+} from "../../wailsjs/go/zone/Bridge";
+import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
+import {fofa, zone} from "../../wailsjs/go/models";
 import {current} from "@reduxjs/toolkit";
-import {Get0zone} from "../../../wailsjs/go/config/Config";
-import {GetAllEvents} from "../../../wailsjs/go/event/Event";
+import {Get0zone} from "../../wailsjs/go/config/Config";
 import {MenuItem} from "@/component/MenuItem";
 import {MenuItemType} from "antd/es/menu/interface";
+import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 interface TabType {

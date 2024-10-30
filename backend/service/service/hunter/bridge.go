@@ -3,9 +3,9 @@ package hunter
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/constraint"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
-	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	"fine/backend/service/model/hunter"
@@ -29,7 +29,7 @@ type Bridge struct {
 }
 
 func NewHunterBridge(app *app.App) *Bridge {
-	t := config.GetSingleton().GetHunter()
+	t := config.GlobalConfig.GetHunter()
 	tt := NewClient(t.Token)
 	proxy.GetSingleton().Add(tt)
 	return &Bridge{
@@ -145,7 +145,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetSingleton().GetDataDir()
+	dataDir := config.GlobalConfig.GetDataDir()
 	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(model.DownloadLog{
@@ -156,7 +156,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 	}, fileID)
 	go func() {
 		var retry = 10
-		interval := config.GetSingleton().GetHunter().Interval
+		interval := config.GlobalConfig.GetHunter().Interval
 		exportDataTaskID := idgen.NextId()
 		for index := int64(1); index <= page; index++ {
 			req := NewGetDataReqBuilder().
@@ -214,15 +214,15 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 		if err := b.hunter.Export(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewHunterDownloadItem)
+		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewHunterDownloadItem)
 	}()
 	return nil
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	hunter := config.GetSingleton().Hunter
+	hunter := config.GlobalConfig.Hunter
 	hunter.Token = key
-	if err := config.GetSingleton().SaveHunter(hunter); err != nil {
+	if err := config.GlobalConfig.SaveHunter(hunter); err != nil {
 		return err
 
 	}

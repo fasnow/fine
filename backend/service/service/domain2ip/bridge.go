@@ -3,7 +3,7 @@ package domain2ip
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/event"
+	"fine/backend/constraint"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	"fine/backend/utils"
@@ -56,9 +56,9 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 	go func() {
 		defer func() {
 			cache.Delete(taskIDStr)
-			event.Emit(event.GetSingleton().Domain2IPDown, Detail{TaskID: taskID})
+			constraint.Emit(constraint.Events.Domain2IPDown, Detail{TaskID: taskID})
 		}()
-		dnss := config.GetSingleton().DNS.Value
+		dnss := config.GlobalConfig.DNS.Value
 		var details []Detail
 		for _, domain := range domains {
 			semaphore <- struct{}{} // 往通道中放入信号量
@@ -84,7 +84,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 					if err != nil {
 						ttt := fmt.Sprintf("%s get CNAME record using dns %s :%v", domain, d, err)
 						logger.Info(ttt)
-						event.Emit(event.GetSingleton().Domain2IPOutput, Detail{
+						constraint.Emit(constraint.Events.Domain2IPOutput, Detail{
 							TaskID: taskID,
 							Domain: domain,
 							Error:  ttt,
@@ -105,7 +105,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 					if err != nil {
 						ttt := fmt.Sprintf("%s get A record using dns %s :%v", domain, d, err)
 						logger.Info(ttt)
-						event.Emit(event.GetSingleton().Domain2IPOutput, Detail{
+						constraint.Emit(constraint.Events.Domain2IPOutput, Detail{
 							TaskID: taskID,
 							Domain: domain,
 							Error:  ttt,
@@ -128,7 +128,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 						IPs:    ipDetails,
 						IsCDN:  isCDN,
 					}
-					event.Emit(event.GetSingleton().Domain2IPOutput, detail)
+					constraint.Emit(constraint.Events.Domain2IPOutput, detail)
 					logger.Info(detail)
 					return
 				}
@@ -151,7 +151,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 					IPs:    ipDetails,
 					IsCDN:  isCDN,
 				}
-				event.Emit(event.GetSingleton().Domain2IPOutput, detail)
+				constraint.Emit(constraint.Events.Domain2IPOutput, detail)
 				logger.Info(detail)
 				details = append(details, detail)
 			}(domain)
@@ -195,7 +195,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 			"data":   tt,
 		}
 		logger.Info(ttt)
-		event.Emit(event.GetSingleton().Domain2IPOutput, ttt)
+		constraint.Emit(constraint.Events.Domain2IPOutput, ttt)
 	}()
 	return taskID
 }

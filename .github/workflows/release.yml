@@ -128,7 +128,5 @@ jobs:
           token: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |   
-            1. new: 添加darwin/amd64支持;
-            2. enhance: 修改FOFA默认列;
-            3. fix: 小程序配置文件提取规则BUG;
-            4. fix: Quake获取用户信息非正常响应产生的崩溃。
+            1. new: ICP备案支持额外查询类型;
+

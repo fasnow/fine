@@ -3,9 +3,9 @@ package quake
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/constraint"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
-	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	quakeModel "fine/backend/service/model/quake"
@@ -29,7 +29,7 @@ type Bridge struct {
 }
 
 func NewQuakeBridge(app *app.App) *Bridge {
-	t := config.GetSingleton().GetQuake()
+	t := config.GlobalConfig.GetQuake()
 	tt := NewClient(t.Token)
 	proxy.GetSingleton().Add(tt)
 	return &Bridge{
@@ -45,7 +45,7 @@ func NewQuakeBridge(app *app.App) *Bridge {
 func (b *Bridge) SetAuth(key string) error {
 	t := config.GetQuake()
 	t.Token = key
-	if err := config.GetSingleton().SaveQuake(t); err != nil {
+	if err := config.GlobalConfig.SaveQuake(t); err != nil {
 		logger.Info(err.Error())
 		return err
 
@@ -257,7 +257,7 @@ func (b *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 			logger.Info(err.Error())
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewQuakeDownloadItem)
+		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewQuakeDownloadItem)
 	}()
 	return nil
 }

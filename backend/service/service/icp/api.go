@@ -40,15 +40,16 @@ func init() {
 }
 
 type ICP struct {
-	Http      *http.Client
-	page      int
-	size      int
-	token     string
-	expireIn  int64
-	clientUid string
-	uuid      string
-	secretKey string
-	sign      string
+	Http        *http.Client
+	page        int
+	size        int
+	token       string
+	expireIn    int64
+	clientUid   string
+	uuid        string
+	secretKey   string
+	sign        string
+	serviceType string
 }
 
 type Struct2 struct {
@@ -167,6 +168,12 @@ func (i *ICP) PageSize(size int) *ICP {
 	return i
 }
 
+// ServiceType 1,6,7,8 网站，app，小程序，快应用
+func (i *ICP) ServiceType(serviceType string) *ICP {
+	i.serviceType = serviceType
+	return i
+}
+
 func (i *ICP) Query(unitName string) (*Result, error) {
 	unitName = strings.TrimSpace(unitName)
 	if unitName == "" {
@@ -182,7 +189,7 @@ func (i *ICP) Query(unitName string) (*Result, error) {
 		"pageNum":     strconv.Itoa(i.page),
 		"pageSize":    strconv.Itoa(i.size),
 		"unitName":    unitName,
-		"serviceType": "1",
+		"serviceType": i.serviceType,
 	}
 	bytesData, err := json.Marshal(postData)
 	if err != nil {
@@ -203,51 +210,62 @@ func (i *ICP) Query(unitName string) (*Result, error) {
 	}
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
+		logger.Info(err.Error())
 		return nil, err
 	}
+	bodyStr := string(body)
 
 	// 被ban或者服务器出错
 	if response.StatusCode != 200 {
-		return nil, errors.New("被ban或者服务器出错--" + string(body))
+		return nil, errors.New("被ban或者服务器出错--" + bodyStr)
 	}
 
-	var tmpResponse struct {
-		Code   int    `json:"code"`
-		Msg    string `json:"msg"`
-		Params struct {
-			EndRow           int         `json:"endRow"`
-			FirstPage        int         `json:"firstPage"`
-			HasNextPage      bool        `json:"hasNextPage"`
-			HasPreviousPage  bool        `json:"hasPreviousPage"`
-			IsFirstPage      bool        `json:"isFirstPage"`
-			IsLastPage       bool        `json:"isLastPage"`
-			LastPage         int         `json:"lastPage"`
-			List             []*icp.Item `json:"list"`
-			NavigatePages    int         `json:"navigatePages"`
-			NavigatepageNums []int       `json:"navigatepageNums"`
-			NextPage         int         `json:"nextPage"`
-			PageNum          int         `json:"pageNum"`
-			PageSize         int         `json:"pageSize"`
-			Pages            int         `json:"pages"`
-			PrePage          int         `json:"prePage"`
-			Size             int         `json:"size"`
-			StartRow         int         `json:"startRow"`
-			Total            int         `json:"total"`
-		} `json:"params"`
-		Success bool `json:"success"`
+	code := gjson.Get(bodyStr, "code").Int()
+	msg := gjson.Get(bodyStr, "msg").String()
+	if code != 200 {
+		return nil, errors.New(msg)
 	}
-	err = json.Unmarshal(body, &tmpResponse)
-	if err != nil {
-		return nil, err
+	pageNum := gjson.Get(bodyStr, "params.pageNum").Int()
+	pageSize := gjson.Get(bodyStr, "params.pageSize").Int()
+	total := gjson.Get(bodyStr, "params.total").Int()
+	list := gjson.Get(bodyStr, "params.list").Array()
+
+	serviceTypeName := ""
+	if i.serviceType == "1" {
+		serviceTypeName = "网站"
+	} else if i.serviceType == "6" {
+		serviceTypeName = "APP"
+	} else if i.serviceType == "7" {
+		serviceTypeName = "小程序"
+	} else if i.serviceType == "8" {
+		serviceTypeName = "快应用"
 	}
-	if tmpResponse.Code != 200 {
-		return nil, errors.New(tmpResponse.Msg)
+	items := make([]*icp.Item, 0)
+	for _, item := range list {
+		itemStr := item.String()
+		serviceName := ""
+		if i.serviceType == "1" {
+			serviceName = gjson.Get(itemStr, "domain").String()
+		} else {
+			serviceName = gjson.Get(itemStr, "serviceName").String()
+		}
+		t := &icp.Item{
+			ServiceName:      serviceName,
+			LeaderName:       gjson.Get(itemStr, "leaderName").String(),
+			NatureName:       gjson.Get(itemStr, "natureName").String(),
+			ServiceLicence:   gjson.Get(itemStr, "serviceLicence").String(),
+			UnitName:         gjson.Get(itemStr, "unitName").String(),
+			UpdateRecordTime: gjson.Get(itemStr, "updateRecordTime").String(),
+			ServiceType:      serviceTypeName,
+		}
+		items = append(items, t)
 	}
+
 	return &Result{
-		Page:  tmpResponse.Params.PageNum,
-		Size:  tmpResponse.Params.PageSize,
-		Items: tmpResponse.Params.List,
-		Total: tmpResponse.Params.Total,
+		Page:  int(pageNum),
+		Size:  int(pageSize),
+		Items: items,
+		Total: int(total),
 	}, nil
 }
 

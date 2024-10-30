@@ -7,9 +7,9 @@ import (
 	"embed"
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/constraint"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
-	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	"fine/backend/runtime"
@@ -158,7 +158,7 @@ func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
 func (r *Bridge) SetAppletPath(path string) error {
 	t := config.GetWechat()
 	t.Applet = path
-	if err := config.GetSingleton().SaveWechat(t); err != nil {
+	if err := config.GlobalConfig.SaveWechat(t); err != nil {
 		logger.Info(err.Error())
 		return err
 
@@ -203,11 +203,11 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					}
 				}
 
-				event.Emit(event.GetSingleton().ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 正在查询小程序信息\n", appid))
+				constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 正在查询小程序信息\n", appid))
 				e, tmpInfo := r.QueryAppID(appid)
 				if e != nil {
 					logger.Info(e)
-					event.Emit(event.GetSingleton().ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 查询小程序信息出错: %s\n", appid, e))
+					constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 查询小程序信息出错: %s\n", appid, e))
 					return
 				}
 				e = r.dbService.InsertInfo(model.Info{Info: tmpInfo})
@@ -242,7 +242,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					cache.Set(appid+version, "", 999*time.Second)
 					defer cache.Delete(appid + version)
 
-					event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 开始反编译\n", appid, version))
+					constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 开始反编译\n", appid, version))
 
 					//读取加密的wxapkg包并解密到指定文件
 					files, _ := os.ReadDir(filepath.Join(config.GlobalConfig.Wechat.Applet, appid, version))
@@ -264,7 +264,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					for _, sourceFileName := range sourceFilesName {
 						bytes, err := os.ReadFile(filepath.Join(config.GlobalConfig.Wechat.Applet, appid, version, sourceFileName))
 						if err != nil {
-							event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 读取wxapkg文件时出错：%s\n", appid, version, err.Error()))
+							constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 读取wxapkg文件时出错：%s\n", appid, version, err.Error()))
 							continue
 						}
 
@@ -272,14 +272,14 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 						if runtime2.GOOS == "windows" {
 							bytes, err = decrypt(bytes, appid, "saltiest", "the iv: 16 bytes")
 							if err != nil {
-								event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 解密wxapkg文件时出错：%s\n", appid, version, err.Error()))
+								constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 解密wxapkg文件时出错：%s\n", appid, version, err.Error()))
 								continue
 							}
 						}
 
 						var targetFile = filepath.Join(outputDir, sourceFileName)
 						if err := utils.WriteFile(targetFile, bytes, 0766); err != nil {
-							event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 无法写入解密后的文件到指定位置：%s\n", appid, version, err.Error()))
+							constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 无法写入解密后的文件到指定位置：%s\n", appid, version, err.Error()))
 							continue
 						}
 						targetFiles = append(targetFiles, targetFile)
@@ -292,7 +292,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					//反编译程序内部出错但是此时可能已经成功反编译,所以只能其他错误再返回
 					if err := cmd.Run(); err != nil && cmd.ProcessState.ExitCode() != 1 {
 						logger.Info(err.Error())
-						event.Emit(event.GetSingleton().DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 反编译时发生错误：%s\n", appid, version, err.Error()))
+						constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 反编译时发生错误：%s\n", appid, version, err.Error()))
 						return
 					}
 
@@ -302,10 +302,10 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 							logger.Info(err.Error())
 						}
 					}
-					event.Emit(event.GetSingleton().DecompileWxMiniProgramDone, fmt.Sprintf("[%s  %s] 反编译完成\n", appid, version))
-					event.Emit(event.GetSingleton().ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s  %s] 信息提取开始\n", appid, version))
+					constraint.Emit(constraint.Events.DecompileWxMiniProgramDone, fmt.Sprintf("[%s  %s] 反编译完成\n", appid, version))
+					constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s  %s] 信息提取开始\n", appid, version))
 					r.extractInfo(appid, version)
-					event.Emit(event.GetSingleton().ExtractWxMiniProgramInfoDone, map[string]any{
+					constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoDone, map[string]any{
 						"appid":   appid,
 						"version": version,
 					})

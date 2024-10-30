@@ -3,9 +3,9 @@ package zone
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/constraint"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
-	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	"fine/backend/service/model/zone"
@@ -43,7 +43,7 @@ func NewZoneBridge(app *app.App) *Bridge {
 func (b *Bridge) SetAuth(key string) error {
 	t := config.Get0zone()
 	t.Token = key
-	if err := config.GetSingleton().Save0zone(t); err != nil {
+	if err := config.GlobalConfig.Save0zone(t); err != nil {
 		logger.Info(err.Error())
 		return err
 
@@ -566,7 +566,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 		if err := SiteDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneSiteDownloadItem)
+		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneSiteDownloadItem)
 	}()
 	return nil
 }
@@ -632,7 +632,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 		if err := DomainDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneMemberDownloadItem)
+		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
@@ -698,7 +698,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 		if err := MemberDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneMemberDownloadItem)
+		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
@@ -764,7 +764,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 		if err := EmailDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNew0zoneMemberDownloadItem)
+		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }

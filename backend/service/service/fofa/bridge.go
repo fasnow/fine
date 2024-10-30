@@ -3,9 +3,9 @@ package fofa
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/constraint"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
-	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	"fine/backend/service/model/fofa"
@@ -156,7 +156,7 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 			logger.Info(err.Error())
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewFofaDownloadItem)
+		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewFofaDownloadItem)
 	}()
 	return nil
 }

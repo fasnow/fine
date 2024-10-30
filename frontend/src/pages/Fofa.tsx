@@ -42,21 +42,21 @@ import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '@/component/ResizableTitle';
 import {ExportDataPanelProps} from './Props';
 import helpIcon from '@/assets/images/help.svg'
-import {buttonProps, authFormProps} from '../setting/Setting';
-import {fofa} from "../../../wailsjs/go/models";
-import {Export, GetUserInfo, Query, SetAuth} from "../../../wailsjs/go/fofa/Bridge";
-import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
-import {GetAllEvents} from "../../../wailsjs/go/event/Event";
-import {GetFofa} from "../../../wailsjs/go/config/Config";
+import {buttonProps, authFormProps} from './Setting';
+import {fofa} from "../../wailsjs/go/models";
+import {Export, GetUserInfo, Query, SetAuth} from "../../wailsjs/go/fofa/Bridge";
+import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
+import {GetFofa} from "../../wailsjs/go/config/Config";
 import type {GetRef} from 'antd';
 import {Dots} from "@/component/Icon";
 import MurmurHash3 from "murmurhash3js"
 import {Buffer} from "buffer"
-import {Fetch} from "../../../wailsjs/go/app/App";
+import {Fetch} from "../../wailsjs/go/app/App";
 import {toUint8Array} from "js-base64";
 import {copy} from "@/util/util";
 import {MenuItem} from "@/component/MenuItem";
 import {MenuItemType} from "antd/es/menu/interface";
+import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 
 type InputRefType = GetRef<typeof Input>; // BaseSelectRef
 

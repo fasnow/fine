@@ -8,7 +8,7 @@ import wailsJson from '../../../wails.json';
 import favicon from "../assets/images/paimon.svg"
 import { genshinLaunch } from "./op";
 import { RootState } from "@/store/store";
-import { Proxy as ProxyComp } from "./setting/Setting"
+import { Proxy as ProxyComp } from "./Setting"
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
     BrowserOpenURL, EventsOn,
@@ -25,8 +25,8 @@ import {model} from "../../wailsjs/go/models";
 import DownloadLog = model.DownloadLog;
 import * as path from "path";
 import semver from "semver/preload";
-import { GetAllEvents} from "../../wailsjs/go/event/Event";
 import {GetDataDir} from "../../wailsjs/go/config/Config";
+import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
     height: "30px",

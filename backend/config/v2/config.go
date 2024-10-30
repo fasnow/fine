@@ -284,10 +284,6 @@ func init() {
 	logger.Info(fmt.Sprintf("set timeout %fs", proxy.GetSingleton().GetTimeout().Seconds()))
 }
 
-func GetSingleton() *Config {
-	return GlobalConfig
-}
-
 func save(config Config) error {
 	cfg := ini.Empty(options)
 	err := ini.ReflectFrom(cfg, &config)

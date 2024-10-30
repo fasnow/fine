@@ -11,8 +11,8 @@ import {EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
 import {Terminal} from 'xterm';
 import 'xterm/css/xterm.css';
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {GetDetail, Stop} from "../../wailsjs/go/domain2ip/Bridge";
+import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 
 const TabContent=()=>{
     const [output,setOutput] = useState<string>("")

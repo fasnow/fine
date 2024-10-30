@@ -22,7 +22,6 @@ import TextArea from "antd/es/input/TextArea";
 import {FitAddon} from "xterm-addon-fit";
 import "@/pages/Wechat.css"
 import {Environment, EventsOn} from "../../wailsjs/runtime";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {GetPlatform, OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/runtime/Runtime";
 import {
     GetWechat,
@@ -44,6 +43,7 @@ import {Provider} from "react-redux";
 import Icon from "antd/es/icon";
 import {DecompileIcon} from "@/component/Icon";
 import InfoToFront = wechat.InfoToFront;
+import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 type DirectoryTreeProps = GetProps<typeof Tree.DirectoryTree>;
 
 export const MiniProgram: React.FC = () => {

@@ -8,6 +8,8 @@ export function Export(arg1:number):Promise<void>;
 
 export function GetImage():Promise<icp.Image>;
 
+export function GetItem():Promise<icp.Item>;
+
 export function IsSignExpired():Promise<boolean>;
 
-export function Query(arg1:string,arg2:number,arg3:number):Promise<icp.QueryResult>;
+export function Query(arg1:string,arg2:number,arg3:number,arg4:string):Promise<{[key: string]: any}>;

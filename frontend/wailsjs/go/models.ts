@@ -123,28 +123,30 @@ export namespace config {
 
 }
 
-export namespace event {
+export namespace constraint {
 	
 	export class Event {
-	    windowSizeChange: number;
-	    hasNewFofaDownloadItem: number;
-	    hasNewDownloadItem: number;
-	    hasNewHunterDownloadItem: number;
-	    hunterQueryFinished: number;
-	    hasNewIcpDownloadItem: number;
-	    hasNewQuakeDownloadItem: number;
-	    hasNew0ZoneSiteDownloadItem: number;
-	    hasNew0ZoneMemberDownloadItem: number;
-	    hasNew0ZoneEmailDownloadItem: number;
-	    hasNew0ZoneDomainDownloadItem: number;
-	    httpxOutput: number;
-	    httpxOutputDone: number;
-	    decompileWxMiniProgram: number;
-	    decompileWxMiniProgramDone: number;
-	    extractWxMiniProgramInfoOutput: number;
-	    extractWxMiniProgramInfoDone: number;
-	    domain2IPOutput: number;
-	    domain2IPDown: number;
+	    windowSizeChange: string;
+	    hasNewFofaDownloadItem: string;
+	    hasNewDownloadItem: string;
+	    hasNewHunterDownloadItem: string;
+	    hunterQueryFinished: string;
+	    hasNewIcpDownloadItem: string;
+	    hasNewQuakeDownloadItem: string;
+	    hasNew0ZoneSiteDownloadItem: string;
+	    hasNew0ZoneMemberDownloadItem: string;
+	    hasNew0ZoneEmailDownloadItem: string;
+	    hasNew0ZoneDomainDownloadItem: string;
+	    httpxOutput: string;
+	    httpxOutputDone: string;
+	    decompileWxMiniProgram: string;
+	    decompileWxMiniProgramDone: string;
+	    extractWxMiniProgramInfoOutput: string;
+	    extractWxMiniProgramInfoDone: string;
+	    domain2IPOutput: string;
+	    domain2IPDown: string;
+	    icpOutput: string;
+	    icpDown: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Event(source);
@@ -171,6 +173,8 @@ export namespace event {
 	        this.extractWxMiniProgramInfoDone = source["extractWxMiniProgramInfoDone"];
 	        this.domain2IPOutput = source["domain2IPOutput"];
 	        this.domain2IPDown = source["domain2IPDown"];
+	        this.icpOutput = source["icpOutput"];
+	        this.icpDown = source["icpDown"];
 	    }
 	}
 
@@ -507,17 +511,13 @@ export namespace icp {
 	    }
 	}
 	export class Item {
-	    domain: string;
-	    domainId: number;
+	    serviceName: string;
 	    leaderName: string;
-	    limitAccess: string;
-	    mainId: number;
-	    mainLicence: string;
 	    natureName: string;
-	    serviceId: number;
 	    serviceLicence: string;
 	    unitName: string;
 	    updateRecordTime: string;
+	    serviceType: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Item(source);
@@ -525,58 +525,14 @@ export namespace icp {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.domain = source["domain"];
-	        this.domainId = source["domainId"];
+	        this.serviceName = source["serviceName"];
 	        this.leaderName = source["leaderName"];
-	        this.limitAccess = source["limitAccess"];
-	        this.mainId = source["mainId"];
-	        this.mainLicence = source["mainLicence"];
 	        this.natureName = source["natureName"];
-	        this.serviceId = source["serviceId"];
 	        this.serviceLicence = source["serviceLicence"];
 	        this.unitName = source["unitName"];
 	        this.updateRecordTime = source["updateRecordTime"];
+	        this.serviceType = source["serviceType"];
 	    }
-	}
-	export class QueryResult {
-	    page: number;
-	    size: number;
-	    total: number;
-	    items: Item[];
-	    task_id: number;
-	    maxPage: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new QueryResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
-	        this.size = source["size"];
-	        this.total = source["total"];
-	        this.items = this.convertValues(source["items"], Item);
-	        this.task_id = source["task_id"];
-	        this.maxPage = source["maxPage"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 
 }

@@ -7,10 +7,9 @@ import (
 
 type ICPQueryLog struct {
 	BaseModel
-	TaskID   int64 `gorm:"unique"`
-	UnitName string
-	Total    int
-	MaxPage  int
+	TaskID      int64 `gorm:"unique"`
+	UnitName    string
+	ServiceType string
 }
 
 type FOFAQueryLog struct {

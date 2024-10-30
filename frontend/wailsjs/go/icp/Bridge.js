@@ -14,10 +14,14 @@ export function GetImage() {
   return window['go']['icp']['Bridge']['GetImage']();
 }
 
+export function GetItem() {
+  return window['go']['icp']['Bridge']['GetItem']();
+}
+
 export function IsSignExpired() {
   return window['go']['icp']['Bridge']['IsSignExpired']();
 }
 
-export function Query(arg1, arg2, arg3) {
-  return window['go']['icp']['Bridge']['Query'](arg1, arg2, arg3);
+export function Query(arg1, arg2, arg3, arg4) {
+  return window['go']['icp']['Bridge']['Query'](arg1, arg2, arg3, arg4);
 }

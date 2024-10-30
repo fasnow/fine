@@ -3,9 +3,9 @@ package icp
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/constraint"
 	"fine/backend/db/model"
 	"fine/backend/db/service"
-	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	"fine/backend/service/model/icp"
@@ -13,9 +13,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
-	"math"
 	"path/filepath"
-	"strconv"
 )
 
 type Bridge struct {
@@ -42,25 +40,35 @@ type QueryResult struct {
 	MaxPage int   `json:"maxPage"`
 }
 
-func (b *Bridge) Query(query string, page, pageSize int) (*QueryResult, error) {
-	queryResult := &QueryResult{}
-	result, err := b.icp.Page(page).PageSize(pageSize).Query(query)
+// GetItem 只是为了向前端暴露Item结构体
+func (b *Bridge) GetItem() *icp.Item {
+	return nil
+}
+
+func (b *Bridge) Query(query string, page, pageSize int, serviceType string) (map[string]any, error) {
+	var taskID int64
+	taskID = idgen.NextId()
+	_ = b.queryLog.Add(&model.ICPQueryLog{
+		UnitName:    query,
+		ServiceType: serviceType,
+	}, taskID)
+	result, err := b.icp.Page(page).PageSize(pageSize).ServiceType(serviceType).Query(query)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
+
 	}
-	if result.Total > 0 {
-		// 缓存查询成功的条件，用于导出
-		taskID := idgen.NextId()
-		queryResult.TaskID = taskID
-		_ = b.queryLog.Add(&model.ICPQueryLog{
-			UnitName: query,
-			Total:    result.Total,
-			MaxPage:  int(math.Ceil(float64(result.Total) / float64(pageSize))),
-		}, taskID)
-	}
-	queryResult.Result = result
-	return queryResult, nil
+	return map[string]any{
+		"code":    constraint.Statuses.CodeOK,
+		"message": "",
+		"data": map[string]any{
+			"taskID": taskID,
+			"items":  result.Items,
+			"page":   result.Page,
+			"size":   result.Size,
+			"total":  result.Total,
+		},
+	}, nil
 }
 
 func (b *Bridge) Export(taskID int64) error {
@@ -80,41 +88,43 @@ func (b *Bridge) Export(taskID int64) error {
 		Status:   0,
 	}, fileID)
 
-	result, err := b.icp.Page(1).PageSize(queryLog.Total).Query(queryLog.UnitName)
+	items := make([]*icp.Item, 0)
+	result, err := b.icp.Page(1).PageSize(1).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
 	if err != nil {
 		logger.Info(err.Error())
-		b.downloadLog.UpdateStatus(fileID, -1, err.Error())
-		return errors.New(strconv.FormatInt(taskID, 10) + queryLog.UnitName)
+		b.downloadLog.UpdateStatus(fileID, constraint.Statuses.ExportError, err.Error())
+		return err
 	}
-
+	result, err = b.icp.Page(1).PageSize(result.Total).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
+	if err != nil {
+		logger.Info(err.Error())
+		b.downloadLog.UpdateStatus(fileID, constraint.Statuses.ExportError, err.Error())
+		return err
+	}
+	items = append(items, result.Items...)
 	var data [][]any
-	headers := append([]any{"id"}, []any{"Domain", "Domain_ID",
-		"Leader_Name", "Limit_Access", "Main_ID", "Main_Licence", "Nature_Name", "Service_ID", "Service_Licence",
-		"Unit_Name", "UpdateRecord_Time"}...)
+	headers := append([]any{"序号"}, []any{"企业名称", "备案内容",
+		"备案号", "备案类型", "备案法人", "单位性质", "审核日期"}...)
 	data = append(data, headers)
-	for index, item := range result.Items {
+	for index, item := range items {
 		var tmpItem = []any{
 			index + 1,
-			item.Domain,
-			item.DomainID,
-			item.LeaderName,
-			item.LimitAccess,
-			item.MainID,
-			item.MainLicence,
-			item.NatureName,
-			item.ServiceID,
-			item.ServiceLicence,
 			item.UnitName,
+			item.ServiceName,
+			item.ServiceLicence,
+			item.ServiceType,
+			item.LeaderName,
+			item.NatureName,
 			item.UpdateRecordTime}
 		data = append(data, tmpItem)
 	}
 	if err := utils.SaveToExcel(data, outputAbsFilepath); err != nil {
 		logger.Info(err.Error())
-		b.downloadLog.UpdateStatus(fileID, -1, err.Error())
+		b.downloadLog.UpdateStatus(fileID, constraint.Statuses.ExportError, err.Error())
 		return err
 	}
-	b.downloadLog.UpdateStatus(fileID, 1, "")
-	event.HasNewDownloadLogItemEventEmit(event.GetSingleton().HasNewIcpDownloadItem)
+	b.downloadLog.UpdateStatus(fileID, constraint.Statuses.Exported, "")
+	constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewIcpDownloadItem)
 	return nil
 }
 

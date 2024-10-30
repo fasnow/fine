@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Col, ConfigProvider, Form, Input, Row, Select, Space, Switch, Tabs, Tooltip } from 'antd';
 import type { ButtonProps, FormProps, TabsProps } from 'antd';
 import "./Setting.css"
-import ScrollBar from '../../component/ScrollBar';
+import ScrollBar from '../component/ScrollBar';
 import { useDispatch, useSelector } from 'react-redux';
 import {RootState, setProxy} from '@/store/store';
 import { SyncOutlined } from '@ant-design/icons';
@@ -13,11 +13,11 @@ import {
   GetProxy, GetQuake,
   SaveProxy,
 
-} from "../../../wailsjs/go/config/Config";
-import {SetAuth as SetHunterAuth} from "../../../wailsjs/go/hunter/Bridge";
-import {SetAuth as SetFofaAuth} from "../../../wailsjs/go/fofa/Bridge";
-import {SetAuth as Set0zoneAuth} from "../../../wailsjs/go/zone/Bridge";
-import {SetAuth as SetQuakeAuth} from "../../../wailsjs/go/quake/Bridge";
+} from "../../wailsjs/go/config/Config";
+import {SetAuth as SetHunterAuth} from "../../wailsjs/go/hunter/Bridge";
+import {SetAuth as SetFofaAuth} from "../../wailsjs/go/fofa/Bridge";
+import {SetAuth as Set0zoneAuth} from "../../wailsjs/go/zone/Bridge";
+import {SetAuth as SetQuakeAuth} from "../../wailsjs/go/quake/Bridge";
 const onChange = (key: string) => {
   console.log(key);
 };

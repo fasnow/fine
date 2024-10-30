@@ -3,7 +3,7 @@ package httpx
 import (
 	"bufio"
 	"fine/backend/app"
-	"fine/backend/event"
+	"fine/backend/constraint"
 	"fine/backend/logger"
 	"fine/backend/runtime"
 	"fine/backend/utils"
@@ -65,7 +65,7 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			event.Emit(event.GetSingleton().HttpxOutput, map[string]any{
+			constraint.Emit(constraint.Events.HttpxOutput, map[string]any{
 				"taskID": taskID,
 				"data":   string(scanner.Bytes()),
 			})
@@ -74,7 +74,7 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			event.Emit(event.GetSingleton().HttpxOutput, map[string]any{
+			constraint.Emit(constraint.Events.HttpxOutput, map[string]any{
 				"taskID": taskID,
 				"data":   string(scanner.Bytes()),
 			})
@@ -87,7 +87,7 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 		if err != nil {
 			logger.Info(err.Error())
 		}
-		event.Emit(event.GetSingleton().HttpxOutputDone, map[string]any{
+		constraint.Emit(constraint.Events.HttpxOutputDone, map[string]any{
 			"taskID": taskID,
 			"data":   "",
 		})

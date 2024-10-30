@@ -12,7 +12,6 @@ import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit'
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState, setHttpx} from "@/store/store";
@@ -23,6 +22,7 @@ import {Chrome} from "@/component/Icon";
 import {copy, strSplit} from "@/util/util";
 import {MenuItem} from "@/component/MenuItem";
 import {fofa, hunter} from "../../wailsjs/go/models";
+import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 
 const items: MenuProps['items'] = [
     MenuItem.CopyCell,

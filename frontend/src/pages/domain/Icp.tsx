@@ -6,7 +6,7 @@ import {
     SearchOutlined,
     SyncOutlined
 } from '@ant-design/icons';
-import {Button, Input, MenuProps, message, Modal, Pagination, Space, Spin, Table, Tabs} from 'antd';
+import {Button, Input, MenuProps, message, Modal, Pagination, Select, Space, Spin, Table, Tabs} from 'antd';
 import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import type {ColumnsType} from 'antd/es/table';
 import {QUERY_FIRST} from "@/component/type";
@@ -19,11 +19,12 @@ import {copy, sleep} from '@/util/util';
 import * as CryptoJS from 'crypto-js';
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 
-import {icp} from "../../../wailsjs/go/models";
 import {CheckImage, Export, GetImage, IsSignExpired, Query} from "../../../wailsjs/go/icp/Bridge";
-import {GetAllEvents} from "../../../wailsjs/go/event/Event";
+import {GetAllEvents} from "../../../wailsjs/go/constraint/Event";
 import {MenuItem} from "@/component/MenuItem";
 import {MenuItemType} from "antd/es/menu/interface";
+import {icp} from "../../../wailsjs/go/models";
+
 
 type dataCacheType = {
     [key: number]: icp.Item[];
@@ -83,10 +84,10 @@ const IcpContent: React.FC = () => {
             }
         },
         {
-            title: '域名', dataIndex: "domain", ellipsis: true, width: 200, onCell: (record, index) => {
+            title: '备案内容', dataIndex: "serviceName", ellipsis: true, width: 200, onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "domain", }; },
-                    onClick: () => copyCell(record.domain)
+                    onClick: () => copyCell(record.serviceName)
                 }
             }
         },
@@ -115,50 +116,10 @@ const IcpContent: React.FC = () => {
             }
         },
         {
-            title: '主备案号', dataIndex: "mainLicense", ellipsis: true, width: 200, onCell: (record, index) => {
-                return {
-                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "mainLicense", }; },
-                    onClick: () => copyCell(record.mainLicence)
-                }
-            }
-        },
-        {
             title: '备案法人', dataIndex: "leaderName", ellipsis: true, width: 200, onCell: (record, index) => {
                 return {
                     onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "leaderName", }; },
                     onClick: () => copyCell(record.leaderName)
-                }
-            }
-        },
-        {
-            title: '域名ID', dataIndex: "domainId", ellipsis: true, width: 100, onCell: (record, index) => {
-                return {
-                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "domainId", }; },
-                    onClick: () => copyCell(record.domainId)
-                }
-            }
-        },
-        {
-            title: '限制访问', dataIndex: "limitAccess", ellipsis: true, width: 80, onCell: (record, index) => {
-                return {
-                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "limitAccess", }; },
-                    onClick: () => copyCell(record.limitAccess)
-                }
-            }
-        },
-        {
-            title: 'mainId', dataIndex: "mainId", ellipsis: true, width: 80, onCell: (record, index) => {
-                return {
-                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "mainId", }; },
-                    onClick: () => copyCell(record.mainId)
-                }
-            }
-        },
-        {
-            title: 'serviceId', dataIndex: "serviceId", ellipsis: true, width: 80, onCell: (record, index) => {
-                return {
-                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "serviceId", }; },
-                    onClick: () => copyCell(record.serviceId)
                 }
             }
         },
@@ -181,6 +142,8 @@ const IcpContent: React.FC = () => {
     const unitNameChanged = useRef<boolean>(false)
     const status = useRef<"new" | "pageSizeChange" | "export" | "pageChange">()
     const [disable,setDisable] = useState<boolean>(false)
+    const [serviceType, setServiceType] = useState<string>("1")
+    const [serviceTypeCache, setServiceTypeCache] = useState<string>("1")
 
     useEffect(() => {
         GetAllEvents().then(
@@ -352,32 +315,33 @@ const IcpContent: React.FC = () => {
 
     async function handleQuery(unitName: string, page: number, pageSize: number,) {
         setLoading(true)
-        if (status.current == "new") {
+        if (status.current === "new") {
             setId(0)
             setDataCache({})
             setTotal(0)
         }
 
         //不能使用inputCache，setInputCache(tmpInput)为异步更新，此时inputCache还没有更新
-        Query(unitName,page,pageSize).then(
+        Query(unitName,page,pageSize,serviceTypeCache).then(
             result=>{
                 setCurrentPage(page)
                 setCurrentSize(pageSize)
                 let index=0
                 let pre:dataCacheType = {}
-                if (status.current == "pageChange") {
+                if (status.current === "pageChange") {
                     index = (page - 1) * pageSize
                     pre = dataCache
                 }
+                const data = result["data"]
+                setTotal(data["total"])
                 setDataCache({
                     ...pre,
-                    [page]: result.items?.map((item) => {
+                    [page]: data["items"]?.map((item:icp.Item) => {
                         index++
                         return { ...item, index: index }
                     })
                 })
-                setTotal(result.total)
-                setId(result.task_id)
+                setId(data["taskID"])
                 setLoading(false)
             }
         ).catch(
@@ -477,8 +441,8 @@ const IcpContent: React.FC = () => {
     const handleMenuItemClick = (key: string) => {
         switch (key) {
             case MenuItem.OpenDomain.key:
-                if (selectedRow.item?.domain) {
-                    BrowserOpenURL("http://" + selectedRow.item?.domain)
+                if (selectedRow.item?.serviceName) {
+                    BrowserOpenURL("http://" + selectedRow.item?.serviceName)
                 }
                 break
             case MenuItem.CopyCell.key:
@@ -518,20 +482,46 @@ const IcpContent: React.FC = () => {
     return (<div >
         {contextHolder}
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-            <Input
-                style={{ width: "600px" }}
-                size="small"
-                allowClear
-                suffix={<Space.Compact block>
-                    <Button type='text' size="small" icon={<SearchOutlined />} onClick={() => preHandleQuery(currentPage, currentPageSize)} />
-                    {/* <Tooltip title='帮助信息'>
-                        <Button type='text' size="small" icon={<QuestionOutlined />} />
-                    </Tooltip> */}
-                </Space.Compact>}
-                value={input}
-                onPressEnter={() => preHandleQuery(currentPage, currentPageSize)}
-                onChange={(e) => setInput(e.target.value)}
-            />
+            <Space.Compact>
+                <Select
+                    size={"small"}
+                    onChange={(value)=>{
+                        setServiceType(value)
+                        setServiceTypeCache(value)
+                    }}
+                    defaultValue="1"
+                    options={[
+                        {
+                            value: '1',
+                            label: '网站',
+                        },
+                        {
+                            value: '6',
+                            label: 'APP',
+                        },
+                        {
+                            value: '7',
+                            label: '小程序',
+                        },
+                        {
+                            value: '8',
+                            label: '快应用',
+                        },
+                    ]}
+                    style={{width:100}}
+                />
+                <Input
+                    style={{ width: "600px" }}
+                    size="small"
+                    allowClear
+                    suffix={<Space.Compact block>
+                        <Button type='text' size="small" icon={<SearchOutlined />} onClick={() => preHandleQuery(currentPage, currentPageSize)} />
+                    </Space.Compact>}
+                    value={input}
+                    onPressEnter={() => preHandleQuery(currentPage, currentPageSize)}
+                    onChange={(e) => setInput(e.target.value)}
+                />
+            </Space.Compact>
             <span style={{ textAlign: 'center' }}>ICP备案查询：请输入单位名称或域名或备案号查询，请勿使用子域名或者带http://www等字符的网址查询</span>
         </div>
         <ContextMenu

@@ -15,10 +15,10 @@ import (
 )
 
 type RSDQueryResult struct {
-	Items []quake.RealtimeServiceItem `json:"items"` //用指针wails会无法生成正确的映射
-	Page  int                         `json:"page"`
-	Size  int                         `json:"size"`
-	Total int64                       `json:"total"`
+	Items    []quake.RealtimeServiceItem `json:"items"` //用指针wails会无法生成正确的映射
+	PageNum  int                         `json:"pageNum"`
+	PageSize int                         `json:"pageSize"`
+	Total    int64                       `json:"total"`
 }
 
 //type Component struct {
@@ -107,10 +107,10 @@ func (r *realtimeData) Service(req *GetRealtimeDataReq) (*RSDQueryResult, error)
 		return nil, err
 	}
 	result := &RSDQueryResult{
-		Items: resultItems,
-		Page:  page,
-		Size:  size,
-		Total: total,
+		Items:    resultItems,
+		PageNum:  page,
+		PageSize: size,
+		Total:    total,
 	}
 	if result.Items == nil {
 		result.Items = make([]quake.RealtimeServiceItem, 0)
@@ -119,10 +119,10 @@ func (r *realtimeData) Service(req *GetRealtimeDataReq) (*RSDQueryResult, error)
 }
 
 type RHDQueryResult struct {
-	Items []*quake.RealtimeHostItem `json:"items"`
-	Page  int                       `json:"page"`
-	Size  int                       `json:"size"`
-	Total int64                     `json:"total"`
+	Items    []*quake.RealtimeHostItem `json:"items"`
+	PageNum  int                       `json:"pageNum"`
+	PageSize int                       `json:"pageSize"`
+	Total    int64                     `json:"total"`
 }
 
 //type RHDQueryResultItem struct {
@@ -203,10 +203,10 @@ func (r *realtimeData) Host(req *GetRealtimeDataReq) (*RHDQueryResult, error) {
 		return nil, err
 	}
 	result := &RHDQueryResult{
-		Items: resultItems,
-		Page:  page,
-		Size:  size,
-		Total: total,
+		Items:    resultItems,
+		PageNum:  page,
+		PageSize: size,
+		Total:    total,
 	}
 	if result.Items == nil {
 		result.Items = make([]*quake.RealtimeHostItem, 0)

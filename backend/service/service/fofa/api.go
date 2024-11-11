@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	service2 "fine/backend/service/service"
+	"github.com/tidwall/gjson"
 	"io"
 
 	"fine/backend/service/model/fofa"
 	"fine/backend/utils"
 	"fmt"
-	"github.com/buger/jsonparser"
 	"net/http"
 	netUrl "net/url"
 	"strconv"
@@ -25,11 +25,11 @@ type Req struct {
 }
 
 type Result struct {
-	Query string       `json:"query"`
-	Total int64        `json:"total"`
-	Page  int          `json:"page"`
-	Size  int          `json:"size"`
-	Items []*fofa.Item `json:"items"`
+	Query    string       `json:"query"`
+	Total    int64        `json:"total"`
+	PageNum  int          `json:"pageNum"`
+	PageSize int          `json:"pageSize"`
+	Items    []*fofa.Item `json:"items"`
 }
 
 //type fofa.Item struct {
@@ -103,8 +103,8 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 		ErrMsg          string `json:"errmsg"`
 		ConsumedFpoint  int    `json:"consumed_fpoint"`
 		RequiredFpoints int    `json:"required_fpoints"`
-		Size            int64  `json:"size"`
-		Page            int    `json:"page"`
+		Total           int64  `json:"size"`
+		PageNum         int    `json:"page"`
 		Mode            string `json:"mode"`
 		Query           string `json:"query"`
 	}
@@ -116,10 +116,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 		return nil, errors.New(tmpResponse.ErrMsg)
 	}
 
-	items, _, _, err := jsonparser.Get(body, "results")
-	if items == nil {
-		return nil, service2.UnexpectedStructureError
-	}
+	items := gjson.Get(string(body), "results").Array()
 
 	// 把不带键的 [[],[]...] 转成带键的 [{},{}...]
 	formatItems, err := f.formatItems(items, fields)
@@ -130,10 +127,10 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 	var resp Result
 	resp.Items = formatItems
 	resp.Query = tmpResponse.Query
-	resp.Page = tmpResponse.Page
+	resp.PageNum = tmpResponse.PageNum
 	size, _ := strconv.Atoi(req.req.QueryParams.Get("size"))
-	resp.Size = size
-	resp.Total = tmpResponse.Size
+	resp.PageSize = size
+	resp.Total = tmpResponse.Total
 	if resp.Items == nil {
 		resp.Items = make([]*fofa.Item, 0)
 	}
@@ -364,20 +361,9 @@ func (f *Fofa) User() (*User, error) {
 }
 
 // fofa查询结果是不带键的，会按照你查询时给定的fields的先后顺序输出，每个item是 [] 此处是把每个item附上键变成 {"field":"value"}，键名为fields的每个字段
-func (f *Fofa) formatItems(items []byte, fields string) ([]*fofa.Item, error) {
-	//对应两种返回结果 field不唯一和field唯一的情况
-	var tmpListList [][]string //field不唯一
-	var tmpStringList []string //field唯一
-	err1 := json.Unmarshal(items, &tmpListList)
-	err2 := json.Unmarshal(items, &tmpStringList)
-	if err1 != nil && err2 != nil {
-		return nil, errors.New("无法格式化数据条目：" + err1.Error())
-	}
-	var listLen int
-	if err1 == nil {
-		listLen = len(tmpListList)
-	} else {
-		listLen = len(tmpStringList)
+func (f *Fofa) formatItems(items []gjson.Result, fields string) ([]*fofa.Item, error) {
+	if len(items) == 0 {
+		return make([]*fofa.Item, 0), nil
 	}
 	var keys []string
 	for _, v := range strings.Split(fields, ",") {
@@ -385,239 +371,243 @@ func (f *Fofa) formatItems(items []byte, fields string) ([]*fofa.Item, error) {
 			keys = append(keys, v)
 		}
 	}
-	//var newItems = make([]*map[string]string, 0)
 	var newItems = make([]*fofa.Item, 0)
-	//fields 为空 fofa默认按照 host,ip,port先后顺序返回
 	if len(keys) == 0 {
-		for i := 0; i < listLen; i++ {
+		//fields 为空 fofa默认按照 host,ip,port先后顺序返回
+		for _, item := range items {
+			v := item.Array()
 			var tmpItem = &fofa.Item{
-				Host: tmpListList[i][0],
-				Ip:   tmpListList[i][1],
-				Port: tmpListList[i][2],
+				Host: v[0].String(),
+				Ip:   v[1].String(),
+				Port: v[2].String(),
 			}
 			newItems = append(newItems, tmpItem)
 		}
-	} else if len(keys) == 1 { //传入的field只有一个的话，只会返回 字符串列表 不会返回 字典列表
-		for i := 0; i < listLen; i++ {
+	} else if len(keys) == 1 {
+		//传入的field只有一个的话，只会返回 字符串列表 不会返回 字典列表
+		for _, item := range items {
 			var tmpItem = &fofa.Item{}
+			v := item.String()
 			switch keys[0] {
 			case FieldMap["ip"]:
-				tmpItem.Ip = tmpStringList[i]
+				tmpItem.Ip = v
 				break
 			case FieldMap["port"]:
-				tmpItem.Port = tmpStringList[i]
+				tmpItem.Port = v
 				break
 			case FieldMap["protocol"]:
-				tmpItem.Protocol = tmpStringList[i]
+				tmpItem.Protocol = v
 				break
 			case FieldMap["country"]:
-				tmpItem.Country = tmpStringList[i]
+				tmpItem.Country = v
 				break
 			case FieldMap["country_name"]:
-				tmpItem.CountryName = tmpStringList[i]
+				tmpItem.CountryName = v
 				break
 			case FieldMap["region"]:
-				tmpItem.Region = tmpStringList[i]
+				tmpItem.Region = v
 				break
 			case FieldMap["city"]:
-				tmpItem.City = tmpStringList[i]
+				tmpItem.City = v
 				break
 			case FieldMap["longitude"]:
-				tmpItem.Longitude = tmpStringList[i]
+				tmpItem.Longitude = v
 				break
 			case FieldMap["latitude"]:
-				tmpItem.Latitude = tmpStringList[i]
+				tmpItem.Latitude = v
 				break
 			case FieldMap["as_number"]:
-				tmpItem.AsNumber = tmpStringList[i]
+				tmpItem.AsNumber = v
 				break
 			case FieldMap["as_organization"]:
-				tmpItem.AsOrganization = tmpStringList[i]
+				tmpItem.AsOrganization = v
 				break
 			case FieldMap["host"]:
-				tmpItem.Host = tmpStringList[i]
+				tmpItem.Host = v
 				break
 			case FieldMap["domain"]:
-				tmpItem.Domain = tmpStringList[i]
+				tmpItem.Domain = v
 				break
 			case FieldMap["os"]:
-				tmpItem.Os = tmpStringList[i]
+				tmpItem.Os = v
 				break
 			case FieldMap["server"]:
-				tmpItem.Server = tmpStringList[i]
+				tmpItem.Server = v
 				break
 			case FieldMap["icp"]:
-				tmpItem.Icp = tmpStringList[i]
+				tmpItem.Icp = v
 				break
 			case FieldMap["title"]:
-				tmpItem.Title = tmpStringList[i]
+				tmpItem.Title = v
 				break
 			case FieldMap["jarm"]:
-				tmpItem.Jarm = tmpStringList[i]
+				tmpItem.Jarm = v
 				break
 			case FieldMap["header"]:
-				tmpItem.Header = tmpStringList[i]
+				tmpItem.Header = v
 				break
 			case FieldMap["banner"]:
-				tmpItem.Banner = tmpStringList[i]
+				tmpItem.Banner = v
 				break
 			case FieldMap["cert"]:
-				tmpItem.Cert = tmpStringList[i]
+				tmpItem.Cert = v
 				break
 			case FieldMap["base_protocol"]:
-				tmpItem.BaseProtocol = tmpStringList[i]
+				tmpItem.BaseProtocol = v
 				break
 			case FieldMap["link"]:
-				tmpItem.Link = tmpStringList[i]
+				tmpItem.Link = v
 				break
 			case FieldMap["product"]:
-				tmpItem.Product = tmpStringList[i]
+				tmpItem.Product = v
 				break
 			case FieldMap["product_category"]:
-				tmpItem.ProductCategory = tmpStringList[i]
+				tmpItem.ProductCategory = v
 				break
 			case FieldMap["version"]:
-				tmpItem.Version = tmpStringList[i]
+				tmpItem.Version = v
 				break
 			case FieldMap["lastupdatetime"]:
-				tmpItem.LastUpdateTime = tmpStringList[i]
+				tmpItem.LastUpdateTime = v
 				break
 			case FieldMap["cname"]:
-				tmpItem.Cname = tmpStringList[i]
+				tmpItem.Cname = v
 				break
 			case FieldMap["icon_hash"]:
-				tmpItem.IconHash = tmpStringList[i]
+				tmpItem.IconHash = v
 				break
 			case FieldMap["certs_valid"]:
-				tmpItem.CertsValid = tmpStringList[i]
+				tmpItem.CertsValid = v
 				break
 			case FieldMap["cname_domain"]:
-				tmpItem.CnameDomain = tmpStringList[i]
+				tmpItem.CnameDomain = v
 				break
 			case FieldMap["body"]:
-				tmpItem.Body = tmpStringList[i]
+				tmpItem.Body = v
 				break
 			case FieldMap["icon"]:
-				tmpItem.Icon = tmpStringList[i]
+				tmpItem.Icon = v
 				break
 			case FieldMap["fid"]:
-				tmpItem.Fid = tmpStringList[i]
+				tmpItem.Fid = v
 				break
 			case FieldMap["structinfo"]:
-				tmpItem.Structinfo = tmpStringList[i]
+				tmpItem.Structinfo = v
 				break
 			}
 			newItems = append(newItems, tmpItem)
 		}
 	} else {
-		for i := 0; i < listLen; i++ {
+		//其他情况按字段先后返回
+		for _, item := range items {
+			v := item.Array()
 			var tmpItem = &fofa.Item{}
 			for j := 0; j < len(keys); j++ {
 				switch keys[j] {
 				case FieldMap["ip"]:
-					tmpItem.Ip = tmpListList[i][j]
+					tmpItem.Ip = v[j].String()
 					break
 				case FieldMap["port"]:
-					tmpItem.Port = tmpListList[i][j]
+					tmpItem.Port = v[j].String()
 					break
 				case FieldMap["protocol"]:
-					tmpItem.Protocol = tmpListList[i][j]
+					tmpItem.Protocol = v[j].String()
 					break
 				case FieldMap["country"]:
-					tmpItem.Country = tmpListList[i][j]
+					tmpItem.Country = v[j].String()
 					break
 				case FieldMap["country_name"]:
-					tmpItem.CountryName = tmpListList[i][j]
+					tmpItem.CountryName = v[j].String()
 					break
 				case FieldMap["region"]:
-					tmpItem.Region = tmpListList[i][j]
+					tmpItem.Region = v[j].String()
 					break
 				case FieldMap["city"]:
-					tmpItem.City = tmpListList[i][j]
+					tmpItem.City = v[j].String()
 					break
 				case FieldMap["longitude"]:
-					tmpItem.Longitude = tmpListList[i][j]
+					tmpItem.Longitude = v[j].String()
 					break
 				case FieldMap["latitude"]:
-					tmpItem.Latitude = tmpListList[i][j]
+					tmpItem.Latitude = v[j].String()
 					break
 				case FieldMap["as_number"]:
-					tmpItem.AsNumber = tmpListList[i][j]
+					tmpItem.AsNumber = v[j].String()
 					break
 				case FieldMap["as_organization"]:
-					tmpItem.AsOrganization = tmpListList[i][j]
+					tmpItem.AsOrganization = v[j].String()
 					break
 				case FieldMap["host"]:
-					tmpItem.Host = tmpListList[i][j]
+					tmpItem.Host = v[j].String()
 					break
 				case FieldMap["domain"]:
-					tmpItem.Domain = tmpListList[i][j]
+					tmpItem.Domain = v[j].String()
 					break
 				case FieldMap["os"]:
-					tmpItem.Os = tmpListList[i][j]
+					tmpItem.Os = v[j].String()
 					break
 				case FieldMap["server"]:
-					tmpItem.Server = tmpListList[i][j]
+					tmpItem.Server = v[j].String()
 					break
 				case FieldMap["icp"]:
-					tmpItem.Icp = tmpListList[i][j]
+					tmpItem.Icp = v[j].String()
 					break
 				case FieldMap["title"]:
-					tmpItem.Title = tmpListList[i][j]
+					tmpItem.Title = v[j].String()
 					break
 				case FieldMap["jarm"]:
-					tmpItem.Jarm = tmpListList[i][j]
+					tmpItem.Jarm = v[j].String()
 					break
 				case FieldMap["header"]:
-					tmpItem.Header = tmpListList[i][j]
+					tmpItem.Header = v[j].String()
 					break
 				case FieldMap["banner"]:
-					tmpItem.Banner = tmpListList[i][j]
+					tmpItem.Banner = v[j].String()
 					break
 				case FieldMap["cert"]:
-					tmpItem.Cert = tmpListList[i][j]
+					tmpItem.Cert = v[j].String()
 					break
 				case FieldMap["base_protocol"]:
-					tmpItem.BaseProtocol = tmpListList[i][j]
+					tmpItem.BaseProtocol = v[j].String()
 					break
 				case FieldMap["link"]:
-					tmpItem.Link = tmpListList[i][j]
+					tmpItem.Link = v[j].String()
 					break
 				case FieldMap["product"]:
-					tmpItem.Product = tmpListList[i][j]
+					tmpItem.Product = v[j].String()
 					break
 				case FieldMap["product_category"]:
-					tmpItem.ProductCategory = tmpListList[i][j]
+					tmpItem.ProductCategory = v[j].String()
 					break
 				case FieldMap["version"]:
-					tmpItem.Version = tmpListList[i][j]
+					tmpItem.Version = v[j].String()
 					break
 				case FieldMap["lastupdatetime"]:
-					tmpItem.LastUpdateTime = tmpListList[i][j]
+					tmpItem.LastUpdateTime = v[j].String()
 					break
 				case FieldMap["cname"]:
-					tmpItem.Cname = tmpListList[i][j]
+					tmpItem.Cname = v[j].String()
 					break
 				case FieldMap["icon_hash"]:
-					tmpItem.IconHash = tmpListList[i][j]
+					tmpItem.IconHash = v[j].String()
 					break
 				case FieldMap["certs_valid"]:
-					tmpItem.CertsValid = tmpListList[i][j]
+					tmpItem.CertsValid = v[j].String()
 					break
 				case FieldMap["cname_domain"]:
-					tmpItem.CnameDomain = tmpListList[i][j]
+					tmpItem.CnameDomain = v[j].String()
 					break
 				case FieldMap["body"]:
-					tmpItem.Body = tmpListList[i][j]
+					tmpItem.Body = v[j].String()
 					break
 				case FieldMap["icon"]:
-					tmpItem.Icon = tmpListList[i][j]
+					tmpItem.Icon = v[j].String()
 					break
 				case FieldMap["fid"]:
-					tmpItem.Fid = tmpListList[i][j]
+					tmpItem.Fid = v[j].String()
 					break
 				case FieldMap["structinfo"]:
-					tmpItem.Structinfo = tmpListList[i][j]
+					tmpItem.Structinfo = v[j].String()
 					break
 				}
 			}

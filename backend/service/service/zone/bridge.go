@@ -4,10 +4,9 @@ import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
 	"fine/backend/constraint"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/db/service"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	"fine/backend/service/model/zone"
 	"fine/backend/utils"
 	"fmt"
@@ -29,7 +28,7 @@ type Bridge struct {
 
 func NewZoneBridge(app *app.App) *Bridge {
 	tt := NewClient(config.Get0zone().Token)
-	proxy.GetSingleton().Add(tt)
+	config.ProxyManager.Add(tt)
 	return &Bridge{
 		zone:        tt,
 		queryLog:    service.NewZoneQueryLog(),
@@ -54,49 +53,49 @@ func (b *Bridge) SetAuth(key string) error {
 
 type QuerySiteResult struct {
 	Result  SiteResult `json:"result"`
-	TaskID  int64      `json:"id"`
+	TaskID  int64      `json:"taskID"`
 	MaxPage int        `json:"maxPage"`
 }
 
 type QueryDomainResult struct {
 	Result  DomainResult `json:"result"`
-	TaskID  int64        `json:"id"`
+	TaskID  int64        `json:"taskID"`
 	MaxPage int          `json:"maxPage"`
 }
 
 type QueryApkResult struct {
 	Result  ApkResult `json:"result"`
-	TaskID  int64     `json:"id"`
+	TaskID  int64     `json:"taskID"`
 	MaxPage int       `json:"maxPage"`
 }
 
 type QueryMemberResult struct {
 	Result  MemberResult `json:"result"`
-	TaskID  int64        `json:"id"`
+	TaskID  int64        `json:"taskID"`
 	MaxPage int          `json:"maxPage"`
 }
 
 type QueryEmailResult struct {
 	Result  EmailResult `json:"result"`
-	TaskID  int64       `json:"id"`
+	TaskID  int64       `json:"taskID"`
 	MaxPage int         `json:"maxPage"`
 }
 
 type QueryCodeResult struct {
 	Result  CodeResult `json:"result"`
-	TaskID  int64      `json:"id"`
+	TaskID  int64      `json:"taskID"`
 	MaxPage int        `json:"maxPage"`
 }
 
 type QueryDwmResult struct {
 	Result  DarknetResult `json:"result"`
-	TaskID  int64         `json:"id"`
+	TaskID  int64         `json:"taskID"`
 	MaxPage int           `json:"maxPage"`
 }
 
 type QueryAimResult struct {
 	Result  AimResult `json:"result"`
-	TaskID  int64     `json:"id"`
+	TaskID  int64     `json:"taskID"`
 	MaxPage int       `json:"maxPage"`
 }
 
@@ -113,7 +112,7 @@ func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*Que
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -134,7 +133,7 @@ func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*Que
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -164,7 +163,7 @@ func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*Q
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -185,7 +184,7 @@ func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*Q
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -215,7 +214,7 @@ func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*Quer
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -236,7 +235,7 @@ func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*Quer
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -266,7 +265,7 @@ func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*Q
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -287,7 +286,7 @@ func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*Q
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -317,7 +316,7 @@ func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*Qu
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -338,7 +337,7 @@ func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*Qu
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -368,7 +367,7 @@ func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*Que
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -389,7 +388,7 @@ func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*Que
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -419,7 +418,7 @@ func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*Quer
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -440,7 +439,7 @@ func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*Quer
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -469,7 +468,7 @@ func (b *Bridge) QueryAim(taskID int64, query string, page, pageSize int) (*Quer
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = page
+		queryResult.Result.PageNum = page
 		queryResult.Result.PageSize = pageSize
 		queryResult.TaskID = taskID
 		queryResult.MaxPage = int(math.Ceil(float64(total) / float64(pageSize)))
@@ -489,7 +488,7 @@ func (b *Bridge) QueryAim(taskID int64, query string, page, pageSize int) (*Quer
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.ZoneQueryLog{
+			_ = b.queryLog.Add(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
@@ -514,7 +513,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 	dataDir := config.GetDataDir()
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(model.DownloadLog{
+	_ = b.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -580,7 +579,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 	dataDir := config.GetDataDir()
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(model.DownloadLog{
+	_ = b.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -646,7 +645,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 	dataDir := config.GetDataDir()
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(model.DownloadLog{
+	_ = b.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -712,7 +711,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 	dataDir := config.GetDataDir()
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(model.DownloadLog{
+	_ = b.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,

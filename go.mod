@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	github.com/buger/jsonparser v1.1.1
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
 	github.com/miekg/dns v1.1.59

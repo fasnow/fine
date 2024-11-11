@@ -168,7 +168,7 @@ export default function RightPenetration(props) {
     var endMoveNum = 0;
     var moveDistance = 0;
     if (d) {
-      if (showtype == 'down') {
+      if (showtype === 'down') {
         var downMoveNum = d.depth ? state.current.diamonds.h / 2 : state.current.originDiamonds.h / 2 - 10;
         // var downMoveNum =  30;
         let tmpNum = s.y + (d.y - s.y) / 2;
@@ -354,7 +354,7 @@ export default function RightPenetration(props) {
     }
     let links = nodes.slice(1);
     nodes.forEach(d => {
-      d.y = d.depth * (d.depth == 1 ? 150 : state.current.diamonds.intervalH);
+      d.y = d.depth * (d.depth === 1 ? 150 : state.current.diamonds.intervalH);
     });
 
 

@@ -3,7 +3,7 @@ package runtime
 import (
 	"encoding/base64"
 	"fine/backend/app"
-	"fine/backend/proxy"
+	"fine/backend/config/v2"
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -86,7 +86,7 @@ func (r *Runtime) CheckUpdate() (map[string]string, error) {
 	client := UpdateHttpClient{
 		Client: &http.Client{},
 	}
-	err := proxy.GetSingleton().Add(&client)
+	err := config.ProxyManager.Add(&client)
 	if err != nil {
 		return nil, err
 	}

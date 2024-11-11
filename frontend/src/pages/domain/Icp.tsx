@@ -19,11 +19,11 @@ import {copy, sleep} from '@/util/util';
 import * as CryptoJS from 'crypto-js';
 import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
 
-import {CheckImage, Export, GetImage, IsSignExpired, Query} from "../../../wailsjs/go/icp/Bridge";
+import {Export,Query} from "../../../wailsjs/go/icp/Bridge";
 import {GetAllEvents} from "../../../wailsjs/go/constraint/Event";
 import {MenuItem} from "@/component/MenuItem";
 import {MenuItemType} from "antd/es/menu/interface";
-import {icp} from "../../../wailsjs/go/models";
+import {fofa, icp} from "../../../wailsjs/go/models";
 
 
 type dataCacheType = {
@@ -57,15 +57,11 @@ type TabType = {
     children: ReactNode,
     closable?: boolean
 }
-interface Position {
-    x: number;
-    y: number;
+
+interface PageDataType extends icp.Item {
+    index: number
 }
 
-interface FormData {
-    bigImage: string;
-    clickedPositions: Position[];
-}
 const IcpContent: React.FC = () => {
     const defaultColumns: ColumnsType<icp.Item> = [
         {
@@ -86,7 +82,7 @@ const IcpContent: React.FC = () => {
         {
             title: '备案内容', dataIndex: "serviceName", ellipsis: true, width: 200, onCell: (record, index) => {
                 return {
-                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "domain", }; },
+                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "serviceName", }; },
                     onClick: () => copyCell(record.serviceName)
                 }
             }
@@ -127,23 +123,19 @@ const IcpContent: React.FC = () => {
 
     const [columns, setColumns] = useState<ColumnsType<icp.Item>>(defaultColumns)
     const pageSizeOptions = [40, 80, 100]
-    const [id, setId] = useState<number>(0)
     const [input, setInput] = useState<string>("")
     const [inputCache, setInputCache] = useState<string>("")
-    const [dataCache, setDataCache] = useState<dataCacheType>({})
     const [total, setTotal] = useState<number>(0)
-    const [currentPage, setCurrentPage] = useState<number>(1)
-    const [currentPageSize, setCurrentSize] = useState<number>(pageSizeOptions[0])
+    const [currentPageNum, setCurrentPageNum] = useState<number>(1)
+    const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
     const [loading, setLoading] = useState(false)
     const [isExporting, setIsExporting] = useState(false)
-    const dispatch = useDispatch()
     const [messageApi, contextHolder] = message.useMessage();
-    const queryParams = useRef({ page: 0, pageSize: 0 })
-    const unitNameChanged = useRef<boolean>(false)
-    const status = useRef<"new" | "pageSizeChange" | "export" | "pageChange">()
     const [disable,setDisable] = useState<boolean>(false)
     const [serviceType, setServiceType] = useState<string>("1")
-    const [serviceTypeCache, setServiceTypeCache] = useState<string>("1")
+    const [serviceTypeCache, setServiceTypeCache] = useState<string>(serviceType)
+    const pageIDMap = useRef<{ [key: number]: number }>({})
+    const [pageData, setPageData] = useState<PageDataType[]>([])
 
     useEffect(() => {
         GetAllEvents().then(
@@ -164,249 +156,79 @@ const IcpContent: React.FC = () => {
         messageApi.success("复制成功", 0.5)
     }
 
-    const [captcha, setCaptcha] = useState({
-        bigImage: "",
-        smallImage: "",
-        secretKey: "",
-        clickCount: 0,
-        maxClicks: 0,
-        loading: false,
-        visible: false,
-        positions: [] as Position[],
-        refetching: false
-    })
-
-    function encryptPoints(points: Position[], A: string): string {
-        const key = CryptoJS.enc.Utf8.parse(A || "XwKsGlMcdPMEhR1B");
-        const srcs = CryptoJS.enc.Utf8.parse(JSON.stringify(points));
-        const encrypted = CryptoJS.AES.encrypt(srcs, key, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 });
-        return encrypted.toString();
-    }
-
-
-    const handleClickImage = (event: React.MouseEvent<HTMLImageElement>) => {
-        const clickCount = captcha.clickCount + 1
-        if (clickCount > captcha.maxClicks) { return }
-        const position: Position = {
-            x: event.clientX - getImageOffsetLeft(),
-            y: event.clientY - getImageOffsetTop(),
-        };
-
-        const positions = [...captcha.positions, position]
-        setCaptcha((prevCaptcha) => ({
-            ...prevCaptcha,
-            positions: positions,
-            clickCount: clickCount
-        }))
-        markImageClickPosition(position, clickCount);
-        if (clickCount == captcha.maxClicks) {
-            const pointJson = encryptPoints(positions, captcha.secretKey)
-            CheckImage( encryptPoints(positions, captcha.secretKey)).then(
-                result=>{
-                    if (result.sign == "") {
-                        setCaptcha(pre => ({
-                            ...pre,
-                            smallImage: result.smallImage,
-                        }))
-                        sleep(500)
-                        fetchImage()
-                    } else {
-                        clearImageMarkers()
-                        setCaptcha({ bigImage: "", smallImage: "", secretKey: "", visible: false, maxClicks: 0, clickCount: 0, positions: [], loading: false, refetching: false })
-                        if (status.current == "new" || status.current == "pageSizeChange") {
-                            handleQuery(inputCache, 1, queryParams.current.pageSize)
-                        } else if (status.current == "pageChange") {
-                            handleQuery(inputCache, queryParams.current.page, queryParams.current.pageSize)
-                        }
-                        else if (status.current == "export") {
-                            exportData()
-                        }
-                    }
-                }
-            ).catch(
-                err=> {
-                    errorNotification("ICP无法获取签名", err)
-                    setCaptcha(pre => ({
-                        ...pre,
-                        loading: false
-                    }))
-                }
-            )
-        }
-
-    };
-
-    const markImageClickPosition = (position: Position, clickCount: number) => {
-        const marker = document.createElement('div');
-        marker.className = 'marker';
-        marker.style.position = 'absolute';
-        marker.style.left = `${position.x - 10}px`;
-        marker.style.top = `${position.y - 10}px`;
-        marker.style.backgroundColor = "#1abd6c";
-        marker.style.color = "#fff";
-        marker.style.width = "20px";
-        marker.style.height = "20px";
-        marker.style.textAlign = "center";
-        marker.style.lineHeight = "20px";
-        marker.style.borderRadius = "50%";
-        marker.style.userSelect = 'none';
-        marker.textContent = `${clickCount}`;
-        document.getElementById('captchaImageContainer')?.appendChild(marker);
-    };
-
-    const getImageOffsetLeft = () => {
-        const imageElement = document.getElementById('captchaImage');
-        return imageElement ? imageElement.getBoundingClientRect().left : 0;
-    };
-
-    const getImageOffsetTop = () => {
-        const imageElement = document.getElementById('captchaImage');
-        return imageElement ? imageElement.getBoundingClientRect().top : 0;
-    };
-
-    const clearImageMarkers = () => {
-        const markers = document.querySelectorAll('.marker');
-        markers?.forEach(marker => marker.remove());
-    };
-
-
-    const preHandleQuery = async (page: number, pageSize: number) => {
+    const preHandleQuery = async () => {
         const tmpInput = input.trim()
         if (tmpInput === "") {
             return
         }
-        setInputCache(tmpInput)//缓存查询条件
-        queryParams.current.page = page
-        queryParams.current.pageSize = pageSize
-        const expired = await isSignExpired()
-        status.current = "new"
-        if (expired) {
-            fetchImage()
-            return
-        }
-        handleQuery(tmpInput, 1, queryParams.current.pageSize)
+        setInputCache(tmpInput)
+        setServiceTypeCache(serviceType)
+        handleNewQuery(0,tmpInput, currentPageSize)
     }
 
-    const fetchImage = () => {
-        clearImageMarkers()
-        setCaptcha(pre => ({ ...pre, loading: true, refetching: true, visible: true, positions: [], clickCount: 0 }))
-        GetImage().then(
-            result=>{
-                setCaptcha(pre => ({
-                    ...pre,
-                    bigImage: result.bigImage,
-                    smallImage: result.smallImage,
-                    secretKey: result.secretKey,
-                    maxClicks: result.wordCount,
-                    loading: false,
-                    refetching: false
-                }))
-            }
-        ).catch(
-            err=>{
-                errorNotification("ICP无法获取验证码", err)
-                setCaptcha(pre => ({
-                    ...pre,
-                    loading: false
-                }))
-            }
-        )
-    }
-
-    async function handleQuery(unitName: string, page: number, pageSize: number,) {
+    async function handleNewQuery(taskID:number,unitName: string, pageSize: number) {
+        pageIDMap.current = {}
+        setCurrentPageNum(1)
+        setTotal(0)
         setLoading(true)
-        if (status.current === "new") {
-            setId(0)
-            setDataCache({})
-            setTotal(0)
-        }
-
         //不能使用inputCache，setInputCache(tmpInput)为异步更新，此时inputCache还没有更新
-        Query(unitName,page,pageSize,serviceTypeCache).then(
+        Query(taskID,unitName,1,pageSize,serviceType).then(
             result=>{
-                setCurrentPage(page)
-                setCurrentSize(pageSize)
                 let index=0
-                let pre:dataCacheType = {}
-                if (status.current === "pageChange") {
-                    index = (page - 1) * pageSize
-                    pre = dataCache
-                }
-                const data = result["data"]
-                setTotal(data["total"])
-                setDataCache({
-                    ...pre,
-                    [page]: data["items"]?.map((item:icp.Item) => {
-                        index++
-                        return { ...item, index: index }
-                    })
-                })
-                setId(data["taskID"])
+                setTotal(result["total"])
+                setPageData(result["items"]?.map((item:icp.Item) => {
+                    index++
+                    return { ...item, index: index }
+                }))
+                pageIDMap.current[1] = result["taskID"]
                 setLoading(false)
             }
         ).catch(
             err=>{
                 errorNotification("ICP查询出错", err)
+                setPageData([])
                 setLoading(false)
             }
         )
     }
 
-    const getPageData = () => {
-        return dataCache[currentPage] ? dataCache[currentPage] : []
-    }
-
-    const isSignExpired = async () => {
-        try {
-            return await IsSignExpired()
-        } catch (error) {
-            errorNotification("ICP获取签名失败", error)
-        }
-
-    }
-
     async function handlePaginationChange(newPage: number, newSize: number) {
         //page发生变换
-        if (newPage != currentPage && newSize == currentPageSize) {
-            //从缓存取数据
-            if (dataCache[newPage]) {
-                setCurrentPage(newPage)
-                setLoading(false)
-                return
-            }
-            status.current = "pageChange"
-            const expired = await isSignExpired()
-            if (expired) {
-                queryParams.current.page = newPage
-                fetchImage()
-                return
-            }
-            handleQuery(inputCache, newPage, queryParams.current.pageSize)
+        if (newPage !== currentPageNum && newSize === currentPageSize) {
+            setLoading(true)
+            let pageID = pageIDMap.current[newPage]
+            Query(pageID ? pageID : 0,inputCache,newPage,newSize,serviceTypeCache).then(
+                (result)=>{
+                    let index = (newPage - 1) * currentPageSize
+                    setPageData(result["items"].map((item:icp.Item) => ({index: ++index, ...item})))
+                    setCurrentPageNum(newPage)
+                    setLoading(false)
+                    pageIDMap.current[newPage] = result["taskID"]
+                }
+            ).catch(
+                err => {
+                    errorNotification("ICP查询出错", err)
+                    setLoading(false)
+                }
+            )
         }
 
         //size发生变换
-        if (newSize != currentPageSize) {
-            queryParams.current.page = 1
-            queryParams.current.pageSize = newSize
-            status.current = "pageSizeChange"
-            const expired = await isSignExpired()
-            if (expired) {
-                fetchImage()
-                return
-            }
-            handleQuery(inputCache, 1, newSize)
+        if (newSize !== currentPageSize) {
+            setCurrentPageSize(newSize)
+            handleNewQuery(0,inputCache, newSize)
         }
     }
 
     async function exportData() {
-        if (id == 0) {
+        if (pageIDMap.current[1] === 0) {
             errorNotification("导出结果", QUERY_FIRST)
             setIsExporting(false)
             return
         }
         setIsExporting(true)
         setDisable(true)
-        Export(id).catch(
+        Export(pageIDMap.current[1]).catch(
             err=> {
                 errorNotification("导出结果", err)
             }
@@ -461,7 +283,7 @@ const IcpContent: React.FC = () => {
                 break
             case MenuItem.CopyCol.key:
                 {
-                    const colValues = dataCache[currentPage].map(item => {
+                    const colValues = pageData.map(item => {
                         for (const key in item) {
                             if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.colKey) {
                                 return String(item[key as keyof icp.Item]);
@@ -482,12 +304,10 @@ const IcpContent: React.FC = () => {
     return (<div >
         {contextHolder}
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-            <Space.Compact>
+            <Space.Compact size={"small"}>
                 <Select
-                    size={"small"}
                     onChange={(value)=>{
                         setServiceType(value)
-                        setServiceTypeCache(value)
                     }}
                     defaultValue="1"
                     options={[
@@ -512,15 +332,13 @@ const IcpContent: React.FC = () => {
                 />
                 <Input
                     style={{ width: "600px" }}
-                    size="small"
                     allowClear
-                    suffix={<Space.Compact block>
-                        <Button type='text' size="small" icon={<SearchOutlined />} onClick={() => preHandleQuery(currentPage, currentPageSize)} />
-                    </Space.Compact>}
                     value={input}
-                    onPressEnter={() => preHandleQuery(currentPage, currentPageSize)}
                     onChange={(e) => setInput(e.target.value)}
                 />
+                <Space.Compact >
+                    <Button  size="small" icon={<SearchOutlined />} onClick={() => preHandleQuery()} />
+                </Space.Compact>
             </Space.Compact>
             <span style={{ textAlign: 'center' }}>ICP备案查询：请输入单位名称或域名或备案号查询，请勿使用子域名或者带http://www等字符的网址查询</span>
         </div>
@@ -531,7 +349,7 @@ const IcpContent: React.FC = () => {
                 handleMenuItemClick(key)
             }
         }
-            hidden={getPageData().length === 0}
+            hidden={pageData.length === 0}
         >
             <Table
                 // locale={{ emptyText: "暂无数据" }}
@@ -544,7 +362,7 @@ const IcpContent: React.FC = () => {
                         cell: ResizableTitle,
                     },
                 }}
-                dataSource={getPageData()}
+                dataSource={pageData}
                 loading={loading}
                 size="small"
                 pagination={false}
@@ -556,7 +374,7 @@ const IcpContent: React.FC = () => {
                         pageSizeOptions={pageSizeOptions}
                         defaultPageSize={pageSizeOptions[0]}
                         defaultCurrent={1}
-                        current={currentPage}
+                        current={currentPageNum}
                         showTotal={(total) => `${total} items`}
                         size="small"
                         onChange={(page, size) => handlePaginationChange(page, size)}
@@ -565,12 +383,6 @@ const IcpContent: React.FC = () => {
                         disabled={disable}
                         size="small"
                         onClick={async () => {
-                            const expired = await isSignExpired()
-                            if (expired) {
-                                status.current = "export"
-                                fetchImage()
-                                return
-                            }
                             exportData()
                         }}
                         icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}
@@ -578,69 +390,10 @@ const IcpContent: React.FC = () => {
                         {isExporting ? "正在导出" : "导出结果"}
                     </Button>
                 </div>}
-                // onRow={(record) => {
-                //     return {
-                //         onContextMenu: (event) => { selectedRow.current = record },
-                //     };
-                // }}
                 sticky
                 rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
             />
         </ContextMenu>
-        <Modal
-            title={<span style={{ color: "#008cff" }}>请完成安全校验</span>}
-            open={captcha.visible}
-            onCancel={() => {
-                clearImageMarkers()
-                setCaptcha({ bigImage: "", smallImage: "", secretKey: "", visible: false, maxClicks: 0, clickCount: 0, positions: [], loading: false, refetching: false })
-            }
-            }
-            footer={null}
-            destroyOnClose
-        // bodyStyle={{ width: "500px", height: "259px" }}
-        >
-            <Spin spinning={captcha.loading}>
-                <Space direction='vertical'>
-                    <div style={{ position: 'relative' }} id="captchaImageContainer">
-                        {
-                            captcha.bigImage &&
-                            <img
-                                onClick={handleClickImage}
-                                id="captchaImage"
-                                src={`data:image/png;base64,${captcha.bigImage}`}
-                            />
-                        }
-
-                        {
-                            captcha.bigImage && <Button
-                                style={{
-                                    position: "absolute",
-                                    top: '2px',
-                                    right: '2px',
-                                    backgroundColor: "#ffffff"
-                                }}
-                                size='small'
-                                icon={<SyncOutlined spin={captcha.refetching} />}
-                                type='link'
-                                onClick={() => {
-                                    fetchImage();
-                                    setCaptcha((pre) => ({ ...pre, clickCount: 0 }))
-                                }
-                                }
-                            />
-                        }
-                    </div>
-
-                    {
-                        captcha.smallImage &&
-                        <img
-                            src={`data:image/png;base64,${captcha.smallImage}`}
-                        />
-                    }
-
-                </Space>
-            </Spin>
-        </Modal>
     </div>)
 }
 

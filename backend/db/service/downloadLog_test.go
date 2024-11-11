@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fmt"
 	"github.com/yitter/idgenerator-go/idgen"
 	"testing"
@@ -12,7 +12,7 @@ func TestDownloadLogService_Insert(t *testing.T) {
 	db.SetDBAbsFilepath("data.db")
 	service := NewDownloadLogService()
 	taskID := idgen.NextId()
-	err := service.Insert(model.DownloadLog{
+	err := service.Insert(models.DownloadLog{
 		Filename: "2.txt",
 		Dir:      "",
 		Deleted:  false,

@@ -295,7 +295,7 @@ const TabContent: React.FC = () => {
                             items={[
                                 { key: "", label: "法人", children: item.legalPersonName },
                                 { key: "", label: "成立日期", children: item.estiblishTime },
-                                { key: "", label: "投资数额", children: (item.amount != "0" && item.amount) || "未公开" },
+                                { key: "", label: "投资数额", children: (item.amount !== "0" && item.amount) || "未公开" },
                                 { key: "", label: "投资比例", children: item.percent || "未公开" },
                                 { key: "", label: "经营状态", children: item.regStatus },
                             ]} />

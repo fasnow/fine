@@ -20,11 +20,11 @@ const Rdg: React.FC<CustomRadioGroupProps> = (props: CustomRadioGroupProps) => {
   const [selectedValue, setSelectedValue] = useState<string | number>(
     props.defaultValue||0
   );
-  const [data, setData] = useState<{ key: number, value: string }[]>(props.options.filter((item) => item.value == props.defaultValue)[0]?.content)
+  const [data, setData] = useState<{ key: number, value: string }[]>(props.options.filter((item) => item.value === props.defaultValue)[0]?.content)
 
   const handleRadioChange = (value: string | number) => {
     setSelectedValue(value);
-    setData(props.options.filter((item) => item.value == value)[0]?.content)
+    setData(props.options.filter((item) => item.value === value)[0]?.content)
   };
 
   return (

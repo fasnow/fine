@@ -4,10 +4,9 @@ import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
 	"fine/backend/constraint"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/db/service"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	"fine/backend/service/model/hunter"
 	"fine/backend/utils"
 	"fmt"
@@ -31,7 +30,7 @@ type Bridge struct {
 func NewHunterBridge(app *app.App) *Bridge {
 	t := config.GlobalConfig.GetHunter()
 	tt := NewClient(t.Token)
-	proxy.GetSingleton().Add(tt)
+	config.ProxyManager.Add(tt)
 	return &Bridge{
 		hunter:      tt,
 		queryLog:    service.NewHunterQueryLog(),
@@ -46,15 +45,15 @@ func NewHunterBridge(app *app.App) *Bridge {
 type QueryResult struct {
 	*Result
 	MaxPage int   `json:"maxPage"`
-	TaskID  int64 `json:"id"`
+	TaskID  int64 `json:"taskID"`
 }
 
 type QueryOptions struct {
 	Query      string `json:"query"`
 	StartTime  string `json:"startTime"`
 	EndTime    string `json:"endTime"`
-	Page       int    `json:"page"`
-	Size       int    `json:"size"`
+	PageNum    int    `json:"page"`
+	PageSize   int    `json:"size"`
 	IsWeb      int    `json:"isWeb"`
 	StatusCode string `json:"statusCode"`
 	PortFilter bool   `json:"portFilter"`
@@ -74,7 +73,7 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 			return nil, err
 		}
 		queryResult.Total = total
-		queryResult.Page = page
+		queryResult.PageNum = page
 		queryResult.TaskID = taskID
 		queryResult.RestQuota = b.token.GetLast() //从数据库获取剩余积分
 		for _, cacheItem := range cacheItems {
@@ -103,8 +102,8 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		// 缓存查询成功的条件，用于导出
 		id := idgen.NextId()
 		if page == 1 {
-			_ = b.queryLog.Add(&model.HunterQueryLog{
-				BaseModel:  model.BaseModel{},
+			_ = b.queryLog.Add(&models.HunterQueryLog{
+				BaseModel:  models.BaseModel{},
 				Query:      query,
 				StartTime:  startTime,
 				EndTime:    endTime,
@@ -148,7 +147,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 	dataDir := config.GlobalConfig.GetDataDir()
 	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(model.DownloadLog{
+	_ = b.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,

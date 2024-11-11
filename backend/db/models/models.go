@@ -1,8 +1,9 @@
-package model
+package models
 
 import (
 	"fine/backend/service/model/fofa"
 	"fine/backend/service/model/hunter"
+	"fine/backend/service/model/icp"
 	quakeModel "fine/backend/service/model/quake"
 	"fine/backend/service/model/zone"
 )
@@ -71,4 +72,10 @@ type ZoneAim struct {
 	BaseModel
 	TaskID int64
 	*zone.AimItem
+}
+
+type ICP struct {
+	BaseModel
+	TaskID int64
+	*icp.Item
 }

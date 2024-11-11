@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/logger"
 	"gorm.io/gorm"
 	"os"
@@ -17,7 +17,7 @@ func NewDownloadLogService() *DownloadLogService {
 	return &DownloadLogService{dbConn: db.GetDBConnect()}
 }
 
-func (d *DownloadLogService) Insert(item model.DownloadLog, fileID int64) error {
+func (d *DownloadLogService) Insert(item models.DownloadLog, fileID int64) error {
 	item.FileID = fileID
 	if err := d.dbConn.Create(&item).Error; err != nil {
 		logger.Info(err.Error())
@@ -27,7 +27,7 @@ func (d *DownloadLogService) Insert(item model.DownloadLog, fileID int64) error 
 }
 
 func (d *DownloadLogService) MarkAsDeleted(fileId int64) {
-	var logItem = &model.DownloadLog{}
+	var logItem = &models.DownloadLog{}
 	if err := d.dbConn.Where("file_id = ?", fileId).Limit(1).Find(logItem).Error; err != nil {
 		logger.Info(err.Error())
 		return
@@ -41,17 +41,17 @@ func (d *DownloadLogService) MarkAsDeleted(fileId int64) {
 
 // Clear 清空记录，文件仍存在
 func (d *DownloadLogService) Clear() error {
-	if err := d.dbConn.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&model.DownloadLog{}).Error; err != nil {
+	if err := d.dbConn.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.DownloadLog{}).Error; err != nil {
 		logger.Info(err.Error())
 		return err
 	}
 	return nil
 }
 
-func (d *DownloadLogService) GetByPagination(page, pageSize int) ([]*model.DownloadLog, int64, error) {
+func (d *DownloadLogService) GetByPagination(page, pageSize int) ([]*models.DownloadLog, int64, error) {
 	var total int64
-	var items = make([]*model.DownloadLog, 0)
-	d.dbConn.Model(&model.DownloadLog{}).Count(&total)
+	var items = make([]*models.DownloadLog, 0)
+	d.dbConn.Model(&models.DownloadLog{}).Count(&total)
 	if total == 0 {
 		return items, 0, nil
 	}
@@ -62,7 +62,7 @@ func (d *DownloadLogService) GetByPagination(page, pageSize int) ([]*model.Downl
 		pageSize = 10
 	}
 	var offset = (page - 1) * pageSize
-	if err := d.dbConn.Model(&model.DownloadLog{}).Order("created_at desc").Limit(pageSize).Offset(offset).Find(&items).Error; err != nil {
+	if err := d.dbConn.Model(&models.DownloadLog{}).Order("created_at desc").Limit(pageSize).Offset(offset).Find(&items).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -78,8 +78,8 @@ func (d *DownloadLogService) GetByPagination(page, pageSize int) ([]*model.Downl
 func (d *DownloadLogService) GetByOffset(offset, limit int) (map[string]any, error) {
 	//wails最多支持2个返回值
 	var total int64
-	var items = make([]*model.DownloadLog, 0)
-	d.dbConn.Model(&model.DownloadLog{}).Count(&total)
+	var items = make([]*models.DownloadLog, 0)
+	d.dbConn.Model(&models.DownloadLog{}).Count(&total)
 	if total == 0 {
 		//return items, nil
 		return map[string]any{
@@ -87,7 +87,7 @@ func (d *DownloadLogService) GetByOffset(offset, limit int) (map[string]any, err
 			"items": items,
 		}, nil
 	}
-	if err := d.dbConn.Model(&model.DownloadLog{}).Order("created_at desc").Limit(limit).Offset(offset).Find(&items).Error; err != nil {
+	if err := d.dbConn.Model(&models.DownloadLog{}).Order("created_at desc").Limit(limit).Offset(offset).Find(&items).Error; err != nil {
 		return nil, err
 	}
 	for _, item := range items {
@@ -103,12 +103,12 @@ func (d *DownloadLogService) GetByOffset(offset, limit int) (map[string]any, err
 	}, nil
 }
 
-func (d *DownloadLogService) GetRunningOrErrorOccurredTask() []*model.ExportStatus {
-	var items = make([]*model.DownloadLog, 0)
-	var exportStatusList []*model.ExportStatus
+func (d *DownloadLogService) GetRunningOrErrorOccurredTask() []*models.ExportStatus {
+	var items = make([]*models.DownloadLog, 0)
+	var exportStatusList []*models.ExportStatus
 	d.dbConn.Where("status <> 0").Find(items)
 	for _, item := range items {
-		exportStatusList = append(exportStatusList, &model.ExportStatus{
+		exportStatusList = append(exportStatusList, &models.ExportStatus{
 			FileID:  item.FileID,
 			Message: item.Message,
 		})
@@ -117,7 +117,7 @@ func (d *DownloadLogService) GetRunningOrErrorOccurredTask() []*model.ExportStat
 }
 
 func (d *DownloadLogService) UpdateStatus(fileID int64, status int, message string) {
-	var item = &model.DownloadLog{
+	var item = &models.DownloadLog{
 		FileID: fileID,
 		Status: status,
 	}

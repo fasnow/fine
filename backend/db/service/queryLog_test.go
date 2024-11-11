@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"github.com/yitter/idgenerator-go/idgen"
 	"testing"
 	"time"
@@ -12,8 +12,8 @@ func TestQueryOptionsService_Add(t *testing.T) {
 	db.SetDBAbsFilepath("data.db")
 	s := NewICPQueryLog()
 	taskID := idgen.NextId()
-	options := &model.ICPQueryLog{
-		BaseModel: model.BaseModel{},
+	options := &models.ICPQueryLog{
+		BaseModel: models.BaseModel{},
 		TaskID:    0,
 		UnitName:  "",
 		Total:     0,

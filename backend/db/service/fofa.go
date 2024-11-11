@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/logger"
 	"fine/backend/service/model/fofa"
 	"gorm.io/gorm"
@@ -17,10 +17,10 @@ func NewFofaDBService() *FofaDBService {
 }
 
 func (f *FofaDBService) BatchInsert(taskID int64, items []*fofa.Item) error {
-	dbItems := make([]*model.Fofa, 0)
+	dbItems := make([]*models.Fofa, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.Fofa{
+		dbItems = append(dbItems, &models.Fofa{
 			Item:   tmp,
 			TaskID: taskID,
 		})
@@ -32,15 +32,15 @@ func (f *FofaDBService) BatchInsert(taskID int64, items []*fofa.Item) error {
 	return nil
 }
 
-func (f *FofaDBService) GetByTaskID(taskID int64) []*model.Fofa {
-	items := make([]*model.Fofa, 0)
+func (f *FofaDBService) GetByTaskID(taskID int64) []*models.Fofa {
+	items := make([]*models.Fofa, 0)
 	f.dbConn.Where("task_id = ?", taskID).Find(&items)
 	return items
 }
 
-func (f *FofaDBService) GetByPaginationAndTaskID(taskID int64, page, pageSize int) []*model.Fofa {
-	var offset = (page - 1) * pageSize
-	var items = make([]*model.Fofa, 0)
-	f.dbConn.Model(&model.Fofa{}).Limit(pageSize).Offset(offset).Where("task_id = ?", taskID).Find(&items)
+func (f *FofaDBService) GetByPaginationAndTaskID(taskID int64, pageNum, pageSize int) []*models.Fofa {
+	var offset = (pageNum - 1) * pageSize
+	var items = make([]*models.Fofa, 0)
+	f.dbConn.Model(&models.Fofa{}).Limit(pageSize).Offset(offset).Where("task_id = ?", taskID).Find(&items)
 	return items
 }

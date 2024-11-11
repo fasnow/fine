@@ -2,8 +2,8 @@ package app
 
 import (
 	"context"
+	"fine/backend/config/v2"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
@@ -22,7 +22,7 @@ func NewApp() *App {
 	app := &App{
 		HttpClient: &http.Client{},
 	}
-	proxy.GetSingleton().Add(app)
+	config.ProxyManager.Add(app)
 	return app
 }
 

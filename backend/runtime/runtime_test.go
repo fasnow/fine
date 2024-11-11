@@ -19,7 +19,9 @@ func TestRuntime_ReadFile(t *testing.T) {
 
 func TestRuntime_CheckUpdate(t *testing.T) {
 	r := NewRuntime(app.NewApp())
-	proxy.GetSingleton().SetProxy("http://127.0.0.1:8080")
+	proxyManager := proxy.NewManager()
+	proxyManager.Add(r)
+	proxyManager.SetProxy("http://127.0.0.1:8080")
 	res, err := r.CheckUpdate()
 	if err != nil {
 		t.Error(err)

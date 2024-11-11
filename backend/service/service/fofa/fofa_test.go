@@ -2,14 +2,14 @@ package fofa
 
 import (
 	"fine/backend/app"
-	"fine/backend/proxy"
+	"fine/backend/config/v2"
 	"fmt"
 	"testing"
 )
 
 func TestFofa_Get(t *testing.T) {
 	b := NewFofaBridge(app.NewApp())
-	err := proxy.GetSingleton().SetProxy("http://127.0.0.1:8080")
+	err := config.ProxyManager.SetProxy("http://127.0.0.1:8080")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -21,7 +21,7 @@ func TestFofa_Get(t *testing.T) {
 	}
 	fmt.Println(userInfo)
 
-	err = proxy.GetSingleton().SetProxy("")
+	err = config.ProxyManager.SetProxy("")
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -5,7 +5,6 @@ import (
 	"fine/backend/config/v2"
 	"fine/backend/constraint"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
@@ -24,7 +23,7 @@ type Bridge struct {
 
 func NewDomain2IPBridge(app *app.App) *Bridge {
 	t := NewClient()
-	proxy.GetSingleton().Add(t)
+	config.ProxyManager.Add(t)
 	return &Bridge{
 		app:       app,
 		ip2domain: t,

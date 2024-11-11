@@ -1,7 +1,7 @@
 package db
 
 import (
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/logger"
 	"fine/backend/service/model/hunter"
 	quakeModel "fine/backend/service/model/quake"
@@ -41,49 +41,49 @@ func GetDBConnect() *gorm.DB {
 			logger.Info(err.Error())
 			panic(err)
 		}
-		if err = dbConn.AutoMigrate(&model.ICPQueryLog{}); err != nil {
+		if err = dbConn.AutoMigrate(&models.ICP{}, &models.ICPQueryLog{}); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}
-		if err = dbConn.AutoMigrate(&model.DownloadLog{}); err != nil {
+		if err = dbConn.AutoMigrate(&models.DownloadLog{}); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}
-		if err = dbConn.AutoMigrate(&model.CacheTotal{}); err != nil {
+		if err = dbConn.AutoMigrate(&models.CacheTotal{}); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}
-		if err = dbConn.AutoMigrate(&model.Fofa{}, &model.FOFAQueryLog{}); err != nil {
+		if err = dbConn.AutoMigrate(&models.Fofa{}, &models.FOFAQueryLog{}); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}
-		if err = dbConn.AutoMigrate(&model.Hunter{}, &hunter.Component{}, &model.HunterQueryLog{}, &model.HunterRestToken{}); err != nil {
+		if err = dbConn.AutoMigrate(&models.Hunter{}, &hunter.Component{}, &models.HunterQueryLog{}, &models.HunterRestToken{}); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}
-		if err = dbConn.AutoMigrate(&model.Quake{}, &model.QuakeRealtimeQueryLog{}, &quakeModel.Service{}, &quakeModel.Component{}); err != nil {
+		if err = dbConn.AutoMigrate(&models.Quake{}, &models.QuakeRealtimeQueryLog{}, &quakeModel.Service{}, &quakeModel.Component{}); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(
-			&model.ZoneSite{},
-			&model.ZoneDomain{},
+			&models.ZoneSite{},
+			&models.ZoneDomain{},
 			//&model.ZoneApk{},
-			&model.ZoneMember{},
-			&model.ZoneEmail{},
+			&models.ZoneMember{},
+			&models.ZoneEmail{},
 			//&model.ZoneCode{},
 			//&model.ZoneDwm{},
 			//&model.ZoneAim{},
-			&model.ZoneQueryLog{},
+			&models.ZoneQueryLog{},
 		); err != nil {
 			logger.Info(err.Error())
 			panic(err)
 		}
 		if err = dbConn.AutoMigrate(
-			&model.MiniProgram{},
+			&models.MiniProgram{},
 			&wechat.Version{},
-			&model.MatchedString{},
-			&model.Info{},
+			&models.MatchedString{},
+			&models.Info{},
 		); err != nil {
 			logger.Info(err.Error())
 			panic(err)

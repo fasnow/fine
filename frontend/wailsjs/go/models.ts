@@ -147,6 +147,7 @@ export namespace constraint {
 	    domain2IPDown: string;
 	    icpOutput: string;
 	    icpDown: string;
+	    icpBatchQuery: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Event(source);
@@ -175,6 +176,7 @@ export namespace constraint {
 	        this.domain2IPDown = source["domain2IPDown"];
 	        this.icpOutput = source["icpOutput"];
 	        this.icpDown = source["icpDown"];
+	        this.icpBatchQuery = source["icpBatchQuery"];
 	    }
 	}
 
@@ -265,11 +267,11 @@ export namespace fofa {
 	export class QueryResult {
 	    query: string;
 	    total: number;
-	    page: number;
-	    size: number;
+	    pageNum: number;
+	    pageSize: number;
 	    items: Item[];
 	    maxPage: number;
-	    id: number;
+	    taskID: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new QueryResult(source);
@@ -279,11 +281,11 @@ export namespace fofa {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.query = source["query"];
 	        this.total = source["total"];
-	        this.page = source["page"];
-	        this.size = source["size"];
+	        this.pageNum = source["pageNum"];
+	        this.pageSize = source["pageSize"];
 	        this.items = this.convertValues(source["items"], Item);
 	        this.maxPage = source["maxPage"];
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -443,11 +445,11 @@ export namespace hunter {
 	    restQuota: number;
 	    syntaxPrompt: string;
 	    total: number;
-	    page: number;
-	    size: number;
+	    pageNum: number;
+	    pageSize: number;
 	    items: Item[];
 	    maxPage: number;
-	    id: number;
+	    taskID: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new QueryResult(source);
@@ -460,11 +462,11 @@ export namespace hunter {
 	        this.restQuota = source["restQuota"];
 	        this.syntaxPrompt = source["syntaxPrompt"];
 	        this.total = source["total"];
-	        this.page = source["page"];
-	        this.size = source["size"];
+	        this.pageNum = source["pageNum"];
+	        this.pageSize = source["pageSize"];
 	        this.items = this.convertValues(source["items"], Item);
 	        this.maxPage = source["maxPage"];
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -490,26 +492,6 @@ export namespace hunter {
 
 export namespace icp {
 	
-	export class Image {
-	    bigImage: string;
-	    smallImage: string;
-	    uuid: string;
-	    secretKey: string;
-	    wordCount: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Image(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.bigImage = source["bigImage"];
-	        this.smallImage = source["smallImage"];
-	        this.uuid = source["uuid"];
-	        this.secretKey = source["secretKey"];
-	        this.wordCount = source["wordCount"];
-	    }
-	}
 	export class Item {
 	    serviceName: string;
 	    leaderName: string;
@@ -570,7 +552,7 @@ export namespace ip138 {
 
 }
 
-export namespace model {
+export namespace models {
 	
 	export class DownloadLog {
 	    id: number;
@@ -987,8 +969,8 @@ export namespace quake {
 	}
 	export class RSDQueryResult {
 	    items: RealtimeServiceItem[];
-	    page: number;
-	    size: number;
+	    pageNum: number;
+	    pageSize: number;
 	    total: number;
 	
 	    static createFrom(source: any = {}) {
@@ -998,8 +980,8 @@ export namespace quake {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.items = this.convertValues(source["items"], RealtimeServiceItem);
-	        this.page = source["page"];
-	        this.size = source["size"];
+	        this.pageNum = source["pageNum"];
+	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	    }
 	
@@ -1056,7 +1038,7 @@ export namespace quake {
 	
 	export class RealtimeServiceQueryResult {
 	    result: RSDQueryResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -1066,7 +1048,7 @@ export namespace quake {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], RSDQueryResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -1475,7 +1457,7 @@ export namespace zone {
 		}
 	}
 	export class AimResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: AimItem[];
@@ -1486,7 +1468,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], AimItem);
@@ -1534,7 +1516,7 @@ export namespace zone {
 	    }
 	}
 	export class ApkResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: ApkItem[];
@@ -1545,7 +1527,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], ApkItem);
@@ -1703,7 +1685,7 @@ export namespace zone {
 	}
 	
 	export class CodeResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: CodeItem[];
@@ -1714,7 +1696,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], CodeItem);
@@ -1848,7 +1830,7 @@ export namespace zone {
 	}
 	
 	export class DarknetResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: DarknetItem[];
@@ -1859,7 +1841,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], DarknetItem);
@@ -1903,7 +1885,7 @@ export namespace zone {
 	    }
 	}
 	export class DomainResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: DomainItem[];
@@ -1914,7 +1896,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], DomainItem);
@@ -1959,7 +1941,7 @@ export namespace zone {
 	    }
 	}
 	export class EmailResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: EmailItem[];
@@ -1970,7 +1952,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], EmailItem);
@@ -2017,7 +1999,7 @@ export namespace zone {
 	    }
 	}
 	export class MemberResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: MemberItem[];
@@ -2028,7 +2010,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], MemberItem);
@@ -2054,7 +2036,7 @@ export namespace zone {
 	}
 	export class QueryAimResult {
 	    result: AimResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2064,7 +2046,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], AimResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -2088,7 +2070,7 @@ export namespace zone {
 	}
 	export class QueryApkResult {
 	    result: ApkResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2098,7 +2080,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], ApkResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -2122,7 +2104,7 @@ export namespace zone {
 	}
 	export class QueryCodeResult {
 	    result: CodeResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2132,7 +2114,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], CodeResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -2156,7 +2138,7 @@ export namespace zone {
 	}
 	export class QueryDomainResult {
 	    result: DomainResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2166,7 +2148,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], DomainResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -2190,7 +2172,7 @@ export namespace zone {
 	}
 	export class QueryDwmResult {
 	    result: DarknetResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2200,7 +2182,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], DarknetResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -2224,7 +2206,7 @@ export namespace zone {
 	}
 	export class QueryEmailResult {
 	    result: EmailResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2234,7 +2216,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], EmailResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -2258,7 +2240,7 @@ export namespace zone {
 	}
 	export class QueryMemberResult {
 	    result: MemberResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2268,7 +2250,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], MemberResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	
@@ -2335,7 +2317,7 @@ export namespace zone {
 	    }
 	}
 	export class SiteResult {
-	    page: number;
+	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	    items: SiteItem[];
@@ -2346,7 +2328,7 @@ export namespace zone {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.page = source["page"];
+	        this.pageNum = source["pageNum"];
 	        this.pageSize = source["pageSize"];
 	        this.total = source["total"];
 	        this.items = this.convertValues(source["items"], SiteItem);
@@ -2372,7 +2354,7 @@ export namespace zone {
 	}
 	export class QuerySiteResult {
 	    result: SiteResult;
-	    id: number;
+	    taskID: number;
 	    maxPage: number;
 	
 	    static createFrom(source: any = {}) {
@@ -2382,7 +2364,7 @@ export namespace zone {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.result = this.convertValues(source["result"], SiteResult);
-	        this.id = source["id"];
+	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }
 	

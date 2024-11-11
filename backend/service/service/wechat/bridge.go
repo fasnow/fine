@@ -8,10 +8,9 @@ import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
 	"fine/backend/constraint"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/db/service"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	"fine/backend/runtime"
 	"fine/backend/service/model/wechat"
 	"fine/backend/utils"
@@ -47,7 +46,7 @@ func NewWechatBridge(app *app.App) *Bridge {
 		dbService: service.NewWechatDBService(),
 		Http:      &http.Client{},
 	}
-	proxy.GetSingleton().Add(c)
+	config.ProxyManager.Add(c)
 	return c
 }
 
@@ -210,7 +209,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 查询小程序信息出错: %s\n", appid, e))
 					return
 				}
-				e = r.dbService.InsertInfo(model.Info{Info: tmpInfo})
+				e = r.dbService.InsertInfo(models.Info{Info: tmpInfo})
 				if e != nil {
 					logger.Info(err)
 				}
@@ -385,7 +384,7 @@ func (f FileInfoSlice) Swap(i, j int) {
 func (r *Bridge) extractInfo(appid, version string) {
 	targetDir := filepath.Join(config.GlobalConfig.WechatDataPath, appid, version)
 	rules := config.GlobalConfig.Wechat.Rules
-	item := model.MatchedString{
+	item := models.MatchedString{
 		AppID:   appid,
 		Version: version,
 	}
@@ -430,7 +429,7 @@ func (r *Bridge) extractInfo(appid, version string) {
 	r.dbService.UpdateMatchStringTask(id, true, matchedStrings)
 }
 
-func (r *Bridge) GetMatchedString(appid, version string) model.MatchedString {
+func (r *Bridge) GetMatchedString(appid, version string) models.MatchedString {
 	return r.dbService.FindMatchedString(appid, version)
 }
 
@@ -471,8 +470,8 @@ func generateDecompileExe() (string, error) {
 	if utils.FileExist(filename) {
 		currentDate := time.Now()
 
-		//2024/06/28
-		comparisonDate := time.Date(2024, 6, 28, 0, 0, 0, 0, time.Local)
+		//2024/11/09
+		comparisonDate := time.Date(2024, 11, 9, 0, 0, 0, 0, time.Local)
 		if currentDate.After(comparisonDate) {
 			return filename, nil
 		}

@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"fine/backend/config/v2"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,9 +14,9 @@ type CustomHttp struct {
 
 func TestManager_SetProxy(t *testing.T) {
 	c := &CustomHttp{HttpClient: &http.Client{}}
-	GetSingleton().Add(c)
-
-	GetSingleton().SetProxy("http://127.0.0.1:8080")
+	proxyManager := NewManager()
+	proxyManager.Add(c)
+	proxyManager.SetProxy("http://127.0.0.1:8080")
 	response2, err2 := c.HttpClient.Get("http://bing.com")
 	if err2 != nil {
 		return
@@ -26,7 +27,7 @@ func TestManager_SetProxy(t *testing.T) {
 	}
 	fmt.Println(string(all2))
 
-	GetSingleton().SetProxy("")
+	config.ProxyManager.SetProxy("")
 	response, err := c.HttpClient.Get("http://baidu.com")
 	if err != nil {
 		return

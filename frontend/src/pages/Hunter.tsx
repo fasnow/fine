@@ -5,50 +5,46 @@ import {
     Collapse,
     DatePicker,
     Divider,
+    Dropdown,
+    Flex,
     Form,
     Input,
     InputNumber,
     List,
+    MenuProps,
     Modal,
     Pagination,
     Popover,
     Row,
     Select,
     Space,
+    Spin,
     Switch,
     Table,
     Tabs,
     Tooltip,
-    message,
-    Upload,
-    Flex,
-    Spin,
-    Dropdown, MenuProps
+    Upload
 } from 'antd';
 import {
-    SearchOutlined,
-    InboxOutlined,
-    QuestionOutlined,
-    UserOutlined,
     CloudDownloadOutlined,
-    LoadingOutlined,
     ExclamationCircleOutlined,
-    CloudOutlined,
-    CopyOutlined,
-    GlobalOutlined
+    InboxOutlined,
+    LoadingOutlined,
+    QuestionOutlined,
+    SearchOutlined,
+    UserOutlined
 } from '@ant-design/icons';
 import {errorNotification} from '@/component/Notification';
-import {ColumnGroupType, ColumnType, ColumnsType} from 'antd/es/table';
+import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../component/ColumnFilter';
 import {HunterUserType, RootState, setHunterAuth, setHunterUser} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
-import dayjs from 'dayjs';
 import {ResizeCallbackData} from 'react-resizable';
 import {ExportDataPanelProps} from './Props';
-import {buttonProps, authFormProps} from './Setting';
+import {authFormProps, buttonProps} from './Setting';
 import {copy, localeCompare, RangePresets} from '@/util/util';
-import {fofa, hunter} from "../../wailsjs/go/models";
+import {hunter} from "../../wailsjs/go/models";
 import {Export, GetRestToken, Query, SetAuth} from "../../wailsjs/go/hunter/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import ResizableTitle from "@/component/ResizableTitle";
@@ -72,7 +68,8 @@ const defaultCheckedColsDataIndex: string[] = [
     "protocol",
     "web_title",
     "status_code",
-    "company"
+    "company",
+    "number"
 ]
 
 interface HunterComponentType {
@@ -228,7 +225,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 title="导出结果"
                 open={exportable}
                 onOk={() => {
-                    if ((maxPage == 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
+                    if ((maxPage === 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
                         setStatus("error")
                         return
                     } else {
@@ -308,12 +305,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             {
                 title: '序号',
                 dataIndex: "index",
-                width: 52,
+                width: 45,
                 ellipsis: true,
                 fixed: "left",
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"index"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "index"),
                     }
                 }
             },
@@ -326,7 +323,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.url, b.url)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"url"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "url"),
                         onClick: () => copy(record.url)
                     }
                 }
@@ -339,7 +336,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.domain, b.domain)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"domain"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "domain"),
                         onClick: () => copy(record.domain)
                     }
                 }
@@ -352,7 +349,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.ip, b.ip)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"ip"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "ip"),
                         onClick: () => copy(record.ip)
                     }
                 }
@@ -361,11 +358,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 title: '端口',
                 dataIndex: "port",
                 ellipsis: true,
-                width: 80,
+                width: 60,
                 sorter: ((a, b) => localeCompare(a.port, b.port)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"port"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "port"),
                         onClick: () => copy(record.port)
                     }
                 }
@@ -374,11 +371,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 title: '协议',
                 dataIndex: "protocol",
                 ellipsis: true,
-                width: 80,
+                width: 70,
                 sorter: ((a, b) => localeCompare(a.protocol, b.protocol)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"protocol"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "protocol"),
                         onClick: () => copy(record.protocol)
                     }
                 }
@@ -391,7 +388,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.web_title, b.web_title)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"web_title"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "web_title"),
                         onClick: () => copy(record.web_title)
                     }
                 }
@@ -400,11 +397,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 title: '响应码',
                 dataIndex: "status_code",
                 ellipsis: true,
-                width: 80,
+                width: 60,
                 sorter: ((a, b) => localeCompare(a.status_code, b.status_code)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"status_code"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "status_code"),
                         onClick: () => copy(record.status_code)
                     }
                 }
@@ -429,7 +426,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         return component.name + component.version
                     })
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"component"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "component"),
                         onClick: () => copy(tmp?.join(" | "))
                     }
                 }
@@ -442,7 +439,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.os, b.os)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"os"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "os"),
                         onClick: () => copy(record.os)
                     }
                 }
@@ -455,7 +452,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.company, b.company)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"company"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "company"),
                         onClick: () => copy(record.company)
                     }
                 }
@@ -468,7 +465,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 width: 100,
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"city"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "city"),
                         onClick: () => copy(record.city)
                     }
                 }
@@ -476,7 +473,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             {
                 title: '更新时间', dataIndex: "updated_at", ellipsis: true, width: 100, onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"updated_at"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "updated_at"),
                         onClick: () => copy(record.updated_at)
                     }
                 }
@@ -489,7 +486,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.is_web, b.is_web)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"is_web"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "is_web"),
                         onClick: () => copy(record.is_web)
                     }
                 }
@@ -497,7 +494,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             {
                 title: 'Banner', dataIndex: "banner", ellipsis: true, width: 100, onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"banner"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "banner"),
                         onClick: () => copy(record.banner)
                     }
                 }
@@ -510,7 +507,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.is_risk, b.is_risk)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"is_risk"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "is_risk"),
                         onClick: () => copy(record.is_risk)
                     }
                 }
@@ -523,7 +520,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.number, b.number)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"number"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "number"),
                         onClick: () => copy(record.number)
                     }
                 }
@@ -536,7 +533,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.as_org, b.as_org)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"as_org"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "as_org"),
                         onClick: () => copy(record.as_org)
                     }
                 }
@@ -549,7 +546,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => localeCompare(a.isp, b.isp)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"isp"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "isp"),
                         onClick: () => copy(record.isp)
                     }
                 }
@@ -616,7 +613,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             )
         }, []);
 
-        const handleOnContextMenu = (item: hunter.Item, rowIndex: number | undefined, colKey: string)=>{
+        const handleOnContextMenu = (item: hunter.Item, rowIndex: number | undefined, colKey: string) => {
             selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
             beforeContextMenuOpen();
         }
@@ -755,7 +752,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     }))
                     setTotal(result.total)
                     setLoading(false)
-                    pageIDMap.current[1] = result.id
+                    pageIDMap.current[1] = result.taskID
                     dispatch(setHunterUser({
                         restToken: result.restQuota
                     }))
@@ -773,7 +770,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             const {isWeb, statusCode, portFilter, dateRange, inputCache} = this.state
 
             //page发生变换，size使用原size
-            if (newPage != currentPage && newSize == currentPageSize) {
+            if (newPage !== currentPage && newSize === currentPageSize) {
                 setLoading(true)
                 let pageID = pageIDMap.current[newPage]
                 pageID = pageID ? pageID : 0
@@ -787,7 +784,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         }))
                         setCurrentPage(newPage)
                         setTotal(result.total)
-                        pageIDMap.current[newPage] = result.id
+                        pageIDMap.current[newPage] = result.taskID
                         dispatch(setHunterUser({
                             restToken: result.restQuota
                         }))
@@ -816,7 +813,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             }
 
             //size发生变换，page设为1
-            if (newSize != currentPageSize) {
+            if (newSize !== currentPageSize) {
                 handleFirstQuery(newSize)
             }
         }
@@ -882,7 +879,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     size="small"
                     allowClear
                     value={input}
-                    onPressEnter={() => handleFirstQuery(currentPageSize)}
                     onChange={(e) => this.setState({input: e.target.value})}
                     suffix={
                         <Popover

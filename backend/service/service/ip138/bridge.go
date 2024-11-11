@@ -2,9 +2,9 @@ package ip138
 
 import (
 	"fine/backend/app"
+	"fine/backend/config/v2"
 	"fine/backend/db/service"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 )
 
 type Bridge struct {
@@ -16,7 +16,7 @@ type Bridge struct {
 
 func NewIP138Bridge(app *app.App) *Bridge {
 	tt := NewClient()
-	proxy.GetSingleton().Add(tt)
+	config.ProxyManager.Add(tt)
 	return &Bridge{
 		ip138:       tt,
 		queryLog:    service.NewICPQueryLog(),

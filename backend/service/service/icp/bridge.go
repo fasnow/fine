@@ -1,16 +1,18 @@
 package icp
 
 import (
+	"context"
 	"fine/backend/app"
 	"fine/backend/config/v2"
 	"fine/backend/constraint"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/db/service"
 	"fine/backend/logger"
 	"fine/backend/proxy"
 	"fine/backend/service/model/icp"
 	"fine/backend/utils"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
@@ -21,58 +23,102 @@ type Bridge struct {
 	icp         *ICP
 	queryLog    *service.ICPQueryLog
 	downloadLog *service.DownloadLogService
+	proxy       string
+	dataCache   *service.IcpDBService
 }
 
 func NewICPBridge(app *app.App) *Bridge {
 	tt := NewClient()
-	proxy.GetSingleton().Add(tt)
+	config.ProxyManager.Add(tt)
 	return &Bridge{
 		icp:         tt,
 		queryLog:    service.NewICPQueryLog(),
 		downloadLog: service.NewDownloadLogService(),
+		dataCache:   service.NewIcpDBService(),
 		app:         app,
 	}
 }
 
 type QueryResult struct {
 	*Result
-	TaskID  int64 `json:"task_id"`
+	TaskID  int64 `json:"taskID"`
 	MaxPage int   `json:"maxPage"`
 }
 
 // GetItem 只是为了向前端暴露Item结构体
-func (b *Bridge) GetItem() *icp.Item {
+func (r *Bridge) GetItem() *icp.Item {
 	return nil
 }
 
-func (b *Bridge) Query(query string, page, pageSize int, serviceType string) (map[string]any, error) {
-	var taskID int64
-	taskID = idgen.NextId()
-	_ = b.queryLog.Add(&model.ICPQueryLog{
-		UnitName:    query,
-		ServiceType: serviceType,
-	}, taskID)
-	result, err := b.icp.Page(page).PageSize(pageSize).ServiceType(serviceType).Query(query)
+func (r *Bridge) Query(taskID int64, query string, pageNum, pageSize int, serviceType string) (map[string]any, error) {
+	//获取缓存
+	log, err := r.queryLog.GetByTaskID(taskID)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
-
 	}
+	if log.Total != 0 {
+		cacheItems := r.dataCache.GetByTaskID(taskID)
+		items := make([]*icp.Item, 0)
+		for _, cacheItem := range cacheItems {
+			items = append(items, cacheItem.Item)
+		}
+		return map[string]any{
+			"taskID":   taskID,
+			"items":    items,
+			"pageNum":  pageNum,
+			"pageSize": pageSize,
+			"total":    log.Total,
+		}, nil
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	var e error
+	result, err2 := backoff.RetryWithData(func() (*Result, error) {
+		result, err3 := r.icp.PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).Query(query)
+		if err3 != nil {
+			if err3.Error() == IllegalRequestError.Error() || err3.Error() == CaptchaMismatchError.Error() || err3.Error() == TokenExpiredError.Error() {
+				err4 := r.icp.setTokenFromRemote()
+				if err4 != nil {
+					logger.Info(err4.Error())
+					e = err4
+					cancel()         // 取消上下文
+					return nil, err4 // 返回什么都可以,因为上下文被取消了
+				}
+				return nil, err3 // 触发重试
+			}
+			logger.Info(err.Error())
+			return nil, err
+		}
+		return result, nil
+	}, backoff.WithContext(backoff.NewExponentialBackOff(), ctx))
+	if e != nil {
+		logger.Info(err.Error())
+		return nil, err
+	}
+	if err2 != nil {
+		logger.Info(err2.Error())
+		return nil, err2
+	}
+	taskID = idgen.NextId()
+	if pageNum == 1 { //用于导出
+		_ = r.queryLog.Add(&models.ICPQueryLog{
+			UnitName:    query,
+			ServiceType: serviceType,
+			Total:       result.Total,
+		}, taskID)
+	}
+	_ = r.dataCache.BatchInsert(taskID, result.Items)
 	return map[string]any{
-		"code":    constraint.Statuses.CodeOK,
-		"message": "",
-		"data": map[string]any{
-			"taskID": taskID,
-			"items":  result.Items,
-			"page":   result.Page,
-			"size":   result.Size,
-			"total":  result.Total,
-		},
+		"taskID":   taskID,
+		"items":    result.Items,
+		"pageNum":  result.PageNum,
+		"pageSize": result.PageSize,
+		"total":    result.Total,
 	}, nil
 }
 
-func (b *Bridge) Export(taskID int64) error {
-	queryLog, err := b.queryLog.GetByTaskID(taskID)
+func (r *Bridge) Export(taskID int64) error {
+	queryLog, err := r.queryLog.GetByTaskID(taskID)
 	if err != nil {
 		logger.Info(err.Error())
 		return errors.New("查询后再导出")
@@ -81,7 +127,7 @@ func (b *Bridge) Export(taskID int64) error {
 	dataDir := config.GetDataDir()
 	filename := fmt.Sprintf("ICP_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(model.DownloadLog{
+	_ = r.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -89,16 +135,16 @@ func (b *Bridge) Export(taskID int64) error {
 	}, fileID)
 
 	items := make([]*icp.Item, 0)
-	result, err := b.icp.Page(1).PageSize(1).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
+	result, err := r.icp.PageNum(1).PageSize(1).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
 	if err != nil {
 		logger.Info(err.Error())
-		b.downloadLog.UpdateStatus(fileID, constraint.Statuses.ExportError, err.Error())
+		r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Error, err.Error())
 		return err
 	}
-	result, err = b.icp.Page(1).PageSize(result.Total).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
+	result, err = r.icp.PageNum(1).PageSize(result.Total).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
 	if err != nil {
 		logger.Info(err.Error())
-		b.downloadLog.UpdateStatus(fileID, constraint.Statuses.ExportError, err.Error())
+		r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Error, err.Error())
 		return err
 	}
 	items = append(items, result.Items...)
@@ -120,35 +166,45 @@ func (b *Bridge) Export(taskID int64) error {
 	}
 	if err := utils.SaveToExcel(data, outputAbsFilepath); err != nil {
 		logger.Info(err.Error())
-		b.downloadLog.UpdateStatus(fileID, constraint.Statuses.ExportError, err.Error())
+		r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Error, err.Error())
 		return err
 	}
-	b.downloadLog.UpdateStatus(fileID, constraint.Statuses.Exported, "")
+	r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Completed, "")
 	constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewIcpDownloadItem)
 	return nil
 }
 
-func (b *Bridge) GetImage() (*icp.Image, error) {
-	image, err := b.icp.GetImage()
-	if err != nil {
-		logger.Info(err.Error())
-		return nil, err
+func (r *Bridge) BatchQuery(unitList []string, serviceTypeList []string) {
+	var client *ICP
+	if r.proxy != "" {
+		client = NewClient()
+		proxyManager := proxy.NewManager()
+		proxyManager.Add(client)
+		proxyManager.SetProxy(r.proxy)
+	} else {
+		client = r.icp
 	}
-	return image, nil
-}
-
-func (b *Bridge) IsSignExpired() bool {
-	return b.icp.IsSignExpired()
-}
-
-func (b *Bridge) CheckImage(pointJson string) (*map[string]any, error) {
-	sign, smallImage, err := b.icp.CheckImage(pointJson)
-	if err != nil {
-		logger.Info(err.Error())
-		return nil, err
+	for i, unitName := range unitList {
+		for j, serviceType := range serviceTypeList {
+			result, err := client.PageNum(1).PageSize(1).ServiceType(serviceType).Query(unitName)
+			if err != nil {
+				constraint.Emit(constraint.Events.ICPBatchQuery, map[string]any{
+					"code":    constraint.Statuses.Error,
+					"message": err.Error(),
+				})
+				return
+			}
+			if i == len(unitList)-1 && j == len(serviceTypeList)-1 {
+				constraint.Emit(constraint.Events.ICPBatchQuery, map[string]any{
+					"code":  constraint.Statuses.Completed,
+					"items": result.Items,
+				})
+			} else {
+				constraint.Emit(constraint.Events.ICPBatchQuery, map[string]any{
+					"code":  constraint.Statuses.InProgress,
+					"items": result.Items,
+				})
+			}
+		}
 	}
-	return &map[string]any{
-		"sign":       sign,
-		"smallImage": smallImage,
-	}, nil
 }

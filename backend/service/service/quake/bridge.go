@@ -4,10 +4,9 @@ import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
 	"fine/backend/constraint"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/db/service"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	quakeModel "fine/backend/service/model/quake"
 	"fine/backend/utils"
 
@@ -31,7 +30,7 @@ type Bridge struct {
 func NewQuakeBridge(app *app.App) *Bridge {
 	t := config.GlobalConfig.GetQuake()
 	tt := NewClient(t.Token)
-	proxy.GetSingleton().Add(tt)
+	config.ProxyManager.Add(tt)
 	return &Bridge{
 		quake:       tt,
 		queryLog:    service.NewQuakeQueryLog(),
@@ -56,7 +55,7 @@ func (b *Bridge) SetAuth(key string) error {
 
 type RealtimeServiceQueryResult struct {
 	Result  RSDQueryResult `json:"result"`
-	TaskID  int64          `json:"id"`
+	TaskID  int64          `json:"taskID"`
 	MaxPage int            `json:"maxPage"`
 }
 
@@ -64,7 +63,7 @@ type RealtimeDataQueryOptions struct {
 	Query       string   `json:"query,omitempty"`
 	Rule        string   `json:"rule,omitempty"`
 	IpList      []string `json:"ipList,omitempty"`
-	Page        int      `json:"page,omitempty"`
+	PageNum     int      `json:"page,omitempty"`
 	PageSize    int      `json:"size,omitempty"`
 	IgnoreCache bool     `json:"ignoreCache,omitempty"`
 	StartTime   string   `json:"startTime,omitempty"`
@@ -97,8 +96,8 @@ func (b *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 			return nil, err
 		}
 		queryResult.Result.Total = total
-		queryResult.Result.Page = options.Page
-		queryResult.Result.Size = options.PageSize
+		queryResult.Result.PageNum = options.PageNum
+		queryResult.Result.PageSize = options.PageSize
 		queryResult.TaskID = taskID
 		for _, cacheItem := range cacheItems {
 			queryResult.Result.Items = append(queryResult.Result.Items, *cacheItem.RealtimeServiceItem)
@@ -108,7 +107,7 @@ func (b *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 
 	req := NewGetRealtimeDataBuilder().
 		Query(options.Query).
-		Page(options.Page).
+		Page(options.PageNum).
 		Size(options.PageSize).
 		EndTime(options.EndTime).
 		StartTime(options.StartTime).
@@ -126,13 +125,13 @@ func (b *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 	}
 	if result.Total > 0 {
 		id := idgen.NextId()
-		if options.Page == 1 {
+		if options.PageNum == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&model.QuakeRealtimeQueryLog{
+			_ = b.queryLog.Add(&models.QuakeRealtimeQueryLog{
 				Query:       options.Query,
 				Rule:        options.Rule,
 				IpList:      options.IpList,
-				Page:        options.Page,
+				Page:        options.PageNum,
 				PageSize:    options.PageSize,
 				IgnoreCache: options.IgnoreCache,
 				StartTime:   options.StartTime,
@@ -191,7 +190,7 @@ func (b *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 	dataDir := config.GetDataDir()
 	filename := fmt.Sprintf("Quake_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(model.DownloadLog{
+	_ = b.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,

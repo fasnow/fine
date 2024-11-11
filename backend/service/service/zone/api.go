@@ -27,7 +27,7 @@ func (s *site) Get(req *GetDataReq) (*SiteResult, error) {
 	}
 	var result SiteResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	var siteDataItems []zone.SiteItem
 	if len(dataList) != 0 {
@@ -63,7 +63,7 @@ func (d *domain) Get(req *GetDataReq) (*DomainResult, error) {
 	}
 	var result DomainResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	var tempDomainStructList []struct {
 		Msg struct {
@@ -136,7 +136,7 @@ func (m *member) Get(req *GetDataReq) (*MemberResult, error) {
 	}
 	var result MemberResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	var tempMemberStructList []struct {
 		Name string `json:"name"`
@@ -194,7 +194,7 @@ func (e *email) Get(req *GetDataReq) (*EmailResult, error) {
 	}
 	var result EmailResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	type tempEmailStruct struct {
 		Email     string `json:"email"`
@@ -250,7 +250,7 @@ func (a *apk) Get(req *GetDataReq) (*ApkResult, error) {
 	}
 	var result ApkResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	var apkDataItems []zone.ApkItem
 	if len(dataList) != 0 {
@@ -355,7 +355,7 @@ func (c *code) Get(req *GetDataReq) (*CodeResult, error) {
 	}
 	var result CodeResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	var codeDataItem []zone.CodeItem
 	if len(dataList) != 0 {
@@ -390,7 +390,7 @@ func (d *darknet) Get(req *GetDataReq) (*DarknetResult, error) {
 	}
 	var result DarknetResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	var darknetDataItem []zone.DarknetItem
 	if len(dataList) != 0 {
@@ -430,7 +430,7 @@ func (a *aim) Get(req *GetDataReq) (*AimResult, error) {
 	}
 	var result AimResult
 	result.Total = total
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	var aimDataItem []zone.AimItem
 	if len(dataList) != 0 {

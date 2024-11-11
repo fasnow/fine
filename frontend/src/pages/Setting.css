@@ -1,5 +1,5 @@
-.border{
-    border:1px solid rgba(160, 152, 152, 0.5);
+.border {
+    border: 1px solid rgba(160, 152, 152, 0.5);
     /* top: -14px; */
     padding: 1px 8px;
     /* color: #777; */
@@ -10,13 +10,14 @@
     /* -webkit-margin-start: 16px;
     margin-inline-start: 16px; */
 }
+
 .border_title {
-        position:relative;
-        top:-15px;
-        text-align: center;
-        background: white;
+    position: relative;
+    top: -15px;
+    text-align: center;
+    background: white;
 }
 
-:where(.css-dev-only-do-not-override-1cwnorf).ant-tabs >.ant-tabs-nav .ant-tabs-nav-wrap, :where(.css-dev-only-do-not-override-1cwnorf).ant-tabs >div>.ant-tabs-nav .ant-tabs-nav-wrap {
+:where(.css-dev-only-do-not-override-1cwnorf).ant-tabs > .ant-tabs-nav .ant-tabs-nav-wrap, :where(.css-dev-only-do-not-override-1cwnorf).ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-wrap {
     flex: none;
 }

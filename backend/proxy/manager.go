@@ -62,6 +62,14 @@ func GetSingleton() *Manager {
 	return instance
 }
 
+func NewManager() *Manager {
+	return &Manager{
+		proxyClient: &http.Client{
+			Transport: defaultTransport,
+		},
+	}
+}
+
 // Add 添加一个需要使用代理的类，该类必须具有一个导出的http.client或者*http.client属性
 func (r *Manager) Add(client ...any) error {
 	for _, c := range client {
@@ -123,6 +131,7 @@ func (r *Manager) SetProxy(proxy string) error {
 	r.proxyClient.Transport = transport
 	return nil
 }
+
 func (r *Manager) ProxyString() string {
 	return r.proxyUrl
 }

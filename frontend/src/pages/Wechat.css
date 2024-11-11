@@ -1,6 +1,6 @@
-.wechat-content{
+.wechat-content {
     /*position: fixed;*/
-    height: calc( 100% - 200px);
+    height: calc(100% - 200px);
 }
 
 .left {

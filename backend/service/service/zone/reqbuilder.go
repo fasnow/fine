@@ -8,8 +8,8 @@ import (
 type ReqBody struct {
 	Query           string         `json:"query"`                       //是	str	零零信安 查询关键词（query 的值支持高级查询语法，如: group==北京、ip==47.95.5.0/24） 商业会员支持携带所属公司（company字段）进行查询。
 	QueryType       zone.QueryType `json:"query_type"`                  //是	str	site	查询类型（固定值）
-	Page            int            `json:"page"`                        //是	int	1	页数
-	Size            int            `json:"pagesize"`                    //是	int	10	每页条数，最大40
+	PageNum         int            `json:"page"`                        //是	int	1	页数
+	PageSize        int            `json:"pagesize"`                    //是	int	10	每页条数，最大40
 	ZoneKeyId       string         `json:"zone_key_id"`                 //是	str	*******	您的API KEY
 	TimestampSort   string         `json:"timestamp_sort,omitempty"`    //只适用于AIM数据 否	str	DESC	入库时间排序，升序: ASC, 降序: DESC
 	MessageTimeSort string         `json:"message_time_sort,omitempty"` //只适用于AIM数据 否	str	DESC	消息发送时间排序，升序: ASC, 降序: DESC
@@ -43,12 +43,12 @@ func (builder *GetDataReqBuilder) Query(query string) *GetDataReqBuilder {
 }
 
 func (builder *GetDataReqBuilder) Page(page int) *GetDataReqBuilder {
-	builder.req.Body.Page = page
+	builder.req.Body.PageNum = page
 	return builder
 }
 
 func (builder *GetDataReqBuilder) Size(size int) *GetDataReqBuilder {
-	builder.req.Body.Size = size
+	builder.req.Body.PageSize = size
 	return builder
 }
 

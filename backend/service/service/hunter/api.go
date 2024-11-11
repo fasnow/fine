@@ -20,8 +20,8 @@ type Result struct {
 	RestQuota    int            `json:"restQuota"`    //今日剩余积分
 	SyntaxPrompt string         `json:"syntaxPrompt"`
 	Total        int64          `json:"total"` //资产总数
-	Page         int            `json:"page"`
-	PageSize     int            `json:"size"`
+	PageNum      int            `json:"pageNum"`
+	PageSize     int            `json:"pageSize"`
 	Items        []*hunter.Item `json:"items"`
 }
 
@@ -117,7 +117,7 @@ func (h *Hunter) Get(req *GetDataReq) (*Result, error) {
 	result.ConsumeQuota, _ = strconv.Atoi(consumeQuota)
 	result.RestQuota, _ = strconv.Atoi(restQuota)
 	result.SyntaxPrompt = tmpResponse.Data.SyntaxPrompt
-	result.Page = page
+	result.PageNum = page
 	result.PageSize = size
 	result.Total = tmpResponse.Data.Total
 	result.Items = tmpResponse.Data.Arr

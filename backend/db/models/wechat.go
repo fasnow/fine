@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"fine/backend/service/model/wechat"

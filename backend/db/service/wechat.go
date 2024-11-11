@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/service/model/wechat"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -18,7 +18,7 @@ func NewWechatDBService() *WechatDBService {
 }
 
 func (r *WechatDBService) Insert(miniProgram wechat.MiniProgram) error {
-	item := &model.MiniProgram{
+	item := &models.MiniProgram{
 		MiniProgram: wechat.MiniProgram{
 			AppID:    miniProgram.AppID,
 			Versions: miniProgram.Versions,
@@ -35,9 +35,9 @@ func (r *WechatDBService) AppendVersionByAppID(appid string, version ...wechat.V
 	return r.dbConn.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&item).Error
 }
 
-func (r *WechatDBService) FindByAppId(appid string) model.MiniProgram {
-	result := model.MiniProgram{}
-	r.dbConn.Model(&model.MiniProgram{}).Where("app_id = ?", appid).Preload("Versions").Limit(1).Find(&result)
+func (r *WechatDBService) FindByAppId(appid string) models.MiniProgram {
+	result := models.MiniProgram{}
+	r.dbConn.Model(&models.MiniProgram{}).Where("app_id = ?", appid).Preload("Versions").Limit(1).Find(&result)
 	return result
 }
 
@@ -55,10 +55,10 @@ func (r *WechatDBService) UpdateUnpackedStatus(appid, version string, unpacked b
 }
 
 func (r *WechatDBService) DeleteAll() error {
-	return r.dbConn.Select(clause.Associations).Where("1 = 1").Delete(&model.MiniProgram{}).Error
+	return r.dbConn.Select(clause.Associations).Where("1 = 1").Delete(&models.MiniProgram{}).Error
 }
 
-func (r *WechatDBService) InsertMatchStringTask(item model.MatchedString) (uint, error) {
+func (r *WechatDBService) InsertMatchStringTask(item models.MatchedString) (uint, error) {
 	result := r.dbConn.Create(&item)
 	if result.Error != nil {
 		return 0, result.Error
@@ -66,22 +66,22 @@ func (r *WechatDBService) InsertMatchStringTask(item model.MatchedString) (uint,
 	return item.ID, nil
 }
 
-func (r *WechatDBService) FindMatchedString(appid, version string) model.MatchedString {
-	result := model.MatchedString{}
-	r.dbConn.Model(&model.MatchedString{}).Where("app_id = ? AND version = ?", appid, version).Limit(1).Order("id desc").Find(&result)
+func (r *WechatDBService) FindMatchedString(appid, version string) models.MatchedString {
+	result := models.MatchedString{}
+	r.dbConn.Model(&models.MatchedString{}).Where("app_id = ? AND version = ?", appid, version).Limit(1).Order("id desc").Find(&result)
 	return result
 }
 
 func (r *WechatDBService) UpdateMatchStringTask(id uint, taskDown bool, matched []string) error {
-	result := model.MatchedString{}
+	result := models.MatchedString{}
 	result.TaskDown = taskDown
 	result.Matched = strings.Join(matched, "\n")
 	return r.dbConn.Model(&result).Where("id = ?", id).Updates(&result).Error
 }
 
-func (r *WechatDBService) InsertInfo(info model.Info) error {
-	result := &model.Info{}
-	r.dbConn.Model(&model.Info{}).Where("app_id = ?", info.AppID).Limit(1).Find(result)
+func (r *WechatDBService) InsertInfo(info models.Info) error {
+	result := &models.Info{}
+	r.dbConn.Model(&models.Info{}).Where("app_id = ?", info.AppID).Limit(1).Find(result)
 	if result.ID != 0 {
 		result.Info = info.Info
 		r.dbConn.Updates(result)
@@ -90,14 +90,14 @@ func (r *WechatDBService) InsertInfo(info model.Info) error {
 	return r.dbConn.Create(&info).Error
 }
 
-func (r *WechatDBService) FindInfoByAppID(appid string) (model.Info, error) {
-	result := model.Info{}
-	if err := r.dbConn.Model(&model.Info{}).Where("app_id = ?", appid).Limit(1).Find(&result).Error; err != nil {
+func (r *WechatDBService) FindInfoByAppID(appid string) (models.Info, error) {
+	result := models.Info{}
+	if err := r.dbConn.Model(&models.Info{}).Where("app_id = ?", appid).Limit(1).Find(&result).Error; err != nil {
 		return result, err
 	}
 	return result, nil
 }
 
 func (r *WechatDBService) DeleteAllInfo() error {
-	return r.dbConn.Where("1 = 1").Delete(&model.Info{}).Error
+	return r.dbConn.Where("1 = 1").Delete(&models.Info{}).Error
 }

@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"gorm.io/gorm"
 )
 
@@ -15,11 +15,11 @@ func NewHunterResidualTokenDBService() *HunterRestTokenDBService {
 }
 
 func (h *HunterRestTokenDBService) Add(total int) {
-	h.dbConn.Create(&model.HunterRestToken{Total: total})
+	h.dbConn.Create(&models.HunterRestToken{Total: total})
 }
 
 func (h *HunterRestTokenDBService) GetLast() int {
-	totalToken := &model.HunterRestToken{}
+	totalToken := &models.HunterRestToken{}
 	h.dbConn.Last(totalToken)
 	return totalToken.Total
 }

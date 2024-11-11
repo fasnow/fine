@@ -4,10 +4,9 @@ import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
 	"fine/backend/constraint"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/db/service"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	"fine/backend/service/model/fofa"
 	"fine/backend/utils"
 	"fmt"
@@ -29,7 +28,7 @@ type Bridge struct {
 func NewFofaBridge(app *app.App) *Bridge {
 	t := config.GetFofa()
 	tt := NewClient(t.Email, t.Token)
-	proxy.GetSingleton().Add(tt)
+	config.ProxyManager.Add(tt)
 	return &Bridge{
 		fofa:        tt,
 		queryLog:    service.NewFOFAQueryLog(),
@@ -43,7 +42,7 @@ func NewFofaBridge(app *app.App) *Bridge {
 type QueryResult struct {
 	*Result
 	MaxPage int   `json:"maxPage"`
-	TaskID  int64 `json:"id"`
+	TaskID  int64 `json:"taskID"`
 }
 
 func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields string, full bool) (*QueryResult, error) {
@@ -57,8 +56,8 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 		cacheItems := r.dataCache.GetByTaskID(taskID)
 		queryResult.Query = q
 		queryResult.Total = total
-		queryResult.Page = int(page)
-		queryResult.Size = int(pageSize)
+		queryResult.PageNum = int(page)
+		queryResult.PageSize = int(pageSize)
 		queryResult.TaskID = taskID
 		for _, cacheItem := range cacheItems {
 			queryResult.Items = append(queryResult.Items, cacheItem.Item)
@@ -80,7 +79,7 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = r.queryLog.Add(&model.FOFAQueryLog{
+			_ = r.queryLog.Add(&models.FOFAQueryLog{
 				Query:  query,
 				Fields: fields,
 				Full:   full,
@@ -104,7 +103,7 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 	dataDir := config.GetDataDir()
 	filename := fmt.Sprintf("Fofa_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = r.downloadLog.Insert(model.DownloadLog{
+	_ = r.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,

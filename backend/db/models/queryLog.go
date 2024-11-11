@@ -1,4 +1,4 @@
-package model
+package models
 
 import (
 	"fine/backend/service/model"
@@ -10,6 +10,7 @@ type ICPQueryLog struct {
 	TaskID      int64 `gorm:"unique"`
 	UnitName    string
 	ServiceType string
+	Total       int
 }
 
 type FOFAQueryLog struct {

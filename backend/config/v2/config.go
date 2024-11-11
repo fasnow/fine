@@ -77,6 +77,7 @@ var (
 		SpaceBeforeInlineComment: true,
 		AllowShadows:             true,
 	}
+	ProxyManager  = proxy.NewManager()
 	GlobalConfig  *Config
 	defaultConfig = &Config{
 		Timeout: 20 * time.Second,
@@ -224,8 +225,8 @@ func init() {
 			logger.Info("generate default config file successfully, locate at " + defaultConfig.filePath + ", run with default config")
 
 			//超时
-			proxy.GetSingleton().SetTimeout(GlobalConfig.Timeout)
-			logger.Info(fmt.Sprintf("set timeout %fs", proxy.GetSingleton().GetTimeout().Seconds()))
+			ProxyManager.SetTimeout(GlobalConfig.Timeout)
+			logger.Info(fmt.Sprintf("set timeout %fs", ProxyManager.GetTimeout().Seconds()))
 
 			return
 		}
@@ -273,15 +274,15 @@ func init() {
 		} else {
 			p = fmt.Sprintf("%s://%s:%s", GlobalConfig.Proxy.Type, GlobalConfig.Proxy.Host, GlobalConfig.Proxy.Port)
 		}
-		if err := proxy.GetSingleton().SetProxy(p); err != nil {
+		if err := ProxyManager.SetProxy(p); err != nil {
 			logger.Info("set proxy error: " + err.Error())
 		}
-		logger.Info("enable proxy on" + proxy.GetSingleton().ProxyString())
+		logger.Info("enable proxy on" + ProxyManager.ProxyString())
 	}
 
 	//超时
-	proxy.GetSingleton().SetTimeout(GlobalConfig.Timeout)
-	logger.Info(fmt.Sprintf("set timeout %fs", proxy.GetSingleton().GetTimeout().Seconds()))
+	ProxyManager.SetTimeout(GlobalConfig.Timeout)
+	logger.Info(fmt.Sprintf("set timeout %fs", ProxyManager.GetTimeout().Seconds()))
 }
 
 func save(config Config) error {
@@ -317,16 +318,16 @@ func SaveProxy(p Proxy) error {
 			auth := p.User
 			if p.Pass != "" {
 				auth += ":" + p.Pass + "@"
-				_ = proxy.GetSingleton().SetProxy(fmt.Sprintf("%s://%s%s:%s", p.Type, auth, p.Host, p.Port))
-				logger.Info("proxy enabled on " + proxy.GetSingleton().ProxyString())
+				_ = ProxyManager.SetProxy(fmt.Sprintf("%s://%s%s:%s", p.Type, auth, p.Host, p.Port))
+				logger.Info("proxy enabled on " + ProxyManager.ProxyString())
 				return nil
 			}
 		}
-		_ = proxy.GetSingleton().SetProxy(fmt.Sprintf("%s://%s:%s", p.Type, p.Host, p.Port))
-		logger.Info("proxy enabled on " + proxy.GetSingleton().ProxyString())
+		_ = ProxyManager.SetProxy(fmt.Sprintf("%s://%s:%s", p.Type, p.Host, p.Port))
+		logger.Info("proxy enabled on " + ProxyManager.ProxyString())
 		return nil
 	}
-	_ = proxy.GetSingleton().SetProxy("")
+	_ = ProxyManager.SetProxy("")
 	logger.Info("proxy disabled")
 	return nil
 }

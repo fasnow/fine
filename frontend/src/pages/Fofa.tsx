@@ -1,38 +1,38 @@
 import React, {ReactNode, useEffect, useRef, useState} from 'react';
+import type {GetRef} from 'antd';
 import {
-    Upload,
-    Popover,
     Button,
     Divider,
+    Dropdown,
+    Flex,
     Form,
     Input,
     InputNumber,
+    MenuProps,
     Modal,
     Pagination,
+    Popover,
     Select,
     Space,
+    Spin,
     Switch,
     Table,
     Tabs,
     Tooltip,
-    message,
-    Flex,
-    Spin,
-    Dropdown,
-    MenuProps
+    Upload
 } from 'antd';
 import {
-    SearchOutlined,
-    QuestionOutlined,
-    UserOutlined,
-    SyncOutlined,
     CloudDownloadOutlined,
+    InboxOutlined,
     LoadingOutlined,
-    InboxOutlined
+    QuestionOutlined,
+    SearchOutlined,
+    SyncOutlined,
+    UserOutlined
 } from '@ant-design/icons';
 import {errorNotification} from '@/component/Notification';
 import {QUERY_FIRST} from '@/component/type';
-import {ColumnGroupType, ColumnType, ColumnsType} from 'antd/es/table';
+import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '@/component/ColumnFilter';
 import {RootState, setFofaAuth, setFofaUser} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
@@ -42,12 +42,11 @@ import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '@/component/ResizableTitle';
 import {ExportDataPanelProps} from './Props';
 import helpIcon from '@/assets/images/help.svg'
-import {buttonProps, authFormProps} from './Setting';
+import {authFormProps, buttonProps} from './Setting';
 import {fofa} from "../../wailsjs/go/models";
 import {Export, GetUserInfo, Query, SetAuth} from "../../wailsjs/go/fofa/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {GetFofa} from "../../wailsjs/go/config/Config";
-import type {GetRef} from 'antd';
 import {Dots} from "@/component/Icon";
 import MurmurHash3 from "murmurhash3js"
 import {Buffer} from "buffer"
@@ -297,7 +296,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 title="导出结果"
                 open={exportable}
                 onOk={async () => {
-                    if ((maxPage == 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
+                    if ((maxPage === 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
                         setStatus("error")
                         return
                     } else {
@@ -358,7 +357,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             {
                 title: '序号', dataIndex: "index", ellipsis: true, width: 50, fixed: true, onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"index"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "index"),
                         onClick: () => copy(index)
                     }
                 }
@@ -371,7 +370,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => a.link.localeCompare(b.link)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"link"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "link"),
                         onClick: () => copy(record.link)
                     }
                 }
@@ -384,7 +383,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.domain.localeCompare(b.domain)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"domain"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "domain"),
                         onClick: () => copy(record.domain)
                     }
                 }
@@ -397,7 +396,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => a.ip.localeCompare(b.ip)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"ip"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "ip"),
                         onClick: () => copy(record.ip)
                     }
                 }
@@ -410,7 +409,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => a.port.localeCompare(b.port)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"port"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "port"),
                         onClick: () => copy(record.port)
                     }
                 }
@@ -423,7 +422,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => a.protocol.localeCompare(b.protocol)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"protocol"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "protocol"),
                         onClick: () => copy(record.protocol)
                     }
                 }
@@ -436,7 +435,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => a.base_protocol.localeCompare(b.base_protocol)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"base_protocol"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "base_protocol"),
                         onClick: () => copy(record.base_protocol)
                     }
                 }
@@ -449,7 +448,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => a.title.localeCompare(b.title)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"title"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "title"),
                         onClick: () => copy(record.title)
                     }
                 }
@@ -462,7 +461,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a, b) => a.icp.localeCompare(b.icp)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"icp"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "icp"),
                         onClick: () => copy(record.icp)
                     }
                 }
@@ -475,7 +474,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.host.localeCompare(b.host)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"host"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "host"),
                         onClick: () => copy(record.host)
                     }
                 }
@@ -488,7 +487,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.cert.localeCompare(b.cert)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"cert"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "cert"),
                         onClick: () => copy(record.cert)
                     }
                 }
@@ -501,7 +500,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.os.localeCompare(b.os)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"os"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "os"),
                         onClick: () => copy(record.os)
                     }
                 }
@@ -514,7 +513,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.server.localeCompare(b.server)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"server"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "server"),
                         onClick: () => copy(record.server)
                     }
                 }
@@ -527,7 +526,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.header.localeCompare(b.header)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"header"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "header"),
                         onClick: () => copy(record.header)
                     }
                 }
@@ -540,7 +539,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.banner.localeCompare(b.banner)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"banner"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "banner"),
                         onClick: () => copy(record.banner)
                     }
                 }
@@ -553,7 +552,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.product.localeCompare(b.product)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"product"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "product"),
                         onClick: () => copy(record.product)
                     }
                 }
@@ -566,7 +565,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.product_category.localeCompare(b.product_category)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"product_category"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "product_category"),
                         onClick: () => copy(record.product_category)
                     }
                 }
@@ -579,7 +578,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.version.localeCompare(b.version)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"version"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "version"),
                         onClick: () => copy(record.version)
                     }
                 }
@@ -592,7 +591,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.lastupdatetime.localeCompare(b.lastupdatetime)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"lastupdatetime"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "lastupdatetime"),
                         onClick: () => copy(record.lastupdatetime)
                     }
                 }
@@ -605,7 +604,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.cname.localeCompare(b.cname)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"cname"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "cname"),
                         onClick: () => copy(record.cname)
                     }
                 }
@@ -618,7 +617,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.icon_hash.localeCompare(b.icon_hash)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"icon_hash"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "icon_hash"),
                         onClick: () => copy(record.icon_hash)
                     }
                 }
@@ -631,7 +630,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.certs_valid.localeCompare(b.certs_valid)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"certs_valid"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "certs_valid"),
                         onClick: () => copy(record.certs_valid)
                     }
                 }
@@ -644,7 +643,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.cname_domain.localeCompare(b.cname_domain)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"cname_domain"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "cname_domain"),
                         onClick: () => copy(record.cname_domain)
                     }
                 }
@@ -657,7 +656,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.body.localeCompare(b.body)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"body"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "body"),
                         onClick: () => copy(record.body)
                     }
                 }
@@ -670,7 +669,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.icon.localeCompare(b.icon)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"icon"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "icon"),
                         onClick: () => copy(record.icon)
                     }
                 }
@@ -683,7 +682,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.link.localeCompare(b.fid)),
                 onCell: (record, fid) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"fid"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "fid"),
                         onClick: () => copy(record.fid)
                     }
                 }
@@ -696,7 +695,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.structinfo.localeCompare(b.structinfo)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"structinfo"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "structinfo"),
                         onClick: () => copy(record.structinfo)
                     }
                 }
@@ -709,7 +708,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.country.localeCompare(b.country)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"country"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "country"),
                         onClick: () => copy(record.country)
                     }
                 }
@@ -722,7 +721,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.country_name.localeCompare(b.country_name)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"country_name"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "country_name"),
                         onClick: () => copy(record.country_name)
                     }
                 }
@@ -735,7 +734,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.region.localeCompare(b.region)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"region"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "region"),
                         onClick: () => copy(record.region)
                     }
                 }
@@ -748,7 +747,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.city.localeCompare(b.city)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"city"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "city"),
                         onClick: () => copy(record.city)
                     }
                 }
@@ -756,7 +755,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             {
                 title: '经度', dataIndex: "longitude", width: 100, ellipsis: true, onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"longitude"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "longitude"),
                         onClick: () => copy(record.longitude)
                     }
                 }
@@ -764,7 +763,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             {
                 title: '纬度', dataIndex: "latitude", width: 100, ellipsis: true, onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"latitude"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "latitude"),
                         onClick: () => copy(record.latitude)
                     }
                 }
@@ -777,7 +776,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.as_number.localeCompare(b.as_number)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"as_number"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "as_number"),
                         onClick: () => copy(record.as_number)
                     }
                 }
@@ -790,7 +789,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 sorter: ((a: fofa.Item, b: fofa.Item) => a.as_organization.localeCompare(b.as_organization)),
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"as_organization"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "as_organization"),
                         onClick: () => copy(record.as_organization)
                     }
                 }
@@ -798,7 +797,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             {
                 title: 'jarm指纹', dataIndex: "jarm", width: 100, ellipsis: true, onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record,index,"jarm"),
+                        onContextMenu: () => handleOnContextMenu(record, index, "jarm"),
                         onClick: () => copy(record.jarm)
                     }
                 }
@@ -826,7 +825,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             window.addEventListener("resize", () => {
                 setTableScrollHeight(window.innerHeight - 200)
             })
-            const init = async () => {
+            const init = () => {
                 let tmpCols: (ColumnGroupType<fofa.Item> | ColumnType<fofa.Item>)[]
                 let tmp: (ColumnGroupType<fofa.Item> | ColumnType<fofa.Item>)[]
                 if (this.props.checkedColsValue) {
@@ -841,7 +840,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 // }
                 setColumns(tmp)
                 if (this.props.onContextMenu?.input) {
-                    handleFirstQuery(this.props.onContextMenu.input, tmp, currentPageSize)
+                    handleNewQuery(this.props.onContextMenu.input, tmp, currentPageSize)
                 }
             }
             init()
@@ -881,7 +880,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             }));
         }
 
-        const handleOnContextMenu = (item: fofa.Item, rowIndex: number | undefined, colKey: string)=>{
+        const handleOnContextMenu = (item: fofa.Item, rowIndex: number | undefined, colKey: string) => {
             selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
             beforeContextMenuOpen();
         }
@@ -922,6 +921,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                                 return item[key as keyof fofa.Item]
                             }
                         }
+                        return null
                     })
                     copy(colValues)
                     break
@@ -941,9 +941,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             selectedRow = undefined
         };
 
-        const handleFirstQuery = async (query: string, columns: ColumnsType<fofa.Item>, pageSize: number) => {
-            const tmpInput = query.trim()
-            setCurrentPageSize(pageSize)
+        const handleNewQuery = async (query: string, columns: ColumnsType<fofa.Item>, pageSize: number) => {
             if (query === "") {
                 return
             }
@@ -952,7 +950,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             setCurrentPage(1)
             pageIDMap.current = {}
             this.setState({
-                inputCache: tmpInput,
+                inputCache: query,
             })
             const tmp: string[] = ["link"]
             columns.forEach((item) => {
@@ -962,18 +960,18 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 }
             })
             //不能使用inputCache，setInputCache(tmpInput)为异步更新，此时inputCache还没有更新
-            Query(0, tmpInput, 1, pageSize, tmp.join(","), this.state.full).then(
+            Query(0, query, 1, pageSize, tmp.join(","), this.state.full).then(
                 (result) => {
                     updateRestToken()
                     let index = 0
                     setPageData(result.items.map(item => ({index: ++index, ...item})))
                     setTotal(result.total)
                     setLoading(false)
-                    pageIDMap.current[1] = result.id
+                    pageIDMap.current[1] = result.taskID
                 }
             ).catch(
                 err => {
-                    errorNotification("Fofa查询出错", err)
+                    errorNotification("FOFA查询出错", err)
                     setLoading(false)
                     setPageData([])
                     return
@@ -987,14 +985,14 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             if (tmpInput === "") {
                 return
             }
-            handleFirstQuery(tmpInput, columns, currentPageSize)
+            handleNewQuery(tmpInput, columns, currentPageSize)
         }
 
         const handlePaginationChange = async (newPage: number, newPageSize: number) => {
             const {inputCache} = this.state
 
             //page发生变换，size使用原size
-            if (newPage !== currentPage && newPageSize == currentPageSize) {
+            if (newPage !== currentPage && newPageSize === currentPageSize) {
                 setLoading(true)
                 const tmp: string[] = []
                 columns.forEach((item) => {
@@ -1012,11 +1010,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         setPageData(result.items.map(item => ({index: ++index, ...item})))
                         setCurrentPage(newPage)
                         setLoading(false)
-                        pageIDMap.current[newPage] = result.id
+                        pageIDMap.current[newPage] = result.taskID
                     }
                 ).catch(
                     err => {
-                        errorNotification("Fofa查询出错", err)
+                        errorNotification("FOFA查询出错", err)
                         setLoading(false)
                     }
                 )
@@ -1024,7 +1022,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
             //size发生变换，page设为1
             if (newPageSize !== currentPageSize) {
-                handleFirstQuery(this.state.input, columns, newPageSize)
+                setCurrentPageSize(newPageSize)
+                handleNewQuery(this.state.input, columns, newPageSize)
             }
         }
 
@@ -1108,7 +1107,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 const base64 = Buffer.from(iconArrayBuffer).toString('base64')
                 const hash = 0 | MurmurHash3.x86.hash32(formatStrWithCount(base64, 76), 0);
                 this.setState({input: `icon_hash="${hash}"`})
-                handleFirstQuery(`icon_hash="${hash}"`, columns, currentPageSize)
+                handleNewQuery(`icon_hash="${hash}"`, columns, currentPageSize)
                 hide()
             }
         }
@@ -1197,7 +1196,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     size="small"
                     allowClear
                     value={input}
-                    onPressEnter={preHandleFirstQuery}
                     onChange={(e) => this.setState({input: e.target.value})}
                     placeholder='Search...'
                     suffix={iconSearchPanel}
@@ -1274,7 +1272,7 @@ const advancedHelpColumns: ColumnsType<AdvancedHelpDataType> = [
         title: '具体含义', dataIndex: "description", render: (text, record, index) => (
             <>
                 {
-                    index == 5 ? <>
+                    index === 5 ? <>
                         模糊匹配，使用*或者?进行搜索，比如banner*=\"mys??\" (个人版及以上可用)
                         <Button
                             size='small' icon={<img style={{height: "12px"}} src={helpIcon}></img>} type="link"

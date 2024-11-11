@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/service/model/zone"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -42,10 +42,10 @@ func NewZoneDBService() *ZoneDBService {
 }
 
 func (r *site) BatchInsert(taskID int64, items []zone.SiteItem) error {
-	dbItems := make([]*model.ZoneSite, 0)
+	dbItems := make([]*models.ZoneSite, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneSite{
+		dbItems = append(dbItems, &models.ZoneSite{
 			SiteItem: &tmp,
 			TaskID:   taskID,
 		})
@@ -56,8 +56,8 @@ func (r *site) BatchInsert(taskID int64, items []zone.SiteItem) error {
 	return nil
 }
 
-func (r *site) GetByTaskID(taskID int64) ([]*model.ZoneSite, error) {
-	items := make([]*model.ZoneSite, 0)
+func (r *site) GetByTaskID(taskID int64) ([]*models.ZoneSite, error) {
+	items := make([]*models.ZoneSite, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}
@@ -65,10 +65,10 @@ func (r *site) GetByTaskID(taskID int64) ([]*model.ZoneSite, error) {
 }
 
 func (r *domain) BatchInsert(taskID int64, items []zone.DomainItem) error {
-	dbItems := make([]*model.ZoneDomain, 0)
+	dbItems := make([]*models.ZoneDomain, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneDomain{
+		dbItems = append(dbItems, &models.ZoneDomain{
 			DomainItem: &tmp,
 			TaskID:     taskID,
 		})
@@ -79,8 +79,8 @@ func (r *domain) BatchInsert(taskID int64, items []zone.DomainItem) error {
 	return nil
 }
 
-func (r *domain) GetByTaskID(taskID int64) ([]*model.ZoneDomain, error) {
-	items := make([]*model.ZoneDomain, 0)
+func (r *domain) GetByTaskID(taskID int64) ([]*models.ZoneDomain, error) {
+	items := make([]*models.ZoneDomain, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}
@@ -88,10 +88,10 @@ func (r *domain) GetByTaskID(taskID int64) ([]*model.ZoneDomain, error) {
 }
 
 func (r *apk) BatchInsert(taskID int64, items []zone.ApkItem) error {
-	dbItems := make([]*model.ZoneApk, 0)
+	dbItems := make([]*models.ZoneApk, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneApk{
+		dbItems = append(dbItems, &models.ZoneApk{
 			ApkItem: &tmp,
 			TaskID:  taskID,
 		})
@@ -102,8 +102,8 @@ func (r *apk) BatchInsert(taskID int64, items []zone.ApkItem) error {
 	return nil
 }
 
-func (r *apk) GetByTaskID(taskID int64) ([]*model.ZoneApk, error) {
-	items := make([]*model.ZoneApk, 0)
+func (r *apk) GetByTaskID(taskID int64) ([]*models.ZoneApk, error) {
+	items := make([]*models.ZoneApk, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}
@@ -111,10 +111,10 @@ func (r *apk) GetByTaskID(taskID int64) ([]*model.ZoneApk, error) {
 }
 
 func (r *member) BatchInsert(taskID int64, items []zone.MemberItem) error {
-	dbItems := make([]*model.ZoneMember, 0)
+	dbItems := make([]*models.ZoneMember, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneMember{
+		dbItems = append(dbItems, &models.ZoneMember{
 			MemberItem: &tmp,
 			TaskID:     taskID,
 		})
@@ -125,8 +125,8 @@ func (r *member) BatchInsert(taskID int64, items []zone.MemberItem) error {
 	return nil
 }
 
-func (r *member) GetByTaskID(taskID int64) ([]*model.ZoneMember, error) {
-	items := make([]*model.ZoneMember, 0)
+func (r *member) GetByTaskID(taskID int64) ([]*models.ZoneMember, error) {
+	items := make([]*models.ZoneMember, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}
@@ -134,10 +134,10 @@ func (r *member) GetByTaskID(taskID int64) ([]*model.ZoneMember, error) {
 }
 
 func (r *email) BatchInsert(taskID int64, items []zone.EmailItem) error {
-	dbItems := make([]*model.ZoneEmail, 0)
+	dbItems := make([]*models.ZoneEmail, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneEmail{
+		dbItems = append(dbItems, &models.ZoneEmail{
 			EmailItem: &tmp,
 			TaskID:    taskID,
 		})
@@ -148,8 +148,8 @@ func (r *email) BatchInsert(taskID int64, items []zone.EmailItem) error {
 	return nil
 }
 
-func (r *email) GetByTaskID(taskID int64) ([]*model.ZoneEmail, error) {
-	items := make([]*model.ZoneEmail, 0)
+func (r *email) GetByTaskID(taskID int64) ([]*models.ZoneEmail, error) {
+	items := make([]*models.ZoneEmail, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}
@@ -157,10 +157,10 @@ func (r *email) GetByTaskID(taskID int64) ([]*model.ZoneEmail, error) {
 }
 
 func (r *code) BatchInsert(taskID int64, items []zone.CodeItem) error {
-	dbItems := make([]*model.ZoneCode, 0)
+	dbItems := make([]*models.ZoneCode, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneCode{
+		dbItems = append(dbItems, &models.ZoneCode{
 			CodeItem: &tmp,
 			TaskID:   taskID,
 		})
@@ -171,8 +171,8 @@ func (r *code) BatchInsert(taskID int64, items []zone.CodeItem) error {
 	return nil
 }
 
-func (r *code) GetByTaskID(taskID int64) ([]*model.ZoneCode, error) {
-	items := make([]*model.ZoneCode, 0)
+func (r *code) GetByTaskID(taskID int64) ([]*models.ZoneCode, error) {
+	items := make([]*models.ZoneCode, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}
@@ -180,10 +180,10 @@ func (r *code) GetByTaskID(taskID int64) ([]*model.ZoneCode, error) {
 }
 
 func (r *dwm) BatchInsert(taskID int64, items []zone.DarknetItem) error {
-	dbItems := make([]*model.ZoneDwm, 0)
+	dbItems := make([]*models.ZoneDwm, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneDwm{
+		dbItems = append(dbItems, &models.ZoneDwm{
 			DarknetItem: &tmp,
 			TaskID:      taskID,
 		})
@@ -194,8 +194,8 @@ func (r *dwm) BatchInsert(taskID int64, items []zone.DarknetItem) error {
 	return nil
 }
 
-func (r *dwm) GetByTaskID(taskID int64) ([]*model.ZoneDwm, error) {
-	items := make([]*model.ZoneDwm, 0)
+func (r *dwm) GetByTaskID(taskID int64) ([]*models.ZoneDwm, error) {
+	items := make([]*models.ZoneDwm, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}
@@ -203,10 +203,10 @@ func (r *dwm) GetByTaskID(taskID int64) ([]*model.ZoneDwm, error) {
 }
 
 func (r *aim) BatchInsert(taskID int64, items []zone.AimItem) error {
-	dbItems := make([]*model.ZoneAim, 0)
+	dbItems := make([]*models.ZoneAim, 0)
 	for _, item := range items {
 		tmp := item
-		dbItems = append(dbItems, &model.ZoneAim{
+		dbItems = append(dbItems, &models.ZoneAim{
 			AimItem: &tmp,
 			TaskID:  taskID,
 		})
@@ -217,8 +217,8 @@ func (r *aim) BatchInsert(taskID int64, items []zone.AimItem) error {
 	return nil
 }
 
-func (r *aim) GetByTaskID(taskID int64) ([]*model.ZoneAim, error) {
-	items := make([]*model.ZoneAim, 0)
+func (r *aim) GetByTaskID(taskID int64) ([]*models.ZoneAim, error) {
+	items := make([]*models.ZoneAim, 0)
 	if err := r.dbConn.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
 		return items, err
 	}

@@ -30,15 +30,15 @@ type Event struct {
 	Domain2IPDown                  string `json:"domain2IPDown"`
 	ICPOutput                      string `json:"icpOutput"`
 	ICPDown                        string `json:"icpDown"`
+	ICPBatchQuery                  string `json:"icpBatchQuery"`
 }
 
 type Status struct {
-	Exporting     int `json:"exporting,omitempty"`
-	Exported      int `json:"exported,omitempty"`
-	ExportError   int `json:"exportError,omitempty"`
-	ExportDeleted int `json:"exportDeleted,omitempty"`
-	CodeOK        int `json:"codeOK,omitempty"`
-	CodeError     int `json:"codeError,omitempty"`
+	InProgress int `json:"exporting,omitempty"`
+	Completed  int `json:"completed,omitempty"`
+	Deleted    int `json:"deleted,omitempty"`
+	Error      int `json:"error,omitempty"`
+	OK         int `json:"OK,omitempty"`
 }
 
 var Events = &Event{
@@ -63,12 +63,11 @@ var Events = &Event{
 }
 
 var Statuses = &Status{
-	Exporting:     1,
-	Exported:      2,
-	ExportError:   3,
-	ExportDeleted: 4,
-	CodeOK:        5,
-	CodeError:     6,
+	InProgress: 1,
+	Completed:  2,
+	Deleted:    3,
+	Error:      4,
+	OK:         5,
 }
 
 func init() {

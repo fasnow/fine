@@ -2,7 +2,7 @@ package service
 
 import (
 	"fine/backend/db"
-	"fine/backend/db/model"
+	"fine/backend/db/models"
 	"fine/backend/logger"
 	"gorm.io/gorm"
 )
@@ -16,7 +16,7 @@ func NewICPQueryLog() *ICPQueryLog {
 		dbConn: db.GetDBConnect()}
 }
 
-func (q *ICPQueryLog) Add(item *model.ICPQueryLog, taskID int64) error {
+func (q *ICPQueryLog) Add(item *models.ICPQueryLog, taskID int64) error {
 	item.TaskID = taskID
 	if err := q.dbConn.Create(item).Error; err != nil {
 		logger.Info(err.Error())
@@ -25,8 +25,8 @@ func (q *ICPQueryLog) Add(item *model.ICPQueryLog, taskID int64) error {
 	return nil
 }
 
-func (q *ICPQueryLog) GetByTaskID(taskID int64) (*model.ICPQueryLog, error) {
-	item := &model.ICPQueryLog{}
+func (q *ICPQueryLog) GetByTaskID(taskID int64) (*models.ICPQueryLog, error) {
+	item := &models.ICPQueryLog{}
 	if err := q.dbConn.Where("task_id = ?", taskID).Find(item).Error; err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -43,7 +43,7 @@ func NewFOFAQueryLog() *FOFAQueryLog {
 		dbConn: db.GetDBConnect()}
 }
 
-func (q *FOFAQueryLog) Add(item *model.FOFAQueryLog, taskID int64) error {
+func (q *FOFAQueryLog) Add(item *models.FOFAQueryLog, taskID int64) error {
 	item.TaskID = taskID
 	if err := q.dbConn.Create(item).Error; err != nil {
 		logger.Info(err.Error())
@@ -52,8 +52,8 @@ func (q *FOFAQueryLog) Add(item *model.FOFAQueryLog, taskID int64) error {
 	return nil
 }
 
-func (q *FOFAQueryLog) GetByTaskID(taskID int64) (*model.FOFAQueryLog, error) {
-	item := &model.FOFAQueryLog{}
+func (q *FOFAQueryLog) GetByTaskID(taskID int64) (*models.FOFAQueryLog, error) {
+	item := &models.FOFAQueryLog{}
 	if err := q.dbConn.Where("task_id = ?", taskID).Find(item).Error; err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -70,7 +70,7 @@ func NewHunterQueryLog() *HunterQueryLog {
 		dbConn: db.GetDBConnect()}
 }
 
-func (q *HunterQueryLog) Add(item *model.HunterQueryLog, taskID int64) error {
+func (q *HunterQueryLog) Add(item *models.HunterQueryLog, taskID int64) error {
 	item.TaskID = taskID
 	if err := q.dbConn.Create(item).Error; err != nil {
 		return err
@@ -78,8 +78,8 @@ func (q *HunterQueryLog) Add(item *model.HunterQueryLog, taskID int64) error {
 	return nil
 }
 
-func (q *HunterQueryLog) GetByTaskID(taskID int64) (*model.HunterQueryLog, error) {
-	item := &model.HunterQueryLog{}
+func (q *HunterQueryLog) GetByTaskID(taskID int64) (*models.HunterQueryLog, error) {
+	item := &models.HunterQueryLog{}
 	if err := q.dbConn.Where("task_id = ?", taskID).Find(item).Error; err != nil {
 		return nil, err
 	}
@@ -96,11 +96,11 @@ func NewCacheTotal() *CacheTotal {
 }
 
 func (c *CacheTotal) Add(taskID, total int64, query string) {
-	c.dbConn.Create(&model.CacheTotal{TaskID: taskID, Total: total, Query: query})
+	c.dbConn.Create(&models.CacheTotal{TaskID: taskID, Total: total, Query: query})
 }
 
 func (c *CacheTotal) GetByTaskID(taskID int64) (int64, string) {
-	cacheTotal := &model.CacheTotal{}
+	cacheTotal := &models.CacheTotal{}
 	c.dbConn.Where("task_id = ?", taskID).Find(cacheTotal)
 	return cacheTotal.Total, cacheTotal.Query
 }
@@ -115,7 +115,7 @@ func NewQuakeQueryLog() *QuakeQueryLog {
 	}
 }
 
-func (q *QuakeQueryLog) Add(item *model.QuakeRealtimeQueryLog, taskID int64) error {
+func (q *QuakeQueryLog) Add(item *models.QuakeRealtimeQueryLog, taskID int64) error {
 	item.TaskID = taskID
 	if err := q.dbConn.Create(item).Error; err != nil {
 		return err
@@ -123,8 +123,8 @@ func (q *QuakeQueryLog) Add(item *model.QuakeRealtimeQueryLog, taskID int64) err
 	return nil
 }
 
-func (q *QuakeQueryLog) GetByTaskID(taskID int64) (*model.QuakeRealtimeQueryLog, error) {
-	item := &model.QuakeRealtimeQueryLog{}
+func (q *QuakeQueryLog) GetByTaskID(taskID int64) (*models.QuakeRealtimeQueryLog, error) {
+	item := &models.QuakeRealtimeQueryLog{}
 	if err := q.dbConn.Where("task_id = ?", taskID).Find(item).Error; err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func NewZoneQueryLog() *ZoneQueryLog {
 	}
 }
 
-func (q *ZoneQueryLog) Add(item *model.ZoneQueryLog, taskID int64) error {
+func (q *ZoneQueryLog) Add(item *models.ZoneQueryLog, taskID int64) error {
 	item.TaskID = taskID
 	if err := q.dbConn.Create(item).Error; err != nil {
 		return err
@@ -149,8 +149,8 @@ func (q *ZoneQueryLog) Add(item *model.ZoneQueryLog, taskID int64) error {
 	return nil
 }
 
-func (q *ZoneQueryLog) GetByTaskID(taskID int64) (*model.ZoneQueryLog, error) {
-	item := &model.ZoneQueryLog{}
+func (q *ZoneQueryLog) GetByTaskID(taskID int64) (*models.ZoneQueryLog, error) {
+	item := &models.ZoneQueryLog{}
 	if err := q.dbConn.Where("task_id = ?", taskID).Find(item).Error; err != nil {
 		return nil, err
 	}

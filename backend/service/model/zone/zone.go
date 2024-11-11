@@ -216,7 +216,7 @@ type QueryOptions struct {
 }
 
 type QueryResultTotal struct {
-	Page     int   `json:"page"`
+	PageNum  int   `json:"pageNum"`
 	PageSize int   `json:"pageSize"`
 	Total    int64 `json:"total"`
 }

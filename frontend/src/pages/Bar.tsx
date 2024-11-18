@@ -39,6 +39,7 @@ import semver from "semver/preload";
 import {GetDataDir} from "../../wailsjs/go/config/Config";
 import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 import DownloadLog = models.DownloadLog;
+import {CssConfig} from "@/pages/Config";
 
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
@@ -582,9 +583,6 @@ const Bar: React.FC = () => {
             id="drag"
             className="bar"
             // draggable
-            style={{
-                backgroundColor: 'rgb(255, 255, 255,1)'
-            }}
             onDoubleClick={() => {
                 WindowToggleMaximise();
                 f.current = !f.current

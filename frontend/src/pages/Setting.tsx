@@ -12,6 +12,8 @@ import {SetAuth as SetHunterAuth} from "../../wailsjs/go/hunter/Bridge";
 import {SetAuth as SetFofaAuth} from "../../wailsjs/go/fofa/Bridge";
 import {SetAuth as Set0zoneAuth} from "../../wailsjs/go/zone/Bridge";
 import {SetAuth as SetQuakeAuth} from "../../wailsjs/go/quake/Bridge";
+import locale from "antd/locale/zh_CN";
+import {CssConfig} from "@/pages/Config";
 
 const onChange = (key: string) => {
     console.log(key);
@@ -343,7 +345,7 @@ const Account: React.FC = () => {
     }
 
     return (
-        <ScrollBar height="calc(100vh - 100px)">
+        <ScrollBar height={`calc(100vh - ${CssConfig.tab.height} - ${CssConfig.title.height} - 30px)`}>
             <Space direction='vertical' style={{width: "100%", paddingTop: "20px"}} size={20}>
                 <FofaForm/>
                 <HunterForm/>
@@ -360,13 +362,11 @@ const items: TabsProps['items'] = [
         key: 'account',
         label: `账号`,
         children: <Account/>,
-        destroyInactiveTabPane: true
     },
     {
         key: 'proxy',
         label: `代理`,
-        children: <Proxy/>,
-        destroyInactiveTabPane: true
+        children: <ScrollBar height={`calc(100vh - ${CssConfig.tab.height} - ${CssConfig.title.height} - 30px)`}><Proxy/></ScrollBar>,
     },
 
     // {
@@ -384,27 +384,22 @@ export const Setting: React.FC = () => {
 
 
         return (<Tooltip title="刷新设置">
-            <Button style={{marginLeft: "10px"}} size="small" shape="circle" type="text" icon={<SyncOutlined spin={spin}
-                                                                                                             onClick={async () => {
-                                                                                                                 setSpin(true)
-                                                                                                                 // await getUserInfo()
-                                                                                                                 setSpin(false)
-                                                                                                             }}
-            />}></Button>
+            <Button
+                style={{marginLeft: "10px"}}
+                size="small"
+                shape="circle"
+                type="text"
+                icon={<SyncOutlined spin={spin} onClick={async () => {
+                    setSpin(true)
+                    setSpin(false)
+                }}
+            />
+            }></Button>
         </Tooltip>)
     }
-    return <ConfigProvider
-        theme={{
-            token: {
-                marginLG: 16,
-                margin: 0,
-            }
-        }}>
-        <Tabs
-            size="small"
-            // tabBarExtraContent={{
-            //   right: <RefreshPanel />
-            // }}
-            style={{height: "100%"}} defaultActiveKey="account" items={items} onChange={onChange}/>
-    </ConfigProvider>
+    return <Tabs
+        type={"card"}
+        size="small"
+        defaultActiveKey="account" items={items} onChange={onChange}
+    />
 }

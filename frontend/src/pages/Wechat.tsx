@@ -1,6 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react';
 import type {GetProps} from 'antd';
-import {Button, ConfigProvider, Flex, Input, List, Popconfirm, Popover, Space, Tag, Tooltip, Tree} from 'antd';
+import {
+    Button,
+    ConfigProvider,
+    Flex,
+    Input,
+    List,
+    Popconfirm,
+    Popover,
+    Space,
+    Splitter,
+    Tag,
+    Tooltip,
+    Tree
+} from 'antd';
 import {FileTextOutlined, FileZipOutlined, FolderOpenOutlined} from "@ant-design/icons";
 import {Join} from "../../wailsjs/go/runtime/Path";
 import {Allotment} from "allotment";
@@ -27,6 +40,7 @@ import {
 import {DecompileIcon} from "@/component/Icon";
 import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 import InfoToFront = wechat.InfoToFront;
+import {CssConfig} from "@/pages/Config";
 
 type DirectoryTreeProps = GetProps<typeof Tree.DirectoryTree>;
 
@@ -179,275 +193,254 @@ export const MiniProgram: React.FC = () => {
     }
 
     return (
-        <div style={{
-            position: "relative",
-        }}>
-            {
-                // platform != "windows" && <div
-                //     style={{
-                //         position: "fixed",
-                //         display:"flex",
-                //         justifyContent:"center",
-                //         alignItems:"center",
-                //         margin:"0px",
-                //         width: "100%",
-                //         height: "100%",
-                //         backgroundColor: "rgba(242, 242, 242, 0.5)", /* 半透明背景颜色 */
-                //         zIndex: 999, /* 确保覆盖整个页面内容 */
-                //         fontSize:"20px",
-                //         color:"rgba(72, 72, 72,0.5)"
-                //     }}
-                // >暂只支持Windows平台</div>
-            }
-            <Flex vertical gap={10}
-                  style={{
-                      padding: "0 10px",
-                      height: "calc(100vh - 54px)"
-                  }}
-            >
-                <Space.Compact style={{justifyContent: "center"}}>
-                    <Input style={{width: "600px",}} size={'small'} prefix={<>微信Applet路径</>} value={appletPath}/>
-                    <Button size={"small"} onClick={configAppletPath} disabled={platform != "windows"}>选择</Button>
-                    {
-                        autoDecompile ?
-                            < Button size={"small"} onClick={() => {
-                                setAutoDecompile(false)
-                                autoRef.current = false
-                            }} style={{backgroundColor: "red", color: "white"}}>停用自动反编译</Button>
-                            :
-                            < Button size={"small"} onClick={() => {
-                                setAutoDecompile(true)
-                                autoRef.current = true
-                            }} style={{backgroundColor: "green", color: "white"}}>启用自动反编译</Button>
-                    }
-                    <Popconfirm
-                        placement="bottom"
-                        title={"删除"}
-                        description={<>确认删除Applet目录下的所有文件吗?<br/>
-                            (会同时删除反编译后的所有文件)</>}
-                        okText="Yes"
-                        cancelText="No"
-                        onConfirm={() => {
-                            setIsClearing(true)
-                            ClearApplet().catch(
-                                err => errorNotification("错误", err)
-                            ).then(() => {
-                                // setTreeData([])
-                            }).finally(
-                                () => {
-                                    setIsClearing(false)
-                                }
-                            )
-                        }}
-                    >
-                        <Button size={"small"}>清空Applet目录</Button>
-                    </Popconfirm>
-                    <Popconfirm
-                        placement="bottom"
-                        title={"删除"}
-                        description={"确认删除所有反编译后的文件吗?"}
-                        okText="Yes"
-                        cancelText="No"
-                        onConfirm={() => {
-                            setIsClearing(true)
-                            ClearDecompiled().catch(
-                                err => errorNotification("错误", err)
-                            ).then(() => {
-                                // setTreeData([])
-                            }).finally(
-                                () => setIsClearing(false)
-                            )
-                        }}
-                    >
-                        <Button size={"small"}>清空反编译后的文件</Button>
-                    </Popconfirm>
-                    <Popover
-                        content={<Flex vertical={true} gap={5}>
-                            <Flex gap={5}>
-                                <Button size={"small"} type={"primary"} onClick={() => {
-                                    setOpen(false)
-                                    SaveWechatMatchRules(rules.split("\n"))
-                                }}>保存</Button>
-                                <Button size={"small"} type={"primary"} onClick={() => {
-                                    setOpen(false)
-                                }}>取消</Button>
-                            </Flex>
-                            <TextArea
-                                value={rules}
-                                placeholder={"每行一条"}
-                                style={{width: "300px"}}
-                                autoSize={{minRows: 10, maxRows: 10}}
-                                onChange={e => setRules(e.target.value)}
-                                allowClear
-                            />
-                        </Flex>}
-                        trigger={"click"}
-                        destroyTooltipOnHide
-                        open={open}
-                        onOpenChange={(v) => {
-                            if (v) {
-                                GetWechatMatchRules().then(
-                                    rules => setRules(rules.join("\n"))
-                                )
-                            } else {
-                                setRules("")
+        <Flex vertical gap={10}
+              style={{
+                  padding: "0 10px",
+                  height: `calc(100vh - ${CssConfig.title.height} - ${CssConfig.tab.height} - 70px)`
+              }}
+        >
+            <Space.Compact style={{justifyContent: "center"}}>
+                <Input style={{width: "600px",}} size={'small'} prefix={<>微信Applet路径</>} value={appletPath}/>
+                <Button size={"small"} onClick={configAppletPath} disabled={platform != "windows"}>选择</Button>
+                {
+                    autoDecompile ?
+                        < Button size={"small"} onClick={() => {
+                            setAutoDecompile(false)
+                            autoRef.current = false
+                        }} style={{backgroundColor: "red", color: "white"}}>停用自动反编译</Button>
+                        :
+                        < Button size={"small"} onClick={() => {
+                            setAutoDecompile(true)
+                            autoRef.current = true
+                        }} style={{backgroundColor: "green", color: "white"}}>启用自动反编译</Button>
+                }
+                <Popconfirm
+                    placement="bottom"
+                    title={"删除"}
+                    description={<>确认删除Applet目录下的所有文件吗?<br/>
+                        (会同时删除反编译后的所有文件)</>}
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={() => {
+                        setIsClearing(true)
+                        ClearApplet().catch(
+                            err => errorNotification("错误", err)
+                        ).then(() => {
+                            // setTreeData([])
+                        }).finally(
+                            () => {
+                                setIsClearing(false)
                             }
-                            setOpen(v)
-                        }}
-                    >
-                        <Button size={"small"}>信息提取规则</Button>
-                    </Popover>
-                </Space.Compact>
-                <Flex align={"center"} justify={"center"}><>建议先执行清空Applet目录以避免无法回溯是哪个小程序</>
-                </Flex>
-                <div style={{height: "100%"}}>
-                    <Allotment>
-                        <Allotment.Pane preferredSize={"40%"} className={"left"}>
-                            <ConfigProvider theme={{
-                                components: {
-                                    List: {
-                                        titleMarginBottom: 5,
-                                        metaMarginBottom: 0
-                                    }
-                                }
-                            }}>
-                                <List
-                                    style={{overflowY: "auto", maxHeight: "100%", width: "100%"}}
-                                    itemLayout="vertical"
-                                    dataSource={data}
-                                    renderItem={(item) => (
-                                        <List.Item key={item.appid}
-                                        >
-                                            <Flex vertical gap={5}>
-                                                <Flex gap={5}>
-                                                    <Tag color={"cyan"} bordered={false}>
+                        )
+                    }}
+                >
+                    <Button size={"small"}>清空Applet目录</Button>
+                </Popconfirm>
+                <Popconfirm
+                    placement="bottom"
+                    title={"删除"}
+                    description={"确认删除所有反编译后的文件吗?"}
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={() => {
+                        setIsClearing(true)
+                        ClearDecompiled().catch(
+                            err => errorNotification("错误", err)
+                        ).then(() => {
+                            // setTreeData([])
+                        }).finally(
+                            () => setIsClearing(false)
+                        )
+                    }}
+                >
+                    <Button size={"small"}>清空反编译后的文件</Button>
+                </Popconfirm>
+                <Popover
+                    content={<Flex vertical={true} gap={5}>
+                        <Flex gap={5}>
+                            <Button size={"small"} type={"primary"} onClick={() => {
+                                setOpen(false)
+                                SaveWechatMatchRules(rules.split("\n"))
+                            }}>保存</Button>
+                            <Button size={"small"} type={"primary"} onClick={() => {
+                                setOpen(false)
+                            }}>取消</Button>
+                        </Flex>
+                        <TextArea
+                            value={rules}
+                            placeholder={"每行一条"}
+                            style={{width: "300px"}}
+                            autoSize={{minRows: 10, maxRows: 10}}
+                            onChange={e => setRules(e.target.value)}
+                            allowClear
+                        />
+                    </Flex>}
+                    trigger={"click"}
+                    destroyTooltipOnHide
+                    open={open}
+                    onOpenChange={(v) => {
+                        if (v) {
+                            GetWechatMatchRules().then(
+                                rules => setRules(rules.join("\n"))
+                            )
+                        } else {
+                            setRules("")
+                        }
+                        setOpen(v)
+                    }}
+                >
+                    <Button size={"small"}>信息提取规则</Button>
+                </Popover>
+            </Space.Compact>
+            <Flex align={"center"} justify={"center"}><>建议先执行清空Applet目录以避免无法回溯是哪个小程序</>
+            </Flex>
+            <Splitter>
+                <Splitter.Panel defaultSize={"35%"} style={{overflowX: "auto"}}>
+                    <ConfigProvider theme={{
+                        components: {
+                            List: {
+                                titleMarginBottom: 5,
+                                metaMarginBottom: 0
+                            }
+                        }
+                    }}>
+                        <List
+                            // style={{overflowY: "auto", height: "calc(100vh -400px)", width: "100%"}}
+                            itemLayout="vertical"
+                            dataSource={data}
+                            renderItem={(item) => (
+                                <List.Item key={item.appid}
+                                >
+                                    <Flex vertical gap={5}>
+                                        <Flex gap={5}>
+                                            <Tag color={"cyan"} bordered={false}>
                                                          <span style={{fontWeight: "bold"}}>
                                                         {item.appid}
                                                     </span>
-                                                    </Tag>
-                                                    <Tag color={"orange"} bordered={false}>
+                                            </Tag>
+                                            <Tag color={"orange"} bordered={false}>
                                                          <span style={{fontWeight: "bold"}}>
                                                         {item.update_date}
                                                     </span>
-                                                    </Tag>
-                                                    {
-                                                        item?.username && <>
-                                                            <Tag bordered={false} color="cyan">{item.username}</Tag>
-                                                        </>
-                                                    }
+                                            </Tag>
+                                            {
+                                                item?.username && <>
+                                                    <Tag bordered={false} color="cyan">{item.username}</Tag>
+                                                </>
+                                            }
 
-                                                </Flex>
-                                                <Flex vertical gap={5}>
-                                                    {
-                                                        item?.nickname && <> <Flex><Tag
-                                                            title={item.nickname}
-                                                            bordered={false}
-                                                            color="red"
-                                                            style={{
-                                                                whiteSpace: "nowrap",
-                                                                textOverflow: "ellipsis",
-                                                                overflow: "hidden"
-                                                            }}>{item.nickname}</Tag></Flex></>
-                                                    }
-                                                    {
-                                                        item.versions.map((i) => {
-                                                            return <Flex gap={5} key={`${item.appid}-${i.number}`}>
-                                                                <Tag bordered={false} color="cyan"><span
-                                                                    title={i.unpacked ? "已反编译" : "未反编译"}><FileZipOutlined
-                                                                    style={{color: i.unpacked ? "green" : "black"}}/>{i.number}</span></Tag>
-                                                                <Space.Compact size={"small"}>
-                                                                    <Tooltip title={"反编译"}>
-                                                                        <Button icon={<DecompileIcon
-                                                                            style={{fontSize: "12px"}}/>}
-                                                                                onClick={() => {
-                                                                                    decompile([new wechat.MiniProgram({
-                                                                                        appid: item.appid,
-                                                                                        versions: item.versions
-                                                                                    })], true)
+                                        </Flex>
+                                        <Flex vertical gap={5}>
+                                            {
+                                                item?.nickname && <> <Flex><Tag
+                                                    title={item.nickname}
+                                                    bordered={false}
+                                                    color="red"
+                                                    style={{
+                                                        whiteSpace: "nowrap",
+                                                        textOverflow: "ellipsis",
+                                                        overflow: "hidden"
+                                                    }}>{item.nickname}</Tag></Flex></>
+                                            }
+                                            {
+                                                item.versions.map((i) => {
+                                                    return <Flex gap={5} key={`${item.appid}-${i.number}`}>
+                                                        <Tag bordered={false} color="cyan"><span
+                                                            title={i.unpacked ? "已反编译" : "未反编译"}><FileZipOutlined
+                                                            style={{color: i.unpacked ? "green" : "black"}}/>{i.number}</span></Tag>
+                                                        <Space.Compact size={"small"}>
+                                                            <Tooltip title={"反编译"}>
+                                                                <Button icon={<DecompileIcon
+                                                                    style={{fontSize: "12px"}}/>}
+                                                                        onClick={() => {
+                                                                            decompile([new wechat.MiniProgram({
+                                                                                appid: item.appid,
+                                                                                versions: item.versions
+                                                                            })], true)
 
-                                                                                }}/>
-                                                                    </Tooltip>
-                                                                    <Tooltip title={"打开数据文件夹"}>
-                                                                        <Button
-                                                                            icon={<FolderOpenOutlined/>}
-                                                                            onClick={
-                                                                                async () => {
-                                                                                    OpenFolder(await Join([dataCachePath.current, item.appid, i.number]))
+                                                                        }}/>
+                                                            </Tooltip>
+                                                            <Tooltip title={"打开数据文件夹"}>
+                                                                <Button
+                                                                    icon={<FolderOpenOutlined/>}
+                                                                    onClick={
+                                                                        async () => {
+                                                                            OpenFolder(await Join([dataCachePath.current, item.appid, i.number]))
+                                                                        }
+                                                                    }/>
+                                                            </Tooltip>
+                                                            <Tooltip title={"敏感信息"}>
+                                                                <Button
+                                                                    icon={<FileTextOutlined/>}
+                                                                    onClick={
+                                                                        async () => {
+                                                                            setSelect({
+                                                                                appid: item.appid,
+                                                                                version: i.number,
+                                                                                nickname: item.nickname
+                                                                            })
+                                                                            GetMatchedString(item.appid, i.number).then(
+                                                                                r => {
+                                                                                    setMatchedResult(r.matched)
                                                                                 }
-                                                                            }/>
-                                                                    </Tooltip>
-                                                                    <Tooltip title={"敏感信息"}>
-                                                                        <Button
-                                                                            icon={<FileTextOutlined/>}
-                                                                            onClick={
-                                                                                async () => {
-                                                                                    setSelect({
-                                                                                        appid: item.appid,
-                                                                                        version: i.number,
-                                                                                        nickname: item.nickname
-                                                                                    })
-                                                                                    GetMatchedString(item.appid, i.number).then(
-                                                                                        r => {
-                                                                                            setMatchedResult(r.matched)
-                                                                                        }
-                                                                                    )
-                                                                                }
-                                                                            }/>
-                                                                    </Tooltip>
-                                                                </Space.Compact>
-                                                            </Flex>
-                                                        })
-                                                    }
-                                                    <span style={{color: "gray", fontSize: "12px"}}>
+                                                                            )
+                                                                        }
+                                                                    }/>
+                                                            </Tooltip>
+                                                        </Space.Compact>
+                                                    </Flex>
+                                                })
+                                            }
+                                            <span style={{color: "gray", fontSize: "12px"}}>
                                                         {item.description}
                                                     </span>
-                                                </Flex>
-                                            </Flex>
-                                        </List.Item>
-                                    )}
-                                />
-                            </ConfigProvider>
-                        </Allotment.Pane>
-                        <Allotment vertical className={"wechat-right"}>
-                            <Allotment.Pane className={"right-top"} preferredSize={500} minSize={150}>
-                                <Flex vertical gap={5} style={{height: "100%"}}>
-                                    <Flex>
-                                        {
-                                            select?.appid && <Flex>
-                                                <Tag bordered={false}
-                                                     color={"orange"}>{select?.appid} {select?.version}</Tag>
-                                            </Flex>
-                                        }
-                                        {
-                                            select?.nickname && <Flex>
-                                                <Tag bordered={false} color={"orange"}>{select.nickname}</Tag>
-                                            </Flex>
-                                        }
+                                        </Flex>
                                     </Flex>
-
-                                    <TextArea
-                                        value={matchedResult}
-                                        onChange={(e) => setMatchedResult(e.target.value)}
-                                        style={{height: "100%"}}
-                                        wrap="off"
-                                        allowClear
-                                    />
+                                </List.Item>
+                            )}
+                        />
+                    </ConfigProvider>
+                </Splitter.Panel>
+                <Splitter.Panel>
+                    <Splitter layout="vertical">
+                        <Splitter.Panel defaultSize={"70%"}>
+                            <Flex vertical gap={5} style={{height: "100%"}}>
+                                <Flex>
+                                    {
+                                        select?.appid && <Flex>
+                                            <Tag bordered={false}
+                                                 color={"orange"}>{select?.appid} {select?.version}</Tag>
+                                        </Flex>
+                                    }
+                                    {
+                                        select?.nickname && <Flex>
+                                            <Tag bordered={false} color={"orange"}>{select.nickname}</Tag>
+                                        </Flex>
+                                    }
                                 </Flex>
-                            </Allotment.Pane>
-                            <Allotment.Pane className={"right-bottom"} minSize={150}>
+
                                 <TextArea
-                                    value={decompileResult}
-                                    onChange={(e) => setDecompileResult(e.target.value)}
-                                    style={{
-                                        height: "100%"
-                                    }}
+                                    value={matchedResult}
+                                    onChange={(e) => setMatchedResult(e.target.value)}
+                                    style={{height: "100%"}}
+                                    wrap="off"
                                     allowClear
                                 />
-                            </Allotment.Pane>
-                        </Allotment>
-                    </Allotment>
-                </div>
-            </Flex>
-        </div>
+                            </Flex>
+                        </Splitter.Panel>
+                        <Splitter.Panel min={'15%'}>
+                            <TextArea
+                                value={decompileResult}
+                                onChange={(e) => setDecompileResult(e.target.value)}
+                                style={{
+                                    height: "100%"
+                                }}
+                                allowClear
+                            />
+                        </Splitter.Panel>
+                    </Splitter>
+                </Splitter.Panel>
+            </Splitter>
+        </Flex>
     );
 };

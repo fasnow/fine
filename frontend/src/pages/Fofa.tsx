@@ -1140,7 +1140,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                                     multiple={false}
                                     customRequest={(options) => {
                                         const {file, onError} = options;
-                                        ;
                                         if (file instanceof Blob) {
                                             const reader = new FileReader();
                                             reader.onload = (e) => {

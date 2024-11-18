@@ -2,15 +2,13 @@ import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import {Allotment} from "allotment";
 import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
-import {Button, Dropdown, Input, InputNumber, MenuProps, Space, Table, Tabs, Tooltip} from "antd";
+import {Button, Dropdown, Input, InputNumber, MenuProps, Slider, Space, Splitter, Table, Tabs, Tooltip} from "antd";
 import "@/pages/Httpx.css"
 import {GetHttpx, SaveHttpx} from "../../wailsjs/go/config/Config";
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
 import {errorNotification} from "@/component/Notification";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
-import 'xterm/css/xterm.css';
-import {FitAddon} from 'xterm-addon-fit'
 import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState, setHttpx} from "@/store/store";
@@ -75,7 +73,6 @@ const TabContent = () => {
     const [flags, setFlags] = useState<string>("")
     const [running, setRunning] = useState<boolean>(false)
     const [targets, setTargets] = useState<string>("")
-    const fitAddon = useRef<FitAddon>(new FitAddon());
     // const [total,setTotal] = useState<number>(0)
     const [offset, setOffset] = useState<number>(1)
     const [limit, setLimit] = useState<number>(15)
@@ -295,8 +292,8 @@ const TabContent = () => {
                 </Space.Compact>
             </Space>
             <div style={{height: "calc(100%)"}}>
-                <Allotment onChange={() => fitAddon.current.fit()}>
-                    <Allotment.Pane preferredSize={"350"} className={"httpx-left"}>
+                <Splitter >
+                    <Splitter.Panel defaultSize="30%" min="20%" max="70%">
                         <TextArea
                             size={"small"}
                             value={targets}
@@ -305,8 +302,8 @@ const TabContent = () => {
                             placeholder={"每行一个"}
                             autoSize={{minRows: 10, maxRows: 10}}
                         />
-                    </Allotment.Pane>
-                    <Allotment.Pane className={"httpx-right"}>
+                    </Splitter.Panel>
+                    <Splitter.Panel >
                         <Dropdown
                             menu={{items, onClick: handleMenuItemClick}}
                             trigger={['contextMenu']}
@@ -337,8 +334,8 @@ const TabContent = () => {
                                 />
                             </div>
                         </Dropdown>
-                    </Allotment.Pane>
-                </Allotment>
+                    </Splitter.Panel>
+                </Splitter>
             </div>
         </div>
     );

@@ -18,6 +18,6 @@
     background: white;
 }
 
-:where(.css-dev-only-do-not-override-1cwnorf).ant-tabs > .ant-tabs-nav .ant-tabs-nav-wrap, :where(.css-dev-only-do-not-override-1cwnorf).ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-wrap {
-    flex: none;
-}
+/*:where(.css-dev-only-do-not-override-1cwnorf).ant-tabs > .ant-tabs-nav .ant-tabs-nav-wrap, :where(.css-dev-only-do-not-override-1cwnorf).ant-tabs > div > .ant-tabs-nav .ant-tabs-nav-wrap {*/
+/*    flex: none;*/
+/*}*/

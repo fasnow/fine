@@ -11,6 +11,7 @@ import {SyncOutlined} from "@ant-design/icons";
 import 'xterm/css/xterm.css';
 import {GetDetail, Stop} from "../../wailsjs/go/domain2ip/Bridge";
 import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
+import {CssConfig} from "@/pages/Config";
 
 const TabContent = () => {
     const [output, setOutput] = useState<string>("")
@@ -82,7 +83,7 @@ const TabContent = () => {
         <div style={{
             display: "flex",
             flexDirection: "column",
-            height: "calc(100vh - 82px)",
+            height: `calc(100vh - ${CssConfig.title.height} - ${CssConfig.tab.height})`,
             padding: "5px 0 5px 0",
         }}>
             <Allotment>

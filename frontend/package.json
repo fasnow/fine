@@ -21,14 +21,12 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "typescript": "^5.2.2",
-    "web-vitals": "^2.1.4",
-    "xterm": "^5.3.0",
-    "xterm-addon-fit": "^0.8.0"
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
     "@craco/craco": "^7.1.0",
     "@reduxjs/toolkit": "^2.0.1",
-    "@types/crypto-js": "^4.2.1",
+    "@types/crypto-js": "^4.2.2",
     "@types/css-tree": "^2.3.5",
     "@types/cssbeautify": "^0.3.5",
     "@types/d3": "^7.4.3",
@@ -57,6 +55,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "esprima": "^4.0.0",
+    "gm-crypto": "^0.1.12",
     "js-base64": "^3.7.6",
     "js-beautify": "^1.7.5",
     "js-md5": "^0.8.3",

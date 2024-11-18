@@ -20,17 +20,10 @@ import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
 import {MiniProgram} from "@/pages/Wechat";
 import Domain2IP from "@/pages/Domain2IP";
+import {AES, Cipher} from "@/pages/Cipher";
+import {CssConfig} from "@/pages/Config";
 
 const { Header } = Lay;
-const headerStyle: React.CSSProperties = {
-    textAlign: 'center',
-    color: '#000',
-    height: '30px',
-    lineHeight: '30px',
-    margin: '0',
-    padding: '0',
-    backgroundColor:"rgb(255,255,255)"
-};
 const mainStyle: React.CSSProperties = {
     backgroundColor: 'rgb(255, 255, 255, 1)',
     height: "calc(100vh - 30px)",
@@ -102,7 +95,7 @@ const App: React.FC = () => {
                         paddingSM: 0
                     },
                     Tabs: {
-                        cardHeight: 24,
+                        cardHeight: CssConfig.tab.height,
                         cardPadding: "0px 3px 0px 10px",
                         cardPaddingSM: "0px 3px 0px 10px",
                         verticalItemPadding: "5px 10px",
@@ -114,35 +107,20 @@ const App: React.FC = () => {
                     },
                     Table: {
                         cellPaddingBlockSM: 4,
+                    },
+                    Splitter: {
+                        splitBarSize:5,
+                        splitBarDraggableSize:0
                     }
                 },
             }}
         >
             <Lay>
-                <Header style={headerStyle}><Bar /></Header>
+                <Header style={CssConfig.title}><Bar /></Header>
                 <Lay style={mainStyle} >
                     <Tabs items={items} tabBarStyle={{backgroundColor:'rgba(242, 242, 242,1)',
                         padding: "0 10px"
                     }}/>
-                    {/*<Sider width="145" style={{left: 0, top: 0, bottom: 0, backgroundColor: 'rgb(70, 118, 195,1)',overflowY:"auto" }}>*/}
-                    {/*    /!*<ScrollBar height={"calc(100vh - 30px)"}  >*!/*/}
-                    {/*    /!*    <Menu />*!/*/}
-                    {/*    /!*</ScrollBar>*!/*/}
-                    {/*    <Menu />*/}
-                    {/*</Sider>*/}
-                    {/*<Lay style={contentStyle}>*/}
-                    {/*    /!*<ScrollBar height="calc(100vh - 30px)" style={{*!/*/}
-                    {/*    /!*    paddingLeft: "10px",*!/*/}
-                    {/*    /!*    paddingRight: "10px",*!/*/}
-                    {/*    /!*    paddingBottom: "1px",*!/*/}
-                    {/*    /!*    backgroundColor: "rgb(255,255,255,1)",*!/*/}
-                    {/*    /!*    border: "2px",*!/*/}
-                    {/*    /!*    borderRadius: "2px"*!/*/}
-                    {/*    /!*}}>*!/*/}
-                    {/*    /!*    <Outlet />*!/*/}
-                    {/*    /!*</ScrollBar>*!/*/}
-                    {/*    <Outlet />*/}
-                    {/*</Lay>*/}
                 </Lay>
             </Lay>
         </ConfigProvider>
@@ -179,7 +157,6 @@ const items: TabsProps['items'] = [
         key: '1',
         label: '设置',
         children: <div style={{padding:"0 10px"}}><Setting/></div>,
-        destroyInactiveTabPane:true
     },
     {
         key: '2',
@@ -210,10 +187,10 @@ const items: TabsProps['items'] = [
         label: '小程序反编译',
         children: <div ><MiniProgram/></div>,
     },
-    // {
-    //     key: '7',
-    //     label: 'Domain2IP',
-    //     children: <div ><Domain2IP/></div>,
-    // },
+    {
+        key: '7',
+        label: '编码转换',
+        children: <Cipher/>,
+    },
 ];
 

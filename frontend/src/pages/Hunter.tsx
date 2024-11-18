@@ -588,7 +588,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             // }
             setColumns(tmp)
             if (this.props.onContextMenu?.input) {
-                handleFirstQuery(currentPageSize)
+                handleNewQuery(this.props.onContextMenu?.input, currentPageSize)
             }
 
             let index = 0;
@@ -726,9 +726,9 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             }));
         }
 
-        const handleFirstQuery = async (pageSize: number) => {
-            const {input, isWeb, dateRange, statusCode, portFilter} = this.state
-            const tmpInput = input.trim()
+        const handleNewQuery = async (query:string, pageSize: number) => {
+            const { isWeb, dateRange, statusCode, portFilter} = this.state
+            const tmpInput = query.trim()
             setCurrentPageSize(pageSize)
             if (tmpInput === "") {
                 return
@@ -814,7 +814,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
             //size发生变换，page设为1
             if (newSize !== currentPageSize) {
-                handleFirstQuery(newSize)
+                handleNewQuery(inputCache, newSize)
             }
         }
 
@@ -867,7 +867,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             if (iconArrayBuffer instanceof ArrayBuffer) {
                 const hash = md5(iconArrayBuffer)
                 this.setState({input: `web.icon="${hash}"`})
-                handleFirstQuery(currentPageSize)
+                handleNewQuery(`web.icon="${hash}"`, currentPageSize)
                 hide()
             }
         }
@@ -941,7 +941,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     placeholder='Search...'
                 />
                 <Button type='text' size="small" icon={<SearchOutlined/>}
-                        onClick={() => handleFirstQuery(currentPageSize)}/>
+                        onClick={() => handleNewQuery(input, currentPageSize)}/>
                 <Help/>
             </Flex>
             <Space

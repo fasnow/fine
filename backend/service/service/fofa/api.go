@@ -71,7 +71,6 @@ type Result struct {
 //}
 
 func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
-	req.req.QueryParams.Set("email", f.email)
 	req.req.QueryParams.Set("key", f.key)
 	var fields = req.req.QueryParams.Get("fields")
 	var fieldList = strings.Split(fields, ",")
@@ -330,7 +329,6 @@ type User struct {
 
 func (f *Fofa) User() (*User, error) {
 	params := netUrl.Values{}
-	params.Add("email", f.email)
 	params.Add("key", f.key)
 	url := fmt.Sprintf("%v?%s", FofaUserApiUrl, params.Encode())
 	request, err := http.NewRequest("GET", url, nil)

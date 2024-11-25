@@ -127,7 +127,9 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
-          body: |   
-            1. new: ICP备案去掉验证码验证;
-            2. fix: 修复已知问题。
+          body: |
+            1. new: 编解码部分功能;
+            2. enhance: 优化配置;
+            3. fix: @m0s30 #12;
+            4. fix: 其他已知问题。
 

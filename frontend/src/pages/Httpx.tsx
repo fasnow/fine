@@ -11,7 +11,7 @@ import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
 import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
 import {useDispatch, useSelector} from "react-redux";
-import {RootState, setHttpx} from "@/store/store";
+import {RootState, configActions} from "@/store/store";
 import {ResizeCallbackData} from "react-resizable";
 import {ColumnsType} from "antd/es/table";
 import ResizableTitle from "@/component/ResizableTitle";
@@ -96,7 +96,7 @@ const TabContent = () => {
             result => {
                 setPath(result.path)
                 setFlags(result.flags)
-                dispatch(setHttpx({path: result.path, flags: result.flags}))
+                dispatch(configActions.setHttpx({path: result.path, flags: result.flags}))
             }
         )
 
@@ -136,7 +136,7 @@ const TabContent = () => {
 
     const saveHttpx = () => {
         SaveHttpx({path: path, flags: flags})
-        dispatch(setHttpx({path: path, flags: flags}))
+        dispatch(configActions.setHttpx({path: path, flags: flags}))
     }
 
     const setHttpxPath = () => {
@@ -145,7 +145,7 @@ const TabContent = () => {
                 if (result) {
                     setPath(result)
                     SaveHttpx({path: result, flags: flags})
-                    dispatch(setHttpx({path: result, flags: flags}))
+                    dispatch(configActions.setHttpx({path: result, flags: flags}))
                 }
             }
         ).catch(

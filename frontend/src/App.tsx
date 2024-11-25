@@ -14,7 +14,7 @@ import Icp from "@/pages/domain/Icp";
 import Hunter from "@/pages/Hunter";
 import Quake from "@/pages/Quake";
 import {useDispatch} from "react-redux";
-import {setProxy} from "@/store/store";
+import {configActions} from "@/store/store";
 import Zone from "@/pages/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
@@ -62,7 +62,7 @@ const App: React.FC = () => {
         try {
             GetProxy().then(
                 result=>{
-                    dispatch(setProxy(result))
+                    dispatch(configActions.setProxy(result))
                 }
             )
             // doConfig("D:\\Tools\\wechatMiniAppReverse\\wxappUnpacker52破解版\\wx320a5673052ac189\\app-config.json")

@@ -470,8 +470,8 @@ func generateDecompileExe() (string, error) {
 	if utils.FileExist(filename) {
 		currentDate := time.Now()
 
-		//2024/11/09
-		comparisonDate := time.Date(2024, 11, 9, 0, 0, 0, 0, time.Local)
+		//2024/11/25
+		comparisonDate := time.Date(2024, 11, 25, 0, 0, 0, 0, time.Local)
 		if currentDate.After(comparisonDate) {
 			return filename, nil
 		}

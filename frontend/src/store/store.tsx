@@ -1,6 +1,7 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
 import {config, fofa, quake} from "../../wailsjs/go/models";
 import UserRole = quake.UserRole;
+import QueryOnEnter = config.QueryOnEnter;
 
 export type HunterUserType = {
     restToken: number
@@ -38,7 +39,6 @@ export type QuakeUserType = {
 }
 
 export type FofaAuthType = {
-    email: string
     key: string
 }
 
@@ -69,7 +69,6 @@ export interface DownloadLogItem {
 
 const initialAuthState: AuthType = {
     fofa: {
-        email: "",
         key: ""
     },
     hunter: {
@@ -145,8 +144,6 @@ const initialQuakeUserState: QuakeUserType = {
     role: [],
 }
 
-const initialDownloadLogState: DownloadLogItem[] = []
-
 const initialHttpxState: config.Httpx = {
     path:"",
     flags:""
@@ -160,6 +157,7 @@ const configSlice = createSlice({
         auth: initialAuthState,
         proxy: initialProxyState,
         httpx: initialHttpxState,
+        queryOnEnter:{} as QueryOnEnter
     } ,
     //方法
     reducers: {
@@ -194,6 +192,18 @@ const configSlice = createSlice({
         },
         setHttpx: (state, action: { payload: config.Httpx, type: string }) => {
             state.httpx = action.payload
+        },
+        setQueryOnEnter: (state, action: { payload: QueryOnEnter, type: string}) => {
+            state.queryOnEnter = action.payload
+        },
+        setAssetsQueryOnEnter: (state, action: { payload: boolean, type: string}) => {
+            state.queryOnEnter.assets = action.payload
+        },
+        setIcpQueryOnEnter: (state, action: { payload: boolean, type: string }) => {
+            state.queryOnEnter.icp = action.payload
+        },
+        setIP138QueryOnEnter: (state, action: { payload: boolean, type: string }) => {
+            state.queryOnEnter.ip138 = action.payload
         },
     }
 })
@@ -230,59 +240,14 @@ const userSlice = createSlice({
     }
 })
 
-const downloadLogSlice = createSlice({
-    //切片名称
-    name: "downloadLog",
-    //初始值
-    initialState: {
-        log: initialDownloadLogState,
-        hasNewItem:false
-    },
-    //方法
-    reducers: {
-        setDownloadLog: (state, action: {payload:DownloadLogItem[],type:string}) => {
-            state.log = action.payload
-        },
-        addDownloadLog: (state, action: {payload:DownloadLogItem,type:string}) => {
-            state.log.push(action.payload)
-        },
-        setHasNewLogItem: (state, action: {payload:boolean,type:string}) => {
-            state.hasNewItem=action.payload
-        },
-    }
-})
+export const configActions = configSlice.actions
 
-const serverStatusSlice = createSlice({
-    //切片名称
-    name: "serverStatus",
-    //初始值
-    initialState: {
-        available: false,
-    },
-    //方法
-    reducers: {
-        setServerStarted: (state, action: {payload:boolean,type:string}) => {
-            state.available = action.payload
-        },
-    }
-})
-
-export const { setAuth, setFofaAuth, setHunterAuth, setZoneAuth, setQuakeAuth, setProxy,setHttpx } = configSlice.actions
-
-export const { setDownloadLog, addDownloadLog,setHasNewLogItem } = downloadLogSlice.actions
-
-export const { setFofaUser,setHunterUser,
-    setQuakeUser
-} = userSlice.actions
-
-export const { setServerStarted } = serverStatusSlice.actions
+export const userActions = userSlice.actions
 
 const store = configureStore({
     reducer: {
         config: configSlice.reducer,
-        downloadLog: downloadLogSlice.reducer,
-        user:userSlice.reducer,
-        server:serverStatusSlice.reducer
+        user:userSlice.reducer,//主要用于存储剩余token
     }
 })
 

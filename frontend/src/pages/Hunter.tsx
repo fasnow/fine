@@ -37,7 +37,7 @@ import {
 import {errorNotification} from '@/component/Notification';
 import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../component/ColumnFilter';
-import {HunterUserType, RootState, setHunterAuth, setHunterUser} from '@/store/store';
+import {HunterUserType, RootState, configActions, userActions} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import {ResizeCallbackData} from 'react-resizable';
@@ -194,7 +194,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         setDisable(false)
                         GetRestToken().then(
                             result => {
-                                dispatch(setHunterUser({restToken: result}))
+                                dispatch(userActions.setHunterUser({restToken: result}))
                             }
                         )
                     })
@@ -568,6 +568,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 234)
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
+        const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
@@ -605,7 +606,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     EventsOn(String(result.hasNewHunterDownloadItem), function () {
                         GetRestToken().then(
                             result => {
-                                dispatch(setHunterUser({restToken: result}))
+                                dispatch(userActions.setHunterUser({restToken: result}))
                             }
                         )
                     })
@@ -753,7 +754,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     setTotal(result.total)
                     setLoading(false)
                     pageIDMap.current[1] = result.taskID
-                    dispatch(setHunterUser({
+                    dispatch(userActions.setHunterUser({
                         restToken: result.restQuota
                     }))
                 }
@@ -785,7 +786,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         setCurrentPage(newPage)
                         setTotal(result.total)
                         pageIDMap.current[newPage] = result.taskID
-                        dispatch(setHunterUser({
+                        dispatch(userActions.setHunterUser({
                             restToken: result.restQuota
                         }))
                         setLoading(false)
@@ -938,6 +939,10 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                             </Popover>
                         </Popover>
                     }
+                    onPressEnter={()=>{
+                        if(!allowEnterPress)return
+                        handleNewQuery(input, currentPageSize)
+                    }}
                     placeholder='Search...'
                 />
                 <Button type='text' size="small" icon={<SearchOutlined/>}
@@ -1147,78 +1152,72 @@ type TabType = {
 }
 
 const AuthSetting: React.FC = () => {
-    const [form] = Form.useForm()
-    const [editable, setEditable] = useState(false)
-    useSelector((state: RootState) => state.config.auth?.hunter);
     const [open, setOpen] = useState<boolean>(false)
+    const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
+    const key = useSelector((state:RootState)=>state.config.auth.hunter.key)
+    const [tmpKey, setTmpKey] = useState("")
 
-    function save(values: any) {
-        setOpen(false)
-        setEditable(false)
-        form.setFieldsValue(values);
-        dispatch(setHunterAuth(values))
-        SetAuth(values.key).catch(
+    useEffect(()=>{
+        setTmpKey(key)
+    }, [key])
+
+
+    function save() {
+        SetAuth(tmpKey).catch(
             err => errorNotification("错误", err)
+        ).then(
+            ()=>{
+                setOpen(false)
+                setEditable(false)
+                dispatch(configActions.setHunterAuth({key: tmpKey}))
+            }
         )
     }
 
-    return (
-        <><Tooltip title="设置">
+    return <>
+        <Tooltip title="设置">
             <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
-            <Modal
-                open={open}
-                onCancel={() => setOpen(false)}
-                onOk={() => {
-                    setOpen(false)
-                }}
-                footer={null}
-                closeIcon={null}
-                width={420}
-                destroyOnClose
-                afterOpenChange={open => {
-                    open && GetHunter().then(
-                        result => {
-                            form.setFieldsValue({
-                                key: result.token,
-                            });
-                        }
-                    ).catch(
-                        err => errorNotification("错误", err)
-                    )
-                }}
-            >
-                <Form
-                    {...authFormProps}
-                    form={form}
-                    disabled={!editable}
-                    onFinish={(values) => {
-                        save(values);
-                    }}
-                >
-                    <Form.Item name="key">
-                        <Input.Password placeholder="token"/>
-                    </Form.Item>
-                </Form>
-                <div style={{display: 'flex', justifyContent: "flex-end"}}>
-                    {!editable ?
-                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                        :
-                        <>
-                            <Button {...buttonProps} htmlType="submit"
-                                    onClick={() => form.submit()}
-                            >保存</Button>
-                            <Button {...buttonProps} htmlType="submit"
-                                    onClick={() => {
-                                        setEditable(false);
-                                        setOpen(false)
-                                    }}
-                            >取消</Button>
-                        </>}
-                </div>
-            </Modal>
-        </>)
+        <Modal
+            open={open}
+            onCancel={() => setOpen(false)}
+            onOk={() => {
+                setOpen(false)
+            }}
+            footer={null}
+            closeIcon={null}
+            width={420}
+            destroyOnClose
+        >
+            <Flex vertical gap={10}>
+                <Input.Password value={tmpKey} placeholder="token" onChange={
+                    e=>{
+                        if(!editable)return
+                        setTmpKey(e.target.value)
+                    }
+                }/>
+                <Flex gap={10} justify={"end"}>
+                    {
+                        !editable ?
+                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                            :
+                            <>
+                                <Button {...buttonProps} htmlType="submit"
+                                        onClick={save}
+                                >保存</Button>
+                                <Button {...buttonProps} htmlType="submit"
+                                        onClick={() => {
+                                            setEditable(false);
+                                            setOpen(false)
+                                        }}
+                                >取消</Button>
+                            </>
+                    }
+                </Flex>
+            </Flex>
+        </Modal>
+    </>
 }
 
 class Hunter extends React.Component {
@@ -1341,8 +1340,6 @@ class Hunter extends React.Component {
                     <Button size="small" shape="circle" type="text" icon={<ExclamationCircleOutlined/>}/>
                 </Tooltip>
             </Space>
-
-
         </div>
     }
 

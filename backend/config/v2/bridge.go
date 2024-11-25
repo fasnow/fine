@@ -1,6 +1,12 @@
 package config
 
+import "fine/backend/logger"
+
 //wails调用
+
+func (r *Config) Get() *Config {
+	return r
+}
 
 func (r *Config) GetWechatDataPath() string {
 	return r.WechatDataPath
@@ -96,4 +102,15 @@ func (r *Config) GetDNS() DNS {
 
 func (r *Config) SaveDNS(dns DNS) error {
 	return SaveDNS(dns)
+}
+
+func (r *Config) SaveQueryOnEnter(enter QueryOnEnter) error {
+	t := GlobalConfig
+	t.QueryOnEnter = enter
+	err := save(*t)
+	if err != nil {
+		logger.Info("can't save queryOnEnter to file")
+		return err
+	}
+	return nil
 }

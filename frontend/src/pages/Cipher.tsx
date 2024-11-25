@@ -793,11 +793,11 @@ export const DES:React.FC<Props>=(props:Props)=>{
         <Flex vertical gap={1} style={{width:"100%"}}>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>key</Col>
-                <Col span={21}><Input onChange={(e)=>{setKey(e.target.value)}} size={"small"} placeholder="128/192/256位,即16/24/32字节"/></Col>
+                <Col span={21}><Input onChange={(e)=>{setKey(e.target.value)}} size={"small"} placeholder="8字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>iv</Col>
-                <Col span={21}><Input onChange={(e)=>{setIV(e.target.value)}} size={"small"} placeholder="16字节"/></Col>
+                <Col span={21}><Input onChange={(e)=>{setIV(e.target.value)}} size={"small"} placeholder="8字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>mode</Col>

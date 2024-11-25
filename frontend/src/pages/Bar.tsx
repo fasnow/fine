@@ -11,7 +11,7 @@ import {
     SendOutlined,
     SyncOutlined,
 } from "@ant-design/icons";
-import {Badge, Button, ConfigProvider, Divider, List, Modal, Popover, Space, Spin, Tag, Tooltip,} from "antd";
+import {Badge, Button, ConfigProvider, Divider, Flex, List, Modal, Popover, Space, Spin, Tag, Tooltip,} from "antd";
 import React, {useEffect, useRef, useState} from "react";
 import "./Bar.css";
 import {useSelector} from "react-redux";
@@ -349,6 +349,7 @@ const Update: React.FC = () => {
     const [releaseUrl, setReleaseUrl] = useState<string>("")
     const [releaseVersion, setReleaseVersion] = useState<string>("")
     const [releaseDescription, setReleaseDescription] = useState<string>("")
+
     useEffect(() => {
         CheckUpdate().then(
             result => {
@@ -412,27 +413,39 @@ const Update: React.FC = () => {
             onCancel={() => setOpen(false)}
             okText={"下载更新"}
         >
-            <div
-                style={{
-                    backgroundColor: "rgba(250, 250, 250,0.5)",
-                    borderLeft: "2px solid #5cdbd3",
-                }}
-            >
-                <span>
-                    最新版本:&nbsp;{releaseVersion}
-                </span><br/>
-                <span style={{display: 'flex', flexDirection: "column"}}>
+            <Flex vertical gap={10}>
+                <Flex >
+                    <span>
+                        最新版本:
+                    </span>
+                    <Tag style={{fontSize:"14px"}} bordered={false} color="green">{releaseVersion}</Tag>
+                </Flex>
+                <Flex vertical>
                     <span>更新内容:</span>
-                    {(releaseDescription && <span style={{
-                        whiteSpace: "pre",
-                        margin: "2px"
-                    }}>{("\t" + releaseDescription).replace(/\n(?!\n?$)/g, '\n\t')}</span>)}
-                </span>
-                <span style={{display: 'flex', flexDirection: "column"}}>
-                    <span>下载地址:</span>
-                    {(releaseUrl && <span style={{whiteSpace: "pre", margin: "2px"}}>{"\t" + releaseUrl}</span>)}
-                </span>
-            </div>
+                    {
+                        releaseDescription && releaseDescription.replace(/\n(?!\n?$)/g, '\n')
+                            .split("\n").map((item,i)=>{
+                                return <span key={i} style={{whiteSpace: "pre",marginLeft: "10px"}}>{item}</span>
+                            })
+                    }
+                </Flex>
+                <Flex vertical>
+                    <span>
+                        下载地址:
+                    </span>
+                    <span style={{whiteSpace: "pre", marginLeft: "10px"}}>
+                        {
+                            releaseUrl &&
+                            <Tag
+                                style={{fontSize:"14px"}}
+                                bordered={false}
+                                color="green">
+                                {releaseUrl.replace(/\n(?!\n?$)/g,"")}
+                            </Tag>
+                        }
+                    </span>
+                </Flex>
+            </Flex>
         </Modal></>
 }
 

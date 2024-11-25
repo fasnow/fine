@@ -34,7 +34,7 @@ import {errorNotification} from '@/component/Notification';
 import {QUERY_FIRST} from '@/component/type';
 import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../component/ColumnFilter';
-import {RootState, setQuakeAuth, setQuakeUser} from '@/store/store';
+import {RootState, configActions, userActions} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
@@ -211,27 +211,35 @@ const defaultMenuItems: MenuItemType[] = [
 ];
 
 const AuthSetting: React.FC = () => {
-    const [form] = Form.useForm()
+    const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const [open, setOpen] = useState<boolean>(false)
+    const key = useSelector((state:RootState)=>state.config.auth.quake.key)
+    const [tmpKey, setTmpKey] = useState("")
 
-    function save(values: any) {
-        setOpen(false)
-        setEditable(false)
-        form.setFieldsValue(values);
-        dispatch(setQuakeAuth(values))
-        SetAuth(values.key).catch(
+    useEffect(()=>{
+        setTmpKey(key)
+    }, [key])
+
+
+    function save() {
+        SetAuth(tmpKey).catch(
             err => errorNotification("错误", err)
+        ).then(
+            ()=>{
+                setOpen(false)
+                setEditable(false)
+                dispatch(configActions.setQuakeAuth({key: tmpKey}))
+            }
         )
     }
 
-    return (<><Tooltip title="设置">
-        <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
-    </Tooltip>
+    return <>
+        <Tooltip title="设置">
+            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
+        </Tooltip>
         <Modal
             open={open}
-            destroyOnClose
             onCancel={() => setOpen(false)}
             onOk={() => {
                 setOpen(false)
@@ -239,46 +247,36 @@ const AuthSetting: React.FC = () => {
             footer={null}
             closeIcon={null}
             width={420}
-            afterOpenChange={open => {
-                open && GetQuake().then(
-                    result => {
-                        form.setFieldsValue({
-                            key: result.token
-                        });
-                    }
-                )
-            }}
+            destroyOnClose
         >
-            <Form
-                {...authFormProps}
-                form={form}
-                disabled={!editable}
-                onFinish={(values) => save(values)}
-            >
-                <Form.Item name="key">
-                    <Input.Password placeholder="token"/>
-                </Form.Item>
-            </Form>
-            <div style={{display: 'flex', justifyContent: "flex-end"}}>
-                {
-                    !editable ?
-                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                        :
-                        <>
-                            <Button {...buttonProps} htmlType="submit"
-                                    onClick={() => form.submit()}
-                            >保存</Button>
-                            <Button {...buttonProps} htmlType="submit"
-                                    onClick={() => {
-                                        setEditable(false);
-                                        setOpen(false)
-                                    }}
-                            >取消</Button>
-                        </>
-                }
-            </div>
+            <Flex vertical gap={10}>
+                <Input.Password value={tmpKey} placeholder="token" onChange={
+                    e=>{
+                        if(!editable)return
+                        setTmpKey(e.target.value)
+                    }
+                }/>
+                <Flex gap={10} justify={"end"}>
+                    {
+                        !editable ?
+                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                            :
+                            <>
+                                <Button {...buttonProps} htmlType="submit"
+                                        onClick={save}
+                                >保存</Button>
+                                <Button {...buttonProps} htmlType="submit"
+                                        onClick={() => {
+                                            setEditable(false);
+                                            setOpen(false)
+                                        }}
+                                >取消</Button>
+                            </>
+                    }
+                </Flex>
+            </Flex>
         </Modal>
-    </>)
+    </>
 }
 
 interface PageDataType extends quake.RealtimeServiceItem {
@@ -351,7 +349,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const updateRestToken = () => {
             GetUserInfo().then(
                 result => {
-                    dispatch(setQuakeUser(result))
+                    dispatch(userActions.setQuakeUser(result))
                 }
             ).catch(
                 err => errorNotification("更新Quake剩余积分", err)
@@ -682,6 +680,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 260)
+        const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
@@ -713,7 +712,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const updateRestToken = () => {
             GetUserInfo().then(
                 result => {
-                    dispatch(setQuakeUser(result))
+                    dispatch(userActions.setQuakeUser(result))
                 }
             ).catch(
                 err => errorNotification("错误", err)
@@ -969,6 +968,10 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     value={input}
                     onChange={(e) => this.setState({input: e.target.value})}
                     placeholder='Search...'
+                    onPressEnter={()=>{
+                        if(!allowEnterPress)return
+                        handleFirstQuery(currentPageSize)
+                    }}
                 />
                 <Button type='text' size="small" icon={<SearchOutlined/>}
                         onClick={() => handleFirstQuery(currentPageSize)}/>
@@ -1242,7 +1245,7 @@ class Quake extends React.Component {
         const updateRestToken = async () => {
             try {
                 const user = await GetUserInfo()
-                dispatch(setQuakeUser(user))
+                dispatch(userActions.setQuakeUser(user))
             } catch (err) {
                 errorNotification("Quake用户信息", err)
             }

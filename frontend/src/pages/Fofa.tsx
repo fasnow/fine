@@ -34,7 +34,7 @@ import {errorNotification} from '@/component/Notification';
 import {QUERY_FIRST} from '@/component/type';
 import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '@/component/ColumnFilter';
-import {RootState, setFofaAuth, setFofaUser} from '@/store/store';
+import {RootState, configActions, userActions} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
@@ -258,7 +258,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const updateRestToken = () => {
             GetUserInfo().then(
                 result => {
-                    dispatch(setFofaUser(result))
+                    dispatch(userActions.setFofaUser(result))
                 }
             ).catch(
                 err => errorNotification("更新FOFA剩余积分", err)
@@ -820,6 +820,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 200)
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
+        const allowEnterPress = useSelector((state:RootState) =>state.config.queryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
@@ -849,7 +850,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const updateRestToken = () => {
             GetUserInfo().then(
                 result => {
-                    dispatch(setFofaUser(result))
+                    dispatch(userActions.setFofaUser(result))
                 }
             ).catch(
                 err => errorNotification("错误", err)
@@ -1198,6 +1199,10 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     onChange={(e) => this.setState({input: e.target.value})}
                     placeholder='Search...'
                     suffix={iconSearchPanel}
+                    onPressEnter={()=> {
+                        if(!allowEnterPress)return
+                        preHandleFirstQuery()
+                    }}
                 />
                 <Button type='text' size="small" icon={<SearchOutlined/>} onClick={preHandleFirstQuery}/>
                 <Help/>
@@ -1511,17 +1516,25 @@ const Help: React.FC = () => {
 
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
-    const [form] = Form.useForm()
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
+    const key = useSelector((state:RootState)=>state.config.auth.fofa.key)
+    const [tmpKey, setTmpKey] = useState("")
 
-    function save(values: any) {
-        setOpen(false)
-        setEditable(false)
-        form.setFieldsValue(values);
-        dispatch(setFofaAuth({email: values.email, key: values.key}))
-        SetAuth(values.email, values.key).catch(
+    useEffect(()=>{
+        setTmpKey(key)
+    }, [key])
+
+
+    function save() {
+        SetAuth(tmpKey).catch(
             err => errorNotification("错误", err)
+        ).then(
+            ()=>{
+                setOpen(false)
+                setEditable(false)
+                dispatch(configActions.setFofaAuth({key: tmpKey}))
+            }
         )
     }
 
@@ -1539,39 +1552,22 @@ const AuthSetting: React.FC = () => {
             closeIcon={null}
             width={420}
             destroyOnClose
-            afterOpenChange={open => {
-                open && GetFofa().then(
-                    result => {
-                        console.log(result)
-                        form.setFieldsValue({
-                            email: result.email,
-                            key: result.token,
-                        });
-                    }
-                )
-            }}
         >
-            <Form
-                {...authFormProps}
-                form={form}
-                disabled={!editable}
-                onFinish={(values) => save(values)}
-            >
-                <Form.Item name="email">
-                    <Input placeholder="email"/>
-                </Form.Item>
-                <Form.Item name="key">
-                    <Input.Password placeholder="token"/>
-                </Form.Item>
-            </Form>
-            <div style={{display: 'flex', justifyContent: "flex-end"}}>
+            <Flex vertical gap={10}>
+                <Input.Password value={tmpKey} placeholder="token" onChange={
+                    e=>{
+                        if(!editable)return
+                        setTmpKey(e.target.value)
+                    }
+                }/>
+                <Flex gap={10} justify={"end"}>
                 {
                     !editable ?
                         <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
                         :
                         <>
                             <Button {...buttonProps} htmlType="submit"
-                                    onClick={() => form.submit()}
+                                    onClick={save}
                             >保存</Button>
                             <Button {...buttonProps} htmlType="submit"
                                     onClick={() => {
@@ -1581,7 +1577,8 @@ const AuthSetting: React.FC = () => {
                             >取消</Button>
                         </>
                 }
-            </div>
+                </Flex>
+            </Flex>
         </Modal>
     </>
 }
@@ -1685,7 +1682,7 @@ class Fofa extends React.Component {
 
         const updateRestToken = async () => {
             try {
-                dispatch(setFofaUser(await GetUserInfo()))
+                dispatch(userActions.setFofaUser(await GetUserInfo()))
             } catch (err) {
                 errorNotification("Fofa用户信息", err)
             }

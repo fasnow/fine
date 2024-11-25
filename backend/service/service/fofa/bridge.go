@@ -27,7 +27,7 @@ type Bridge struct {
 
 func NewFofaBridge(app *app.App) *Bridge {
 	t := config.GetFofa()
-	tt := NewClient(t.Email, t.Token)
+	tt := NewClient(t.Token)
 	config.ProxyManager.Add(tt)
 	return &Bridge{
 		fofa:        tt,
@@ -168,13 +168,12 @@ func (r *Bridge) GetUserInfo() (*User, error) {
 	return user, nil
 }
 
-func (r *Bridge) SetAuth(email, key string) error {
+func (r *Bridge) SetAuth(key string) error {
 	t := config.GetFofa()
 	t.Token = key
-	t.Email = email
 	if err := config.SaveFofa(t); err != nil {
 		return err
 	}
-	r.fofa.SetAuth(email, key)
+	r.fofa.SetAuth(key)
 	return nil
 }

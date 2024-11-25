@@ -6,6 +6,8 @@ import {List, WindowScroller} from "react-virtualized"
 import TextArea from 'antd/es/input/TextArea';
 import {sleep} from '@/util/util';
 import {GetCurrentDomain, GetCurrentIP, GetHistoryIP} from "../../wailsjs/go/ip138/Bridge";
+import {useSelector} from "react-redux";
+import {RootState} from "@/store/store";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 type TabType = {
@@ -34,6 +36,7 @@ const IP138Content: React.FC = () => {
     const [wornning, setWarnnig] = useState<string>("")
     const running = useRef<boolean>(false)
     const interval = useRef<number>(1000)
+    const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.ip138)
 
     function isIPAddress(input: string): boolean {
         // IPv4 正则表达式
@@ -238,7 +241,10 @@ const IP138Content: React.FC = () => {
                         </Tooltip> */}
                     </Space.Compact>}
                     value={input}
-                    onPressEnter={preQuery}
+                    onPressEnter={()=>{
+                        if(!allowEnterPress)return
+                        preQuery()
+                    }}
                     onChange={(e) => setInput(e.target.value)}
                 />
                 <MultipleTargetModal/>

@@ -1,5 +1,21 @@
 export namespace config {
 	
+	export class QueryOnEnter {
+	    assets: boolean;
+	    icp: boolean;
+	    ip138: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new QueryOnEnter(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.assets = source["assets"];
+	        this.icp = source["icp"];
+	        this.ip138 = source["ip138"];
+	    }
+	}
 	export class DNS {
 	    value: string[];
 	
@@ -10,22 +26,6 @@ export namespace config {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.value = source["value"];
-	    }
-	}
-	export class Fofa {
-	    email: string;
-	    token: string;
-	    interval: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Fofa(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.email = source["email"];
-	        this.token = source["token"];
-	        this.interval = source["interval"];
 	    }
 	}
 	export class Httpx {
@@ -40,56 +40,6 @@ export namespace config {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.path = source["path"];
 	        this.flags = source["flags"];
-	    }
-	}
-	export class Hunter {
-	    token: string;
-	    interval: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Hunter(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.token = source["token"];
-	        this.interval = source["interval"];
-	    }
-	}
-	export class Proxy {
-	    enable: boolean;
-	    type: string;
-	    host: string;
-	    port: string;
-	    user: string;
-	    pass: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Proxy(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.enable = source["enable"];
-	        this.type = source["type"];
-	        this.host = source["host"];
-	        this.port = source["port"];
-	        this.user = source["user"];
-	        this.pass = source["pass"];
-	    }
-	}
-	export class Quake {
-	    token: string;
-	    interval: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Quake(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.token = source["token"];
-	        this.interval = source["interval"];
 	    }
 	}
 	export class Wechat {
@@ -120,6 +70,128 @@ export namespace config {
 	        this.interval = source["interval"];
 	    }
 	}
+	export class Quake {
+	    token: string;
+	    interval: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Quake(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.token = source["token"];
+	        this.interval = source["interval"];
+	    }
+	}
+	export class Hunter {
+	    token: string;
+	    interval: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Hunter(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.token = source["token"];
+	        this.interval = source["interval"];
+	    }
+	}
+	export class Fofa {
+	    token: string;
+	    interval: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Fofa(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.token = source["token"];
+	        this.interval = source["interval"];
+	    }
+	}
+	export class Proxy {
+	    enable: boolean;
+	    type: string;
+	    host: string;
+	    port: string;
+	    user: string;
+	    pass: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Proxy(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enable = source["enable"];
+	        this.type = source["type"];
+	        this.host = source["host"];
+	        this.port = source["port"];
+	        this.user = source["user"];
+	        this.pass = source["pass"];
+	    }
+	}
+	export class Config {
+	    Timeout: number;
+	    Proxy: Proxy;
+	    Fofa: Fofa;
+	    Hunter: Hunter;
+	    Quake: Quake;
+	    Zone: Zone;
+	    Wechat: Wechat;
+	    Httpx: Httpx;
+	    DNS: DNS;
+	    WechatDataPath: string;
+	    QueryOnEnter: QueryOnEnter;
+	
+	    static createFrom(source: any = {}) {
+	        return new Config(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Timeout = source["Timeout"];
+	        this.Proxy = this.convertValues(source["Proxy"], Proxy);
+	        this.Fofa = this.convertValues(source["Fofa"], Fofa);
+	        this.Hunter = this.convertValues(source["Hunter"], Hunter);
+	        this.Quake = this.convertValues(source["Quake"], Quake);
+	        this.Zone = this.convertValues(source["Zone"], Zone);
+	        this.Wechat = this.convertValues(source["Wechat"], Wechat);
+	        this.Httpx = this.convertValues(source["Httpx"], Httpx);
+	        this.DNS = this.convertValues(source["DNS"], DNS);
+	        this.WechatDataPath = source["WechatDataPath"];
+	        this.QueryOnEnter = this.convertValues(source["QueryOnEnter"], QueryOnEnter);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 
 }
 

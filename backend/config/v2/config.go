@@ -15,7 +15,6 @@ import (
 )
 
 type Fofa struct {
-	Email    string        `ini:"email" json:"email" comment:"向前兼容，可有可无"`
 	Token    string        `ini:"token" json:"token"`
 	Interval time.Duration `ini:"interval" json:"interval" comment:"接口请求间隔，默认:0.3s"`
 }
@@ -54,6 +53,12 @@ type DNS struct {
 	Value []string `ini:"value,,allowshadow" json:"value"`
 }
 
+type QueryOnEnter struct {
+	Assets bool `ini:"assets" json:"assets"`
+	ICP    bool `ini:"icp" json:"icp"`
+	IP138  bool `ini:"ip138" json:"ip138"`
+}
+
 type Config struct {
 	Timeout        time.Duration `ini:"timeout" comment:"全局HTTP超时（不含Httpx），默认:20s"`
 	Proxy          Proxy
@@ -69,6 +74,7 @@ type Config struct {
 	filePath       string `ini:"-"`
 	dbFilePath     string `ini:"-"`
 	WechatDataPath string `ini:"-"`
+	QueryOnEnter   QueryOnEnter
 }
 
 var (
@@ -178,7 +184,6 @@ func init() {
 		tt.Proxy.Pass = deprecatedCfg.Proxy.Pass
 		tt.Httpx.Path = deprecatedCfg.Httpx.Path
 		tt.Httpx.Flags = deprecatedCfg.Httpx.Flags
-		tt.Fofa.Email = deprecatedCfg.Auth.Fofa.Email
 		tt.Fofa.Token = deprecatedCfg.Auth.Fofa.Key
 		tt.Fofa.Interval = time.Duration(deprecatedCfg.Interval.Fofa) * time.Millisecond
 		tt.Hunter.Token = deprecatedCfg.Auth.Hunter.Key
@@ -262,6 +267,7 @@ func init() {
 			}
 			GlobalConfig.Wechat.Applet = filepath.Join(homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
 		}
+
 		save(*GlobalConfig)
 	}
 	logger.Info(*GlobalConfig)

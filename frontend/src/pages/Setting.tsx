@@ -1,23 +1,30 @@
-import React, {useEffect, useState} from 'react';
-import type {ButtonProps, FormProps, TabsProps} from 'antd';
-import {Button, Col, ConfigProvider, Form, Input, Row, Select, Space, Switch, Tabs, Tooltip} from 'antd';
+import React, {CSSProperties, useEffect, useState} from 'react';
+import type {ButtonProps, FormProps} from 'antd';
+import {Button, Divider, Flex, Input, Row, Select, Space, Switch} from 'antd';
 import "./Setting.css"
 import ScrollBar from '../component/ScrollBar';
 import {useDispatch, useSelector} from 'react-redux';
-import {RootState, setProxy} from '@/store/store';
-import {SyncOutlined} from '@ant-design/icons';
+import {RootState, configActions} from '@/store/store';
 import {errorNotification} from '@/component/Notification';
-import {Get0zone, GetFofa, GetHunter, GetProxy, GetQuake, SaveProxy,} from "../../wailsjs/go/config/Config";
+import {
+    Get,
+    Get0zone,
+    GetFofa,
+    GetHunter,
+    GetProxy,
+    GetQuake,
+    SaveProxy,
+    SaveQueryOnEnter,
+} from "../../wailsjs/go/config/Config";
 import {SetAuth as SetHunterAuth} from "../../wailsjs/go/hunter/Bridge";
 import {SetAuth as SetFofaAuth} from "../../wailsjs/go/fofa/Bridge";
 import {SetAuth as Set0zoneAuth} from "../../wailsjs/go/zone/Bridge";
 import {SetAuth as SetQuakeAuth} from "../../wailsjs/go/quake/Bridge";
 import locale from "antd/locale/zh_CN";
 import {CssConfig} from "@/pages/Config";
+import {config} from "../../wailsjs/go/models";
+import QueryOnEnter = config.QueryOnEnter;
 
-const onChange = (key: string) => {
-    console.log(key);
-};
 
 export const buttonProps: ButtonProps = {
     type: "default", shape: "round", size: "small"
@@ -31,317 +38,492 @@ export const proxyFormProps: FormProps = {
     size: "middle", style: {width: "300px"}
 };
 
-export const Proxy: React.FC = () => {
-    const [editable, setEditable] = useState(false)
-    const [form] = Form.useForm();
+const LabelCssProps:CSSProperties={
+    display:"inline-block",textAlign:"left",paddingRight:"5px",width:"48px",height:"24px"
+}
+
+const InputCssProps:CSSProperties={
+    width:"400px", marginRight:"10px"
+}
+export const Proxy=()=>{
     const dispatch = useDispatch()
-    const save = (values: any) => {
-        setEditable(false)
-        form.setFieldsValue(values);
-        SaveProxy({
-            enable: values.enable,
-            type: values.type,
-            host: values.host,
-            port: values.port,
-            user: values.username,
-            pass: values.password
-        }).then(() => {
-            dispatch(setProxy({
-                enable: values.enable,
-                type: values.type,
-                host: values.host,
-                port: values.port,
-                user: values.username,
-                pass: values.password
-            }))
+    const [editable, setEditable] = useState(false)
+    const proxy = useSelector((state: RootState) => state.config.proxy)
+    const [proxyConf,setProxyConf] = useState<config.Proxy>({
+        enable:false,
+        host:"",
+        port:"",
+        user:"",
+        pass:"",
+        type:""
+    })
+    const [proxyConfTmp,setProxyConfTmp] = useState<config.Proxy>({
+        enable:false,
+        host:"",
+        port:"",
+        user:"",
+        pass:"",
+        type:""
+    })
+
+    useEffect(() => {
+        GetProxy().then(
+            result => {
+                dispatch(configActions.setProxy(result))
+            }
+        )
+    }, []);
+
+    useEffect(() => {
+        setProxyConf(proxy)
+        setProxyConfTmp(proxy)
+    }, [proxy]);
+
+    const save=(enable:boolean)=>{
+        let t:config.Proxy={
+            enable:enable,
+            type:proxyConfTmp.type,
+            host:proxyConfTmp.host,
+            port:proxyConfTmp.port,
+            user:proxyConfTmp.user,
+            pass:proxyConfTmp.pass,
+        }
+        setProxyConfTmp(t)
+        SaveProxy(t).then(() => {
+            setEditable(false)
+            dispatch(configActions.setProxy(t))
         }).catch(
             err => errorNotification("错误", err, 3)
         )
     }
-    useEffect(() => {
-        GetProxy().then(
-            result => {
-                form.setFieldsValue({
-                    type: result.type,
-                    host: result.host,
-                    port: result.port,
-                    username: result.user,
-                    password: result.pass,
-                    enable: result.enable
-                });
-                dispatch(setProxy(result))
-            }
-        )
-    }, []);
-    return (<div style={{
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "20px"
-    }}>
-        <div>
-            <Form
-                {...proxyFormProps}
-                form={form}
-                labelCol={{span: 4}}
-                wrapperCol={{span: 20}}
-                layout="horizontal"
-                onFinish={(values) => {
-                    save(values)
+
+    const cancel=()=>{
+        setEditable(false)
+        setProxyConfTmp(proxyConf)
+    }
+    return <Flex justify={"left"}>
+        <span style={LabelCssProps}>代理</span>
+        <span style={{marginRight:"10px"}}>
+            <Space.Compact size={"small"} style={{width:"100%"}}>
+            <Select
+                defaultValue={proxyConf?.type}
+                value={proxyConfTmp.type}
+                style={{ width: '90px' }}
+                options={
+                    [{label:"http",value:"http"}, {label:"socks5",value:"socks5"}]
+                }
+                onChange={(v)=> {
+                    if(editable)setProxyConfTmp(preState => {
+                        return {...preState, type: v}
+                    })
                 }}
-                disabled={!editable}
-                colon={false}
-            >
-                <Form.Item label="类型" name="type">
-                    <Select size="small">
-                        <Select.Option value="http">http</Select.Option>
-                        <Select.Option value="socks5">socks5</Select.Option>
-                    </Select>
-                </Form.Item>
-                <Form.Item label="主机" name="host">
-                    <Input size="small"/>
-                </Form.Item>
-                <Form.Item label="端口" name="port">
-                    <Input size="small"/>
-                </Form.Item>
-                <Form.Item label="用户名" name="username">
-                    <Input size="small"/>
-                </Form.Item>
-                <Form.Item label="密码" name="password">
-                    <Input.Password size="small"/>
-                </Form.Item>
-                <Form.Item labelCol={{span: 4}} label>
-                    <Row>
-                        <Col offset="0" span="12">
-                            <Form.Item noStyle>
-                                {
-                                    !editable ?
-                                        <Button {...buttonProps} disabled={false}
-                                                onClick={() => setEditable(true)}>修改</Button>
-                                        :
-                                        <>
-                                            <Button {...buttonProps}
-                                                    onClick={() => form.submit()}
-                                            >保存</Button>
-                                            <Button {...buttonProps}
-                                                    onClick={() => setEditable(false)}
-                                            >取消</Button>
-                                        </>
-                                }
-                            </Form.Item>
-                        </Col>
-                        <Col offset="6">
-                            <Form.Item name="enable" noStyle valuePropName='checked'>
-                                <Switch disabled={editable} size="default" checkedChildren="开启"
-                                        unCheckedChildren="关闭" onChange={() => form.submit()}/>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </Form.Item>
-            </Form>
-        </div>
-    </div>)
+            />
+            <Input value={proxyConfTmp?.host} placeholder={"host"} style={{ width: '140px' }}
+                   onChange={e=> {
+                       if(editable)setProxyConfTmp(preState => {
+                           return {...preState, host: e.target.value}
+                       })
+                   }}
+            />
+            <Input value={proxyConfTmp?.port} placeholder={"port"} style={{ width: '80px' }}
+                   onChange={e=> {
+                       if(editable)setProxyConfTmp(preState => {
+                           return {...preState, port: e.target.value}
+                       })
+                   }}
+            />
+            <Input value={proxyConfTmp?.user} placeholder={"user"} style={{ width: '100px' }}
+                   onChange={e=> {
+                       if(editable)setProxyConfTmp(preState => {
+                           return {...preState, user: e.target.value}
+                       })
+                   }}
+            />
+            <Input.Password value={proxyConfTmp?.pass} placeholder={"pass"} style={{ width: '100px' }}
+                            onChange={e=> {
+                                if(editable)setProxyConfTmp(preState => {
+                                    return {...preState, pass: e.target.value}
+                                })
+                            }}
+            />
+            </Space.Compact>
+        </span>
+            <Flex gap={10}>
+                {
+                    !editable ?
+                        <Button {...buttonProps} disabled={false}
+                                onClick={() => setEditable(true)}>修改</Button>
+                        :
+                        <Flex gap={10}>
+                            <Button {...buttonProps}
+                                onClick={()=>save(proxyConfTmp.enable)}
+                            >保存</Button>
+                            <Button {...buttonProps}
+                                    onClick={cancel}
+                            >取消</Button>
+                        </Flex>
+                }
+                <Switch value={proxyConfTmp.enable} size="default" checkedChildren="开启"
+                        unCheckedChildren="关闭"
+                        onChange={v=> {
+                            if(!editable)save(v)
+                        }}
+                />
+            </Flex>
+        </Flex>
 }
 
-const Account: React.FC = () => {
+export const Other=()=>{
+    const dispatch = useDispatch()
+    const queryOnEnter = useSelector((state: RootState) => state.config.queryOnEnter)
+
+
+    useEffect(()=>{
+        Get().then(
+            config=>{
+                dispatch(configActions.setQueryOnEnter(config.QueryOnEnter))
+            }
+        )
+    }, [])
+
+    const saveAssets=(enable:boolean)=>{
+        const t:QueryOnEnter = {
+            ...queryOnEnter,
+            assets:enable,
+        }
+        SaveQueryOnEnter(t).catch(
+            err => errorNotification("错误", err, 3)
+        ).then(
+            ()=>dispatch(configActions.setAssetsQueryOnEnter(enable))
+        )
+    }
+
+    const saveIcp=(enable:boolean)=>{
+        const t:QueryOnEnter = {
+            ...queryOnEnter,
+            icp:enable,
+        }
+        SaveQueryOnEnter(t).catch(
+            err => errorNotification("错误", err, 3)
+        ).then(
+            ()=>dispatch(configActions.setIcpQueryOnEnter(enable))
+        )
+    }
+
+    const saveIP138=(enable:boolean)=>{
+        const t:QueryOnEnter = {
+            ...queryOnEnter,
+            ip138:enable,
+        }
+        SaveQueryOnEnter(t).catch(
+            err => errorNotification("错误", err, 3)
+        ).then(
+            ()=>dispatch(configActions.setIP138QueryOnEnter(enable))
+        )
+    }
+
+    return <Flex gap={40}>
+        <span>
+            <span style={{
+                display:"inline-block",
+                textAlign:"left",
+                paddingRight:"5px",
+                height:"24px"
+            }}
+            >
+                IP138 Enter键执行搜索
+            </span>
+            <span>
+                <Switch
+                    value={queryOnEnter.ip138}
+                    checkedChildren="开启"
+                    unCheckedChildren="关闭"
+                    onChange={v=> saveIP138(v)}
+                />
+            </span>
+        </span>
+        <span>
+            <span style={{
+                display:"inline-block",
+                textAlign:"left",
+                paddingRight:"5px",
+                height:"24px"
+            }}
+            >
+                ICP Enter键执行搜索
+            </span>
+            <span>
+                <Switch
+                    value={queryOnEnter.icp}
+                    checkedChildren="开启"
+                    unCheckedChildren="关闭"
+                    onChange={v=> saveIcp(v)}
+                    />
+            </span>
+        </span>
+        <span>
+            <span style={{
+                display:"inline-block",
+                textAlign:"left",
+                paddingRight:"5px",
+                height:"24px"
+            }}
+            >
+                网络资产测绘Enter键执行搜索
+        </span>
+            <span>
+                <Switch
+                    value={queryOnEnter.assets}
+                    checkedChildren="开启"
+                    unCheckedChildren="关闭"
+                    onChange={v=> saveAssets(v)}
+                />
+            </span>
+        </span>
+    </Flex>
+}
+
+export const Setting: React.FC = () => {
     const dispatch = useDispatch()
 
     const FofaForm: React.FC = () => {
-        const [form] = Form.useForm()
         const [editable, setEditable] = useState(false)
-        const fofaAuth = useSelector((state: RootState) => state.config.auth.fofa)
-
-        function save(values: any) {
-            setEditable(false)
-            form.setFieldsValue(values);
-            SetFofaAuth(values.email, values.key).catch(
-                err => errorNotification("错误", err, 3)
-            )
-        }
+        const [key, setKey] = useState("")
+        const [tmpKey, setTmpKey] = useState("")
+        const auth = useSelector((state: RootState) => state.config.auth.fofa)
 
         useEffect(() => {
             GetFofa().then(
                 (result) => {
-                    form.setFieldsValue({
-                        email: result.email,
-                        key: result.token,
-                    });
+                    dispatch(configActions.setFofaAuth({key:result.token}))
                 }
             )
         }, []);
-        return (<div className='border'>
-      <span className='border_title'>
-        Fofa
-      </span>
-            <Form
-                {...authFormProps}
-                form={form}
-                disabled={!editable}
-                onFinish={(values) => save(values)}
-            >
-                <Form.Item name="email">
-                    <Input placeholder="email"/>
-                </Form.Item>
-                <Form.Item name="key">
-                    <Input.Password placeholder="token"/>
-                </Form.Item>
-            </Form>
-            {
-                !editable ?
-                    <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                    :
-                    <>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => form.submit()}
-                        >保存</Button>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => setEditable(false)}
-                        >取消</Button>
-                    </>
-            }
-        </div>)
+
+        useEffect(() => {
+            setKey(auth.key)
+            setTmpKey(auth.key)
+        }, [auth]);
+
+
+        const save=()=> {
+            SetFofaAuth(key).then(
+                r=> {
+                    dispatch(configActions.setFofaAuth({key:key}))
+                    setEditable(false)
+                }
+            ).catch(
+                err => errorNotification("错误", err, 3)
+            )
+        }
+
+        const cancel=()=>{
+            setKey(tmpKey)
+            setEditable(false)
+        }
+
+
+        return <Flex justify={"left"}>
+            <span style={LabelCssProps}>FOFA</span>
+            <span style={InputCssProps}>
+                <Input.Password  value={key} onChange={(e)=>{if(editable)setKey(e.target.value)}} size={"small"}/>
+            </span>
+            <Flex gap={10}>
+                {
+                    !editable ?
+                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                        :
+                        <Flex gap={10}>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={save}
+                            >保存</Button>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={cancel}
+                            >取消</Button>
+                        </Flex>
+                }
+            </Flex>
+        </Flex>
     }
 
     const HunterForm: React.FC = () => {
-        const [form] = Form.useForm()
         const [editable, setEditable] = useState(false)
-        const hunterAuth = useSelector((state: RootState) => state.config.auth?.hunter)
+        const [key, setKey] = useState("")
+        const [tmpKey, setTmpKey] = useState("")
+        const auth = useSelector((state: RootState) => state.config.auth.hunter)
+
         useEffect(() => {
             GetHunter().then(
-                (result) => form.setFieldsValue({key: result.token,})
+                (result) => {
+                    dispatch(configActions.setHunterAuth({key:result.token}))
+                }
             )
         }, []);
 
-        function save(values: any) {
-            setEditable(false)
-            form.setFieldsValue(values);
-            SetHunterAuth(values.key).catch(
+        useEffect(() => {
+            setKey(auth.key)
+            setTmpKey(auth.key)
+        }, [auth]);
+
+
+        const save=()=> {
+            SetHunterAuth(key).then(
+                r=> {
+                    dispatch(configActions.setFofaAuth({key:key}))
+                    setEditable(false)
+                }
+            ).catch(
                 err => errorNotification("错误", err, 3)
             )
         }
 
-        return (<div className='border'>
-      <span className='border_title'>
-        Hunter
-      </span>
-            <Form
-                {...authFormProps}
-                form={form}
-                disabled={!editable}
-                onFinish={(values) => {
-                    save(values)
-                }}
-            >
-                <Form.Item name="key">
-                    <Input.Password placeholder="token"/>
-                </Form.Item>
-            </Form>
-            {
-                !editable ?
-                    <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                    :
-                    <>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => form.submit()}
-                        >保存</Button>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => setEditable(false)}
-                        >取消</Button>
-                    </>
-            }
-        </div>)
+        const cancel=()=>{
+            setKey(tmpKey)
+            setEditable(false)
+        }
+
+
+        return <Flex justify={"left"}>
+            <span style={LabelCssProps}>Hunter</span>
+            <span style={InputCssProps}>
+                <Input.Password value={key} onChange={(e)=>{if(editable)setKey(e.target.value)}} size={"small"}/>
+            </span>
+            <Flex gap={10}>
+                {
+                    !editable ?
+                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                        :
+                        <Flex gap={10}>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={save}
+                            >保存</Button>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={cancel}
+                            >取消</Button>
+                        </Flex>
+                }
+            </Flex>
+        </Flex>
     }
 
     const ZoneForm: React.FC = () => {
-        const [form] = Form.useForm()
         const [editable, setEditable] = useState(false)
-        const zoneAuth = useSelector((state: RootState) => state.config.auth?.['0.zone'])
+        const [key, setKey] = useState("")
+        const [tmpKey, setTmpKey] = useState("")
+        const auth = useSelector((state: RootState) => state.config.auth["0.zone"])
+
         useEffect(() => {
             Get0zone().then(
-                (result) => form.setFieldsValue({key: result.token,})
+                (result) => {
+                    dispatch(configActions.setZoneAuth({key:result.token}))
+                }
             )
         }, []);
 
-        function save(values: any) {
-            setEditable(false)
-            form.setFieldsValue(values);
-            Set0zoneAuth(values.key).catch(
+        useEffect(() => {
+            setKey(auth.key)
+            setTmpKey(auth.key)
+        }, [auth]);
+
+
+        const save=()=> {
+            Set0zoneAuth(key).then(
+                r=> {
+                    dispatch(configActions.setFofaAuth({key:key}))
+                    setEditable(false)
+                }
+            ).catch(
                 err => errorNotification("错误", err, 3)
             )
         }
 
-        return (<div className='border'>
-      <span className='border_title'>
-        0.zone
-      </span>
-            <Form
-                {...authFormProps}
-                form={form}
-                disabled={!editable}
-                onFinish={(values) => save(values)}
-            >
-                <Form.Item name="key">
-                    <Input.Password placeholder="token"/>
-                </Form.Item>
-            </Form>
-            {
-                !editable ?
-                    <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                    :
-                    <>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => form.submit()}
-                        >保存</Button>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => setEditable(false)}
-                        >取消</Button>
-                    </>
-            }
-        </div>)
+        const cancel=()=>{
+            setKey(tmpKey)
+            setEditable(false)
+        }
+
+
+        return <Flex justify={"left"}>
+            <span style={LabelCssProps}>零零信安</span>
+            <span style={InputCssProps}>
+                <Input.Password value={key} onChange={(e)=>{if(editable)setKey(e.target.value)}} size={"small"}/>
+            </span>
+            <Flex gap={10}>
+                {
+                    !editable ?
+                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                        :
+                        <>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={save}
+                            >保存</Button>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={cancel}
+                            >取消</Button>
+                        </>
+                }
+            </Flex>
+        </Flex>
     }
 
     const QuakeForm: React.FC = () => {
-        const [form] = Form.useForm()
         const [editable, setEditable] = useState(false)
+        const [key, setKey] = useState("")
+        const [tmpKey, setTmpKey] = useState("")
+        const auth = useSelector((state: RootState) => state.config.auth.quake)
+
         useEffect(() => {
             GetQuake().then(
-                (result) => form.setFieldsValue({key: result.token,})
+                (result) => {
+                    dispatch(configActions.setQuakeAuth({key:result.token}))
+                }
             )
         }, []);
 
-        function save(values: any) {
-            setEditable(false)
-            form.setFieldsValue(values);
-            SetQuakeAuth(values.key).catch(
+        useEffect(() => {
+            setKey(auth.key)
+            setTmpKey(auth.key)
+        }, [auth]);
+
+
+        const save=()=> {
+            SetQuakeAuth(key).then(
+                r=> {
+                    dispatch(configActions.setFofaAuth({key:key}))
+                    setEditable(false)
+                }
+            ).catch(
                 err => errorNotification("错误", err, 3)
             )
         }
 
-        return (<div className='border'>
-      <span className='border_title'>
-        Quake
-      </span>
-            <Form
-                {...authFormProps}
-                form={form}
-                disabled={!editable}
-                onFinish={(values) => save(values)}
-            >
-                <Form.Item name="key">
-                    <Input.Password placeholder="token"/>
-                </Form.Item>
-            </Form>
-            {
-                !editable ?
-                    <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                    :
-                    <>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => form.submit()}
-                        >保存</Button>
-                        <Button {...buttonProps} htmlType="submit"
-                                onClick={() => setEditable(false)}
-                        >取消</Button>
-                    </>
-            }
-        </div>)
+        const cancel=()=>{
+            setKey(tmpKey)
+            setEditable(false)
+        }
+
+
+        return <Flex justify={"left"}>
+            <span style={LabelCssProps}>Quake</span>
+            <span style={InputCssProps}>
+                <Input.Password value={key} onChange={(e)=>{if(editable)setKey(e.target.value)}} size={"small"}/>
+            </span>
+            <Flex gap={10}>
+                {
+                    !editable ?
+                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                        :
+                        <Flex gap={10}>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={save}
+                            >保存</Button>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={cancel}
+                            >取消</Button>
+                        </Flex>
+                }
+            </Flex>
+        </Flex>
     }
 
     return (
@@ -351,55 +533,11 @@ const Account: React.FC = () => {
                 <HunterForm/>
                 <ZoneForm/>
                 <QuakeForm/>
+                <Divider style={{marginTop:"5px",marginBottom:"5px"}}/>
+                <Proxy/>
+                <Divider style={{marginTop:"5px",marginBottom:"5px"}}/>
+                <Other/>
             </Space>
         </ScrollBar>
     )
-
-}
-
-const items: TabsProps['items'] = [
-    {
-        key: 'account',
-        label: `账号`,
-        children: <Account/>,
-    },
-    {
-        key: 'proxy',
-        label: `代理`,
-        children: <ScrollBar height={`calc(100vh - ${CssConfig.tab.height} - ${CssConfig.title.height} - 30px)`}><Proxy/></ScrollBar>,
-    },
-
-    // {
-    //   key: 'other',
-    //   label: `其他`,
-    //   children: <NotFound />,
-    // },
-];
-
-
-export const Setting: React.FC = () => {
-    const dispatch = useDispatch()
-    const RefreshPanel = () => {
-        const [spin, setSpin] = useState<boolean>(false)
-
-
-        return (<Tooltip title="刷新设置">
-            <Button
-                style={{marginLeft: "10px"}}
-                size="small"
-                shape="circle"
-                type="text"
-                icon={<SyncOutlined spin={spin} onClick={async () => {
-                    setSpin(true)
-                    setSpin(false)
-                }}
-            />
-            }></Button>
-        </Tooltip>)
-    }
-    return <Tabs
-        type={"card"}
-        size="small"
-        defaultActiveKey="account" items={items} onChange={onChange}
-    />
 }

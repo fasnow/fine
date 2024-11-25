@@ -4,7 +4,7 @@ import {
     Button,
     ConfigProvider,
     Dropdown,
-    Empty,
+    Empty, Flex,
     Form,
     Input,
     InputNumber,
@@ -48,7 +48,7 @@ import NotFound from './Notfound';
 import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '../component/ResizableTitle';
 import {useDispatch, useSelector} from 'react-redux';
-import {RootState, setZoneAuth} from '@/store/store';
+import {RootState, configActions} from '@/store/store';
 import {ExportDataPanelProps} from './Props';
 import {authFormProps, buttonProps} from './Setting';
 import {copy, localeCompare} from '@/util/util';
@@ -164,69 +164,59 @@ const CodeDisplay: React.FC<{ code: string, length?: number }> = (props) => {
 
 
 const AuthSetting: React.FC = () => {
-    const [form] = Form.useForm()
-    const [editable, setEditable] = useState(false)
-    const zoneAuth = useSelector((state: RootState) => state.config.auth?.['0.zone'])
-    const dispatch = useDispatch()
     const [open, setOpen] = useState<boolean>(false)
-    const save = (values: any) => {
-        setOpen(false)
-        setEditable(false)
-        form.setFieldsValue(values);
-        dispatch(setZoneAuth(values))
-        SetAuth(values.key).catch(err => errorNotification("错误", err))
+    const [editable, setEditable] = useState(false)
+    const dispatch = useDispatch()
+    const key = useSelector((state:RootState)=>state.config.auth["0.zone"].key)
+    const [tmpKey, setTmpKey] = useState("")
+
+    useEffect(()=>{
+        setTmpKey(key)
+    }, [key])
+
+
+    function save() {
+        SetAuth(tmpKey).catch(
+            err => errorNotification("错误", err)
+        ).then(
+            ()=>{
+                setOpen(false)
+                setEditable(false)
+                dispatch(configActions.setZoneAuth({key: tmpKey}))
+            }
+        )
     }
-    return <div style={{
-        width: "auto",
-        height: "23px",
-        display: "flex",
-        alignItems: "center",
-        backgroundColor: "#f1f3f4"
-    }}>
-        <><Tooltip title="设置">
+
+    return <>
+        <Tooltip title="设置">
             <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
-            <Modal
-                open={open}
-                onCancel={() => setOpen(false)}
-                onOk={() => {
-                    setOpen(false)
-                }}
-                footer={null}
-                closeIcon={null}
-                width={420}
-                destroyOnClose
-                afterOpenChange={(open) => {
-                    open && Get0zone().then(
-                        result => {
-                            form.setFieldsValue({
-                                key: result.token,
-                            });
-                        }
-                    ).catch(
-                        err => errorNotification("错误", err)
-                    )
-                }}
-
-            >
-                <Form
-                    {...authFormProps}
-                    form={form}
-                    disabled={!editable}
-                    onFinish={(values) => save(values)}
-                >
-                    <Form.Item name="key">
-                        <Input.Password placeholder="token"/>
-                    </Form.Item>
-                </Form>
-                <div style={{display: 'flex', justifyContent: "flex-end"}}>
+        <Modal
+            open={open}
+            onCancel={() => setOpen(false)}
+            onOk={() => {
+                setOpen(false)
+            }}
+            footer={null}
+            closeIcon={null}
+            width={420}
+            destroyOnClose
+        >
+            <Flex vertical gap={10}>
+                <Input.Password value={tmpKey} placeholder="token" onChange={
+                    e=>{
+                        if(!editable)return
+                        setTmpKey(e.target.value)
+                    }
+                }/>
+                <Flex gap={10} justify={"end"}>
                     {
                         !editable ?
                             <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
                             :
                             <>
                                 <Button {...buttonProps} htmlType="submit"
-                                        onClick={() => form.submit()}
+                                        onClick={save}
                                 >保存</Button>
                                 <Button {...buttonProps} htmlType="submit"
                                         onClick={() => {
@@ -236,10 +226,10 @@ const AuthSetting: React.FC = () => {
                                 >取消</Button>
                             </>
                     }
-                </div>
-            </Modal>
-        </>
-    </div>
+                </Flex>
+            </Flex>
+        </Modal>
+    </>
 }
 
 const Zone: React.FC = () => {
@@ -427,6 +417,7 @@ const TabContent: React.FC = () => {
         // { label: <>AIM情报  </>, key: "aim", children: <AimTabContent ref={ref.aim} />, closable: false, forceRender: true },
     ]
     const [activeKey, setActiveKey] = useState<TabKey>("site")
+    const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.assets)
 
     async function query() {
         // console.log(ref[activeKey] == ref.site)
@@ -457,9 +448,12 @@ const TabContent: React.FC = () => {
                     size="small"
                     allowClear
                     value={input}
-                    onPressEnter={query}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder='Search...'
+                    onPressEnter={()=>{
+                        if(!allowEnterPress)return
+                        query()
+                    }}
                 />
                 <Button type='text' size="small" icon={<SearchOutlined/>} onClick={query}/>
                 <Help/>

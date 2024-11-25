@@ -86,11 +86,11 @@ func (r *Bridge) Query(taskID int64, query string, pageNum, pageSize int, servic
 				}
 				return nil, err3 // 触发重试
 			}
-			logger.Info(err.Error())
-			return nil, err
+			logger.Info(err3.Error())
+			return nil, err3
 		}
 		return result, nil
-	}, backoff.WithContext(backoff.NewExponentialBackOff(), ctx))
+	}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3), ctx))
 	if e != nil {
 		logger.Info(err.Error())
 		return nil, err

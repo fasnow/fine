@@ -11,7 +11,7 @@ import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import type {ColumnsType} from 'antd/es/table';
 import {QUERY_FIRST} from "@/component/type";
 import {errorNotification} from '@/component/Notification';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '../../component/ResizableTitle';
 import ContextMenu from '../../component/ContextMenu';
@@ -24,6 +24,7 @@ import {GetAllEvents} from "../../../wailsjs/go/constraint/Event";
 import {MenuItem} from "@/component/MenuItem";
 import {MenuItemType} from "antd/es/menu/interface";
 import {fofa, icp} from "../../../wailsjs/go/models";
+import {RootState} from "@/store/store";
 
 
 type dataCacheType = {
@@ -136,6 +137,7 @@ const IcpContent: React.FC = () => {
     const [serviceTypeCache, setServiceTypeCache] = useState<string>(serviceType)
     const pageIDMap = useRef<{ [key: number]: number }>({})
     const [pageData, setPageData] = useState<PageDataType[]>([])
+    const allowEnterPress = useSelector((state: RootState) => state.config.queryOnEnter.icp)
 
     useEffect(() => {
         GetAllEvents().then(
@@ -311,22 +313,10 @@ const IcpContent: React.FC = () => {
                     }}
                     defaultValue="1"
                     options={[
-                        {
-                            value: '1',
-                            label: '网站',
-                        },
-                        {
-                            value: '6',
-                            label: 'APP',
-                        },
-                        {
-                            value: '7',
-                            label: '小程序',
-                        },
-                        {
-                            value: '8',
-                            label: '快应用',
-                        },
+                        {value: '1',label: '网站',},
+                        {value: '6',label: 'APP',},
+                        {value: '7',label: '小程序',},
+                        {value: '8',label: '快应用',},
                     ]}
                     style={{width:100}}
                 />
@@ -335,6 +325,10 @@ const IcpContent: React.FC = () => {
                     allowClear
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    onPressEnter={()=> {
+                        if(!allowEnterPress)return
+                        preHandleQuery()
+                    }}
                 />
                 <Space.Compact >
                     <Button  size="small" icon={<SearchOutlined />} onClick={() => preHandleQuery()} />

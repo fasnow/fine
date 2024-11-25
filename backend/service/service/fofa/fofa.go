@@ -124,20 +124,17 @@ var Fields = struct {
 }
 
 type Fofa struct {
-	email string
-	key   string
-	Http  *http.Client
+	key  string
+	Http *http.Client
 }
 
-func NewClient(email, key string) *Fofa {
+func NewClient(key string) *Fofa {
 	return &Fofa{
-		email: email,
-		key:   key,
-		Http:  &http.Client{},
+		key:  key,
+		Http: &http.Client{},
 	}
 }
 
-func (f *Fofa) SetAuth(email, key string) {
-	f.email = email
+func (f *Fofa) SetAuth(key string) {
 	f.key = key
 }

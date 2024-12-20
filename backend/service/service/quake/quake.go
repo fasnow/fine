@@ -1,6 +1,7 @@
 package quake
 
 import (
+	"fine/backend/proxy/v2"
 	"net/http"
 )
 
@@ -60,7 +61,7 @@ type filterField struct {
 
 type Quake struct {
 	key      string
-	Http     *http.Client
+	http     *http.Client
 	Realtime *realtimeData
 	DeepData *deepData
 	Field    *filterField
@@ -69,7 +70,7 @@ type Quake struct {
 func NewClient(key string) *Quake {
 	client := &Quake{
 		key:      key,
-		Http:     &http.Client{},
+		http:     &http.Client{},
 		Realtime: &realtimeData{},
 		DeepData: &deepData{},
 		Field:    &filterField{},
@@ -79,6 +80,11 @@ func NewClient(key string) *Quake {
 	client.Field.client = client
 	return client
 }
-func (q *Quake) SetAuth(key string) {
-	q.key = key
+
+func (r *Quake) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
+}
+
+func (r *Quake) SetAuth(key string) {
+	r.key = key
 }

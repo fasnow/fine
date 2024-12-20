@@ -1,6 +1,7 @@
 package ip138
 
 import (
+	"fine/backend/proxy/v2"
 	"net/http"
 )
 
@@ -31,7 +32,7 @@ type Response struct {
 }
 
 type IP138 struct {
-	Http   *http.Client
+	http   *http.Client
 	domain string
 	Domain *domain
 	IP     *ip
@@ -39,11 +40,15 @@ type IP138 struct {
 
 func NewClient() *IP138 {
 	client := &IP138{
-		Http:   &http.Client{},
+		http:   &http.Client{},
 		Domain: &domain{},
 		IP:     &ip{},
 	}
 	client.Domain.client = client
 	client.IP.client = client
 	return client
+}
+
+func (r *IP138) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
 }

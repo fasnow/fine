@@ -70,8 +70,8 @@ type Result struct {
 //	Structinfo      string `json:"structinfo"`       //structinfo		结构化信息 (部分协议支持、比如elastic、mongodb)	权限：企业会员
 //}
 
-func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
-	req.req.QueryParams.Set("key", f.key)
+func (r *Fofa) Get(req *GetDataReq) (*Result, error) {
+	req.req.QueryParams.Set("key", r.key)
 	var fields = req.req.QueryParams.Get("fields")
 	var fieldList = strings.Split(fields, ",")
 	if fields != "" {
@@ -86,7 +86,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	response, err := f.Http.Do(request)
+	response, err := r.Http.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 	items := gjson.Get(string(body), "results").Array()
 
 	// 把不带键的 [[],[]...] 转成带键的 [{},{}...]
-	formatItems, err := f.formatItems(items, fields)
+	formatItems, err := r.formatItems(items, fields)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (f *Fofa) Get(req *GetDataReq) (*Result, error) {
 }
 
 // Export 数据为空则不会保存任何文件
-func (f *Fofa) Export(items []*fofa.Item, outputFilepath string, exportFields ...string) error {
+func (r *Fofa) Export(items []*fofa.Item, outputFilepath string, exportFields ...string) error {
 	if len(items) == 0 {
 		return nil
 	}
@@ -327,15 +327,15 @@ type User struct {
 	FofaServer      bool   `json:"fofa_server"`
 }
 
-func (f *Fofa) User() (*User, error) {
+func (r *Fofa) User() (*User, error) {
 	params := netUrl.Values{}
-	params.Add("key", f.key)
+	params.Add("key", r.key)
 	url := fmt.Sprintf("%v?%s", FofaUserApiUrl, params.Encode())
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	response, err := f.Http.Do(request)
+	response, err := r.Http.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +359,7 @@ func (f *Fofa) User() (*User, error) {
 }
 
 // fofa查询结果是不带键的，会按照你查询时给定的fields的先后顺序输出，每个item是 [] 此处是把每个item附上键变成 {"field":"value"}，键名为fields的每个字段
-func (f *Fofa) formatItems(items []gjson.Result, fields string) ([]*fofa.Item, error) {
+func (r *Fofa) formatItems(items []gjson.Result, fields string) ([]*fofa.Item, error) {
 	if len(items) == 0 {
 		return make([]*fofa.Item, 0), nil
 	}

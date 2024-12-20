@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fine/backend/logger"
+	"fine/backend/proxy/v2"
 	"fine/backend/service/model/icp"
 	"fine/backend/service/service"
 	"fmt"
@@ -41,7 +42,7 @@ func init() {
 }
 
 type ICP struct {
-	Http         *http.Client
+	http         *http.Client
 	token        string
 	refreshToken string
 	expireIn     int64
@@ -49,6 +50,10 @@ type ICP struct {
 	page         int
 	size         int
 	serviceType  string // 1,6,7,8 网站，app，小程序，快应用
+}
+
+func (r *ICP) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
 }
 
 type Struct2 struct {
@@ -64,12 +69,12 @@ type Result struct {
 
 func NewClient() *ICP {
 	return &ICP{
-		Http: &http.Client{},
+		http: &http.Client{},
 		sign: "eyJ0eXBlIjozLCJleHREYXRhIjp7InZhZnljb2RlX2ltYWdlX2tleSI6IjBlNzg0YzM4YmQ1ZTQwNWY4NzQyMTdiN2E5MjVjZjdhIn0sImUiOjE3MzA5NzkzNTgwMDB9.kyklc3fgv9Ex8NnlmkYuCyhe8vsLrXBcUUkEawZryGc",
 	}
 }
 
-func (i *ICP) setTokenFromRemote() error {
+func (r *ICP) setTokenFromRemote() error {
 	var req *http.Request
 	timeStampInt := time.Now().UnixMilli()
 	timeStampStr := strconv.FormatInt(timeStampInt, 10)
@@ -81,7 +86,7 @@ func (i *ICP) setTokenFromRemote() error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Set("Referer", referer)
 	req.Header.Set("Cookie", "__jsluid_s = 6452684553c30942fcb8cff8d5aa5a5b")
-	response, err := i.Http.Do(req)
+	response, err := r.http.Do(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return err
@@ -100,52 +105,52 @@ func (i *ICP) setTokenFromRemote() error {
 	if code != 200 {
 		return errors.New(fmt.Sprintf("响应状态码：%v，响应体：%v", response.StatusCode, stringBody))
 	}
-	i.expireIn = timeStampInt + gjson.Get(stringBody, "params.expire").Int()
-	i.token = gjson.Get(stringBody, "params.bussiness").String()
-	i.refreshToken = gjson.Get(stringBody, "params.refresh").String()
+	r.expireIn = timeStampInt + gjson.Get(stringBody, "params.expire").Int()
+	r.token = gjson.Get(stringBody, "params.bussiness").String()
+	r.refreshToken = gjson.Get(stringBody, "params.refresh").String()
 	return nil
 }
 
-func (i *ICP) PageNum(page int) *ICP {
-	i.page = page
-	return i
+func (r *ICP) PageNum(page int) *ICP {
+	r.page = page
+	return r
 }
 
-func (i *ICP) PageSize(size int) *ICP {
-	i.size = size
-	return i
+func (r *ICP) PageSize(size int) *ICP {
+	r.size = size
+	return r
 }
 
-func (i *ICP) ServiceType(serviceType string) *ICP {
-	i.serviceType = serviceType
-	return i
+func (r *ICP) ServiceType(serviceType string) *ICP {
+	r.serviceType = serviceType
+	return r
 }
 
-func (i *ICP) Query(unitName string) (*Result, error) {
+func (r *ICP) Query(unitName string) (*Result, error) {
 	unitName = strings.TrimSpace(unitName)
 	if unitName == "" {
 		return nil, service.UnexpectedQueryStatementError
 	}
-	if i.page <= 0 {
-		i.page = 1
+	if r.page <= 0 {
+		r.page = 1
 	}
-	if i.size <= 0 {
-		i.size = 40
+	if r.size <= 0 {
+		r.size = 40
 	}
 	postData := map[string]string{
-		"pageNum":     strconv.Itoa(i.page),
-		"pageSize":    strconv.Itoa(i.size),
+		"pageNum":     strconv.Itoa(r.page),
+		"pageSize":    strconv.Itoa(r.size),
 		"unitName":    unitName,
-		"serviceType": i.serviceType,
+		"serviceType": r.serviceType,
 	}
 	bytesData, _ := json.Marshal(postData)
 	req, err := http.NewRequest("POST", queryUrl, bytes.NewReader(bytesData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Token", i.token)
-	req.Header.Set("Sign", i.sign)
+	req.Header.Set("Token", r.token)
+	req.Header.Set("Sign", r.sign)
 	req.Header.Set("Referer", referer)
 	req.Header.Set("Cookie", "__jsluid_s=8e209cf6c7c40f530a300ac8dd0eb6c7")
-	response, err := i.Http.Do(req)
+	response, err := r.http.Do(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -180,20 +185,20 @@ func (i *ICP) Query(unitName string) (*Result, error) {
 	list := gjson.Get(bodyStr, "params.list").Array()
 
 	serviceTypeName := ""
-	if i.serviceType == "1" {
+	if r.serviceType == "1" {
 		serviceTypeName = "网站"
-	} else if i.serviceType == "6" {
+	} else if r.serviceType == "6" {
 		serviceTypeName = "APP"
-	} else if i.serviceType == "7" {
+	} else if r.serviceType == "7" {
 		serviceTypeName = "小程序"
-	} else if i.serviceType == "8" {
+	} else if r.serviceType == "8" {
 		serviceTypeName = "快应用"
 	}
 	items := make([]*icp.Item, 0)
 	for _, item := range list {
 		itemStr := item.String()
 		serviceName := ""
-		if i.serviceType == "1" {
+		if r.serviceType == "1" {
 			serviceName = gjson.Get(itemStr, "domain").String()
 		} else {
 			serviceName = gjson.Get(itemStr, "serviceName").String()

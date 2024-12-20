@@ -37,9 +37,9 @@ import {Clear, GetByOffset, MarkAsDeleted} from "../../wailsjs/go/service/Downlo
 import {models} from "../../wailsjs/go/models";
 import semver from "semver/preload";
 import {GetDataDir} from "../../wailsjs/go/config/Config";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 import DownloadLog = models.DownloadLog;
-import {CssConfig} from "@/pages/Config";
+import {Title} from "@/component/Title";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
 
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
@@ -158,14 +158,9 @@ const DownloadViewContent: React.FC = () => {
     }
 
     const showFileInFolder = (dir: string, filename: string) => {
-        try {
-            ShowItemInFolder(dir, filename).catch(
-                err => errorNotification("错误", err)
-            )
-        } catch (e) {
-            errorNotification("错误2", e)
-        }
-
+        ShowItemInFolder(dir, filename).catch(
+            err => errorNotification("错误", err)
+        )
     }
 
     const openFile = (dir: string, filename: string) => {
@@ -198,22 +193,7 @@ const DownloadViewContent: React.FC = () => {
         )
     }
     return (
-        <><ConfigProvider
-            theme={{
-                components: {
-                    Tooltip: {
-                        borderRadius: 0,
-                        colorBgSpotlight: "rgba(255, 255, 255)",
-                        colorTextLightSolid: "rgba(0, 0, 0)",
-                        fontSize: 12,
-                        boxShadowSecondary: "0 0 0px 1px rgba(0, 0, 0,0.5)",
-                        // paddingXS: 4,
-                        controlHeight: 14,
-                        paddingSM: 2,
-                    },
-                },
-            }}
-        >
+        <>
             <div
                 style={{
                     display: "flex",
@@ -223,18 +203,17 @@ const DownloadViewContent: React.FC = () => {
             >
                 <span>下载</span>
                 <span>
-                    <Tooltip placement="bottom" arrow={false} title="打开下载列表">
+                    <Title text="打开下载列表">
                         <Button type="text" size="large" icon={<FolderOpenOutlined/>} onClick={openDataFolder}/>
-                    </Tooltip>
-                    <Tooltip placement="bottomRight" arrow={false} title="文件仍存在">
+                    </Title>
+                    <Title text="文件仍存在">
                         <Button type="text" size="large" icon={<DeleteOutlined/>} onClick={clearDownloadLog}>
                             清空记录
                         </Button>
-                    </Tooltip>
+                    </Title>
                 </span>
             </div>
             <Divider/>
-        </ConfigProvider>
             <div style={{width: "280px"}}>
                 <InfiniteScroll
                     dataLength={data.length}
@@ -249,16 +228,6 @@ const DownloadViewContent: React.FC = () => {
                         components: {
                             List: {
                                 itemPaddingSM: "0px 0px"
-                            },
-                            Tooltip: {
-                                borderRadius: 0,
-                                colorBgSpotlight: "rgba(255, 255, 255)",
-                                colorTextLightSolid: "rgba(0, 0, 0)",
-                                fontSize: 12,
-                                boxShadowSecondary: "0 0 0px 1px rgba(0, 0, 0,0.5)",
-                                // paddingXS: 4,
-                                controlHeight: 14,
-                                paddingSM: 2,
                             },
                         }
                     }}>
@@ -280,20 +249,19 @@ const DownloadViewContent: React.FC = () => {
                                             justifyContent: "space-between",
                                         }}
                                     >
-                                        <Tooltip placement="bottom" arrow={false} title={item.filename}>
-                                            <span
-                                                style={{
-                                                    textDecoration: item.deleted ? "line-through" : "",
-                                                    overflow: "hidden",
-                                                    whiteSpace: "nowrap",
-                                                    textOverflow: 'ellipsis',
-                                                    width: "100%",
-                                                }}
-                                            >
+                                        <Title text={item.filename}>
+                                             <span
+                                                 style={{
+                                                     textDecoration: item.deleted ? "line-through" : "",
+                                                     overflow: "hidden",
+                                                     whiteSpace: "nowrap",
+                                                     textOverflow: 'ellipsis',
+                                                     width: "100%",
+                                                 }}
+                                             >
                                                 {item.filename}
                                             </span>
-                                        </Tooltip>
-
+                                        </Title>
                                         <span>
                                             {item.deleted ?
                                                 <label style={{
@@ -322,14 +290,14 @@ const DownloadViewContent: React.FC = () => {
                                                     alignItems: "center"
                                                 }}
                                             >
-                                                <Tooltip placement="bottom" arrow={false} title="打开文件夹">
+                                                <Title text="打开文件夹">
                                                     <Button size="large" type="text" icon={<FolderOpenOutlined/>}
                                                             onClick={() => showFileInFolder(item.dir, item.filename)}/>
-                                                </Tooltip>
-                                                <Tooltip placement="bottom" arrow={false} title="删除文件">
-                                                    <Button size="large" type="text" icon={<DeleteOutlined/>}
+                                                </Title>
+                                                <Title text="删除文件">
+                                                    <Button title={"删除文件"}  size="large" type="text" icon={<DeleteOutlined/>}
                                                             onClick={() => deleteFile(item.fileId)}/>
-                                                </Tooltip>
+                                                </Title>
                                             </span>}
 
                                     </span>
@@ -450,11 +418,11 @@ const Update: React.FC = () => {
 }
 
 const Proxy: React.FC = () => {
-    const proxy = useSelector((state: RootState) => state.config.proxy)
+    const proxy = useSelector((state: RootState) => state.config.config.Proxy)
     const [url, setUrl] = useState<string>("")
     const [open, setOpen] = useState<boolean>(false)
     useEffect(() => {
-        setUrl(`${proxy.type}://${proxy.host}:${proxy.port}`)
+        setUrl(`${proxy?.type}://${proxy?.host}:${proxy?.port}`)
     }, [proxy])
 
     return <>
@@ -466,23 +434,23 @@ const Proxy: React.FC = () => {
         >
             <Tooltip
                 // placement={platform === "win32" ? "bottom" : "bottomLeft"}
-                title={proxy.enable ? "当前代理" : "代理已禁用"}
+                title={proxy?.enable ? "当前代理" : "代理已禁用"}
             >
                 <Button
                     type="text"
                     style={{
                         borderRadius: "0",
                         height: "30px",
-                        width: !proxy.enable ? "30px" : "auto",
+                        width: !proxy?.enable ? "30px" : "auto",
                         transition: "0s",
                     }}
                     icon={
                         <Space direction="horizontal" size={1}>
                             {
-                                proxy.enable ?
+                                proxy?.enable ?
                                     <>
                                         <span style={{display: "flex", marginBottom: "5px"}}>
-                                            <SendOutlined rotate={315} style={{color: proxy.enable ? "red" : ""}}/>
+                                            <SendOutlined rotate={315} style={{color: proxy?.enable ? "red" : ""}}/>
                                         </span>
                                         {/* <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
                                             {url}
@@ -491,7 +459,7 @@ const Proxy: React.FC = () => {
                                     </>
                                     :
                                     <span style={{display: "flex", marginBottom: "5px"}}>
-                                        <SendOutlined rotate={315} style={{color: proxy.enable ? "red" : ""}}/>
+                                        <SendOutlined rotate={315} style={{color: proxy?.enable ? "red" : ""}}/>
                                     </span>
                             }
                         </Space>
@@ -500,7 +468,7 @@ const Proxy: React.FC = () => {
                 >
 
                     {
-                        proxy.enable &&
+                        proxy?.enable &&
                         <Tag bordered={false} style={{lineHeight: "20px", fontSize: "14px", marginRight: "0px"}}>
                             {url}
                         </Tag>

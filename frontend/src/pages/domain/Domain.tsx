@@ -1,5 +1,5 @@
 import { ConfigProvider, Tabs } from "antd"
-import Icp from "./Icp"
+import Icp from "../Icp"
 
 
 const Domain: React.FC = () => {
@@ -12,7 +12,6 @@ const Domain: React.FC = () => {
             }
         }}
     >
-
         <Tabs
             style={{ height: "30px" }}
             size="small"

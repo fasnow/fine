@@ -3,13 +3,15 @@ package fofa
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/constraint"
 	"fine/backend/db/models"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/service/model/fofa"
+	service2 "fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
@@ -26,9 +28,8 @@ type Bridge struct {
 }
 
 func NewFofaBridge(app *app.App) *Bridge {
-	t := config.GetFofa()
-	tt := NewClient(t.Token)
-	config.ProxyManager.Add(tt)
+	tt := NewClient(config.GlobalConfig.Fofa.Token)
+	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		fofa:        tt,
 		queryLog:    service.NewFOFAQueryLog(),
@@ -100,7 +101,7 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("Fofa_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = r.downloadLog.Insert(models.DownloadLog{
@@ -112,40 +113,29 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 	exportDataTaskID := idgen.NextId()
 
 	go func() {
-		retry := 3
-		interval := config.GetFofa().Interval
 		for index := int64(1); index <= page; index++ {
-			req := NewGetDataReqBuilder().Query(queryLog.Query).
-				Page(index).
-				Size(pageSize).
-				Fields(queryLog.Fields).
-				Full(queryLog.Full).
-				Build()
-			result, err2 := r.fofa.Get(req)
-			if err2 != nil {
-				logger.Info(err2.Error())
-				if retry == 0 {
-					// retry为0可能是因为积分不足，所以不能直接返回错误，获取到多少数据就返回多少
-					cacheItems := r.dataCache.GetByTaskID(exportDataTaskID)
-					exportItems := make([]*fofa.Item, 0)
-					for _, cacheItem := range cacheItems {
-						exportItems = append(exportItems, cacheItem.Item)
-					}
-					if err := r.fofa.Export(exportItems, outputAbsFilepath, queryLog.Fields); err != nil {
-						logger.Info("fofa 导出失败: " + err.Error())
-						return
-					}
-					break
+			result, err := backoff.RetryWithData(func() (*Result, error) {
+				req := NewGetDataReqBuilder().
+					Query(queryLog.Query).
+					Page(index).
+					Size(pageSize).
+					Fields(queryLog.Fields).
+					Full(queryLog.Full).
+					Build()
+				result, err := r.fofa.Get(req)
+				if err != nil {
+					logger.Info(err.Error())
+					return nil, err // 触发重试
 				}
-				index--
-				retry--
-				time.Sleep(interval)
-				continue
+				return result, nil
+			}, service2.GetBackOffWithMaxRetries(10, config.GlobalConfig.Fofa.Interval, 1))
+			if err != nil {
+				logger.Info(err.Error())
+				break
 			}
 			_ = r.dataCache.BatchInsert(exportDataTaskID, result.Items)
-			time.Sleep(interval)
+			time.Sleep(config.GlobalConfig.Fofa.Interval)
 		}
-
 		cacheItems := r.dataCache.GetByTaskID(exportDataTaskID)
 		exportItems := make([]*fofa.Item, 0)
 		for _, cacheItem := range cacheItems {
@@ -155,7 +145,7 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 			logger.Info(err.Error())
 			return
 		}
-		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewFofaDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.Events.HasNewFofaDownloadItem)
 	}()
 	return nil
 }
@@ -169,9 +159,8 @@ func (r *Bridge) GetUserInfo() (*User, error) {
 }
 
 func (r *Bridge) SetAuth(key string) error {
-	t := config.GetFofa()
-	t.Token = key
-	if err := config.SaveFofa(t); err != nil {
+	config.GlobalConfig.Fofa.Token = key
+	if err := config.Save(); err != nil {
 		return err
 	}
 	r.fofa.SetAuth(key)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fine/backend/logger"
+	"fine/backend/proxy/v2"
 	"fine/backend/service/model/zone"
 	"github.com/buger/jsonparser"
 	"io"
@@ -18,7 +19,7 @@ const (
 
 type Zone struct {
 	key     string
-	Http    *http.Client
+	http    *http.Client
 	Site    *site
 	Apk     *apk
 	Domain  *domain
@@ -58,7 +59,7 @@ type aim struct {
 func NewClient(key string) *Zone {
 	zoneClient := &Zone{
 		key:     key,
-		Http:    &http.Client{},
+		http:    &http.Client{},
 		Site:    &site{},
 		Apk:     &apk{},
 		Domain:  &domain{},
@@ -79,11 +80,15 @@ func NewClient(key string) *Zone {
 	return zoneClient
 }
 
-func (z *Zone) SetAuth(key string) {
-	z.key = key
+func (r *Zone) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
 }
 
-func (z *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
+func (r *Zone) SetAuth(key string) {
+	r.key = key
+}
+
+func (r *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
 	bytePostData, err := json.Marshal(req.req.Body)
 	if err != nil {
 		logger.Info(err.Error())
@@ -96,7 +101,7 @@ func (z *Zone) analyze(req *GetDataReq) (int, int, int64, []byte, error) {
 		return 0, 0, 0, nil, err
 	}
 	request.Header.Set("Content-Type", "application/json")
-	response, err := z.Http.Do(request)
+	response, err := r.http.Do(request)
 	if err != nil {
 		logger.Info(err.Error())
 		return 0, 0, 0, nil, err

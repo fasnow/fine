@@ -56,6 +56,18 @@ export namespace config {
 	        this.rules = source["rules"];
 	    }
 	}
+	export class TianYanCha {
+	    token: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TianYanCha(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.token = source["token"];
+	    }
+	}
 	export class Zone {
 	    token: string;
 	    interval: number;
@@ -135,15 +147,18 @@ export namespace config {
 	    }
 	}
 	export class Config {
-	    Timeout: number;
+	    timeout: number;
 	    Proxy: Proxy;
 	    Fofa: Fofa;
 	    Hunter: Hunter;
 	    Quake: Quake;
 	    Zone: Zone;
+	    TianYanCha: TianYanCha;
 	    Wechat: Wechat;
 	    Httpx: Httpx;
 	    DNS: DNS;
+	    BaseDir: string;
+	    DataDir: string;
 	    WechatDataPath: string;
 	    QueryOnEnter: QueryOnEnter;
 	
@@ -153,15 +168,18 @@ export namespace config {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.Timeout = source["Timeout"];
+	        this.timeout = source["timeout"];
 	        this.Proxy = this.convertValues(source["Proxy"], Proxy);
 	        this.Fofa = this.convertValues(source["Fofa"], Fofa);
 	        this.Hunter = this.convertValues(source["Hunter"], Hunter);
 	        this.Quake = this.convertValues(source["Quake"], Quake);
 	        this.Zone = this.convertValues(source["Zone"], Zone);
+	        this.TianYanCha = this.convertValues(source["TianYanCha"], TianYanCha);
 	        this.Wechat = this.convertValues(source["Wechat"], Wechat);
 	        this.Httpx = this.convertValues(source["Httpx"], Httpx);
 	        this.DNS = this.convertValues(source["DNS"], DNS);
+	        this.BaseDir = source["BaseDir"];
+	        this.DataDir = source["DataDir"];
 	        this.WechatDataPath = source["WechatDataPath"];
 	        this.QueryOnEnter = this.convertValues(source["QueryOnEnter"], QueryOnEnter);
 	    }
@@ -192,10 +210,11 @@ export namespace config {
 	
 	
 	
+	
 
 }
 
-export namespace constraint {
+export namespace event {
 	
 	export class Event {
 	    windowSizeChange: string;
@@ -843,6 +862,23 @@ export namespace models {
 
 }
 
+export namespace proxy {
+	
+	export class Manager {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new Manager(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
+
+}
+
 export namespace quake {
 	
 	export class Component {
@@ -1236,6 +1272,594 @@ export namespace quake {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace tianyancha {
+	
+	export class LabelListV3 {
+	    companyId: number;
+	    profileTagId: number;
+	    profileTagTypeId: number;
+	    profileTagNameOnPage: string;
+	    profileTagLogo: string;
+	    borderTransparency: string;
+	    guideTransparency: string;
+	    borderWidth: string;
+	    borderColor: string;
+	    guideColor: string;
+	    fontSize: number;
+	    fontFamily: string;
+	    color: string;
+	    background: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new LabelListV3(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.companyId = source["companyId"];
+	        this.profileTagId = source["profileTagId"];
+	        this.profileTagTypeId = source["profileTagTypeId"];
+	        this.profileTagNameOnPage = source["profileTagNameOnPage"];
+	        this.profileTagLogo = source["profileTagLogo"];
+	        this.borderTransparency = source["borderTransparency"];
+	        this.guideTransparency = source["guideTransparency"];
+	        this.borderWidth = source["borderWidth"];
+	        this.borderColor = source["borderColor"];
+	        this.guideColor = source["guideColor"];
+	        this.fontSize = source["fontSize"];
+	        this.fontFamily = source["fontFamily"];
+	        this.color = source["color"];
+	        this.background = source["background"];
+	    }
+	}
+	export class PenetrationItem {
+	    ratio: number;
+	    amountStr: string;
+	    id: string;
+	    entityType: number;
+	    companyId: number;
+	    humanNameId: number;
+	    name: string;
+	    logo: string;
+	    isActualController: boolean;
+	    isFinalBeneficial: boolean;
+	    isBigHolder: boolean;
+	    hasHolder: boolean;
+	    hasInvestor: boolean;
+	    // Go type: struct { TagID int "json:\"tagId\""; Name string "json:\"name\""; Title string "json:\"title\""; FontColor string "json:\"fontColor\""; BackgroundColor string "json:\"backgroundColor\""; TagLogoURL string "json:\"tagLogoUrl\"" }
+	    statusTag: any;
+	    isValid: boolean;
+	    industry: any;
+	    // Go type: struct { TagID int "json:\"tagId\""; Name string "json:\"name\""; Title string "json:\"title\""; FontColor string "json:\"fontColor\""; BackgroundColor string "json:\"backgroundColor\""; TagLogoURL string "json:\"tagLogoUrl\"" }
+	    entityTag: any;
+	    beneficiaryShareholdingRatio: any;
+	    alias: string;
+	    totalShareholdingRatio: any;
+	    isShellCompany: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new PenetrationItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ratio = source["ratio"];
+	        this.amountStr = source["amountStr"];
+	        this.id = source["id"];
+	        this.entityType = source["entityType"];
+	        this.companyId = source["companyId"];
+	        this.humanNameId = source["humanNameId"];
+	        this.name = source["name"];
+	        this.logo = source["logo"];
+	        this.isActualController = source["isActualController"];
+	        this.isFinalBeneficial = source["isFinalBeneficial"];
+	        this.isBigHolder = source["isBigHolder"];
+	        this.hasHolder = source["hasHolder"];
+	        this.hasInvestor = source["hasInvestor"];
+	        this.statusTag = this.convertValues(source["statusTag"], Object);
+	        this.isValid = source["isValid"];
+	        this.industry = source["industry"];
+	        this.entityTag = this.convertValues(source["entityTag"], Object);
+	        this.beneficiaryShareholdingRatio = source["beneficiaryShareholdingRatio"];
+	        this.alias = source["alias"];
+	        this.totalShareholdingRatio = source["totalShareholdingRatio"];
+	        this.isShellCompany = source["isShellCompany"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class RegStatusLabel {
+	    companyId: number;
+	    profileTagId: number;
+	    profileTagTypeId: number;
+	    profileTagNameOnPage: string;
+	    profileTagLogo: string;
+	    borderTransparency: string;
+	    guideTransparency: string;
+	    borderWidth: string;
+	    borderColor: string;
+	    guideColor: string;
+	    fontSize: number;
+	    fontFamily: string;
+	    color: string;
+	    background: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RegStatusLabel(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.companyId = source["companyId"];
+	        this.profileTagId = source["profileTagId"];
+	        this.profileTagTypeId = source["profileTagTypeId"];
+	        this.profileTagNameOnPage = source["profileTagNameOnPage"];
+	        this.profileTagLogo = source["profileTagLogo"];
+	        this.borderTransparency = source["borderTransparency"];
+	        this.guideTransparency = source["guideTransparency"];
+	        this.borderWidth = source["borderWidth"];
+	        this.borderColor = source["borderColor"];
+	        this.guideColor = source["guideColor"];
+	        this.fontSize = source["fontSize"];
+	        this.fontFamily = source["fontFamily"];
+	        this.color = source["color"];
+	        this.background = source["background"];
+	    }
+	}
+	export class SearchCompanyV4Item {
+	    id: number;
+	    name: string;
+	    type: number;
+	    matchType: any;
+	    base: string;
+	    legalPersonName: string;
+	    estiblishTime: string;
+	    regCapital: string;
+	    regStatus: string;
+	    score: any;
+	    orginalScore: any;
+	    bonusScore: any;
+	    companyScore: any;
+	    historyNames: string;
+	    categoryCode: string;
+	    industry: any;
+	    humanNames: any;
+	    trademarks: any;
+	    tmList: any;
+	    productList: any;
+	    usedBondName: any;
+	    bondName: any;
+	    bondNum: any;
+	    bondType: any;
+	    newtestName: any;
+	    regNumber: string;
+	    orgNumber: string;
+	    creditCode: string;
+	    businessScope: string;
+	    regLocation: string;
+	    phone: any;
+	    phoneList: string[];
+	    phoneInfoList: any;
+	    businessItemList: any;
+	    phoneNum: string;
+	    logo: string;
+	    city: string;
+	    district: any;
+	    emails: any;
+	    emailList: any;
+	    websites: string;
+	    hiddenPhones: any;
+	    abbr: any;
+	    tagList: any;
+	    companyType: number;
+	    companyOrgType: any;
+	    labelList: any;
+	    matchField: any;
+	    latitude: any;
+	    longitude: any;
+	    legalPersonId: string;
+	    legalPersonType: string;
+	    distance: any;
+	    categoryStr: any;
+	    isClaimed: number;
+	    claimPkgType: any;
+	    realClaimPkgType: any;
+	    baiduUrl: any;
+	    isBranch: number;
+	    alias: string;
+	    claimInfo: any;
+	    hidden: number;
+	    legalPersonShowStr: string;
+	    regCapitalShowStr: string;
+	    estiblishTimeShowStr: string;
+	    multiMatchField: any[];
+	    labelListV2: any;
+	    labelJsonList: any;
+	    taxCode: string;
+	    socialSecurityStaff_num: any;
+	    categoryCodeStd: any;
+	    hasMorePhone: any;
+	    hasVideo: any;
+	    videoId: any;
+	    isRecommend: any;
+	    englishName: any;
+	    firstPositionShowStr: string;
+	    secondPositionShowStr: string;
+	    firstPositionValue: string;
+	    secondPositionValue: string;
+	    bizType: string;
+	    docFeature: string;
+	    companyNum: any;
+	    department: string;
+	    illegalType: string;
+	    targetGid: string;
+	    targetName: string;
+	    changeTime: string;
+	    isIn: string;
+	    mainId: string;
+	    targetRegCapitalAmount: string;
+	    targetRegCapitalCurrency: string;
+	    legalPerson: string;
+	    gidForB: string;
+	    geoLocation: any;
+	    websiteFilingCount: number;
+	    repCurrency: any;
+	    province: any;
+	    areaCodes: any;
+	    address: any;
+	    establishmentTime: string;
+	    icps: any;
+	    icp: string;
+	    changeRatio: string;
+	    afterRatio: string;
+	    changeAmt: string;
+	    registerInstitute: string;
+	    companyScale: any;
+	    abstractsBaseInfo: string;
+	    financingRound: string;
+	    staffNumReportYear: any;
+	    categoryCode2017List: any;
+	    institutionTypeList: any;
+	    companyBrandInfo: any;
+	    companyGroupInfo: any;
+	    contantMap: any;
+	    companyPhoneBook: any;
+	    companyQuestions: any;
+	    selfRiskCount: any;
+	    legalPersonLogo: any;
+	    legalPersonAlias: any;
+	    relatedRiskCount: any;
+	    historyRiskCount: any;
+	    followLabel: any;
+	    contentType: number;
+	    normalWord: any;
+	    suggestWordList: any;
+	    companyHumanInfo: any;
+	    phoneType: any;
+	    phoneTips: any;
+	    publicSentimentNewsInfo: any;
+	    enterpriseServiceGoodsInfo: any;
+	    qfLabels: any;
+	    productShowMore: any;
+	    goodsAndProducts: any;
+	    shortVideoList: any;
+	    focusCompanyList: any;
+	    isBrandArea: number;
+	    areaType: number;
+	    customizedImagePath: string;
+	    isBrandAreaControlGroup: number;
+	    adsFlag: any;
+	    isCooperationShow: any;
+	    cooperationUrl: string;
+	    albumHeadImgPath: any;
+	    albumCount: any;
+	    websiteUrl: any;
+	    websiteRiskType: number;
+	    hotMsg: any;
+	    hotType: any;
+	    competitorName: any;
+	    brandInstitutionGroupCard: any;
+	    publishDemandCard: any;
+	    appDynamicCompanyCard: any;
+	    emptyRecommendTextCard: any;
+	    emptyRecommendCompanyCard: any;
+	    recommendScene: any;
+	    companyBrand: any;
+	    companyGroup: any;
+	    institutionCard: any;
+	    verticalCard: any;
+	    phoneTagType: number;
+	    aladdinCompanyCard: any;
+	    illegalSocialOrganization: any;
+	    labelListV3: LabelListV3[];
+	    regStatusLabel: RegStatusLabel[];
+	    newlyCompanyCard: any;
+	    deepSearchCard: any;
+	    legalPersonForList: string;
+	    regCapitalForList: string;
+	    provinceName: string;
+	    cityName: string;
+	    districtName: string;
+	    categoryNameLv1: any;
+	    categoryNameLv2: any;
+	    categoryNameLv3: any;
+	    categoryNameLv4: any;
+	    orgType: string;
+	    approveDate: string;
+	    businessTerm: string;
+	    socialSecurityStaffNum: string;
+	    companyScaleInfo: any;
+	    // Go type: struct { Status int "json:\"status\""; TagID interface {} "json:\"tagId\""; TagName interface {} "json:\"tagName\"" }
+	    followInfo: any;
+	    englishNameForTab: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SearchCompanyV4Item(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.type = source["type"];
+	        this.matchType = source["matchType"];
+	        this.base = source["base"];
+	        this.legalPersonName = source["legalPersonName"];
+	        this.estiblishTime = source["estiblishTime"];
+	        this.regCapital = source["regCapital"];
+	        this.regStatus = source["regStatus"];
+	        this.score = source["score"];
+	        this.orginalScore = source["orginalScore"];
+	        this.bonusScore = source["bonusScore"];
+	        this.companyScore = source["companyScore"];
+	        this.historyNames = source["historyNames"];
+	        this.categoryCode = source["categoryCode"];
+	        this.industry = source["industry"];
+	        this.humanNames = source["humanNames"];
+	        this.trademarks = source["trademarks"];
+	        this.tmList = source["tmList"];
+	        this.productList = source["productList"];
+	        this.usedBondName = source["usedBondName"];
+	        this.bondName = source["bondName"];
+	        this.bondNum = source["bondNum"];
+	        this.bondType = source["bondType"];
+	        this.newtestName = source["newtestName"];
+	        this.regNumber = source["regNumber"];
+	        this.orgNumber = source["orgNumber"];
+	        this.creditCode = source["creditCode"];
+	        this.businessScope = source["businessScope"];
+	        this.regLocation = source["regLocation"];
+	        this.phone = source["phone"];
+	        this.phoneList = source["phoneList"];
+	        this.phoneInfoList = source["phoneInfoList"];
+	        this.businessItemList = source["businessItemList"];
+	        this.phoneNum = source["phoneNum"];
+	        this.logo = source["logo"];
+	        this.city = source["city"];
+	        this.district = source["district"];
+	        this.emails = source["emails"];
+	        this.emailList = source["emailList"];
+	        this.websites = source["websites"];
+	        this.hiddenPhones = source["hiddenPhones"];
+	        this.abbr = source["abbr"];
+	        this.tagList = source["tagList"];
+	        this.companyType = source["companyType"];
+	        this.companyOrgType = source["companyOrgType"];
+	        this.labelList = source["labelList"];
+	        this.matchField = source["matchField"];
+	        this.latitude = source["latitude"];
+	        this.longitude = source["longitude"];
+	        this.legalPersonId = source["legalPersonId"];
+	        this.legalPersonType = source["legalPersonType"];
+	        this.distance = source["distance"];
+	        this.categoryStr = source["categoryStr"];
+	        this.isClaimed = source["isClaimed"];
+	        this.claimPkgType = source["claimPkgType"];
+	        this.realClaimPkgType = source["realClaimPkgType"];
+	        this.baiduUrl = source["baiduUrl"];
+	        this.isBranch = source["isBranch"];
+	        this.alias = source["alias"];
+	        this.claimInfo = source["claimInfo"];
+	        this.hidden = source["hidden"];
+	        this.legalPersonShowStr = source["legalPersonShowStr"];
+	        this.regCapitalShowStr = source["regCapitalShowStr"];
+	        this.estiblishTimeShowStr = source["estiblishTimeShowStr"];
+	        this.multiMatchField = source["multiMatchField"];
+	        this.labelListV2 = source["labelListV2"];
+	        this.labelJsonList = source["labelJsonList"];
+	        this.taxCode = source["taxCode"];
+	        this.socialSecurityStaff_num = source["socialSecurityStaff_num"];
+	        this.categoryCodeStd = source["categoryCodeStd"];
+	        this.hasMorePhone = source["hasMorePhone"];
+	        this.hasVideo = source["hasVideo"];
+	        this.videoId = source["videoId"];
+	        this.isRecommend = source["isRecommend"];
+	        this.englishName = source["englishName"];
+	        this.firstPositionShowStr = source["firstPositionShowStr"];
+	        this.secondPositionShowStr = source["secondPositionShowStr"];
+	        this.firstPositionValue = source["firstPositionValue"];
+	        this.secondPositionValue = source["secondPositionValue"];
+	        this.bizType = source["bizType"];
+	        this.docFeature = source["docFeature"];
+	        this.companyNum = source["companyNum"];
+	        this.department = source["department"];
+	        this.illegalType = source["illegalType"];
+	        this.targetGid = source["targetGid"];
+	        this.targetName = source["targetName"];
+	        this.changeTime = source["changeTime"];
+	        this.isIn = source["isIn"];
+	        this.mainId = source["mainId"];
+	        this.targetRegCapitalAmount = source["targetRegCapitalAmount"];
+	        this.targetRegCapitalCurrency = source["targetRegCapitalCurrency"];
+	        this.legalPerson = source["legalPerson"];
+	        this.gidForB = source["gidForB"];
+	        this.geoLocation = source["geoLocation"];
+	        this.websiteFilingCount = source["websiteFilingCount"];
+	        this.repCurrency = source["repCurrency"];
+	        this.province = source["province"];
+	        this.areaCodes = source["areaCodes"];
+	        this.address = source["address"];
+	        this.establishmentTime = source["establishmentTime"];
+	        this.icps = source["icps"];
+	        this.icp = source["icp"];
+	        this.changeRatio = source["changeRatio"];
+	        this.afterRatio = source["afterRatio"];
+	        this.changeAmt = source["changeAmt"];
+	        this.registerInstitute = source["registerInstitute"];
+	        this.companyScale = source["companyScale"];
+	        this.abstractsBaseInfo = source["abstractsBaseInfo"];
+	        this.financingRound = source["financingRound"];
+	        this.staffNumReportYear = source["staffNumReportYear"];
+	        this.categoryCode2017List = source["categoryCode2017List"];
+	        this.institutionTypeList = source["institutionTypeList"];
+	        this.companyBrandInfo = source["companyBrandInfo"];
+	        this.companyGroupInfo = source["companyGroupInfo"];
+	        this.contantMap = source["contantMap"];
+	        this.companyPhoneBook = source["companyPhoneBook"];
+	        this.companyQuestions = source["companyQuestions"];
+	        this.selfRiskCount = source["selfRiskCount"];
+	        this.legalPersonLogo = source["legalPersonLogo"];
+	        this.legalPersonAlias = source["legalPersonAlias"];
+	        this.relatedRiskCount = source["relatedRiskCount"];
+	        this.historyRiskCount = source["historyRiskCount"];
+	        this.followLabel = source["followLabel"];
+	        this.contentType = source["contentType"];
+	        this.normalWord = source["normalWord"];
+	        this.suggestWordList = source["suggestWordList"];
+	        this.companyHumanInfo = source["companyHumanInfo"];
+	        this.phoneType = source["phoneType"];
+	        this.phoneTips = source["phoneTips"];
+	        this.publicSentimentNewsInfo = source["publicSentimentNewsInfo"];
+	        this.enterpriseServiceGoodsInfo = source["enterpriseServiceGoodsInfo"];
+	        this.qfLabels = source["qfLabels"];
+	        this.productShowMore = source["productShowMore"];
+	        this.goodsAndProducts = source["goodsAndProducts"];
+	        this.shortVideoList = source["shortVideoList"];
+	        this.focusCompanyList = source["focusCompanyList"];
+	        this.isBrandArea = source["isBrandArea"];
+	        this.areaType = source["areaType"];
+	        this.customizedImagePath = source["customizedImagePath"];
+	        this.isBrandAreaControlGroup = source["isBrandAreaControlGroup"];
+	        this.adsFlag = source["adsFlag"];
+	        this.isCooperationShow = source["isCooperationShow"];
+	        this.cooperationUrl = source["cooperationUrl"];
+	        this.albumHeadImgPath = source["albumHeadImgPath"];
+	        this.albumCount = source["albumCount"];
+	        this.websiteUrl = source["websiteUrl"];
+	        this.websiteRiskType = source["websiteRiskType"];
+	        this.hotMsg = source["hotMsg"];
+	        this.hotType = source["hotType"];
+	        this.competitorName = source["competitorName"];
+	        this.brandInstitutionGroupCard = source["brandInstitutionGroupCard"];
+	        this.publishDemandCard = source["publishDemandCard"];
+	        this.appDynamicCompanyCard = source["appDynamicCompanyCard"];
+	        this.emptyRecommendTextCard = source["emptyRecommendTextCard"];
+	        this.emptyRecommendCompanyCard = source["emptyRecommendCompanyCard"];
+	        this.recommendScene = source["recommendScene"];
+	        this.companyBrand = source["companyBrand"];
+	        this.companyGroup = source["companyGroup"];
+	        this.institutionCard = source["institutionCard"];
+	        this.verticalCard = source["verticalCard"];
+	        this.phoneTagType = source["phoneTagType"];
+	        this.aladdinCompanyCard = source["aladdinCompanyCard"];
+	        this.illegalSocialOrganization = source["illegalSocialOrganization"];
+	        this.labelListV3 = this.convertValues(source["labelListV3"], LabelListV3);
+	        this.regStatusLabel = this.convertValues(source["regStatusLabel"], RegStatusLabel);
+	        this.newlyCompanyCard = source["newlyCompanyCard"];
+	        this.deepSearchCard = source["deepSearchCard"];
+	        this.legalPersonForList = source["legalPersonForList"];
+	        this.regCapitalForList = source["regCapitalForList"];
+	        this.provinceName = source["provinceName"];
+	        this.cityName = source["cityName"];
+	        this.districtName = source["districtName"];
+	        this.categoryNameLv1 = source["categoryNameLv1"];
+	        this.categoryNameLv2 = source["categoryNameLv2"];
+	        this.categoryNameLv3 = source["categoryNameLv3"];
+	        this.categoryNameLv4 = source["categoryNameLv4"];
+	        this.orgType = source["orgType"];
+	        this.approveDate = source["approveDate"];
+	        this.businessTerm = source["businessTerm"];
+	        this.socialSecurityStaffNum = source["socialSecurityStaffNum"];
+	        this.companyScaleInfo = source["companyScaleInfo"];
+	        this.followInfo = this.convertValues(source["followInfo"], Object);
+	        this.englishNameForTab = source["englishNameForTab"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SuggestItem {
+	    id: number;
+	    graphId: string;
+	    type: number;
+	    matchType: string;
+	    comName: string;
+	    name: string;
+	    alias: string;
+	    logo: string;
+	    regStatus: number;
+	    taxCode: string;
+	    promptContent: any;
+	    label: any;
+	    sourceName: any;
+	    sourceUrl: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new SuggestItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.graphId = source["graphId"];
+	        this.type = source["type"];
+	        this.matchType = source["matchType"];
+	        this.comName = source["comName"];
+	        this.name = source["name"];
+	        this.alias = source["alias"];
+	        this.logo = source["logo"];
+	        this.regStatus = source["regStatus"];
+	        this.taxCode = source["taxCode"];
+	        this.promptContent = source["promptContent"];
+	        this.label = source["label"];
+	        this.sourceName = source["sourceName"];
+	        this.sourceUrl = source["sourceUrl"];
+	    }
 	}
 
 }

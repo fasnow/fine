@@ -1,6 +1,7 @@
 package hunter
 
 import (
+	"fine/backend/proxy/v2"
 	"net/http"
 )
 
@@ -11,16 +12,20 @@ const (
 
 type Hunter struct {
 	key  string
-	Http *http.Client
+	http *http.Client
 }
 
 func NewClient(key string) *Hunter {
 	return &Hunter{
 		key:  key,
-		Http: &http.Client{},
+		http: &http.Client{},
 	}
 }
 
-func (h *Hunter) SetAuth(key string) {
-	h.key = key
+func (r *Hunter) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
+}
+
+func (r *Hunter) SetAuth(key string) {
+	r.key = key
 }

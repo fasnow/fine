@@ -2,10 +2,8 @@ import React, {forwardRef, ReactNode, useEffect, useImperativeHandle, useRef, us
 import {
     Badge,
     Button,
-    ConfigProvider,
     Dropdown,
     Empty, Flex,
-    Form,
     Input,
     InputNumber,
     List as AdList,
@@ -50,7 +48,7 @@ import ResizableTitle from '../component/ResizableTitle';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState, configActions} from '@/store/store';
 import {ExportDataPanelProps} from './Props';
-import {authFormProps, buttonProps} from './Setting';
+import {buttonProps} from './Setting';
 import {copy, localeCompare} from '@/util/util';
 import {
     ExportDomain,
@@ -67,21 +65,13 @@ import {
     SetAuth
 } from "../../wailsjs/go/zone/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
-import {zone} from "../../wailsjs/go/models";
-import {Get0zone} from "../../wailsjs/go/config/Config";
-import {MenuItem} from "@/component/MenuItem";
+import {config, quake, zone} from "../../wailsjs/go/models";
+import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
-
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
-
-interface TabType {
-    label: ReactNode,
-    children: ReactNode,
-    key: string,
-    closable?: boolean,
-    forceRender?: boolean
-}
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import TabLabel from "@/component/TabLabel";
+import type {Tab} from "rc-tabs/lib/interface"
+import {TargetKey} from "@/pages/Constants";
 
 const codeLineCss: React.CSSProperties = {
     display: "inline-block",
@@ -167,29 +157,41 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const key = useSelector((state:RootState)=>state.config.auth["0.zone"].key)
-    const [tmpKey, setTmpKey] = useState("")
+    const cfg = useSelector((state:RootState)=>state.config.config)
+    const [key, setKey] = useState("")
 
     useEffect(()=>{
-        setTmpKey(key)
-    }, [key])
+        setKey(cfg.Zone.token)
+    }, [cfg.Zone])
 
 
-    function save() {
-        SetAuth(tmpKey).catch(
-            err => errorNotification("错误", err)
-        ).then(
+    const save=()=> {
+        SetAuth(key).then(
             ()=>{
+                const t = { ...cfg, Zone: {...cfg.Zone, token: key} } as config.Config;
+                dispatch(configActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
-                dispatch(configActions.setZoneAuth({key: tmpKey}))
+            }
+        ).catch(
+            err => {
+                errorNotification("错误", err)
+                setKey(cfg.Zone.token)
             }
         )
     }
 
-    return <>
-        <Tooltip title="设置">
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
+    const cancel=()=> {
+        setEditable(false);
+        setOpen(false)
+        setKey(cfg.Zone.token)
+    }
+
+    return <div style={{
+        backgroundColor: "#f1f3f4"
+    }}>
+        <Tooltip title="设置" placement={"right"}>
+            <Button size={"small"} type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
         <Modal
             open={open}
@@ -203,10 +205,10 @@ const AuthSetting: React.FC = () => {
             destroyOnClose
         >
             <Flex vertical gap={10}>
-                <Input.Password value={tmpKey} placeholder="token" onChange={
+                <Input.Password value={key} placeholder="token" onChange={
                     e=>{
                         if(!editable)return
-                        setTmpKey(e.target.value)
+                        setKey(e.target.value)
                     }
                 }/>
                 <Flex gap={10} justify={"end"}>
@@ -219,27 +221,24 @@ const AuthSetting: React.FC = () => {
                                         onClick={save}
                                 >保存</Button>
                                 <Button {...buttonProps} htmlType="submit"
-                                        onClick={() => {
-                                            setEditable(false);
-                                            setOpen(false)
-                                        }}
+                                        onClick={cancel}
                                 >取消</Button>
                             </>
                     }
                 </Flex>
             </Flex>
         </Modal>
-    </>
+    </div>
 }
 
 const Zone: React.FC = () => {
     const [activeKey, setActiveKey] = useState<string>();
-    const [items, setItems] = useState<TabType[]>([]);
+    const [items, setItems] = useState<Tab[]>([]);
     const newTabIndex = useRef(0);
 
     useEffect(() => {
         setItems([{
-            label: `${++newTabIndex.current}`,
+            label: <TabLabel label={`${++newTabIndex.current}`}/>,
             key: `${newTabIndex.current}`,
             children: <TabContent/>,
         }])
@@ -252,7 +251,7 @@ const Zone: React.FC = () => {
     const add = () => {
         const newActiveKey = `${++newTabIndex.current}`;
         const newPanes = [...items];
-        newPanes.push({label: newActiveKey, children: <TabContent/>, key: newActiveKey});
+        newPanes.push({label: <TabLabel label={newActiveKey}/>, children: <TabContent/>, key: newActiveKey});
         setItems(newPanes);
         setActiveKey(newActiveKey);
     };
@@ -290,28 +289,17 @@ const Zone: React.FC = () => {
 
 
     return (
-        <ConfigProvider theme={
-            {
-                components: {
-                    Tabs: {
-                        cardHeight: 24
-                    }
-                }
-            }
-        }>
-            <Tabs
-                size="small"
-                type="editable-card"
-                onChange={onChange}
-                activeKey={activeKey}
-                onEdit={onEdit}
-                items={items}
-                tabBarExtraContent={{
-                    left: <AuthSetting/>
-                }}
-            />
-        </ConfigProvider>
-
+        <Tabs
+            size="small"
+            type="editable-card"
+            onChange={onChange}
+            activeKey={activeKey}
+            onEdit={onEdit}
+            items={items}
+            tabBarExtraContent={{
+                left: <AuthSetting/>
+            }}
+        />
     );
 };
 
@@ -382,7 +370,7 @@ const TabContent: React.FC = () => {
         // "darknet": React.createRef<any>(),
         // "aim": React.createRef<any>(),
     }
-    const items: TabType[] = [
+    const items: Tab[] = [
         {
             label: <>信息系统</>,
             key: "site",
@@ -417,7 +405,7 @@ const TabContent: React.FC = () => {
         // { label: <>AIM情报  </>, key: "aim", children: <AimTabContent ref={ref.aim} />, closable: false, forceRender: true },
     ]
     const [activeKey, setActiveKey] = useState<TabKey>("site")
-    const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.assets)
+    const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.assets)
 
     async function query() {
         // console.log(ref[activeKey] == ref.site)
@@ -477,30 +465,29 @@ const TabContent: React.FC = () => {
 }
 
 const siteMenuItems: MenuItemType[] = [
-    MenuItem.OpenUrl,
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
+    MenuItems.OpenUrl,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
 ];
 
 const SiteTabContent = forwardRef((props, ref) => {
     const selectedRow = useRef<{
-        item: zone.SiteItem | undefined,
+        item: PageDataType | undefined,
         rowIndex: number | undefined,
         colKey: string | undefined
     }>({item: undefined, rowIndex: undefined, colKey: undefined})
 
-    interface PageDataType extends zone.SiteItem {
-        index: number
-    }
+    type  PageDataType = WithIndex<zone.SiteItem>
 
-    const [columns, setColumns] = useState<ColumnsType<zone.SiteItem>>([
+    const [columns, setColumns] = useState<ColumnsType<PageDataType>>([
         {
             title: '序号', dataIndex: "index", ellipsis: true, width: 50, fixed: "left", onCell: (record, index) => {
                 return {
                     onContextMenu: () => {
-                        selectedRow.current = {item: record, rowIndex: index, colKey: "index",};
-                    }
+                        selectedRow.current = {item: record, rowIndex: index, colKey: "index",}
+                    },
+                    onClick: () => copy(record.index)
                 }
             }
         },
@@ -811,28 +798,28 @@ const SiteTabContent = forwardRef((props, ref) => {
     const handleMenuItemClick: MenuProps['onClick'] = (e) => {
         if (!selectedRow.current.item) return
         switch (e.key) {
-            case MenuItem.OpenUrl.key:
+            case MenuItems.OpenUrl.key:
                 if (selectedRow.current.item.url) {
                     BrowserOpenURL(selectedRow.current.item.url)
                 }
                 break
-            case MenuItem.CopyCell.key: {
-                const item = selectedRow.current.item as zone.SiteItem
+            case MenuItems.CopyCell.key: {
+                const item = selectedRow.current.item as PageDataType
                 for (const key in item) {
                     if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current.colKey) {
-                        copy(item[key as keyof zone.SiteItem])
+                        copy(item[key as keyof PageDataType])
                     }
                 }
             }
                 break
-            case MenuItem.CopyRow.key:
+            case MenuItems.CopyRow.key:
                 copy(selectedRow.current.item)
                 break
-            case MenuItem.CopyCol.key: {
+            case MenuItems.CopyCol.key: {
                 const values = pageData.map(item => {
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current?.colKey) {
-                            return item[key as keyof zone.SiteItem]
+                            return item[key as keyof PageDataType]
                         }
                     }
                     return ""
@@ -854,10 +841,10 @@ const SiteTabContent = forwardRef((props, ref) => {
             setColumns(newColumns)
         };
 
-    const getMergeColumns = (): ColumnsType<zone.SiteItem> => {
+    const getMergeColumns = (): ColumnsType<PageDataType> => {
         return columns.map((col, index) => ({
             ...col,
-            onHeaderCell: (column: ColumnsType<zone.SiteItem>[number]) => ({
+            onHeaderCell: (column: ColumnsType<PageDataType>[number]) => ({
                 width: column.width,
                 onResize: handleHeaderResize(index) as React.ReactEventHandler<any>,
             }),
@@ -877,8 +864,10 @@ const SiteTabContent = forwardRef((props, ref) => {
                 <Table
                     // locale={{ emptyText: "暂无数据" }}
                     showSorterTooltip={false}
+                    virtual
                     scroll={{
                         y: 'calc(100vh - 224px)',
+                        x: '100%',
                         scrollToFirstRowOnChange: true
                     }}
                     bordered
@@ -926,10 +915,10 @@ const SiteTabContent = forwardRef((props, ref) => {
 })
 
 const doaminMenuItems: MenuItemType[] = [
-    MenuItem.OpenDomain,
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
+    MenuItems.OpenDomain,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
 
 ];
 
@@ -1127,14 +1116,14 @@ const DomainTabContent = forwardRef((props, ref) => {
     const handleMenuItemClick: MenuProps['onClick'] = (e) => {
         if (!selectedRow.current.item) return
         switch (e.key) {
-            case MenuItem.OpenDomain.key: {
+            case MenuItems.OpenDomain.key: {
                 const url = selectedRow.current.item.url
                 if (url) {
                     BrowserOpenURL(url.startsWith("http") ? url : "http://" + url)
                 }
                 break
             }
-            case MenuItem.CopyCell.key: {
+            case MenuItems.CopyCell.key: {
                 const item = selectedRow.current.item as zone.DomainItem
                 for (const key in item) {
                     if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current.colKey) {
@@ -1143,10 +1132,10 @@ const DomainTabContent = forwardRef((props, ref) => {
                 }
             }
                 break
-            case MenuItem.CopyRow.key:
+            case MenuItems.CopyRow.key:
                 copy(selectedRow.current)
                 break
-            case MenuItem.CopyCol.key: {
+            case MenuItems.CopyCol.key: {
                 const values = pageData.map(item => {
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current.colKey) {
@@ -1194,8 +1183,10 @@ const DomainTabContent = forwardRef((props, ref) => {
                 <Table
                     // locale={{ emptyText: "暂无数据" }}
                     showSorterTooltip={false}
+                    virtual
                     scroll={{
                         y: 'calc(100vh - 224px)',
+                        x: '100%',
                         scrollToFirstRowOnChange: true
                     }}
                     bordered
@@ -1452,8 +1443,10 @@ const ApkTabContent = forwardRef((props, ref) => {
             <Table
                 // locale={{ emptyText: "暂无数据" }}
                 showSorterTooltip={false}
+                virtual
                 scroll={{
                     y: 'calc(100vh - 224px)',
+                    x: '100%',
                     scrollToFirstRowOnChange: true
                 }}
                 bordered
@@ -1571,9 +1564,9 @@ const ApkTabContent = forwardRef((props, ref) => {
 
 
 const emailMenuItems: MenuItemType[] = [
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
 
 ];
 
@@ -1795,7 +1788,7 @@ const EmailTabContent = forwardRef((props, ref) => {
 
     const handleMenuItemClick: MenuProps['onClick'] = (e) => {
         switch (e.key) {
-            case MenuItem.CopyCell.key: {
+            case MenuItems.CopyCell.key: {
                 const item = selectedRow.current.item as ZoneEmailItemType
                 for (const key in item) {
                     if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current.colKey) {
@@ -1804,10 +1797,10 @@ const EmailTabContent = forwardRef((props, ref) => {
                 }
             }
                 break
-            case MenuItem.CopyRow.key:
+            case MenuItems.CopyRow.key:
                 copy(selectedRow.current.item)
                 break
-            case MenuItem.CopyCol.key: {
+            case MenuItems.CopyCol.key: {
                 const values = pageData.map(item => {
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current.colKey) {
@@ -1835,8 +1828,10 @@ const EmailTabContent = forwardRef((props, ref) => {
                 <Table
                     // locale={{ emptyText: "暂无数据" }}
                     showSorterTooltip={false}
+                    virtual
                     scroll={{
                         y: 'calc(100vh - 224px)',
+                        x: '100%',
                         scrollToFirstRowOnChange: true
                     }}
                     bordered
@@ -1881,9 +1876,9 @@ const EmailTabContent = forwardRef((props, ref) => {
 })
 
 const memberMenuItems: MenuItemType[] = [
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
 ];
 
 const MemberTabContent = forwardRef((props, ref) => {
@@ -2114,7 +2109,7 @@ const MemberTabContent = forwardRef((props, ref) => {
 
     const handleMenuItemClick: MenuProps['onClick'] = (e) => {
         switch (e.key) {
-            case MenuItem.CopyCell.key: {
+            case MenuItems.CopyCell.key: {
                 const item = selectedRow.current.item as zone.MemberItem
                 for (const key in item) {
                     if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current.colKey) {
@@ -2123,10 +2118,10 @@ const MemberTabContent = forwardRef((props, ref) => {
                 }
             }
                 break
-            case MenuItem.CopyRow.key:
+            case MenuItems.CopyRow.key:
                 copy(selectedRow.current.item)
                 break
-            case MenuItem.CopyCol.key: {
+            case MenuItems.CopyCol.key: {
                 const values = pageData.map(item => {
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.current.colKey) {
@@ -2154,8 +2149,11 @@ const MemberTabContent = forwardRef((props, ref) => {
                 <Table
                     // locale={{ emptyText: "暂无数据" }}
                     showSorterTooltip={false}
+                    virtual
                     scroll={{
                         y: 'calc(100vh - 224px)',
+                        x: '100%',
+                        scrollToFirstRowOnChange:true
                     }}
                     bordered
                     columns={getMergeColumns()}
@@ -3713,6 +3711,7 @@ const Help: React.FC = () => {
             onCancel={() => setOpen(false)}
             destroyOnClose={true}
             bodyStyle={{height: window.innerHeight - 200, overflowY: "scroll"}}
+            getContainer={false}
         >
 
             <Space direction="vertical">

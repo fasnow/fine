@@ -1,6 +1,7 @@
 package fofa
 
 import (
+	"fine/backend/proxy/v2"
 	"net/http"
 )
 
@@ -135,6 +136,10 @@ func NewClient(key string) *Fofa {
 	}
 }
 
-func (f *Fofa) SetAuth(key string) {
-	f.key = key
+func (r *Fofa) UseProxyManager(manager *proxy.Manager) {
+	r.Http = manager.GetClient()
+}
+
+func (r *Fofa) SetAuth(key string) {
+	r.key = key
 }

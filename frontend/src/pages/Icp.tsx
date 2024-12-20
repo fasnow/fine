@@ -1,74 +1,49 @@
 import {
     CloudDownloadOutlined,
-    CopyOutlined,
-    GlobalOutlined,
     LoadingOutlined,
-    SearchOutlined,
-    SyncOutlined
-} from '@ant-design/icons';
-import {Button, Input, MenuProps, message, Modal, Pagination, Select, Space, Spin, Table, Tabs} from 'antd';
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
+    SearchOutlined} from '@ant-design/icons';
+import {Button, Input, message, Pagination, Select, Space, Table} from 'antd';
+import React, {useEffect, useRef, useState} from 'react';
 import type {ColumnsType} from 'antd/es/table';
 import {QUERY_FIRST} from "@/component/type";
 import {errorNotification} from '@/component/Notification';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {ResizeCallbackData} from 'react-resizable';
-import ResizableTitle from '../../component/ResizableTitle';
-import ContextMenu from '../../component/ContextMenu';
-import {copy, sleep} from '@/util/util';
-import * as CryptoJS from 'crypto-js';
-import {BrowserOpenURL, EventsOn} from "../../../wailsjs/runtime";
+import ResizableTitle from '../component/ResizableTitle';
+import ContextMenu from '../component/ContextMenu';
+import {copy} from '@/util/util';
+import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 
-import {Export,Query} from "../../../wailsjs/go/icp/Bridge";
-import {GetAllEvents} from "../../../wailsjs/go/constraint/Event";
-import {MenuItem} from "@/component/MenuItem";
+import {Export,Query} from "../../wailsjs/go/icp/Bridge";
+import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {fofa, icp} from "../../../wailsjs/go/models";
+import {icp, zone} from "../../wailsjs/go/models";
 import {RootState} from "@/store/store";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import TabsV2 from "@/component/TabsV2";
 
-
-type dataCacheType = {
-    [key: number]: icp.Item[];
-}
-
-let selectedRow: { item: icp.Item | undefined, rowIndex: number | undefined, colKey: string } = {
+let selectedRow: { item: PageDataType | undefined, rowIndex: number | undefined, colKey: string } = {
     item: undefined,
     rowIndex: 0,
     colKey: ''
 }
 
-
 const menuItems: MenuItemType[] = [
-    MenuItem.OpenDomain,
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
+    MenuItems.OpenDomain,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
 ];
 
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
+type  PageDataType = WithIndex<icp.Item>
 
-const defaultPanes = new Array(2).fill(null).map((_, index) => {
-    const id = String(index + 1);
-    return { label: `Tab ${id}`, children: `Content of Tab Pane ${index + 1}`, key: id };
-});
-
-type TabType = {
-    label: string,
-    key: string,
-    children: ReactNode,
-    closable?: boolean
-}
-
-interface PageDataType extends icp.Item {
-    index: number
-}
-
-const IcpContent: React.FC = () => {
-    const defaultColumns: ColumnsType<icp.Item> = [
+const TabContent: React.FC = () => {
+    const defaultColumns: ColumnsType<PageDataType> = [
         {
             title: '序号', dataIndex: "index", ellipsis: true, width: 50, fixed: "left", onCell: (record, index) => {
                 return {
-                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "index", }; }
+                    onContextMenu: () => { selectedRow = { item: record, rowIndex: index, colKey: "index", }; },
+                    onClick: () => copyCell(record.index)
                 }
             }
         },
@@ -121,8 +96,7 @@ const IcpContent: React.FC = () => {
             }
         },
     ];
-
-    const [columns, setColumns] = useState<ColumnsType<icp.Item>>(defaultColumns)
+    const [columns, setColumns] = useState<ColumnsType<PageDataType>>(defaultColumns)
     const pageSizeOptions = [40, 80, 100]
     const [input, setInput] = useState<string>("")
     const [inputCache, setInputCache] = useState<string>("")
@@ -137,9 +111,13 @@ const IcpContent: React.FC = () => {
     const [serviceTypeCache, setServiceTypeCache] = useState<string>(serviceType)
     const pageIDMap = useRef<{ [key: number]: number }>({})
     const [pageData, setPageData] = useState<PageDataType[]>([])
-    const allowEnterPress = useSelector((state: RootState) => state.config.queryOnEnter.icp)
+    const allowEnterPress = useSelector((state: RootState) => state.config.config.QueryOnEnter.icp)
+    const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 195)
 
     useEffect(() => {
+        window.addEventListener("resize", () => {
+            setTableScrollHeight(window.innerHeight - 195)
+        })
         GetAllEvents().then(
             result=>{
                 EventsOn(String(result.hasNewIcpDownloadItem),()=>{
@@ -178,7 +156,7 @@ const IcpContent: React.FC = () => {
             result=>{
                 let index=0
                 setTotal(result["total"])
-                setPageData(result["items"]?.map((item:icp.Item) => {
+                setPageData(result["items"]?.map((item:PageDataType) => {
                     index++
                     return { ...item, index: index }
                 }))
@@ -252,10 +230,10 @@ const IcpContent: React.FC = () => {
             setColumns(newColumns);
         };
 
-    const getMergeColumns = (): ColumnsType<icp.Item> => {
+    const getMergeColumns = (): ColumnsType<PageDataType> => {
         return columns.map((col, index) => ({
             ...col,
-            onHeaderCell: (column: ColumnsType<icp.Item>[number]) => ({
+            onHeaderCell: (column: ColumnsType<PageDataType>[number]) => ({
                 width: column.width,
                 onResize: handleHeaderResize(index) as React.ReactEventHandler<any>,
             }),
@@ -264,31 +242,31 @@ const IcpContent: React.FC = () => {
 
     const handleMenuItemClick = (key: string) => {
         switch (key) {
-            case MenuItem.OpenDomain.key:
+            case MenuItems.OpenDomain.key:
                 if (selectedRow.item?.serviceName) {
                     BrowserOpenURL("http://" + selectedRow.item?.serviceName)
                 }
                 break
-            case MenuItem.CopyCell.key:
+            case MenuItems.CopyCell.key:
                 {
                     const item = selectedRow.item
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.colKey) {
-                            const value = item[key as keyof icp.Item]
+                            const value = item[key as keyof PageDataType]
                             copy(String(value))
                         }
                     }
                 }
                 break
-            case MenuItem.CopyRow.key:
+            case MenuItems.CopyRow.key:
                 copy(selectedRow)
                 break
-            case MenuItem.CopyCol.key:
+            case MenuItems.CopyCol.key:
                 {
                     const colValues = pageData.map(item => {
                         for (const key in item) {
                             if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.colKey) {
-                                return String(item[key as keyof icp.Item]);
+                                return String(item[key as keyof PageDataType]);
                             }
                         }
                         return ""
@@ -348,7 +326,8 @@ const IcpContent: React.FC = () => {
             <Table
                 // locale={{ emptyText: "暂无数据" }}
                 showSorterTooltip={false}
-                scroll={{ y: 'calc(100vh - 195px)', scrollToFirstRowOnChange: true }}
+                virtual
+                scroll={{ y: tableScrollHeight,x: '100%', scrollToFirstRowOnChange: true }}
                 bordered
                 columns={getMergeColumns()}
                 components={{
@@ -392,66 +371,7 @@ const IcpContent: React.FC = () => {
 }
 
 const Icp: React.FC = () => {
-    const [items, setItems] = useState<TabType[]>([]);
-    const [activeKey, setActiveKey] = useState<string>(items[0]?.label);
-    const newTabIndex = useRef(1);
-
-    useEffect(() => {
-        const newActiveKey = `${newTabIndex.current++}`;
-        setItems([
-            {
-                label: newActiveKey,
-                key: newActiveKey,
-                children: <IcpContent />,
-            }
-        ],)
-    }, [])
-
-    const onChange = (key: string) => {
-        setActiveKey(key);
-    };
-
-    const add = () => {
-        const newActiveKey = `${newTabIndex.current++}`;
-        setItems([...items, {
-            label: newActiveKey,
-            key: newActiveKey,
-            children: <IcpContent />,
-        }]);
-        setActiveKey(newActiveKey);
-    };
-
-    const remove = (targetKey: TargetKey) => {
-        const targetIndex = items.findIndex((pane) => pane.key === targetKey);
-        const newPanes = items.filter((pane) => pane.key !== targetKey);
-        if (newPanes.length && targetKey === activeKey) {
-            const { key } = newPanes[targetIndex === newPanes.length ? targetIndex - 1 : targetIndex];
-            setActiveKey(key);
-        }
-        setItems(newPanes);
-    };
-
-    const onEdit = (targetKey: TargetKey, action: 'add' | 'remove') => {
-        if (action === 'add') {
-            add();
-        } else {
-            remove(targetKey);
-        }
-    };
-
-    return (
-        <div>
-            <Tabs
-                size="small"
-                onChange={onChange}
-                activeKey={activeKey}
-                type="editable-card"
-                // tabBarExtraContent={}
-                onEdit={onEdit}
-                items={items}
-            />
-        </div>
-    );
+    return <TabsV2 defaultTabContent={<TabContent/>}/>
 }
 
 export default Icp

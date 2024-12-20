@@ -1,4 +1,4 @@
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Button,
     Col,
@@ -7,7 +7,6 @@ import {
     Divider,
     Dropdown,
     Flex,
-    Form,
     Input,
     InputNumber,
     List,
@@ -42,23 +41,23 @@ import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import {ResizeCallbackData} from 'react-resizable';
 import {ExportDataPanelProps} from './Props';
-import {authFormProps, buttonProps} from './Setting';
+import {buttonProps} from './Setting';
 import {copy, localeCompare, RangePresets} from '@/util/util';
-import {hunter} from "../../wailsjs/go/models";
+import {config, fofa, hunter} from "../../wailsjs/go/models";
 import {Export, GetRestToken, Query, SetAuth} from "../../wailsjs/go/hunter/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import ResizableTitle from "@/component/ResizableTitle";
 import type {Tab} from 'rc-tabs/lib/interface';
-import {GetHunter} from "../../wailsjs/go/config/Config";
 import {Dots} from "@/component/Icon";
 import {md5} from "js-md5"
 import {Fetch} from "../../wailsjs/go/app/App";
 import {toUint8Array} from "js-base64";
-import {MenuItem} from "@/component/MenuItem";
+import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import TabLabel from "@/component/TabLabel";
+import {TargetKey} from "@/pages/Constants";
 
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const pageSizeOptions = [10, 20, 50, 100]
 const defaultCheckedColsDataIndex: string[] = [
     "index",
@@ -120,22 +119,19 @@ type TabContentState = {
 }
 
 const defaultMenuItems = [
-    MenuItem.OpenUrl,
-    MenuItem.QueryIP,
-    MenuItem.QueryIpCidr,
-    MenuItem.QueryTitle,
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
-    MenuItem.CopyUrlCol
+    MenuItems.OpenUrl,
+    MenuItems.QueryIP,
+    MenuItems.QueryIpCidr,
+    MenuItems.QueryTitle,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
+    MenuItems.CopyUrlCol
 ];
 
-interface PageDataType extends hunter.Item {
-    index: number
-}
+type  PageDataType = WithIndex<hunter.Item>
 
-
-let selectedRow: { item: hunter.Item | undefined, rowIndex: number | undefined, colKey: string } | undefined = {
+let selectedRow: { item: PageDataType | undefined, rowIndex: number | undefined, colKey: string } | undefined = {
     item: undefined,
     rowIndex: 0,
     colKey: ''
@@ -301,11 +297,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     }
 
     Content = () => {
-        const defaultColumns: ColumnsType<hunter.Item> = [
+        const defaultColumns: ColumnsType<PageDataType> = [
             {
                 title: '序号',
                 dataIndex: "index",
-                width: 45,
+                width: 50,
                 ellipsis: true,
                 fixed: "left",
                 onCell: (record, index) => {
@@ -358,7 +354,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 title: '端口',
                 dataIndex: "port",
                 ellipsis: true,
-                width: 60,
+                width: 70,
                 sorter: ((a, b) => localeCompare(a.port, b.port)),
                 onCell: (record, index) => {
                     return {
@@ -397,7 +393,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 title: '响应码',
                 dataIndex: "status_code",
                 ellipsis: true,
-                width: 60,
+                width: 80,
                 sorter: ((a, b) => localeCompare(a.status_code, b.status_code)),
                 onCell: (record, index) => {
                     return {
@@ -552,7 +548,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 }
             },
         ];
-        const [columns, setColumns] = useState<ColumnsType<hunter.Item>>(defaultColumns)
+        const [columns, setColumns] = useState<ColumnsType<PageDataType>>(defaultColumns)
         const [loading, setLoading] = useState<boolean>(false)
         const [loading2, setLoading2] = useState<boolean>(false)
         const [pageData, setPageData] = useState<PageDataType[]>([])
@@ -568,14 +564,14 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 234)
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
-        const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.assets)
+        const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
                 setTableScrollHeight(window.innerHeight - 234)
             })
-            let tmpCols: (ColumnGroupType<hunter.Item> | ColumnType<hunter.Item>)[]
-            let tmp: (ColumnGroupType<hunter.Item> | ColumnType<hunter.Item>)[]
+            let tmpCols: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
+            let tmp: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
             if (this.props.checkedColsValue) {
                 tmpCols = defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
                 tmp = tmpCols.map(col => ({...col}));
@@ -594,7 +590,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
             let index = 0;
             // setPageData(result?.map((item) => {
-            //     const instance = new hunter.Item(item)
+            //     const instance = new PageDataType(item)
             //     const {convertValues, ...reset} = instance
             //     return {index: ++index, ...item, convertValues, ...reset}
             // }))
@@ -614,7 +610,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             )
         }, []);
 
-        const handleOnContextMenu = (item: hunter.Item, rowIndex: number | undefined, colKey: string) => {
+        const handleOnContextMenu = (item: PageDataType, rowIndex: number | undefined, colKey: string) => {
             selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
             beforeContextMenuOpen();
         }
@@ -627,13 +623,13 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             for (const key in menuItems) {
                 const tt = menuItems[key]
                 switch (menuItems[key].key) {
-                    case MenuItem.OpenUrl.key:
+                    case MenuItems.OpenUrl.key:
                         tt["disabled"] = !selectedRow.item.url;
                         break;
-                    case MenuItem.CopyCell.key:
-                        tt["disabled"] = !selectedRow.item[selectedRow?.colKey as keyof hunter.Item];
+                    case MenuItems.CopyCell.key:
+                        tt["disabled"] = !selectedRow.item[selectedRow?.colKey as keyof PageDataType];
                         break;
-                    case MenuItem.QueryTitle.key:
+                    case MenuItems.QueryTitle.key:
                         tt["disabled"] = !selectedRow.item.web_title;
                         break;
                 }
@@ -647,38 +643,38 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 return
             }
             switch (e.key) {
-                case MenuItem.QueryTitle.key:
+                case MenuItems.QueryTitle.key:
                     this.props?.onContextMenu.addTab("web.title=" + selectedRow.item.web_title)
                     break
-                case MenuItem.QueryIpCidr.key:
+                case MenuItems.QueryIpCidr.key:
                     this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip + "/24")
                     break
-                case MenuItem.QueryIP.key:
+                case MenuItems.QueryIP.key:
                     this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip)
                     break
-                case MenuItem.OpenUrl.key:
+                case MenuItems.OpenUrl.key:
                     if (selectedRow.item.url) {
                         BrowserOpenURL(selectedRow.item.url)
                     }
                     break
-                case MenuItem.CopyCell.key: {
+                case MenuItems.CopyCell.key: {
                     const item = selectedRow.item
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.colKey) {
-                            const value = item[key as keyof hunter.Item]
+                            const value = item[key as keyof PageDataType]
                             copy(value)
                         }
                     }
                 }
                     break
-                case MenuItem.CopyRow.key:
+                case MenuItems.CopyRow.key:
                     copy(selectedRow)
                     break
-                case MenuItem.CopyUrlCol.key: {
+                case MenuItems.CopyUrlCol.key: {
                     const colValues = pageData.map(item => {
                         for (const key in item) {
                             if (Object.prototype.hasOwnProperty.call(item, key) && key === 'url') {
-                                return item[key as keyof hunter.Item]
+                                return item[key as keyof PageDataType]
                             }
                         }
                         return ""
@@ -686,11 +682,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     copy(colValues)
                     break
                 }
-                case MenuItem.CopyCol.key: {
+                case MenuItems.CopyCol.key: {
                     const colValues = pageData.map(item => {
                         for (const key in item) {
                             if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow?.colKey) {
-                                return item[key as keyof hunter.Item]
+                                return item[key as keyof PageDataType]
                             }
                         }
                         return ""
@@ -712,7 +708,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 setColumns(newColumns)
             };
 
-        const getMergeColumns = (): ColumnsType<hunter.Item> => {
+        const getMergeColumns = (): ColumnsType<PageDataType> => {
 
             if (!columns) {
                 return defaultColumns
@@ -720,7 +716,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
             return columns?.map((col, index) => ({
                 ...col,
-                onHeaderCell: (column: ColumnsType<hunter.Item>[number]) => ({
+                onHeaderCell: (column: ColumnsType<PageDataType>[number]) => ({
                     width: column.width,
                     onResize: handleHeaderResize(index) as React.ReactEventHandler<any>,
                 }),
@@ -1006,7 +1002,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     <Table
                         // locale={{ emptyText: "暂无数据" }}
                         showSorterTooltip={false}
-                        scroll={{y: tableScrollHeight, scrollToFirstRowOnChange: true}}
+                        virtual
+                        scroll={{y: tableScrollHeight, x: "100%", scrollToFirstRowOnChange: true}}
                         bordered
                         columns={getMergeColumns()}
                         components={{
@@ -1143,40 +1140,41 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     }
 }
 
-
-type TabType = {
-    label: string,
-    key: string,
-    children: ReactNode,
-    closable?: boolean
-}
-
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const key = useSelector((state:RootState)=>state.config.auth.hunter.key)
-    const [tmpKey, setTmpKey] = useState("")
+    const cfg = useSelector((state:RootState)=>state.config.config)
+    const [key, setKey] = useState("")
 
     useEffect(()=>{
-        setTmpKey(key)
-    }, [key])
+        setKey(cfg.Hunter.token)
+    }, [cfg.Hunter])
 
-
-    function save() {
-        SetAuth(tmpKey).catch(
-            err => errorNotification("错误", err)
-        ).then(
+    const save=()=> {
+        SetAuth(key).then(
             ()=>{
+                const t = { ...cfg, Hunter: {...cfg.Hunter, token: key} } as config.Config;
+                dispatch(configActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
-                dispatch(configActions.setHunterAuth({key: tmpKey}))
+            }
+        ).catch(
+            err => {
+                errorNotification("错误", err)
+                setKey(cfg.Hunter.token)
             }
         )
     }
 
+    const cancel=()=> {
+        setEditable(false);
+        setOpen(false)
+        setKey(cfg.Hunter.token)
+    }
+
     return <>
-        <Tooltip title="设置">
+        <Tooltip title="设置" placement={"right"}>
             <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
         <Modal
@@ -1189,12 +1187,13 @@ const AuthSetting: React.FC = () => {
             closeIcon={null}
             width={420}
             destroyOnClose
+            getContainer={false}
         >
             <Flex vertical gap={10}>
-                <Input.Password value={tmpKey} placeholder="token" onChange={
+                <Input.Password value={key} placeholder="token" onChange={
                     e=>{
                         if(!editable)return
-                        setTmpKey(e.target.value)
+                        setKey(e.target.value)
                     }
                 }/>
                 <Flex gap={10} justify={"end"}>
@@ -1207,10 +1206,7 @@ const AuthSetting: React.FC = () => {
                                         onClick={save}
                                 >保存</Button>
                                 <Button {...buttonProps} htmlType="submit"
-                                        onClick={() => {
-                                            setEditable(false);
-                                            setOpen(false)
-                                        }}
+                                        onClick={cancel}
                                 >取消</Button>
                             </>
                     }
@@ -1225,7 +1221,7 @@ class Hunter extends React.Component {
         activeKey: "",
         tabCount: 0,
         tabRefs: [] as TabContent[],
-        items: [] as TabType[],
+        items: [] as Tab[],
     };
 
     componentDidMount(): void {
@@ -1233,7 +1229,7 @@ class Hunter extends React.Component {
         this.setState({
             activeKey: initialTabKey,
             items: [{
-                label: initialTabKey,
+                label: <TabLabel label={initialTabKey}/>,
                 key: initialTabKey,
                 // children: <TabContent ref={(r: TabContent) => {
                 //     if (r) {
@@ -1268,7 +1264,7 @@ class Hunter extends React.Component {
         const newPanes = [
             ...this.state.items,
             {
-                label: newActiveKey,
+                label: <TabLabel label={newActiveKey}/>,
                 key: newActiveKey,
                 children: <TabContent
                     ref={(r: TabContent) => {

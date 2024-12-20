@@ -2,6 +2,7 @@ package domain2ip
 
 import (
 	"encoding/json"
+	"fine/backend/proxy/v2"
 	"github.com/miekg/dns"
 	"github.com/pkg/errors"
 	"io"
@@ -11,13 +12,17 @@ import (
 )
 
 type IP2Domain struct {
-	Htt *http.Client
+	http *http.Client
 }
 
 func NewClient() *IP2Domain {
 	return &IP2Domain{
-		Htt: &http.Client{},
+		http: &http.Client{},
 	}
+}
+
+func (r *IP2Domain) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
 }
 
 func (r *IP2Domain) GetARecord(domain, address string) ([]string, error) {

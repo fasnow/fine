@@ -4,14 +4,14 @@ import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
 import {Button, Popover, Tabs} from "antd";
 import "@/pages/Domain2IP.css"
-import {GetDNS, SaveDNS} from "../../wailsjs/go/config/Config";
 import {errorNotification} from "@/component/Notification";
 import {EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
 import 'xterm/css/xterm.css';
 import {GetDetail, Stop} from "../../wailsjs/go/domain2ip/Bridge";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
-import {CssConfig} from "@/pages/Config";
+import {CssConfig} from "@/pages/Constants";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import TabsV2 from "@/component/TabsV2";
 
 const TabContent = () => {
     const [output, setOutput] = useState<string>("")
@@ -69,13 +69,13 @@ const TabContent = () => {
     }
 
     const stop = () => {
-        Stop(taskID.current).catch(
-            e => errorNotification("错误", e)
-        ).then(
+        Stop(taskID.current).then(
             () => {
                 taskID.current = 0
                 setRunning(false)
             }
+        ).catch(
+            e => errorNotification("错误", e)
         )
     }
 
@@ -113,122 +113,8 @@ const TabContent = () => {
     );
 }
 
-type TabType = {
-    label: string,
-    key: string,
-    children: ReactNode,
-    closable?: boolean
-}
-
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
-
 const Domain2IP = () => {
-    const [activeKey, setActiveKey] = useState<string>("1")
-    const [items, setItems] = useState<TabType[]>([])
-    const newTabIndex = useRef<number>(0)
-    const [dns, setDNS] = useState<string>("")
-    useEffect(() => {
-        const newActiveKey = `${++newTabIndex.current}`;
-        setItems([
-            {
-                label: newActiveKey,
-                key: newActiveKey,
-                children: <TabContent/>,
-            }
-        ],)
-    }, []);
-
-    const onTabChange = (newActiveKey: string) => {
-        setActiveKey(newActiveKey)
-    };
-
-    const addTab = (input: string) => {
-        const newActiveKey = `${++newTabIndex.current}`;
-        setItems([...items, {
-            label: newActiveKey,
-            key: newActiveKey,
-            children: <TabContent/>,
-        }]);
-        setActiveKey(newActiveKey);
-    };
-
-    const removeTab = (targetKey: TargetKey) => {
-        const targetIndex = items.findIndex((pane) => pane.key === targetKey);
-        const newPanes = items.filter((pane) => pane.key !== targetKey);
-        if (newPanes.length && targetKey === activeKey) {
-            const {key} = newPanes[targetIndex === newPanes.length ? targetIndex - 1 : targetIndex];
-            setActiveKey(key);
-        }
-        setItems(newPanes);
-    };
-
-    const onEditTab = (
-        targetKey: React.MouseEvent | React.KeyboardEvent | string,
-        action: 'add' | 'remove',
-    ) => {
-        if (action === 'add') {
-            addTab("");
-        } else {
-            removeTab(targetKey);
-        }
-    };
-
-    return (
-        <div style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "100%",
-            rowGap: "5px",
-            padding: "5px"
-        }}>
-
-            <Tabs
-                size="small"
-                type="editable-card"
-                tabBarExtraContent={{
-                    left:
-                        <Popover
-                            content={
-                                <div style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    width: "100%"
-                                }}>
-                                    <TextArea
-                                        size={"small"}
-                                        value={dns}
-                                        rows={10}
-                                        onChange={e => setDNS(e.target.value)}
-                                        onBlur={() => {
-                                            SaveDNS({value: dns.split("\n")})
-                                                .catch(e => errorNotification("错误", "保存失败:" + e))
-                                        }}/>
-                                </div>}
-                            onOpenChange={(open) => {
-                                if (open) {
-                                    GetDNS().then(r => {
-                                        setDNS(r.value.join(","))
-                                    })
-                                }
-                            }}
-                            title="每行一个"
-                            trigger="click"
-                            placement={"bottomRight"}
-                        >
-                            <Button size={"small"} type={"text"}>DNS设置</Button>
-                        </Popover>
-
-
-                }}
-                onChange={onTabChange}
-                activeKey={activeKey}
-                onEdit={onEditTab}
-                items={items}
-            />
-        </div>
-    );
+    return <TabsV2 defaultTabContent={<TabContent/>}/>
 }
-
 
 export default Domain2IP;

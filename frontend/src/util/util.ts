@@ -57,13 +57,23 @@ export const localeCompare=(a:any,b:any)=>{
       }
 }
 
-export const strSplit=(str:string, delimiter:string, limit:number)=>{
+export const strSplit = (str: string, delimiter: string, limit: number): string[] => {
     let parts = str.split(delimiter);
-    if (parts.length > limit) {
-        return [parts[0], parts.slice(1).join(delimiter)];
+
+    if (parts.length === limit) {
+        return parts;
+    } else if (parts.length < limit) {
+        // 小于 `limit` 时，补充空字符串到指定长度
+        while (parts.length < limit) {
+            parts.push("");
+        }
+        return parts;
+    } else {
+        // 大于 `limit` 时，将多余部分合并到最后一个元素
+        return [...parts.slice(0, limit - 1), parts.slice(limit - 1).join(delimiter)];
     }
-    return parts;
-}
+};
+
 
 export const copy = (value: any) => {
     if (!value) {

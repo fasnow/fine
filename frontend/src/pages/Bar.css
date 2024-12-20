@@ -18,10 +18,10 @@
 .left {
     display: flex;
     align-items: flex-start;
-    /* // 设置可拖动 */
-    --wails-draggable: drag;
-    user-select: none;
+    --wails-draggable: drag;/* 设置可拖动 */
+    user-select: none; /* 禁止选择文本 */
     -webkit-user-select: none;
+    pointer-events: none; /* 禁止点击和获取焦点 */
 }
 
 .right {

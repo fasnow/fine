@@ -50,6 +50,10 @@ export function GetQuake() {
   return window['go']['config']['Config']['GetQuake']();
 }
 
+export function GetTianYanCha() {
+  return window['go']['config']['Config']['GetTianYanCha']();
+}
+
 export function GetWechat() {
   return window['go']['config']['Config']['GetWechat']();
 }
@@ -92,6 +96,10 @@ export function SaveQuake(arg1) {
 
 export function SaveQueryOnEnter(arg1) {
   return window['go']['config']['Config']['SaveQueryOnEnter'](arg1);
+}
+
+export function SaveTianYanCha(arg1) {
+  return window['go']['config']['Config']['SaveTianYanCha'](arg1);
 }
 
 export function SaveWechat(arg1) {

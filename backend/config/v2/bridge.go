@@ -13,7 +13,8 @@ func (r *Config) GetWechatDataPath() string {
 }
 
 func (r *Config) SaveWechatDataPath(path string) {
-	SaveWechatDataPath(path)
+	GlobalConfig.WechatDataPath = path
+	Save()
 }
 
 func (r *Config) GetProxy() Proxy {
@@ -29,15 +30,16 @@ func (r *Config) GetFofa() Fofa {
 }
 
 func (r *Config) GetConfigBaseDir() string {
-	return r.baseDir
+	return r.BaseDir
 }
 
 func (r *Config) GetDataDir() string {
-	return r.dataDir
+	return r.DataDir
 }
 
 func (r *Config) SaveFofa(fofa Fofa) error {
-	return SaveFofa(fofa)
+	GlobalConfig.Fofa = fofa
+	return Save()
 }
 
 func (r *Config) GetHunter() Hunter {
@@ -45,7 +47,8 @@ func (r *Config) GetHunter() Hunter {
 }
 
 func (r *Config) SaveHunter(hunter Hunter) error {
-	return SaveHunter(hunter)
+	GlobalConfig.Hunter = hunter
+	return Save()
 }
 
 func (r *Config) GetQuake() Quake {
@@ -53,7 +56,8 @@ func (r *Config) GetQuake() Quake {
 }
 
 func (r *Config) SaveQuake(quake Quake) error {
-	return SaveQuake(quake)
+	GlobalConfig.Quake = quake
+	return Save()
 }
 
 func (r *Config) Get0zone() Zone {
@@ -61,7 +65,8 @@ func (r *Config) Get0zone() Zone {
 }
 
 func (r *Config) Save0zone(zone Zone) error {
-	return Save0zone(zone)
+	GlobalConfig.Zone = zone
+	return Save()
 }
 
 func (r *Config) GetDBFile() string {
@@ -77,7 +82,8 @@ func (r *Config) GetHttpx() Httpx {
 }
 
 func (r *Config) SaveHttpx(httpx Httpx) error {
-	return SaveHttpx(httpx)
+	GlobalConfig.Httpx = httpx
+	return Save()
 }
 
 func (r *Config) GetWechat() Wechat {
@@ -85,7 +91,8 @@ func (r *Config) GetWechat() Wechat {
 }
 
 func (r *Config) SaveWechatMatchRules(rules []string) error {
-	return SaveWechatMatchRules(rules)
+	GlobalConfig.Wechat.Rules = rules
+	return Save()
 }
 
 func (r *Config) GetWechatMatchRules() []string {
@@ -93,7 +100,8 @@ func (r *Config) GetWechatMatchRules() []string {
 }
 
 func (r *Config) SaveWechat(wechat Wechat) error {
-	return SaveWechat(wechat)
+	GlobalConfig.Wechat = wechat
+	return Save()
 }
 
 func (r *Config) GetDNS() DNS {
@@ -101,16 +109,25 @@ func (r *Config) GetDNS() DNS {
 }
 
 func (r *Config) SaveDNS(dns DNS) error {
-	return SaveDNS(dns)
+	GlobalConfig.DNS = dns
+	return Save()
 }
 
 func (r *Config) SaveQueryOnEnter(enter QueryOnEnter) error {
-	t := GlobalConfig
-	t.QueryOnEnter = enter
-	err := save(*t)
+	GlobalConfig.QueryOnEnter = enter
+	err := Save()
 	if err != nil {
 		logger.Info("can't save queryOnEnter to file")
 		return err
 	}
 	return nil
+}
+
+func (r *Config) GetTianYanCha() TianYanCha {
+	return r.TianYanCha
+}
+
+func (r *Config) SaveTianYanCha(cha TianYanCha) error {
+	GlobalConfig.TianYanCha = cha
+	return Save()
 }

@@ -3,12 +3,14 @@ package quake
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/constraint"
 	"fine/backend/db/models"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/logger"
 	quakeModel "fine/backend/service/model/quake"
+	service2 "fine/backend/service/service"
 	"fine/backend/utils"
+	"github.com/cenkalti/backoff/v4"
 
 	"fmt"
 	"github.com/pkg/errors"
@@ -30,7 +32,7 @@ type Bridge struct {
 func NewQuakeBridge(app *app.App) *Bridge {
 	t := config.GlobalConfig.GetQuake()
 	tt := NewClient(t.Token)
-	config.ProxyManager.Add(tt)
+	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		quake:       tt,
 		queryLog:    service.NewQuakeQueryLog(),
@@ -42,9 +44,8 @@ func NewQuakeBridge(app *app.App) *Bridge {
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	t := config.GetQuake()
-	t.Token = key
-	if err := config.GlobalConfig.SaveQuake(t); err != nil {
+	config.GlobalConfig.Quake.Token = key
+	if err := config.Save(); err != nil {
 		logger.Info(err.Error())
 		return err
 
@@ -187,7 +188,7 @@ func (b *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("Quake_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(models.DownloadLog{
@@ -198,50 +199,36 @@ func (b *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 	}, fileID)
 
 	go func() {
-		var retry = 10
-		interval := config.GetQuake().Interval
 		exportDataTaskID := idgen.NextId()
 		for index := 1; index <= page; index++ {
-			req := NewGetRealtimeDataBuilder().
-				Query(queryLog.Query).
-				Page(index).
-				Size(pageSize).
-				EndTime(queryLog.EndTime).
-				StartTime(queryLog.StartTime).
-				IpList(queryLog.IpList).
-				Include(queryLog.Include).
-				Exclude(queryLog.Exclude).
-				Latest(queryLog.Latest).
-				IgnoreCache(queryLog.IgnoreCache).
-				Rule(queryLog.Rule).
-				Build()
-			result, err := b.quake.Realtime.Service(req)
+			result, err := backoff.RetryWithData(func() (*RSDQueryResult, error) {
+				req := NewGetRealtimeDataBuilder().
+					Query(queryLog.Query).
+					Page(index).
+					Size(pageSize).
+					EndTime(queryLog.EndTime).
+					StartTime(queryLog.StartTime).
+					IpList(queryLog.IpList).
+					Include(queryLog.Include).
+					Exclude(queryLog.Exclude).
+					Latest(queryLog.Latest).
+					IgnoreCache(queryLog.IgnoreCache).
+					Rule(queryLog.Rule).
+					Build()
+				result, err := b.quake.Realtime.Service(req)
+				if err != nil {
+					logger.Info(err.Error())
+					return nil, err
+				}
+				return result, nil
+			}, service2.GetBackOffWithMaxRetries(10, config.GlobalConfig.Quake.Interval, 1))
+
 			if err != nil {
 				logger.Info(err.Error())
-				if retry == 0 {
-					// retry为0可能是因为积分不足，所以不能直接返回错误，获取到多少数据就返回多少
-					cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
-					if err != nil {
-						logger.Info(err.Error())
-						return
-					}
-					exportItems := make([]quakeModel.RealtimeServiceItem, 0)
-					for _, cacheItem := range cacheItems {
-						exportItems = append(exportItems, *cacheItem.RealtimeServiceItem)
-					}
-					if err := b.quake.Export(exportItems, outputAbsFilepath); err != nil {
-						logger.Info(err.Error())
-						return
-					}
-					break
-				}
-				retry--
-				index--
-				time.Sleep(interval)
-				continue
+				break
 			}
 			_ = b.dataCache.BatchInsert(exportDataTaskID, result.Items)
-			time.Sleep(interval)
+			time.Sleep(config.GlobalConfig.Quake.Interval)
 		}
 		cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
 		if err != nil {
@@ -256,7 +243,7 @@ func (b *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 			logger.Info(err.Error())
 			return
 		}
-		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewQuakeDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.Events.HasNewQuakeDownloadItem)
 	}()
 	return nil
 }

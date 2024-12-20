@@ -29,3 +29,7 @@ export function QueryAppID(arg1) {
 export function SetAppletPath(arg1) {
   return window['go']['wechat']['Bridge']['SetAppletPath'](arg1);
 }
+
+export function UseProxyManager(arg1) {
+  return window['go']['wechat']['Bridge']['UseProxyManager'](arg1);
+}

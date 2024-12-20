@@ -1,4 +1,4 @@
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import type {GetRef} from 'antd';
 import {
     Button,
@@ -42,30 +42,29 @@ import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '@/component/ResizableTitle';
 import {ExportDataPanelProps} from './Props';
 import helpIcon from '@/assets/images/help.svg'
-import {authFormProps, buttonProps} from './Setting';
-import {fofa} from "../../wailsjs/go/models";
+import {buttonProps} from './Setting';
+import {config, fofa} from "../../wailsjs/go/models";
 import {Export, GetUserInfo, Query, SetAuth} from "../../wailsjs/go/fofa/Bridge";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
-import {GetFofa} from "../../wailsjs/go/config/Config";
 import {Dots} from "@/component/Icon";
 import MurmurHash3 from "murmurhash3js"
 import {Buffer} from "buffer"
 import {Fetch} from "../../wailsjs/go/app/App";
 import {toUint8Array} from "js-base64";
 import {copy} from "@/util/util";
-import {MenuItem} from "@/component/MenuItem";
+import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import {TargetKey} from "@/pages/Constants";
+import TabLabel from "@/component/TabLabel";
+import type {Tab} from "rc-tabs/lib/interface"
 
 type InputRefType = GetRef<typeof Input>; // BaseSelectRef
 
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
-interface PageDataType extends fofa.Item {
-    index: number
-}
+type  PageDataType = WithIndex<fofa.Item>
 
-let selectedRow: { item: fofa.Item | undefined, rowIndex: number | undefined, colKey: string } | undefined = {
+let selectedRow: { item: PageDataType | undefined, rowIndex: number | undefined, colKey: string } | undefined = {
     item: undefined,
     rowIndex: 0,
     colKey: ''
@@ -144,14 +143,14 @@ type TabContentState = {
 }
 
 const defaultMenuItems = [
-    MenuItem.OpenUrl,
-    MenuItem.QueryIP,
-    MenuItem.QueryIpCidr,
-    MenuItem.QueryTitle,
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
-    MenuItem.CopyUrlCol
+    MenuItems.OpenUrl,
+    MenuItems.QueryIP,
+    MenuItems.QueryIpCidr,
+    MenuItems.QueryTitle,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
+    MenuItems.CopyUrlCol
 ];
 
 class TabContent extends React.Component<TabContentProps, TabContentState> {
@@ -166,13 +165,13 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         }
     }
 
-    tableId = `fofa-${index++}`
+    // tableId = `fofa-${index++}`
 
     // async componentDidMount() {
     //     window.addEventListener("resize", this.handleResize);
     //     this.handleResize()
-    //     let tmpCols: (ColumnGroupType<fofa.Item> | ColumnType<fofa.Item>)[]
-    //     let tmp: (ColumnGroupType<fofa.Item> | ColumnType<fofa.Item>)[]
+    //     let tmpCols: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
+    //     let tmp: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
     //     if (this.props.checkedColsValue) {
     //         tmpCols = this.defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
     //         tmp = tmpCols.map(col => ({ ...col }));
@@ -353,12 +352,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     }
 
     private Content = () => {
-        const defaultColumns: ColumnsType<fofa.Item> = [
+        const defaultColumns: ColumnsType<PageDataType> = [
             {
                 title: '序号', dataIndex: "index", ellipsis: true, width: 50, fixed: true, onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "index"),
-                        onClick: () => copy(index)
+                        onClick: () => copy(record.index)
                     }
                 }
             },
@@ -380,7 +379,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "domain",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.domain.localeCompare(b.domain)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.domain.localeCompare(b.domain)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "domain"),
@@ -471,7 +470,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "host",
                 width: 200,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.host.localeCompare(b.host)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.host.localeCompare(b.host)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "host"),
@@ -484,7 +483,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "cert",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.cert.localeCompare(b.cert)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.cert.localeCompare(b.cert)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "cert"),
@@ -497,7 +496,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "os",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.os.localeCompare(b.os)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.os.localeCompare(b.os)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "os"),
@@ -510,7 +509,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "server",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.server.localeCompare(b.server)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.server.localeCompare(b.server)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "server"),
@@ -523,7 +522,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "header",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.header.localeCompare(b.header)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.header.localeCompare(b.header)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "header"),
@@ -536,7 +535,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "banner",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.banner.localeCompare(b.banner)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.banner.localeCompare(b.banner)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "banner"),
@@ -549,7 +548,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "product",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.product.localeCompare(b.product)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.product.localeCompare(b.product)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "product"),
@@ -562,7 +561,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "product_category",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.product_category.localeCompare(b.product_category)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.product_category.localeCompare(b.product_category)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "product_category"),
@@ -575,7 +574,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "version",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.version.localeCompare(b.version)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.version.localeCompare(b.version)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "version"),
@@ -588,7 +587,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "lastupdatetime",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.lastupdatetime.localeCompare(b.lastupdatetime)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.lastupdatetime.localeCompare(b.lastupdatetime)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "lastupdatetime"),
@@ -601,7 +600,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "cname",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.cname.localeCompare(b.cname)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.cname.localeCompare(b.cname)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "cname"),
@@ -614,7 +613,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "icon_hash",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.icon_hash.localeCompare(b.icon_hash)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.icon_hash.localeCompare(b.icon_hash)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "icon_hash"),
@@ -627,7 +626,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "certs_valid",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.certs_valid.localeCompare(b.certs_valid)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.certs_valid.localeCompare(b.certs_valid)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "certs_valid"),
@@ -640,7 +639,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "cname_domain",
                 width: 120,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.cname_domain.localeCompare(b.cname_domain)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.cname_domain.localeCompare(b.cname_domain)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "cname_domain"),
@@ -653,7 +652,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "body",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.body.localeCompare(b.body)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.body.localeCompare(b.body)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "body"),
@@ -666,7 +665,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "icon",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.icon.localeCompare(b.icon)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.icon.localeCompare(b.icon)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "icon"),
@@ -679,7 +678,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "fid",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.link.localeCompare(b.fid)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.link.localeCompare(b.fid)),
                 onCell: (record, fid) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "fid"),
@@ -692,7 +691,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "structinfo",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.structinfo.localeCompare(b.structinfo)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.structinfo.localeCompare(b.structinfo)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "structinfo"),
@@ -705,7 +704,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "country",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.country.localeCompare(b.country)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.country.localeCompare(b.country)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "country"),
@@ -718,7 +717,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "country_name",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.country_name.localeCompare(b.country_name)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.country_name.localeCompare(b.country_name)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "country_name"),
@@ -731,7 +730,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "region",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.region.localeCompare(b.region)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.region.localeCompare(b.region)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "region"),
@@ -744,7 +743,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "city",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.city.localeCompare(b.city)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.city.localeCompare(b.city)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "city"),
@@ -773,7 +772,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "as_number",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.as_number.localeCompare(b.as_number)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.as_number.localeCompare(b.as_number)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "as_number"),
@@ -786,7 +785,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 dataIndex: "as_organization",
                 width: 100,
                 ellipsis: true,
-                sorter: ((a: fofa.Item, b: fofa.Item) => a.as_organization.localeCompare(b.as_organization)),
+                sorter: ((a: PageDataType, b: PageDataType) => a.as_organization.localeCompare(b.as_organization)),
                 onCell: (record, index) => {
                     return {
                         onContextMenu: () => handleOnContextMenu(record, index, "as_organization"),
@@ -803,7 +802,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 }
             },//jarm指纹,权限：无
         ];
-        const [columns, setColumns] = useState<ColumnsType<fofa.Item>>(defaultColumns)
+        const [columns, setColumns] = useState<ColumnsType<PageDataType>>(defaultColumns)
         const [loading, setLoading] = useState<boolean>(false)
         const [loading2, setLoading2] = useState<boolean>(false)
         const [pageData, setPageData] = useState<PageDataType[]>([])
@@ -820,15 +819,15 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 200)
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
-        const allowEnterPress = useSelector((state:RootState) =>state.config.queryOnEnter.assets)
+        const allowEnterPress = useSelector((state:RootState) =>state.config.config.QueryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
                 setTableScrollHeight(window.innerHeight - 200)
             })
             const init = () => {
-                let tmpCols: (ColumnGroupType<fofa.Item> | ColumnType<fofa.Item>)[]
-                let tmp: (ColumnGroupType<fofa.Item> | ColumnType<fofa.Item>)[]
+                let tmpCols: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
+                let tmp: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
                 if (this.props.checkedColsValue) {
                     tmpCols = defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
                     tmp = tmpCols.map(col => ({...col}));
@@ -867,21 +866,21 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 setColumns(newColumns)
             };
 
-        const getMergeColumns = (): ColumnsType<fofa.Item> => {
+        const getMergeColumns = (): ColumnsType<PageDataType> => {
             if (!columns) {
                 return defaultColumns
             }
 
             return columns?.map((col, index) => ({
                 ...col,
-                onHeaderCell: (column: ColumnsType<fofa.Item>[number]) => ({
+                onHeaderCell: (column: ColumnsType<PageDataType>[number]) => ({
                     width: column.width,
                     onResize: handleHeaderResize(index) as React.ReactEventHandler<any>,
                 }),
             }));
         }
 
-        const handleOnContextMenu = (item: fofa.Item, rowIndex: number | undefined, colKey: string) => {
+        const handleOnContextMenu = (item: PageDataType, rowIndex: number | undefined, colKey: string) => {
             selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
             beforeContextMenuOpen();
         }
@@ -891,35 +890,35 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 return
             }
             switch (e.key) {
-                case MenuItem.QueryIpCidr.key:
+                case MenuItems.QueryIpCidr.key:
                     selectedRow?.item?.ip && this.props?.onContextMenu.addTab("ip=" + selectedRow?.item?.ip + "/24")
                     break
-                case MenuItem.QueryIP.key:
+                case MenuItems.QueryIP.key:
                     selectedRow?.item?.ip && this.props?.onContextMenu.addTab("ip=" + selectedRow?.item?.ip)
                     break
-                case MenuItem.QueryTitle.key:
+                case MenuItems.QueryTitle.key:
                     selectedRow?.item?.title && this.props?.onContextMenu.addTab("title=" + selectedRow?.item?.title)
                     break
-                case MenuItem.OpenUrl.key:
+                case MenuItems.OpenUrl.key:
                     selectedRow?.item?.link && BrowserOpenURL(selectedRow.item.link)
                     break
-                case MenuItem.CopyCell.key: {
-                    const item = selectedRow?.item as fofa.Item
+                case MenuItems.CopyCell.key: {
+                    const item = selectedRow?.item as PageDataType
                     for (const key in item) {
                         if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow?.colKey) {
-                            copy(item[key as keyof fofa.Item])
+                            copy(item[key as keyof PageDataType])
                         }
                     }
                 }
                     break
-                case MenuItem.CopyRow.key:
+                case MenuItems.CopyRow.key:
                     copy(selectedRow?.item)
                     break
-                case MenuItem.CopyUrlCol.key: {
+                case MenuItems.CopyUrlCol.key: {
                     const colValues = pageData.map(item => {
                         for (const key in item) {
                             if (Object.prototype.hasOwnProperty.call(item, key) && key === 'link') {
-                                return item[key as keyof fofa.Item]
+                                return item[key as keyof PageDataType]
                             }
                         }
                         return null
@@ -927,11 +926,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     copy(colValues)
                     break
                 }
-                case MenuItem.CopyCol.key: {
+                case MenuItems.CopyCol.key: {
                     const colValues = pageData.map(item => {
                         for (const key in item) {
                             if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow?.colKey) {
-                                return item[key as keyof fofa.Item]
+                                return item[key as keyof PageDataType]
                             }
                         }
                     })
@@ -942,7 +941,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             selectedRow = undefined
         };
 
-        const handleNewQuery = async (query: string, columns: ColumnsType<fofa.Item>, pageSize: number) => {
+        const handleNewQuery = async (query: string, columns: ColumnsType<PageDataType>, pageSize: number) => {
             if (query === "") {
                 return
             }
@@ -1064,13 +1063,13 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             for (const key in menuItems) {
                 const tt = menuItems[key]
                 switch (menuItems[key].key) {
-                    case MenuItem.OpenUrl.key:
+                    case MenuItems.OpenUrl.key:
                         tt["disabled"] = !selectedRow.item.link;
                         break;
-                    case MenuItem.CopyCell.key:
-                        tt["disabled"] = !selectedRow.item[selectedRow?.colKey as keyof fofa.Item];
+                    case MenuItems.CopyCell.key:
+                        tt["disabled"] = !selectedRow.item[selectedRow?.colKey as keyof PageDataType];
                         break;
-                    case MenuItem.QueryTitle.key:
+                    case MenuItems.QueryTitle.key:
                         tt["disabled"] = !selectedRow.item["title"];
                         break;
                 }
@@ -1188,7 +1187,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 <this.ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize}/>
             </div>)
 
-        return <div>
+        return <div >
             <div style={{display: "flex", justifyContent: 'center', alignItems: "center"}}>
                 <Input
                     ref={inputRef}
@@ -1225,12 +1224,9 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             >
                 <div>
                     <Table
-                        id={this.tableId}
-                        // locale={{ emptyText: "暂无数据" }}
-                        // virtual
                         showSorterTooltip={false}
                         virtual
-                        scroll={{y: tableScrollHeight, scrollToFirstRowOnChange: true}}
+                        scroll={{y: tableScrollHeight, scrollToFirstRowOnChange: true, x: '100%'}}
                         bordered
                         columns={getMergeColumns()}
                         components={{
@@ -1254,13 +1250,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     render() {
         return <this.Content/>
     }
-}
-
-type TabType = {
-    label: string,
-    key: string,
-    children: ReactNode,
-    closable?: boolean
 }
 
 interface AdvancedHelpDataType {
@@ -1518,28 +1507,38 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const key = useSelector((state:RootState)=>state.config.auth.fofa.key)
-    const [tmpKey, setTmpKey] = useState("")
+    const cfg = useSelector((state:RootState)=>state.config.config)
+    const [key, setKey] = useState("")
 
     useEffect(()=>{
-        setTmpKey(key)
-    }, [key])
+        setKey(cfg.Fofa.token)
+    }, [cfg.Fofa])
 
 
-    function save() {
-        SetAuth(tmpKey).catch(
-            err => errorNotification("错误", err)
-        ).then(
+    const save = ()=>{
+        SetAuth(key).then(
             ()=>{
+                const t = { ...cfg, Fofa: { ...cfg.Fofa, token: key } } as config.Config;
+                dispatch(configActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
-                dispatch(configActions.setFofaAuth({key: tmpKey}))
+            }
+        ).catch(
+            err => {
+                errorNotification("错误", err)
+                setKey(cfg.Fofa.token)
             }
         )
     }
 
+    const cancel=() => {
+        setEditable(false);
+        setOpen(false)
+        setKey(cfg.Fofa.token)
+    }
+
     return <>
-        <Tooltip title="设置">
+        <Tooltip title="设置" placement={"right"}>
             <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
         <Modal
@@ -1552,12 +1551,13 @@ const AuthSetting: React.FC = () => {
             closeIcon={null}
             width={420}
             destroyOnClose
+            getContainer={false}
         >
             <Flex vertical gap={10}>
-                <Input.Password value={tmpKey} placeholder="token" onChange={
+                <Input.Password value={key} placeholder="token" onChange={
                     e=>{
                         if(!editable)return
-                        setTmpKey(e.target.value)
+                        setKey(e.target.value)
                     }
                 }/>
                 <Flex gap={10} justify={"end"}>
@@ -1570,10 +1570,7 @@ const AuthSetting: React.FC = () => {
                                     onClick={save}
                             >保存</Button>
                             <Button {...buttonProps} htmlType="submit"
-                                    onClick={() => {
-                                        setEditable(false);
-                                        setOpen(false)
-                                    }}
+                                    onClick={cancel}
                             >取消</Button>
                         </>
                 }
@@ -1588,7 +1585,7 @@ class Fofa extends React.Component {
         activeKey: "",
         tabCount: 0,
         tabRefs: [] as TabContent[],
-        items: [] as TabType[],
+        items: [] as Tab[],
     };
 
     componentDidMount(): void {
@@ -1596,7 +1593,7 @@ class Fofa extends React.Component {
         this.setState({
             activeKey: initialTabKey,
             items: [{
-                label: initialTabKey,
+                label: <TabLabel label={initialTabKey}/>,
                 key: initialTabKey,
                 children: <TabContent
                     ref={
@@ -1625,7 +1622,7 @@ class Fofa extends React.Component {
         const newPanes = [
             ...this.state.items,
             {
-                label: newActiveKey,
+                label: <TabLabel label={newActiveKey}/>,
                 key: newActiveKey,
                 children: <TabContent
                     ref={(r: TabContent) => {

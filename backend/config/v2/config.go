@@ -1,13 +1,11 @@
 package config
 
 import (
-	"fine/backend/config"
 	"fine/backend/db"
 	"fine/backend/logger"
-	"fine/backend/proxy"
+	"fine/backend/proxy/v2"
 	"fmt"
 	"gopkg.in/ini.v1"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -59,18 +57,23 @@ type QueryOnEnter struct {
 	IP138  bool `ini:"ip138" json:"ip138"`
 }
 
+type TianYanCha struct {
+	Token string `ini:"token" json:"token" comment:"X-AUTH-TOKEN"`
+}
+
 type Config struct {
-	Timeout        time.Duration `ini:"timeout" comment:"全局HTTP超时（不含Httpx），默认:20s"`
+	Timeout        time.Duration `ini:"timeout" json:"timeout" comment:"全局HTTP超时（不含Httpx），默认:20s"`
 	Proxy          Proxy
 	Fofa           Fofa
 	Hunter         Hunter
 	Quake          Quake
 	Zone           Zone `ini:"0.zone"`
+	TianYanCha     TianYanCha
 	Wechat         Wechat
 	Httpx          Httpx
 	DNS            DNS    `comment:"获取IP和判断CDN时会用到"`
-	baseDir        string `ini:"-"`
-	dataDir        string `ini:"-"`
+	BaseDir        string `ini:"-"`
+	DataDir        string `ini:"-"`
 	filePath       string `ini:"-"`
 	dbFilePath     string `ini:"-"`
 	WechatDataPath string `ini:"-"`
@@ -107,6 +110,7 @@ var (
 		Zone: Zone{
 			Interval: 1000 * time.Millisecond,
 		},
+		TianYanCha: TianYanCha{Token: ""},
 		Httpx: Httpx{
 			Path:  "",
 			Flags: "-sc -cl -title",
@@ -133,11 +137,11 @@ func init() {
 		baseDir, _ = os.UserHomeDir()
 		baseDir = filepath.Join(baseDir, "fine")
 	}
-	defaultConfig.baseDir = baseDir
-	defaultConfig.filePath = filepath.Join(defaultConfig.baseDir, "config.ini")
-	defaultConfig.dataDir = filepath.Join(baseDir, "data")
-	defaultConfig.dbFilePath = filepath.Join(defaultConfig.dataDir, "data.db")
-	defaultConfig.WechatDataPath = filepath.Join(defaultConfig.dataDir, "wechatMiniProgram")
+	defaultConfig.BaseDir = baseDir
+	defaultConfig.filePath = filepath.Join(defaultConfig.BaseDir, "config.ini")
+	defaultConfig.DataDir = filepath.Join(baseDir, "data")
+	defaultConfig.dbFilePath = filepath.Join(defaultConfig.DataDir, "data.db")
+	defaultConfig.WechatDataPath = filepath.Join(defaultConfig.DataDir, "wechatMiniProgram")
 
 	logger.DataDir = filepath.Join(baseDir, "log")
 
@@ -155,121 +159,71 @@ func init() {
 	//设置数据库路径
 	db.SetDBAbsFilepath(defaultConfig.dbFilePath)
 
-	//读取旧版本的配置文件
-	t := filepath.Join(baseDir, "config.yaml")
-	deprecatedCfg := &config.Config{}
-	bytes, _ := os.ReadFile(t)
-	if bytes == nil {
-		deprecatedCfg = nil
-	} else {
-		if err := yaml.Unmarshal(bytes, deprecatedCfg); err != nil {
-			deprecatedCfg = nil
-		} else {
-			defer func(name string) {
-				_ = os.Remove(name)
-			}(t)
-		}
-	}
-
 	GlobalConfig = defaultConfig
 	ini.PrettyFormat = false
-	if deprecatedCfg != nil {
-		tt := defaultConfig
-		tt.Timeout = time.Duration(deprecatedCfg.Timeout) * time.Second
-		tt.Proxy.Enable = deprecatedCfg.Proxy.Enable
-		tt.Proxy.Type = deprecatedCfg.Proxy.Type
-		tt.Proxy.Host = deprecatedCfg.Proxy.Host
-		tt.Proxy.Port = deprecatedCfg.Proxy.Port
-		tt.Proxy.User = deprecatedCfg.Proxy.User
-		tt.Proxy.Pass = deprecatedCfg.Proxy.Pass
-		tt.Httpx.Path = deprecatedCfg.Httpx.Path
-		tt.Httpx.Flags = deprecatedCfg.Httpx.Flags
-		tt.Fofa.Token = deprecatedCfg.Auth.Fofa.Key
-		tt.Fofa.Interval = time.Duration(deprecatedCfg.Interval.Fofa) * time.Millisecond
-		tt.Hunter.Token = deprecatedCfg.Auth.Hunter.Key
-		tt.Hunter.Interval = time.Duration(deprecatedCfg.Interval.Hunter) * time.Millisecond
-		tt.Zone.Token = deprecatedCfg.Auth.Zone.Key
-		tt.Zone.Interval = time.Duration(deprecatedCfg.Interval.Zone) * time.Millisecond
-		tt.Quake.Token = deprecatedCfg.Auth.Quake.Key
-		tt.Quake.Interval = time.Duration(deprecatedCfg.Interval.Quake) * time.Millisecond
-		tt.Wechat.Applet = deprecatedCfg.Wechat.AppletPath
+	if _, err := os.Stat(defaultConfig.filePath); os.IsNotExist(err) {
+		logger.Info("config file not found, generating default config file...")
 		cfg := ini.Empty(options)
-		err := ini.ReflectFrom(cfg, tt)
-		if err != nil {
-			logger.Info("can't reflect deprecated config struct: " + err.Error())
-			os.Exit(0)
-		}
-		err = cfg.SaveTo(defaultConfig.filePath)
-		if err != nil {
-			logger.Info("can't save deprecated config to a new one: " + err.Error())
-			os.Exit(0)
-		}
-		GlobalConfig = tt
-	} else {
-		if _, err := os.Stat(defaultConfig.filePath); os.IsNotExist(err) {
-			logger.Info("config file not found, generating default config file...")
-			cfg := ini.Empty(options)
-			if runtime.GOOS != "windows" {
-				homeDir, err := os.UserHomeDir()
-				if err != nil {
-					logger.Info(err)
-					os.Exit(1)
-				}
-				defaultConfig.Wechat.Applet = filepath.Join(homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
-			}
-			err := ini.ReflectFrom(cfg, defaultConfig)
-			if err != nil {
-				logger.Info("can't reflect default config struct: " + err.Error())
-				os.Exit(0)
-			}
-			err = cfg.SaveTo(defaultConfig.filePath)
-			if err != nil {
-				logger.Info("can't generate default config file: " + err.Error())
-				os.Exit(0)
-			}
-			logger.Info("generate default config file successfully, locate at " + defaultConfig.filePath + ", run with default config")
-
-			//超时
-			ProxyManager.SetTimeout(GlobalConfig.Timeout)
-			logger.Info(fmt.Sprintf("set timeout %fs", ProxyManager.GetTimeout().Seconds()))
-
-			return
-		}
-		cfg, err := ini.LoadSources(options, defaultConfig.filePath)
-		if err != nil {
-			logger.Info("can't open config file:" + err.Error())
-			os.Exit(0)
-		}
-
-		//迭代配置,避免添加额外数据
-		if cfg.Section("Wechat").HasKey("rule") {
-			GlobalConfig.Wechat.Rules = nil
-		}
-		if cfg.Section("DNS").HasKey("rule") {
-			GlobalConfig.DNS.Value = nil
-		}
-
-		err = cfg.MapTo(GlobalConfig)
-		if err != nil {
-			logger.Info("can't map to config file:" + err.Error())
-			os.Exit(0)
-		}
-
-		// 对于allowshadow关键字的配置，如果内容包含逗号不能直接映射，需要单独取出后填充
-		rules := cfg.Section(`Wechat`).Key("rule").ValueWithShadows()
-		GlobalConfig.Wechat.Rules = rules
-
-		if runtime.GOOS != "windows" { // darwin下微信小程序固定目录
+		if runtime.GOOS != "windows" {
 			homeDir, err := os.UserHomeDir()
 			if err != nil {
 				logger.Info(err)
 				os.Exit(1)
 			}
-			GlobalConfig.Wechat.Applet = filepath.Join(homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
+			defaultConfig.Wechat.Applet = filepath.Join(homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
 		}
+		err := ini.ReflectFrom(cfg, defaultConfig)
+		if err != nil {
+			logger.Info("can't reflect default config struct: " + err.Error())
+			os.Exit(0)
+		}
+		err = cfg.SaveTo(defaultConfig.filePath)
+		if err != nil {
+			logger.Info("can't generate default config file: " + err.Error())
+			os.Exit(0)
+		}
+		logger.Info("generate default config file successfully, locate at " + defaultConfig.filePath + ", run with default config")
 
-		save(*GlobalConfig)
+		//超时
+		ProxyManager.SetTimeout(GlobalConfig.Timeout)
+		logger.Info(fmt.Sprintf("set timeout %fs", ProxyManager.GetClient().Timeout.Seconds()))
+
+		return
 	}
+	cfg, err := ini.LoadSources(options, defaultConfig.filePath)
+	if err != nil {
+		logger.Info("can't open config file:" + err.Error())
+		os.Exit(0)
+	}
+
+	//迭代配置,避免添加额外数据
+	if cfg.Section("Wechat").HasKey("rule") {
+		GlobalConfig.Wechat.Rules = nil
+	}
+	if cfg.Section("DNS").HasKey("rule") {
+		GlobalConfig.DNS.Value = nil
+	}
+
+	err = cfg.MapTo(GlobalConfig)
+	if err != nil {
+		logger.Info("can't map to config file:" + err.Error())
+		os.Exit(0)
+	}
+
+	// 对于allowshadow关键字的配置，如果内容包含逗号不能直接映射，需要单独取出后填充
+	rules := cfg.Section(`Wechat`).Key("rule").ValueWithShadows()
+	GlobalConfig.Wechat.Rules = rules
+
+	if runtime.GOOS != "windows" { // darwin下微信小程序固定目录
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			logger.Info(err)
+			os.Exit(1)
+		}
+		GlobalConfig.Wechat.Applet = filepath.Join(homeDir, "Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages")
+	}
+
+	Save()
 	logger.Info(*GlobalConfig)
 
 	//代理
@@ -288,33 +242,27 @@ func init() {
 
 	//超时
 	ProxyManager.SetTimeout(GlobalConfig.Timeout)
-	logger.Info(fmt.Sprintf("set timeout %fs", ProxyManager.GetTimeout().Seconds()))
+	logger.Info(fmt.Sprintf("set timeout %fs", ProxyManager.GetClient().Timeout.Seconds()))
 }
 
-func save(config Config) error {
+func Save() error {
 	cfg := ini.Empty(options)
-	err := ini.ReflectFrom(cfg, &config)
+	err := ini.ReflectFrom(cfg, GlobalConfig)
 	if err != nil {
 		logger.Info("can't reflect default config struct: " + err.Error())
 		return err
 	}
-	err = cfg.SaveTo(config.filePath)
+	err = cfg.SaveTo(GlobalConfig.filePath)
 	if err != nil {
 		logger.Info("can't generate default config file: " + err.Error())
 		return err
 	}
-	*GlobalConfig = config
 	return nil
 }
 
-func GetProxy() Proxy {
-	return GlobalConfig.Proxy
-}
-
 func SaveProxy(p Proxy) error {
-	t := GlobalConfig
-	t.Proxy = p
-	err := save(*t)
+	GlobalConfig.Proxy = p
+	err := Save()
 	if err != nil {
 		logger.Info("can't store proxy to file")
 		return err
@@ -335,145 +283,5 @@ func SaveProxy(p Proxy) error {
 	}
 	_ = ProxyManager.SetProxy("")
 	logger.Info("proxy disabled")
-	return nil
-}
-
-func GetFofa() Fofa {
-	return GlobalConfig.Fofa
-}
-
-func GetBaseDir() string {
-	return GlobalConfig.baseDir
-}
-
-func SaveWechatDataPath(path string) {
-	GlobalConfig.WechatDataPath = path
-}
-
-func GetWechatDataPath() string {
-	return GlobalConfig.WechatDataPath
-}
-
-func GetDataDir() string {
-	return GlobalConfig.dataDir
-}
-
-func SaveFofa(fofa Fofa) error {
-	t := GlobalConfig
-	t.Fofa = fofa
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save fofa to file")
-		return err
-	}
-	return nil
-}
-
-func GetHunter() Hunter {
-	return GlobalConfig.Hunter
-}
-
-func SaveHunter(hunter Hunter) error {
-	t := GlobalConfig
-	t.Hunter = hunter
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save hunter to file")
-		return err
-	}
-	return nil
-}
-
-func GetQuake() Quake {
-	return GlobalConfig.Quake
-}
-
-func SaveQuake(quake Quake) error {
-	t := GlobalConfig
-	t.Quake = quake
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save quake to file")
-		return err
-	}
-	return nil
-}
-
-func Get0zone() Zone {
-	return GlobalConfig.Zone
-}
-
-func Save0zone(zone Zone) error {
-	t := GlobalConfig
-	t.Zone = zone
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save 0.zone to file")
-		return err
-	}
-	return nil
-}
-
-func GetDBFile() string {
-	return GlobalConfig.dbFilePath
-}
-
-func GetConfigFilePath() string {
-	return GlobalConfig.filePath
-}
-
-func GetHttpx() Httpx {
-	return GlobalConfig.Httpx
-}
-
-func SaveHttpx(httpx Httpx) error {
-	t := GlobalConfig
-	t.Httpx = httpx
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save httpx to file")
-		return err
-	}
-	return nil
-}
-
-func GetWechat() Wechat {
-	return GlobalConfig.Wechat
-}
-
-func SaveWechat(wechat Wechat) error {
-	t := GlobalConfig
-	t.Wechat = wechat
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save wechat to file")
-		return err
-	}
-	return nil
-}
-
-func SaveWechatMatchRules(rules []string) error {
-	t := GlobalConfig
-	t.Wechat.Rules = rules
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save wechat match rules to file")
-		return err
-	}
-	return nil
-}
-
-func GetDNS() DNS {
-	return GlobalConfig.DNS
-}
-
-func SaveDNS(dns DNS) error {
-	t := GlobalConfig
-	t.DNS = dns
-	err := save(*t)
-	if err != nil {
-		logger.Info("can't save dns to file")
-		return err
-	}
 	return nil
 }

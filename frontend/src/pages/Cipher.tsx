@@ -8,7 +8,7 @@ import {
     Tree,
     TreeDataNode
 } from "antd";
-import {CssConfig} from "@/pages/Config";
+import {CssConfig} from "@/pages/Constants";
 import React, {CSSProperties, useEffect, useRef, useState} from "react";
 import './Cipher.css'
 import locale from "antd/locale/zh_CN";

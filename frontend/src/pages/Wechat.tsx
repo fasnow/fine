@@ -22,13 +22,11 @@ import "@/pages/Wechat.css"
 import {Environment, EventsOn} from "../../wailsjs/runtime";
 import {OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/runtime/Runtime";
 import {
-    GetWechat,
-    GetWechatDataPath,
     GetWechatMatchRules,
     SaveWechat,
     SaveWechatMatchRules
 } from "../../wailsjs/go/config/Config";
-import {wechat} from "../../wailsjs/go/models";
+import {config, wechat} from "../../wailsjs/go/models";
 import {errorNotification} from "@/component/Notification";
 import {
     ClearApplet,
@@ -38,11 +36,11 @@ import {
     GetMatchedString,
 } from "../../wailsjs/go/wechat/Bridge";
 import {DecompileIcon} from "@/component/Icon";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
 import InfoToFront = wechat.InfoToFront;
-import {CssConfig} from "@/pages/Config";
-
-type DirectoryTreeProps = GetProps<typeof Tree.DirectoryTree>;
+import {CssConfig} from "@/pages/Constants";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import {useDispatch, useSelector} from "react-redux";
+import {configActions, RootState} from "@/store/store";
 
 export const MiniProgram: React.FC = () => {
     const [data, setData] = useState<InfoToFront[]>([])
@@ -60,6 +58,9 @@ export const MiniProgram: React.FC = () => {
     const [isClearing, setIsClearing] = useState<boolean>(false)
     const [open, setOpen] = useState<boolean>(false)
     const [rules, setRules] = useState<string>("")
+    const dispatch = useDispatch()
+    const cfg = useSelector((state:RootState) => state.config.config )
+
     useEffect(() => {
         Environment().then(
             r => {
@@ -98,17 +99,6 @@ export const MiniProgram: React.FC = () => {
                 _setDecompileResult(data)
             })
         })
-        GetWechat().then(
-            result => {
-                console.log(result)
-                setAppletPath(result.applet)
-            }
-        )
-        GetWechatDataPath().then(
-            result => {
-                dataCachePath.current = result
-            }
-        )
 
         //自动获取新的
         const temp = setTimeout(() => {
@@ -127,8 +117,13 @@ export const MiniProgram: React.FC = () => {
                 , 3000)//3秒更新一次
             clearTimeout(temp);
         }, 0)
-
     }, []);
+
+    useEffect(()=>{
+        setAppletPath(cfg.Wechat.applet)
+        setRules(cfg.Wechat.rules.join("\n"))
+        dataCachePath.current = cfg.WechatDataPath
+    },[cfg.Wechat,cfg.WechatDataPath])
 
     const _setDecompileResult = (value: any) => {
         setDecompileResult(pre => {
@@ -177,14 +172,20 @@ export const MiniProgram: React.FC = () => {
         OpenDirectoryDialog().then(
             result => {
                 if (result) {
-                    SaveWechat({applet: result, rules: []}).then(
+                    SaveWechat({applet: result, rules: cfg.Wechat.rules}).then(
                         () => {
-                            setAppletPath(result)
+                            const t = {...cfg, Wechat: {...cfg.Wechat, applet: result}} as config.Config
+                            dispatch(configActions.setConfig(t))
                             GetAllMiniProgram().then(
                                 result => {
                                     scheduledTask(result)
                                 }
                             )
+                        }
+                    ).catch(
+                        e=>{
+                            errorNotification("错误",e)
+                            setAppletPath(cfg.Wechat.applet)
                         }
                     )
                 }
@@ -196,12 +197,11 @@ export const MiniProgram: React.FC = () => {
         <Flex vertical gap={10}
               style={{
                   padding: "0 10px",
-                  height: `calc(100vh - ${CssConfig.title.height} - ${CssConfig.tab.height} - 70px)`
               }}
         >
             <Space.Compact style={{justifyContent: "center"}}>
                 <Input style={{width: "600px",}} size={'small'} prefix={<>微信Applet路径</>} value={appletPath}/>
-                <Button size={"small"} onClick={configAppletPath} disabled={platform != "windows"}>选择</Button>
+                <Button size={"small"} onClick={configAppletPath} disabled={platform !== "windows"}>选择</Button>
                 {
                     autoDecompile ?
                         < Button size={"small"} onClick={() => {
@@ -223,11 +223,11 @@ export const MiniProgram: React.FC = () => {
                     cancelText="No"
                     onConfirm={() => {
                         setIsClearing(true)
-                        ClearApplet().catch(
-                            err => errorNotification("错误", err)
-                        ).then(() => {
+                        ClearApplet().then(() => {
                             // setTreeData([])
-                        }).finally(
+                        }).catch(
+                            err => errorNotification("错误", err)
+                        ).finally(
                             () => {
                                 setIsClearing(false)
                             }
@@ -294,7 +294,7 @@ export const MiniProgram: React.FC = () => {
             </Space.Compact>
             <Flex align={"center"} justify={"center"}><>建议先执行清空Applet目录以避免无法回溯是哪个小程序</>
             </Flex>
-            <Splitter>
+            <Splitter style={{height: `calc(100vh - ${CssConfig.title.height} - ${CssConfig.tab.height} - 79px)`}}>
                 <Splitter.Panel defaultSize={"35%"} style={{overflowX: "auto"}}>
                     <ConfigProvider theme={{
                         components: {

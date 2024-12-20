@@ -5,8 +5,8 @@ import (
 	"embed"
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/constraint"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/runtime"
 	"fine/backend/service/service/domain2ip"
@@ -16,6 +16,7 @@ import (
 	"fine/backend/service/service/icp"
 	"fine/backend/service/service/ip138"
 	"fine/backend/service/service/quake"
+	"fine/backend/service/service/tianyancha"
 	"fine/backend/service/service/wechat"
 	"fine/backend/service/service/zone"
 	"github.com/wailsapp/wails/v2"
@@ -76,7 +77,7 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			mainApp.SetContext(ctx)
-			constraint.SetContext(ctx)
+			event.SetContext(ctx)
 
 			//适配小屏
 			screens, _ := wailsRuntime.ScreenGetAll(ctx)
@@ -97,7 +98,7 @@ func main() {
 		Bind: []interface{}{
 			mainApp,
 			config.GlobalConfig,
-			constraint.Events,
+			event.Events,
 			runtime.NewRuntime(mainApp),
 			runtime.NewPath(),
 			httpx.NewHttpxBridge(mainApp),
@@ -111,6 +112,7 @@ func main() {
 			service.NewDownloadLogService(),
 			service.NewFofaDBService(),
 			domain2ip.NewDomain2IPBridge(mainApp),
+			tianyancha.NewTianYanChaBridge(),
 		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: true,

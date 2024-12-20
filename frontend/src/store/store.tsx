@@ -1,7 +1,5 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
 import {config, fofa, quake} from "../../wailsjs/go/models";
-import UserRole = quake.UserRole;
-import QueryOnEnter = config.QueryOnEnter;
 
 export type HunterUserType = {
     restToken: number
@@ -35,60 +33,14 @@ export type QuakeUserType = {
     // Go type: struct { NamingFailed interface {} "json:\"注册用户\"" }
     role_validity: any;
     personal_information_status: boolean;
-    role: UserRole[];
+    role: quake.UserRole[];
 }
 
-export type FofaAuthType = {
-    key: string
-}
-
-export type HunterAuthType = {
-    key: string
-}
-
-export type ZoneAuthType = {
-    key: string
-}
-
-export type QuakeAuthType = {
-    key: string
-}
-
-export type AuthType = {
-    "fofa": FofaAuthType
-    "hunter": HunterAuthType
-    "0.zone": ZoneAuthType
-    "quake": QuakeAuthType
-}
 
 export interface DownloadLogItem {
     filename: string,
     dir: string,
     exist?: boolean
-}
-
-const initialAuthState: AuthType = {
-    fofa: {
-        key: ""
-    },
-    hunter: {
-        key: ""
-    },
-    "0.zone": {
-        key: ""
-    },
-    quake: {
-        key: ""
-    }
-}
-
-const initialProxyState: config.Proxy = {
-    type: "",
-    host: "",
-    port: "",
-    user: "",
-    pass: "",
-    enable: false
 }
 
 const initialFofaUserState: fofa.User = {
@@ -144,66 +96,18 @@ const initialQuakeUserState: QuakeUserType = {
     role: [],
 }
 
-const initialHttpxState: config.Httpx = {
-    path:"",
-    flags:""
-}
 
 const configSlice = createSlice({
     //切片名称
     name: "config",
     //初始值
     initialState: {
-        auth: initialAuthState,
-        proxy: initialProxyState,
-        httpx: initialHttpxState,
-        queryOnEnter:{} as QueryOnEnter
+        config: new config.Config(),
     } ,
     //方法
     reducers: {
-        setAuth: (state, action: {
-            payload: {
-                fofa: FofaAuthType,
-                hunter: HunterAuthType,
-                "0.zone": ZoneAuthType,
-                quake: QuakeAuthType
-            }
-            , type: string
-        }) => {
-            state.auth.fofa = action.payload.fofa
-            state.auth.hunter = action.payload.hunter
-            state.auth["0.zone"] = action.payload["0.zone"]
-            state.auth.quake = action.payload.quake
-        },
-        setFofaAuth: (state, action: { payload: FofaAuthType, type: string }) => {
-            state.auth.fofa = action.payload
-        },
-        setHunterAuth: (state, action: { payload: HunterAuthType, type: string }) => {
-            state.auth.hunter = action.payload
-        },
-        setZoneAuth: (state, action: { payload: FofaAuthType, type: string }) => {
-            state.auth["0.zone"] = action.payload
-        },
-        setQuakeAuth: (state, action: { payload: QuakeAuthType, type: string }) => {
-            state.auth.quake = action.payload
-        },
-        setProxy: (state, action: { payload: config.Proxy, type: string }) => {
-            state.proxy = action.payload
-        },
-        setHttpx: (state, action: { payload: config.Httpx, type: string }) => {
-            state.httpx = action.payload
-        },
-        setQueryOnEnter: (state, action: { payload: QueryOnEnter, type: string}) => {
-            state.queryOnEnter = action.payload
-        },
-        setAssetsQueryOnEnter: (state, action: { payload: boolean, type: string}) => {
-            state.queryOnEnter.assets = action.payload
-        },
-        setIcpQueryOnEnter: (state, action: { payload: boolean, type: string }) => {
-            state.queryOnEnter.icp = action.payload
-        },
-        setIP138QueryOnEnter: (state, action: { payload: boolean, type: string }) => {
-            state.queryOnEnter.ip138 = action.payload
+        setConfig: (state, action: { payload:config.Config, type: string }) => {
+            state.config = action.payload
         },
     }
 })
@@ -254,5 +158,3 @@ const store = configureStore({
 export type RootState = ReturnType<typeof store.getState>;
 
 export default store
-
-

@@ -17,7 +17,6 @@ func TestQueryOptionsService_Add(t *testing.T) {
 		TaskID:    0,
 		UnitName:  "",
 		Total:     0,
-		MaxPage:   0,
 	}
 
 	err := s.Add(options, taskID)

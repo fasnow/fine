@@ -3,9 +3,9 @@ package zone
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/constraint"
 	"fine/backend/db/models"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/service/model/zone"
 	"fine/backend/utils"
@@ -27,8 +27,8 @@ type Bridge struct {
 }
 
 func NewZoneBridge(app *app.App) *Bridge {
-	tt := NewClient(config.Get0zone().Token)
-	config.ProxyManager.Add(tt)
+	tt := NewClient(config.GlobalConfig.Zone.Token)
+	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		zone:        tt,
 		queryLog:    service.NewZoneQueryLog(),
@@ -40,9 +40,8 @@ func NewZoneBridge(app *app.App) *Bridge {
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	t := config.Get0zone()
-	t.Token = key
-	if err := config.GlobalConfig.Save0zone(t); err != nil {
+	config.GlobalConfig.Zone.Token = key
+	if err := config.Save(); err != nil {
 		logger.Info(err.Error())
 		return err
 
@@ -510,7 +509,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(models.DownloadLog{
@@ -523,7 +522,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.Get0zone().Interval
+		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -565,7 +564,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 		if err := SiteDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneSiteDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneSiteDownloadItem)
 	}()
 	return nil
 }
@@ -576,7 +575,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(models.DownloadLog{
@@ -589,7 +588,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.Get0zone().Interval
+		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -631,7 +630,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 		if err := DomainDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneMemberDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
@@ -642,7 +641,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(models.DownloadLog{
@@ -655,7 +654,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.Get0zone().Interval
+		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -697,7 +696,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 		if err := MemberDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneMemberDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
@@ -708,7 +707,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(models.DownloadLog{
@@ -721,7 +720,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 
 	go func() {
 		retry := 3
-		interval := config.Get0zone().Interval
+		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
 			req := NewGetDataReqBuilder().Query(queryLog.Query).
 				Page(index).
@@ -763,7 +762,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 		if err := EmailDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNew0zoneMemberDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }

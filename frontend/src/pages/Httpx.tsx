@@ -1,10 +1,8 @@
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
-import {Allotment} from "allotment";
-import "allotment/dist/style.css";
+import React, {useEffect, useRef, useState} from 'react';
 import TextArea from "antd/es/input/TextArea";
-import {Button, Dropdown, Input, InputNumber, MenuProps, Slider, Space, Splitter, Table, Tabs, Tooltip} from "antd";
+import {Button, Dropdown, Input, InputNumber, MenuProps, Space, Splitter, Table, Tooltip} from "antd";
 import "@/pages/Httpx.css"
-import {GetHttpx, SaveHttpx} from "../../wailsjs/go/config/Config";
+import {SaveHttpx} from "../../wailsjs/go/config/Config";
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
 import {errorNotification} from "@/component/Notification";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
@@ -17,14 +15,16 @@ import {ColumnsType} from "antd/es/table";
 import ResizableTitle from "@/component/ResizableTitle";
 import {Chrome} from "@/component/Icon";
 import {copy, strSplit} from "@/util/util";
-import {MenuItem} from "@/component/MenuItem";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
+import {MenuItems} from "@/component/Interface";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import {config} from "../../wailsjs/go/models";
+import TabsV2 from "@/component/TabsV2";
 
 const items: MenuProps['items'] = [
-    MenuItem.CopyCell,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
-    MenuItem.CopyAll,
+    MenuItems.CopyCell,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
+    MenuItems.CopyAll,
 ];
 const onCell = (index: any, record: any, colKey: any) => {
     return {
@@ -78,7 +78,7 @@ const TabContent = () => {
     const [limit, setLimit] = useState<number>(15)
     const taskID = useRef<number>(0)
     useRef<HTMLDivElement>(null);
-    const httpxConfig = useSelector((state: RootState) => state.config.httpx)
+    const cfg = useSelector((state: RootState) => state.config.config)
     const dispatch = useDispatch()
     const [height, setHeight] = useState(window.innerHeight - 200)
     const [dataList, setDataList] = useState<{ "index": number, "url": string, "detail": string }[]>([])
@@ -90,15 +90,6 @@ const TabContent = () => {
         window.addEventListener("resize", () => {
             setHeight(window.innerHeight - 200)
         })
-
-        //设置httpx配置
-        GetHttpx().then(
-            result => {
-                setPath(result.path)
-                setFlags(result.flags)
-                dispatch(configActions.setHttpx({path: result.path, flags: result.flags}))
-            }
-        )
 
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
         GetAllEvents().then(
@@ -130,13 +121,21 @@ const TabContent = () => {
     }, []);
 
     useEffect(() => {
-        setPath(httpxConfig.path)
-        setFlags(httpxConfig.flags)
-    }, [httpxConfig])
+        setPath(cfg.Httpx.path)
+        setFlags(cfg.Httpx.flags)
+    }, [cfg.Httpx])
 
     const saveHttpx = () => {
-        SaveHttpx({path: path, flags: flags})
-        dispatch(configActions.setHttpx({path: path, flags: flags}))
+        SaveHttpx({path: path, flags: flags}).then(
+            ()=>{
+                const t = { ...cfg, Httpx: {...cfg.Httpx, flags: flags, path: path} } as config.Config;
+                dispatch(configActions.setConfig(t))
+            }
+        ).catch(e=> {
+            errorNotification("错误", e)
+            setPath(cfg.Httpx.path)
+            setFlags(cfg.Httpx.flags)
+        })
     }
 
     const setHttpxPath = () => {
@@ -144,8 +143,7 @@ const TabContent = () => {
             result => {
                 if (result) {
                     setPath(result)
-                    SaveHttpx({path: result, flags: flags})
-                    dispatch(configActions.setHttpx({path: result, flags: flags}))
+                    saveHttpx()
                 }
             }
         ).catch(
@@ -229,23 +227,23 @@ const TabContent = () => {
 
     const handleMenuItemClick: MenuProps['onClick'] = (e) => {
         switch (e.key) {
-            case MenuItem.CopyAll.key:
+            case MenuItems.CopyAll.key:
                 let t = "";
                 for (const item of dataList) {
                     t += `${item.index}\t${item.url}\t${item.detail}\n`
                 }
                 copy(t)
                 break
-            case MenuItem.OpenUrl.key:
+            case MenuItems.OpenUrl.key:
                 selectedRow.record?.url && BrowserOpenURL(selectedRow.record.url)
                 break
-            case MenuItem.CopyCell.key:
+            case MenuItems.CopyCell.key:
                 copy(selectedRow?.record[selectedRow["colKey"]])
                 break
-            case MenuItem.CopyRow.key:
+            case MenuItems.CopyRow.key:
                 copy(`${selectedRow.record.index}\t${selectedRow.record.url}\t${selectedRow.record.detail}`)
                 break
-            case MenuItem.CopyCol.key: {
+            case MenuItems.CopyCol.key: {
                 const colValues = dataList.map((item: any) => {
                     return item[selectedRow["colKey"]]
                 })
@@ -325,7 +323,7 @@ const TabContent = () => {
                                     }}
                                     bordered
                                     sticky={{offsetHeader: 0}}
-                                    scroll={{x: 1, y: height}}
+                                    scroll={{x: '100%', y: height}}
                                     size={"small"}
                                     dataSource={dataList}
                                     pagination={false}
@@ -341,78 +339,9 @@ const TabContent = () => {
     );
 }
 
-type TabType = {
-    label: string,
-    key: string,
-    children: ReactNode,
-    closable?: boolean
-}
-
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const Httpx = () => {
-    const [activeKey, setActiveKey] = useState<string>("1")
-    const [items, setItems] = useState<TabType[]>([])
-    const newTabIndex = useRef<number>(0)
-
-    useEffect(() => {
-        const newActiveKey = `${++newTabIndex.current}`;
-        setItems([
-            {
-                label: newActiveKey,
-                key: newActiveKey,
-                children: <TabContent/>,
-            }
-        ],)
-    }, []);
-
-
-    const onTabChange = (newActiveKey: string) => {
-        setActiveKey(newActiveKey)
-    };
-
-    const addTab = (input: string) => {
-        const newActiveKey = `${++newTabIndex.current}`;
-        setItems([...items, {
-            label: newActiveKey,
-            key: newActiveKey,
-            children: <TabContent/>,
-        }]);
-        setActiveKey(newActiveKey);
-    };
-
-    const removeTab = (targetKey: TargetKey) => {
-        const targetIndex = items.findIndex((pane) => pane.key === targetKey);
-        const newPanes = items.filter((pane) => pane.key !== targetKey);
-        if (newPanes.length && targetKey === activeKey) {
-            const {key} = newPanes[targetIndex === newPanes.length ? targetIndex - 1 : targetIndex];
-            setActiveKey(key);
-        }
-        setItems(newPanes);
-    };
-
-    const onEditTab = (
-        targetKey: React.MouseEvent | React.KeyboardEvent | string,
-        action: 'add' | 'remove',
-    ) => {
-        if (action === 'add') {
-            addTab("");
-        } else {
-            removeTab(targetKey);
-        }
-    };
-
-    return (
-        <Tabs
-            size="small"
-            type="editable-card"
-            onChange={onTabChange}
-            activeKey={activeKey}
-            onEdit={onEditTab}
-            items={items}
-        />
-    );
+    return <TabsV2 defaultTabContent={<TabContent/>}/>
 }
-
 
 export default Httpx;

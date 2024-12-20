@@ -16,7 +16,7 @@ type Bridge struct {
 
 func NewIP138Bridge(app *app.App) *Bridge {
 	tt := NewClient()
-	config.ProxyManager.Add(tt)
+	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		ip138:       tt,
 		queryLog:    service.NewICPQueryLog(),

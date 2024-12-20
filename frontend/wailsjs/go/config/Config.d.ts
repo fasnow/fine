@@ -26,6 +26,8 @@ export function GetProxy():Promise<config.Proxy>;
 
 export function GetQuake():Promise<config.Quake>;
 
+export function GetTianYanCha():Promise<config.TianYanCha>;
+
 export function GetWechat():Promise<config.Wechat>;
 
 export function GetWechatDataPath():Promise<string>;
@@ -47,6 +49,8 @@ export function SaveProxy(arg1:config.Proxy):Promise<void>;
 export function SaveQuake(arg1:config.Quake):Promise<void>;
 
 export function SaveQueryOnEnter(arg1:config.QueryOnEnter):Promise<void>;
+
+export function SaveTianYanCha(arg1:config.TianYanCha):Promise<void>;
 
 export function SaveWechat(arg1:config.Wechat):Promise<void>;
 

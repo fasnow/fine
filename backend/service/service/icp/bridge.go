@@ -4,11 +4,10 @@ import (
 	"context"
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/constraint"
 	"fine/backend/db/models"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/logger"
-	"fine/backend/proxy"
 	"fine/backend/service/model/icp"
 	"fine/backend/utils"
 	"fmt"
@@ -29,7 +28,7 @@ type Bridge struct {
 
 func NewICPBridge(app *app.App) *Bridge {
 	tt := NewClient()
-	config.ProxyManager.Add(tt)
+	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		icp:         tt,
 		queryLog:    service.NewICPQueryLog(),
@@ -124,7 +123,7 @@ func (r *Bridge) Export(taskID int64) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("ICP_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = r.downloadLog.Insert(models.DownloadLog{
@@ -138,13 +137,13 @@ func (r *Bridge) Export(taskID int64) error {
 	result, err := r.icp.PageNum(1).PageSize(1).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
 	if err != nil {
 		logger.Info(err.Error())
-		r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Error, err.Error())
+		r.downloadLog.UpdateStatus(fileID, event.Statuses.Error, err.Error())
 		return err
 	}
 	result, err = r.icp.PageNum(1).PageSize(result.Total).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
 	if err != nil {
 		logger.Info(err.Error())
-		r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Error, err.Error())
+		r.downloadLog.UpdateStatus(fileID, event.Statuses.Error, err.Error())
 		return err
 	}
 	items = append(items, result.Items...)
@@ -166,11 +165,11 @@ func (r *Bridge) Export(taskID int64) error {
 	}
 	if err := utils.SaveToExcel(data, outputAbsFilepath); err != nil {
 		logger.Info(err.Error())
-		r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Error, err.Error())
+		r.downloadLog.UpdateStatus(fileID, event.Statuses.Error, err.Error())
 		return err
 	}
-	r.downloadLog.UpdateStatus(fileID, constraint.Statuses.Completed, "")
-	constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewIcpDownloadItem)
+	r.downloadLog.UpdateStatus(fileID, event.Statuses.Completed, "")
+	event.HasNewDownloadLogItemEventEmit(event.Events.HasNewIcpDownloadItem)
 	return nil
 }
 
@@ -178,9 +177,7 @@ func (r *Bridge) BatchQuery(unitList []string, serviceTypeList []string) {
 	var client *ICP
 	if r.proxy != "" {
 		client = NewClient()
-		proxyManager := proxy.NewManager()
-		proxyManager.Add(client)
-		proxyManager.SetProxy(r.proxy)
+		client.UseProxyManager(config.ProxyManager)
 	} else {
 		client = r.icp
 	}
@@ -188,20 +185,20 @@ func (r *Bridge) BatchQuery(unitList []string, serviceTypeList []string) {
 		for j, serviceType := range serviceTypeList {
 			result, err := client.PageNum(1).PageSize(1).ServiceType(serviceType).Query(unitName)
 			if err != nil {
-				constraint.Emit(constraint.Events.ICPBatchQuery, map[string]any{
-					"code":    constraint.Statuses.Error,
+				event.Emit(event.Events.ICPBatchQuery, map[string]any{
+					"code":    event.Statuses.Error,
 					"message": err.Error(),
 				})
 				return
 			}
 			if i == len(unitList)-1 && j == len(serviceTypeList)-1 {
-				constraint.Emit(constraint.Events.ICPBatchQuery, map[string]any{
-					"code":  constraint.Statuses.Completed,
+				event.Emit(event.Events.ICPBatchQuery, map[string]any{
+					"code":  event.Statuses.Completed,
 					"items": result.Items,
 				})
 			} else {
-				constraint.Emit(constraint.Events.ICPBatchQuery, map[string]any{
-					"code":  constraint.Statuses.InProgress,
+				event.Emit(event.Events.ICPBatchQuery, map[string]any{
+					"code":  event.Statuses.InProgress,
 					"items": result.Items,
 				})
 			}

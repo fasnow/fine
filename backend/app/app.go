@@ -4,6 +4,7 @@ import (
 	"context"
 	"fine/backend/config/v2"
 	"fine/backend/logger"
+	"fine/backend/proxy/v2"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
@@ -13,41 +14,45 @@ import (
 
 // App struct
 type App struct {
-	ctx        context.Context
-	HttpClient *http.Client
+	ctx  context.Context
+	http *http.Client
 }
 
 // NewApp creates a new App application struct
 func NewApp() *App {
 	app := &App{
-		HttpClient: &http.Client{},
+		http: &http.Client{},
 	}
-	config.ProxyManager.Add(app)
+	app.UseProxyManager(config.ProxyManager)
 	return app
 }
 
-func (a *App) SetContext(ctx context.Context) {
-	a.ctx = ctx
-	a.startup(ctx)
+func (r *App) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
 }
 
-func (a *App) GetContext() context.Context {
-	return a.ctx
+func (r *App) SetContext(ctx context.Context) {
+	r.ctx = ctx
+	r.startup(ctx)
+}
+
+func (r *App) GetContext() context.Context {
+	return r.ctx
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
-func (a *App) startup(ctx context.Context) {
-	a.ctx = ctx
+func (r *App) startup(ctx context.Context) {
+	r.ctx = ctx
 }
 
-func (a *App) Fetch(url string) ([]byte, error) {
+func (r *App) Fetch(url string) ([]byte, error) {
 	url = strings.TrimSpace(url)
 	if url == "" {
 		return nil, errors.New("目标地址不能为空")
 	}
 	request, _ := http.NewRequest("GET", url, nil)
-	response, err := a.HttpClient.Do(request)
+	response, err := r.http.Do(request)
 	if err != nil {
 		logger.Info(err)
 		return nil, err

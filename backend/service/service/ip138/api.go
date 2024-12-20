@@ -33,9 +33,9 @@ type DomainItem struct {
 	Date   string `json:"date"`
 }
 
-func (i *IP138) getToken() (string, error) {
+func (r *IP138) getToken() (string, error) {
 	var token string
-	url1 := fmt.Sprintf("%s%s/", Ip138BaseURL, i.domain)
+	url1 := fmt.Sprintf("%s%s/", Ip138BaseURL, r.domain)
 	request, err := http.NewRequest("GET", url1, nil)
 
 	// User-Agent必须为空,不然可能会出现302
@@ -44,7 +44,7 @@ func (i *IP138) getToken() (string, error) {
 		logger.Info(err.Error())
 		return "", err
 	}
-	response, err := i.Http.Do(request)
+	response, err := r.http.Do(request)
 	if err != nil {
 		logger.Info(err.Error())
 		return "", err
@@ -132,7 +132,7 @@ func (d *domain) GetHistoryIP(domain string) ([]*IPItem, error) {
 		logger.Info(err.Error())
 		return nil, err
 	}
-	response, err := d.client.Http.Do(request)
+	response, err := d.client.http.Do(request)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -167,7 +167,7 @@ func (d *domain) read() (map[string]string, error) {
 		logger.Info(err.Error())
 		return nil, err
 	}
-	response, err := d.client.Http.Do(request)
+	response, err := d.client.http.Do(request)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -218,7 +218,7 @@ func (d *domain) write() (int, error) {
 		return -1, err
 	}
 	request.Header.Set("User-Agent", "") // User-Agent必须为空,不然可能会出现302,read和write的User-Agent必须一致
-	response, err := d.client.Http.Do(request)
+	response, err := d.client.http.Do(request)
 	if err != nil {
 		return -1, err
 	}
@@ -248,7 +248,7 @@ func (d *domain) getLocation(ip, sign string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	response, err := d.client.Http.Do(request)
+	response, err := d.client.http.Do(request)
 	if err != nil {
 		return "", err
 	}
@@ -317,7 +317,7 @@ func (i *ip) GetCurrentDomain(ip string) ([]*DomainItem, error) {
 	if err != nil {
 		return nil, err
 	}
-	response, err := i.client.Http.Do(request)
+	response, err := i.client.http.Do(request)
 	if err != nil {
 		return nil, err
 	}

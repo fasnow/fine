@@ -128,8 +128,6 @@ jobs:
           token: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |
-            1. new: 编解码部分功能;
-            2. enhance: 优化配置;
-            3. fix: @m0s30 #12;
-            4. fix: 其他已知问题。
+            1. new: 天眼查股权结构图;
+
 

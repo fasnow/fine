@@ -3,13 +3,15 @@ package hunter
 import (
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/constraint"
 	"fine/backend/db/models"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/logger"
 	"fine/backend/service/model/hunter"
+	service2 "fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
@@ -28,9 +30,8 @@ type Bridge struct {
 }
 
 func NewHunterBridge(app *app.App) *Bridge {
-	t := config.GlobalConfig.GetHunter()
-	tt := NewClient(t.Token)
-	config.ProxyManager.Add(tt)
+	tt := NewClient(config.GlobalConfig.Hunter.Token)
+	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		hunter:      tt,
 		queryLog:    service.NewHunterQueryLog(),
@@ -144,7 +145,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 		return errors.New("查询后再导出")
 	}
 	fileID := idgen.NextId()
-	dataDir := config.GlobalConfig.GetDataDir()
+	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
 	_ = b.downloadLog.Insert(models.DownloadLog{
@@ -154,53 +155,32 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 		Status:   0,
 	}, fileID)
 	go func() {
-		var retry = 10
-		interval := config.GlobalConfig.GetHunter().Interval
 		exportDataTaskID := idgen.NextId()
 		for index := int64(1); index <= page; index++ {
-			req := NewGetDataReqBuilder().
-				Query(queryLog.Query).
-				Page(int(index)).
-				Size(int(pageSize)).
-				StartTime(queryLog.StartTime).
-				EndTime(queryLog.EndTime).
-				StatusCode(queryLog.StatusCode).
-				IsWeb(queryLog.IsWeb).
-				PortFilter(queryLog.PortFilter).Build()
-			result, err := b.hunter.Get(req)
+			result, err := backoff.RetryWithData(func() (*Result, error) {
+				req := NewGetDataReqBuilder().
+					Query(queryLog.Query).
+					Page(int(index)).
+					Size(int(pageSize)).
+					StartTime(queryLog.StartTime).
+					EndTime(queryLog.EndTime).
+					StatusCode(queryLog.StatusCode).
+					IsWeb(queryLog.IsWeb).
+					PortFilter(queryLog.PortFilter).Build()
+				result, err := b.hunter.Get(req)
+				if err != nil {
+					logger.Info(err.Error())
+					return nil, err
+				}
+				return result, nil
+			}, service2.GetBackOffWithMaxRetries(10, config.GlobalConfig.Hunter.Interval, 1))
 			if err != nil {
 				logger.Info(err.Error())
-				if err.Error() == "请求太多啦，稍后再试试" {
-					index--
-					retry--
-					time.Sleep(interval)
-					continue
-				}
-				if retry == 0 {
-					// retry为0可能是因为积分不足，所以不能直接返回错误，获取到多少数据就返回多少
-					cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
-					if err != nil {
-						logger.Info(err.Error())
-						return
-					}
-					exportItems := make([]*hunter.Item, 0)
-					for _, cacheItem := range cacheItems {
-						exportItems = append(exportItems, cacheItem.Item)
-					}
-					if err := b.hunter.Export(exportItems, outputAbsFilepath); err != nil {
-						logger.Info(err.Error())
-						return
-					}
-					break
-				}
-				index--
-				retry--
-				time.Sleep(interval)
-				continue
+				break
 			}
 			_ = b.dataCache.BatchInsert(exportDataTaskID, result.Items)
 			b.token.Add(result.RestQuota) //剩余积分添加到数据库记录
-			time.Sleep(interval)
+			time.Sleep(config.GlobalConfig.Hunter.Interval)
 		}
 		cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
 		if err != nil {
@@ -213,15 +193,14 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 		if err := b.hunter.Export(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		constraint.HasNewDownloadLogItemEventEmit(constraint.Events.HasNewHunterDownloadItem)
+		event.HasNewDownloadLogItemEventEmit(event.Events.HasNewHunterDownloadItem)
 	}()
 	return nil
 }
 
 func (b *Bridge) SetAuth(key string) error {
-	hunter := config.GlobalConfig.Hunter
-	hunter.Token = key
-	if err := config.GlobalConfig.SaveHunter(hunter); err != nil {
+	config.GlobalConfig.Hunter.Token = key
+	if err := config.Save(); err != nil {
 		return err
 
 	}

@@ -13,3 +13,7 @@ export function GetContext() {
 export function SetContext(arg1) {
   return window['go']['app']['App']['SetContext'](arg1);
 }
+
+export function UseProxyManager(arg1) {
+  return window['go']['app']['App']['UseProxyManager'](arg1);
+}

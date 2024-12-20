@@ -8,14 +8,9 @@ import {sleep} from '@/util/util';
 import {GetCurrentDomain, GetCurrentIP, GetHistoryIP} from "../../wailsjs/go/ip138/Bridge";
 import {useSelector} from "react-redux";
 import {RootState} from "@/store/store";
+import TabsV2 from "@/component/TabsV2";
 
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
-type TabType = {
-    label: string,
-    key: string,
-    children: ReactNode,
-    closable?: boolean
-}
+
 type Domain2IPSItem = {
     domain: string,
     current?: { ip: string, locationOrDate: string }[],
@@ -25,7 +20,7 @@ type Domain2IPSItem = {
 type IP2DomainsItem = { ip: string, current?: { domain: string, date: string }[], msg?: string }
 type ModeType = "ip2domains" | "domain2ips" | ""
 const rowHeight = 175
-const IP138Content: React.FC = () => {
+const TabContent: React.FC = () => {
     const [input, setInput] = useState<string>("")
     const [multipleTarget, setMultipleTarget] = useState<string[]>([])
     const [targets, setTargets] = useState<string>()
@@ -36,7 +31,7 @@ const IP138Content: React.FC = () => {
     const [wornning, setWarnnig] = useState<string>("")
     const running = useRef<boolean>(false)
     const interval = useRef<number>(1000)
-    const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.ip138)
+    const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.ip138)
 
     function isIPAddress(input: string): boolean {
         // IPv4 正则表达式
@@ -197,28 +192,6 @@ const IP138Content: React.FC = () => {
             </Modal>
         </>
     }
-
-    // useEffect(() => {
-    //     setMode("domain2ips")
-    //     // setLoading(true)
-    //     setIps([
-
-    //         { domain: "baidu.com", current: [], msg: "" },
-    //         { domain: "baidu.com", current: [{ ip: "127.0.0.1", locationOrDate: "2023-01-01" }] },
-    //         { domain: "baidu.com", current: [{ ip: "127.0.0.1", locationOrDate: "2023-01-01" }] },
-    //         { domain: "baidu.com", current: [{ ip: "127.0.0.1", locationOrDate: "2023-01-01" }] },
-    //         { domain: "baidu.com", current: [{ ip: "127.0.0.1", locationOrDate: "2023-01-01" }] },
-    //     ])
-    //     // setIps(Array.from({ length: 1000 }, () => ({ domain: "baidu.com", current: [{ ip: "127.0.0.1", locationOrDate: "2023-01-01" }] })))
-    //     // setMode("ip2domains")
-    //     // setDomains([
-    //     //     { ip: "127.0.0.1", current: [{ domain: "baidu.com", date: "2023-01-01" }] },
-    //     //     { ip: "127.0.0.1", current: [{ domain: "baidu.com", date: "2023-01-01" }] },
-    //     //     { ip: "127.0.0.1", current: [{ domain: "baidu.com", date: "2023-01-01" }] },
-    //     //     { ip: "127.0.0.1", current: [{ domain: "baidu.com", date: "2023-01-01" }] },
-    //     //     { ip: "127.0.0.1", current: [{ domain: "baidu.com", date: "2023-01-01" }] },
-    //     // ])
-    // }, [])
     return (
 
         <div>
@@ -405,74 +378,7 @@ const IP138Content: React.FC = () => {
 }
 
 const IP138: React.FC = () => {
-    const [items, setItems] = useState<TabType[]>([]);
-    const [activeKey, setActiveKey] = useState<string>(items[0]?.label);
-    const newTabIndex = useRef(1);
-
-    useEffect(() => {
-        const newActiveKey = `${newTabIndex.current++}`;
-        setItems([
-            {
-                label: newActiveKey,
-                key: newActiveKey,
-                children: <IP138Content/>,
-            }
-        ],)
-    }, [])
-
-    const onChange = (key: string) => {
-        setActiveKey(key);
-    };
-
-    const add = () => {
-        const newActiveKey = `${newTabIndex.current++}`;
-        setItems([...items, {
-            label: newActiveKey,
-            key: newActiveKey,
-            children: <IP138Content/>,
-        }]);
-        setActiveKey(newActiveKey);
-    };
-
-    const remove = (targetKey: TargetKey) => {
-        const targetIndex = items.findIndex((pane) => pane.key === targetKey);
-        const newPanes = items.filter((pane) => pane.key !== targetKey);
-        if (newPanes.length && targetKey === activeKey) {
-            const {key} = newPanes[targetIndex === newPanes.length ? targetIndex - 1 : targetIndex];
-            setActiveKey(key);
-        }
-        setItems(newPanes);
-    };
-
-    const onEdit = (targetKey: TargetKey, action: 'add' | 'remove') => {
-        if (action === 'add') {
-            add();
-        } else {
-            remove(targetKey);
-        }
-    };
-
-    return (
-        <div>
-            <Tabs
-                size="small"
-                onChange={onChange}
-                activeKey={activeKey}
-                type="editable-card"
-                // tabBarExtraContent={}
-                onEdit={onEdit}
-                items={items}
-            />
-        </div>
-    );
+    return <TabsV2 defaultTabContent={<TabContent/>}/>
 }
-
-// const IP138: React.FC = () => {
-//     return (
-//         <div>
-//            123123123
-//         </div>
-//     );
-// }
 
 export default IP138

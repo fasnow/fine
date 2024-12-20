@@ -7,10 +7,11 @@ import (
 	"embed"
 	"fine/backend/app"
 	"fine/backend/config/v2"
-	"fine/backend/constraint"
 	"fine/backend/db/models"
 	"fine/backend/db/service"
+	"fine/backend/event"
 	"fine/backend/logger"
+	"fine/backend/proxy/v2"
 	"fine/backend/runtime"
 	"fine/backend/service/model/wechat"
 	"fine/backend/utils"
@@ -37,21 +38,25 @@ var decompile embed.FS
 type Bridge struct {
 	app       *app.App
 	dbService *service.WechatDBService
-	Http      *http.Client
+	http      *http.Client
+}
+
+func (r *Bridge) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
 }
 
 func NewWechatBridge(app *app.App) *Bridge {
 	c := &Bridge{
 		app:       app,
 		dbService: service.NewWechatDBService(),
-		Http:      &http.Client{},
+		http:      &http.Client{},
 	}
-	config.ProxyManager.Add(c)
+	c.UseProxyManager(config.ProxyManager)
 	return c
 }
 
 func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
-	appletPath := config.GetWechat().Applet
+	appletPath := config.GlobalConfig.Wechat.Applet
 	miniPrograms := make([]wechat.MiniProgram, 0)
 	items := make([]wechat.InfoToFront, 0)
 	entries, err := os.ReadDir(appletPath)
@@ -155,9 +160,8 @@ func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
 }
 
 func (r *Bridge) SetAppletPath(path string) error {
-	t := config.GetWechat()
-	t.Applet = path
-	if err := config.GlobalConfig.SaveWechat(t); err != nil {
+	config.GlobalConfig.Wechat.Applet = path
+	if err := config.Save(); err != nil {
 		logger.Info(err.Error())
 		return err
 
@@ -202,11 +206,11 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					}
 				}
 
-				constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 正在查询小程序信息\n", appid))
+				event.Emit(event.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 正在查询小程序信息\n", appid))
 				e, tmpInfo := r.QueryAppID(appid)
 				if e != nil {
 					logger.Info(e)
-					constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 查询小程序信息出错: %s\n", appid, e))
+					event.Emit(event.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s] 查询小程序信息出错: %s\n", appid, e))
 					return
 				}
 				e = r.dbService.InsertInfo(models.Info{Info: tmpInfo})
@@ -241,7 +245,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					cache.Set(appid+version, "", 999*time.Second)
 					defer cache.Delete(appid + version)
 
-					constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 开始反编译\n", appid, version))
+					event.Emit(event.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 开始反编译\n", appid, version))
 
 					//读取加密的wxapkg包并解密到指定文件
 					files, _ := os.ReadDir(filepath.Join(config.GlobalConfig.Wechat.Applet, appid, version))
@@ -263,7 +267,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					for _, sourceFileName := range sourceFilesName {
 						bytes, err := os.ReadFile(filepath.Join(config.GlobalConfig.Wechat.Applet, appid, version, sourceFileName))
 						if err != nil {
-							constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 读取wxapkg文件时出错：%s\n", appid, version, err.Error()))
+							event.Emit(event.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 读取wxapkg文件时出错：%s\n", appid, version, err.Error()))
 							continue
 						}
 
@@ -271,14 +275,14 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 						if runtime2.GOOS == "windows" {
 							bytes, err = decrypt(bytes, appid, "saltiest", "the iv: 16 bytes")
 							if err != nil {
-								constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 解密wxapkg文件时出错：%s\n", appid, version, err.Error()))
+								event.Emit(event.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 解密wxapkg文件时出错：%s\n", appid, version, err.Error()))
 								continue
 							}
 						}
 
 						var targetFile = filepath.Join(outputDir, sourceFileName)
 						if err := utils.WriteFile(targetFile, bytes, 0766); err != nil {
-							constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 无法写入解密后的文件到指定位置：%s\n", appid, version, err.Error()))
+							event.Emit(event.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 无法写入解密后的文件到指定位置：%s\n", appid, version, err.Error()))
 							continue
 						}
 						targetFiles = append(targetFiles, targetFile)
@@ -291,7 +295,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 					//反编译程序内部出错但是此时可能已经成功反编译,所以只能其他错误再返回
 					if err := cmd.Run(); err != nil && cmd.ProcessState.ExitCode() != 1 {
 						logger.Info(err.Error())
-						constraint.Emit(constraint.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 反编译时发生错误：%s\n", appid, version, err.Error()))
+						event.Emit(event.Events.DecompileWxMiniProgramOutput, fmt.Sprintf("[%s  %s] 反编译时发生错误：%s\n", appid, version, err.Error()))
 						return
 					}
 
@@ -301,10 +305,10 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 							logger.Info(err.Error())
 						}
 					}
-					constraint.Emit(constraint.Events.DecompileWxMiniProgramDone, fmt.Sprintf("[%s  %s] 反编译完成\n", appid, version))
-					constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s  %s] 信息提取开始\n", appid, version))
+					event.Emit(event.Events.DecompileWxMiniProgramDone, fmt.Sprintf("[%s  %s] 反编译完成\n", appid, version))
+					event.Emit(event.Events.ExtractWxMiniProgramInfoOutput, fmt.Sprintf("[%s  %s] 信息提取开始\n", appid, version))
 					r.extractInfo(appid, version)
-					constraint.Emit(constraint.Events.ExtractWxMiniProgramInfoDone, map[string]any{
+					event.Emit(event.Events.ExtractWxMiniProgramInfoDone, map[string]any{
 						"appid":   appid,
 						"version": version,
 					})
@@ -316,7 +320,7 @@ func (r *Bridge) Decompile(items []wechat.MiniProgram, reDecompile bool) error {
 }
 
 func (r *Bridge) ClearApplet() error {
-	err := runtime.NewPath().RemoveAll(config.GetWechat().Applet, true)
+	err := runtime.NewPath().RemoveAll(config.GlobalConfig.Wechat.Applet, true)
 	if err != nil {
 		return err
 	}
@@ -324,7 +328,7 @@ func (r *Bridge) ClearApplet() error {
 }
 
 func (r *Bridge) ClearDecompiled() error {
-	err := runtime.NewPath().RemoveAll(config.GetWechatDataPath(), true)
+	err := runtime.NewPath().RemoveAll(config.GlobalConfig.WechatDataPath, true)
 	if err != nil {
 		return err
 	}
@@ -437,7 +441,7 @@ func (r *Bridge) QueryAppID(appid string) (error, wechat.Info) {
 	var re wechat.Info
 	var request, _ = http.NewRequest("POST", "https://kainy.cn/api/weapp/info/", strings.NewReader("appid="+appid))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-	response, err := r.Http.Do(request)
+	response, err := r.http.Do(request)
 	if err != nil {
 		return err, re
 	}
@@ -463,9 +467,9 @@ func (r *Bridge) QueryAppID(appid string) (error, wechat.Info) {
 }
 
 func generateDecompileExe() (string, error) {
-	filename := filepath.Join(config.GetBaseDir(), "bin", "decompile.exe")
+	filename := filepath.Join(config.GlobalConfig.BaseDir, "bin", "decompile.exe")
 	if runtime2.GOOS != "windows" {
-		filename = filepath.Join(config.GetBaseDir(), "bin", "decompile")
+		filename = filepath.Join(config.GlobalConfig.BaseDir, "bin", "decompile")
 	}
 	if utils.FileExist(filename) {
 		currentDate := time.Now()

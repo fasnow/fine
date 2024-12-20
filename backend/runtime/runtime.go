@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fine/backend/app"
 	"fine/backend/config/v2"
+	"fine/backend/proxy/v2"
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -78,23 +79,24 @@ func (r *Runtime) OpenFile(dir, filename string) error {
 	return cmd.Start()
 }
 
-type UpdateHttpClient struct {
-	Client *http.Client
+type UpdaterHttpClient struct {
+	http *http.Client
+}
+
+func (r *UpdaterHttpClient) UseProxyManager(manager *proxy.Manager) {
+	r.http = manager.GetClient()
 }
 
 func (r *Runtime) CheckUpdate() (map[string]string, error) {
-	client := UpdateHttpClient{
-		Client: &http.Client{},
+	client := UpdaterHttpClient{
+		http: &http.Client{},
 	}
-	err := config.ProxyManager.Add(&client)
-	if err != nil {
-		return nil, err
-	}
+	client.UseProxyManager(config.ProxyManager)
 	request, err := http.NewRequest("GET", "https://api.github.com/repos/fasnow/fine/releases/latest", nil)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := client.Client.Do(request)
+	resp, err := client.http.Do(request)
 	if err != nil {
 		return nil, err
 	}

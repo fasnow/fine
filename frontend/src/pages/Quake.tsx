@@ -1,4 +1,4 @@
-import React, {CSSProperties, ReactNode, useEffect, useRef, useState} from 'react';
+import React, {CSSProperties, useEffect, useRef, useState} from 'react';
 import {
     Button,
     Col,
@@ -6,7 +6,6 @@ import {
     Divider,
     Dropdown,
     Flex,
-    Form,
     Input,
     InputNumber,
     MenuProps,
@@ -41,20 +40,19 @@ import PointFree from "@/assets/images/point-free.svg"
 import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '../component/ResizableTitle';
 import {ExportDataPanelProps} from './Props';
-import {authFormProps, buttonProps} from './Setting';
+import {buttonProps} from './Setting';
 import {copy, localeCompare, RangePresets} from '@/util/util';
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {GetUserInfo, RealtimeServiceDataExport, RealtimeServiceDataQuery, SetAuth} from "../../wailsjs/go/quake/Bridge";
-import {quake} from "../../wailsjs/go/models";
-import {GetQuake} from "../../wailsjs/go/config/Config";
+import {config, fofa, quake} from "../../wailsjs/go/models";
 import {MenuItemType} from "antd/es/menu/interface";
-import {MenuItem} from "@/component/MenuItem";
-import {GetAllEvents} from "../../wailsjs/go/constraint/Event";
-import RealtimeServiceItem = quake.RealtimeServiceItem;
-
+import {MenuItems, WithIndex} from "@/component/Interface";
+import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import TabLabel from "@/component/TabLabel";
+import type {Tab} from "rc-tabs/lib/interface"
+import {TargetKey} from "@/pages/Constants";
 const {Option} = Select;
 const {RangePicker} = DatePicker;
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const optionCssStyle: CSSProperties = {
     display: "flex",
@@ -200,42 +198,52 @@ type TabContentState = {
     ipList: string[],
 }
 
-let selectedRow: { item: RealtimeServiceItem, rowIndex: number | undefined, colKey: string } | undefined
+let selectedRow: { item: PageDataType, rowIndex: number | undefined, colKey: string } | undefined
 const defaultMenuItems: MenuItemType[] = [
-    MenuItem.OpenUrl,
-    MenuItem.QueryIP,
-    MenuItem.QueryIpCidr,
-    MenuItem.QueryTitle,
-    MenuItem.CopyRow,
-    MenuItem.CopyCol,
+    MenuItems.OpenUrl,
+    MenuItems.QueryIP,
+    MenuItems.QueryIpCidr,
+    MenuItems.QueryTitle,
+    MenuItems.CopyRow,
+    MenuItems.CopyCol,
 ];
 
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const key = useSelector((state:RootState)=>state.config.auth.quake.key)
-    const [tmpKey, setTmpKey] = useState("")
+    const cfg = useSelector((state:RootState)=>state.config.config)
+    const [key, setKey] = useState("")
 
     useEffect(()=>{
-        setTmpKey(key)
-    }, [key])
+        setKey(cfg.Quake.token)
+    }, [cfg.Quake])
 
 
-    function save() {
-        SetAuth(tmpKey).catch(
-            err => errorNotification("错误", err)
-        ).then(
+    const save=()=> {
+        SetAuth(key).then(
             ()=>{
+                const t = { ...cfg, Quake: {...cfg.Quake, token: key} } as config.Config;
+                dispatch(configActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
-                dispatch(configActions.setQuakeAuth({key: tmpKey}))
+            }
+        ).catch(
+            err => {
+                errorNotification("错误", err)
+                setKey(cfg.Quake.token)
             }
         )
     }
 
+    const cancel=() => {
+        setEditable(false);
+        setOpen(false)
+        setKey(cfg.Quake.token)
+    }
+
     return <>
-        <Tooltip title="设置">
+        <Tooltip title="设置" placement={"right"}>
             <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
         <Modal
@@ -250,10 +258,10 @@ const AuthSetting: React.FC = () => {
             destroyOnClose
         >
             <Flex vertical gap={10}>
-                <Input.Password value={tmpKey} placeholder="token" onChange={
+                <Input.Password value={key} placeholder="token" onChange={
                     e=>{
                         if(!editable)return
-                        setTmpKey(e.target.value)
+                        setKey(e.target.value)
                     }
                 }/>
                 <Flex gap={10} justify={"end"}>
@@ -266,10 +274,7 @@ const AuthSetting: React.FC = () => {
                                         onClick={save}
                                 >保存</Button>
                                 <Button {...buttonProps} htmlType="submit"
-                                        onClick={() => {
-                                            setEditable(false);
-                                            setOpen(false)
-                                        }}
+                                        onClick={cancel}
                                 >取消</Button>
                             </>
                     }
@@ -279,9 +284,7 @@ const AuthSetting: React.FC = () => {
     </>
 }
 
-interface PageDataType extends quake.RealtimeServiceItem {
-    index: number
-}
+type  PageDataType = WithIndex<quake.RealtimeServiceItem>
 
 class TabContent extends React.Component<TabContentProps, TabContentState> {
     constructor(props: TabContentProps) {
@@ -399,6 +402,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     setExportable(false);
                     setStatus("")
                 }}
+                getContainer={false}
             >
 
         <span style={{display: 'grid', gap: "3px"}}>
@@ -461,7 +465,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     }
 
     Content = () => {
-        const defaultColumns: ColumnsType<RealtimeServiceItem> = [
+        const defaultColumns: ColumnsType<PageDataType> = [
             {
                 title: '序号',
                 dataIndex: "index",
@@ -470,7 +474,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 fixed: "left",
                 onCell: (record, index) => {
                     return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "index")
+                        onContextMenu: () => handleOnContextMenu(record, index, "index"),
+                        onClick: () => copy(record.index)
                     }
                 }
             },
@@ -668,7 +673,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 }
             },
         ];
-        const [columns, setColumns] = useState<ColumnsType<RealtimeServiceItem>>(defaultColumns)
+        const [columns, setColumns] = useState<ColumnsType<PageDataType>>(defaultColumns)
         const [loading, setLoading] = useState<boolean>(false)
         const [pageData, setPageData] = useState<PageDataType[]>([])
         const pageIDMap = useRef<{ [key: number]: number }>({})
@@ -680,15 +685,15 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 260)
-        const allowEnterPress = useSelector((state:RootState)=>state.config.queryOnEnter.assets)
+        const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
                 setTableScrollHeight(window.innerHeight - 260)
             })
             const init = async () => {
-                let tmpCols: (ColumnGroupType<RealtimeServiceItem> | ColumnType<RealtimeServiceItem>)[]
-                let tmp: (ColumnGroupType<RealtimeServiceItem> | ColumnType<RealtimeServiceItem>)[]
+                let tmpCols: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
+                let tmp: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
                 if (this.props.checkedColsValue) {
                     tmpCols = defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
                     tmp = tmpCols.map(col => ({...col}));
@@ -729,7 +734,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 setColumns(newColumns)
             };
 
-        const getMergeColumns = (): ColumnsType<RealtimeServiceItem> => {
+        const getMergeColumns = (): ColumnsType<PageDataType> => {
 
             if (!columns) {
                 return defaultColumns
@@ -737,7 +742,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
             return columns?.map((col, index) => ({
                 ...col,
-                onHeaderCell: (column: ColumnsType<RealtimeServiceItem>[number]) => ({
+                onHeaderCell: (column: ColumnsType<PageDataType>[number]) => ({
                     width: column.width,
                     onResize: handleHeaderResize(index) as React.ReactEventHandler<any>,
                 }),
@@ -752,14 +757,14 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             for (const key in menuItems) {
                 const tt = menuItems[key]
                 switch (menuItems[key].key) {
-                    case MenuItem.OpenUrl.key: {
+                    case MenuItems.OpenUrl.key: {
                         const domain = selectedRow.item.domain
                         const ip = selectedRow.item.ip
                         const schema = selectedRow.item.service?.name
                         tt["disabled"] = !(schema && schema.startsWith("http") && (domain || ip.indexOf("*") < 0));
                         break;
                     }
-                    case MenuItem.QueryTitle.key:
+                    case MenuItems.QueryTitle.key:
                         tt["disabled"] = !selectedRow.item.service.http.title;
                         break;
                 }
@@ -773,16 +778,16 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 return
             }
             switch (e.key) {
-                case MenuItem.QueryTitle.key:
+                case MenuItems.QueryTitle.key:
                     this.props?.onContextMenu.addTab(`service.http.title:"${selectedRow.item.service.http.title}"`)
                     break
-                case MenuItem.QueryIpCidr.key:
+                case MenuItems.QueryIpCidr.key:
                     this.props?.onContextMenu.addTab(`ip:"${selectedRow.item.ip}/24"`)
                     break
-                case MenuItem.QueryIP.key:
+                case MenuItems.QueryIP.key:
                     this.props?.onContextMenu.addTab(`ip:"${selectedRow.item.ip}"`)
                     break
-                case MenuItem.OpenUrl.key: {
+                case MenuItems.OpenUrl.key: {
                     const domain = selectedRow.item.domain
                     const ip = selectedRow.item.ip
                     const schema = selectedRow.item.service?.name
@@ -796,15 +801,15 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     }
                     break
                 }
-                case MenuItem.CopyRow.key:
+                case MenuItems.CopyRow.key:
                     copy(selectedRow)
                     break
-                case MenuItem.CopyCol.key: {
+                case MenuItems.CopyCol.key: {
                     const colValues = pageData.map(item => {
                         for (const key in item) {
                             const ok = Object.prototype.hasOwnProperty.call(item, key)
                             if (ok && key === selectedRow?.colKey) {
-                                return item[key as keyof RealtimeServiceItem];
+                                return item[key as keyof PageDataType];
                             }
                             switch (selectedRow?.colKey) {
                                 case "protocol":
@@ -844,7 +849,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             selectedRow = undefined
         };
 
-        const handleOnContextMenu = (item: RealtimeServiceItem, rowIndex: number | undefined, colKey: string) => {
+        const handleOnContextMenu = (item: PageDataType, rowIndex: number | undefined, colKey: string) => {
             selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
             beforeContextMenuOpen();
         }
@@ -1088,7 +1093,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     <Table
                         // locale={{ emptyText: "暂无数据" }}
                         showSorterTooltip={false}
-                        scroll={{y: tableScrollHeight, scrollToFirstRowOnChange: true}}
+                        virtual
+                        scroll={{y: tableScrollHeight,x: '100%', scrollToFirstRowOnChange: true}}
                         bordered
                         columns={getMergeColumns()}
                         components={{
@@ -1135,19 +1141,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     }
 }
 
-type TabType = {
-    label: string,
-    key: string,
-    children: ReactNode,
-    closable?: boolean
-}
-
 class Quake extends React.Component {
     state = {
         activeKey: "",
         tabCount: 0,
         tabRefs: [] as TabContent[],
-        items: [] as TabType[],
+        items: [] as Tab[],
         queryFields: [] as string[],
     };
 
@@ -1157,7 +1156,7 @@ class Quake extends React.Component {
         this.setState({
             activeKey: initialTabKey,
             items: [{
-                label: initialTabKey,
+                label: <TabLabel label={initialTabKey}/>,
                 key: initialTabKey,
                 children: <TabContent
                     ref={(r: TabContent) => {
@@ -1187,7 +1186,7 @@ class Quake extends React.Component {
         const newPanes = [
             ...this.state.items,
             {
-                label: newActiveKey,
+                label: <TabLabel label={newActiveKey}/>,
                 key: newActiveKey,
                 children: <TabContent
                     ref={(r: TabContent) => {

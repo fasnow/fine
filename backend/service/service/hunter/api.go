@@ -55,15 +55,15 @@ type Result struct {
 //	Banner         string      `json:"banner"`
 //}
 
-func (h *Hunter) Get(req *GetDataReq) (*Result, error) {
-	req.req.QueryParams.Set("api-key", h.key)
+func (r *Hunter) Get(req *GetDataReq) (*Result, error) {
+	req.req.QueryParams.Set("api-key", r.key)
 	url := fmt.Sprintf("%v?%s", HunterApiUrl, req.req.QueryParams.Encode())
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
 	}
-	response, err := h.Http.Do(request)
+	response, err := r.http.Do(request)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -127,7 +127,7 @@ func (h *Hunter) Get(req *GetDataReq) (*Result, error) {
 	return &result, nil
 }
 
-func (h *Hunter) Export(items []*hunter.Item, filename string) error {
+func (r *Hunter) Export(items []*hunter.Item, filename string) error {
 	if len(items) == 0 {
 		return nil
 	}

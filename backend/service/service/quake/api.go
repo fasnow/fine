@@ -230,8 +230,8 @@ func (a *aggregationData) Host() {
 
 }
 
-func (q *Quake) parser(request *http.Request) ([]byte, int, int, int64, error) {
-	body, err2 := q.send(request)
+func (r *Quake) parser(request *http.Request) ([]byte, int, int, int64, error) {
+	body, err2 := r.send(request)
 	if err2 != nil {
 		return nil, 0, 0, 0, err2
 	}
@@ -290,7 +290,7 @@ func (f *faviconSimilarityData) Get(faviconHash string, similar float64, size in
 	req, _ = http.NewRequest("POST", QuakeFaviconSimilarityDataApiUrl, reqBody)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-QuakeToken", f.client.key)
-	response, err := f.client.Http.Do(req)
+	response, err := f.client.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -468,10 +468,10 @@ type UserRole struct {
 	Credit   int    `json:"credit"`
 }
 
-func (q *Quake) User() (*User, error) {
+func (r *Quake) User() (*User, error) {
 	req, _ := http.NewRequest("GET", QuakeUserApiUrl, nil)
 	//req.Header.Set("Content-Type", "application/json")
-	body, err := q.send(req)
+	body, err := r.send(req)
 	if err != nil {
 		return nil, err
 	}
@@ -491,7 +491,7 @@ func (q *Quake) User() (*User, error) {
 	return &tmpResponse.User, nil
 }
 
-func (q *Quake) Export(items []quake.RealtimeServiceItem, filename string) error {
+func (r *Quake) Export(items []quake.RealtimeServiceItem, filename string) error {
 	var headers = []any{"ID", "IP", "域名", "主机", "端口", "协议", "响应码", "网页标题", "组件", "网站路径", "中间件", "证书", "操作系统", "运营商", "地理位置", "场景", "自治域", "自治域编号", "更新时间"}
 	var data = [][]any{headers}
 	for i, item := range items {
@@ -557,12 +557,12 @@ func (q *Quake) Export(items []quake.RealtimeServiceItem, filename string) error
 }
 
 // 发送请求并返回响应体
-func (q *Quake) send(request *http.Request) ([]byte, error) {
-	request.Header.Set("X-QuakeToken", q.key)
+func (r *Quake) send(request *http.Request) ([]byte, error) {
+	request.Header.Set("X-QuakeToken", r.key)
 	if request.Method == "POST" {
 		request.Header.Set("Content-Type", "application/json")
 	}
-	response, err := q.Http.Do(request)
+	response, err := r.http.Do(request)
 	if err != nil {
 		return nil, err
 	}

@@ -1146,7 +1146,7 @@ class StockTreeVertical {
                     d._children = null;
                 } else {
                     if (this.opts.addChildren){
-                        const t = (await this.opts.addChildren(d.data.id, "IN"))
+                        const t = (await this.opts.addChildren(d.data, "IN"))
                         if (t === undefined){
                             return
                         }

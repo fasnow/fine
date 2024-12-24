@@ -22,6 +22,7 @@ import {Cipher} from "@/pages/Cipher";
 import {CssConfig} from "@/pages/Constants";
 import TianYanCha from "@/pages/TianYanCha";
 import { createStyles } from 'antd-style';
+import {Test} from "@/pages/Test";
 
 const { Header } = Lay;
 

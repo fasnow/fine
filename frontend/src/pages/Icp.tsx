@@ -2,7 +2,7 @@ import {
     CloudDownloadOutlined,
     LoadingOutlined,
     SearchOutlined} from '@ant-design/icons';
-import {Button, Input, message, Pagination, Select, Space, Table} from 'antd';
+import {Button, Flex, Input, message, Pagination, Select, Space, Table} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
 import type {ColumnsType} from 'antd/es/table';
 import {QUERY_FIRST} from "@/component/type";
@@ -281,9 +281,9 @@ const TabContent: React.FC = () => {
             colKey:""
         }
     };
-    return (<div >
+    return (<Flex vertical>
         {contextHolder}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        <Flex vertical align={"center"}>
             <Space.Compact size={"small"}>
                 <Select
                     onChange={(value)=>{
@@ -313,7 +313,7 @@ const TabContent: React.FC = () => {
                 </Space.Compact>
             </Space.Compact>
             <span style={{ textAlign: 'center' }}>ICP备案查询：请输入单位名称或域名或备案号查询，请勿使用子域名或者带http://www等字符的网址查询</span>
-        </div>
+        </Flex>
         <ContextMenu
             items={menuItems}
             onItemClick={
@@ -367,7 +367,7 @@ const TabContent: React.FC = () => {
                 rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
             />
         </ContextMenu>
-    </div>)
+    </Flex>)
 }
 
 const Icp: React.FC = () => {

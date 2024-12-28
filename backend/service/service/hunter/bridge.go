@@ -2,10 +2,11 @@ package hunter
 
 import (
 	"fine/backend/app"
-	"fine/backend/config/v2"
-	"fine/backend/db/models"
-	"fine/backend/db/service"
-	"fine/backend/event"
+	"fine/backend/config"
+	"fine/backend/constant"
+	"fine/backend/database"
+	"fine/backend/database/models"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/service/model/hunter"
 	service2 "fine/backend/service/service"
@@ -22,11 +23,11 @@ import (
 type Bridge struct {
 	app         *app.App
 	hunter      *Hunter
-	queryLog    *service.HunterQueryLog
-	downloadLog *service.DownloadLogService
-	dataCache   *service.HunterDBService
-	token       *service.HunterRestTokenDBService
-	cacheTotal  *service.CacheTotal
+	hunterRepo  repository.HunterRepository
+	downloadLog *repository.DownloadLogService
+	token       *repository.HunterRestTokenDBService
+	cacheTotal  *repository.CacheTotal
+	historyRepo repository.HistoryRepository
 }
 
 func NewHunterBridge(app *app.App) *Bridge {
@@ -34,12 +35,12 @@ func NewHunterBridge(app *app.App) *Bridge {
 	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		hunter:      tt,
-		queryLog:    service.NewHunterQueryLog(),
-		downloadLog: service.NewDownloadLogService(),
-		dataCache:   service.NewHunterDBService(),
-		token:       service.NewHunterResidualTokenDBService(),
-		cacheTotal:  service.NewCacheTotal(),
+		hunterRepo:  repository.NewHunterRepository(database.GetConnection()),
+		downloadLog: repository.NewDownloadLogService(),
+		token:       repository.NewHunterResidualTokenDBService(),
+		cacheTotal:  repository.NewCacheTotal(),
 		app:         app,
+		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
 	}
 }
 
@@ -60,15 +61,15 @@ type QueryOptions struct {
 	PortFilter bool   `json:"portFilter"`
 }
 
-func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime, endTime string, isWeb int, statusCode string, portFilter bool) (*QueryResult, error) {
+func (r *Bridge) Query(taskID int64, query string, page, pageSize int, startTime, endTime string, isWeb int, statusCode string, portFilter bool) (*QueryResult, error) {
 	queryResult := &QueryResult{
 		Result: &Result{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.GetByTaskID(taskID)
+		cacheItems, err := r.hunterRepo.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -76,11 +77,19 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		queryResult.Total = total
 		queryResult.PageNum = page
 		queryResult.TaskID = taskID
-		queryResult.RestQuota = b.token.GetLast() //从数据库获取剩余积分
+		queryResult.RestQuota = r.token.GetLast() //从数据库获取剩余积分
 		for _, cacheItem := range cacheItems {
 			queryResult.Items = append(queryResult.Items, cacheItem.Item)
 		}
 		return queryResult, nil
+	}
+
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.Hunter,
+	})
+	if err != nil {
+		logger.Info(err)
 	}
 
 	//获取新数据
@@ -93,17 +102,17 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		StatusCode(statusCode).
 		IsWeb(isWeb).
 		PortFilter(portFilter).Build()
-	result, err := b.hunter.Get(req)
+	result, err := r.hunter.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
 	}
-	b.token.Add(result.RestQuota) //剩余积分添加到数据库记录
+	r.token.Add(result.RestQuota) //剩余积分添加到数据库记录
 	if result.Total > 0 {
 		// 缓存查询成功的条件，用于导出
 		id := idgen.NextId()
 		if page == 1 {
-			_ = b.queryLog.Add(&models.HunterQueryLog{
+			_ = r.hunterRepo.CreateQueryField(&models.HunterQueryLog{
 				BaseModel:  models.BaseModel{},
 				Query:      query,
 				StartTime:  startTime,
@@ -116,8 +125,8 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 				Total:      result.Total,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.hunterRepo.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 	}
 	for i := 0; i < len(result.Items); i++ {
@@ -138,8 +147,8 @@ func (b *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 	return queryResult, nil
 }
 
-func (b *Bridge) Export(taskID, page, pageSize int64) error {
-	queryLog, err := b.queryLog.GetByTaskID(taskID)
+func (r *Bridge) Export(taskID, page, pageSize int64) error {
+	queryLog, err := r.hunterRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		logger.Info(err.Error())
 		return errors.New("查询后再导出")
@@ -148,7 +157,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(models.DownloadLog{
+	_ = r.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -167,7 +176,7 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 					StatusCode(queryLog.StatusCode).
 					IsWeb(queryLog.IsWeb).
 					PortFilter(queryLog.PortFilter).Build()
-				result, err := b.hunter.Get(req)
+				result, err := r.hunter.Get(req)
 				if err != nil {
 					logger.Info(err.Error())
 					return nil, err
@@ -178,11 +187,11 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 				logger.Info(err.Error())
 				break
 			}
-			_ = b.dataCache.BatchInsert(exportDataTaskID, result.Items)
-			b.token.Add(result.RestQuota) //剩余积分添加到数据库记录
+			_ = r.hunterRepo.CreateBulk(exportDataTaskID, result.Items)
+			r.token.Add(result.RestQuota) //剩余积分添加到数据库记录
 			time.Sleep(config.GlobalConfig.Hunter.Interval)
 		}
-		cacheItems, err := b.dataCache.GetByTaskID(exportDataTaskID)
+		cacheItems, err := r.hunterRepo.GetBulkByTaskID(exportDataTaskID)
 		if err != nil {
 			return
 		}
@@ -190,24 +199,24 @@ func (b *Bridge) Export(taskID, page, pageSize int64) error {
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)
 		}
-		if err := b.hunter.Export(exportItems, outputAbsFilepath); err != nil {
+		if err := r.hunter.Export(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.Events.HasNewHunterDownloadItem)
+		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNewHunterDownloadItem)
 	}()
 	return nil
 }
 
-func (b *Bridge) SetAuth(key string) error {
+func (r *Bridge) SetAuth(key string) error {
 	config.GlobalConfig.Hunter.Token = key
 	if err := config.Save(); err != nil {
 		return err
 
 	}
-	b.hunter.SetAuth(key)
+	r.hunter.SetAuth(key)
 	return nil
 }
 
-func (b *Bridge) GetRestToken() int {
-	return b.token.GetLast()
+func (r *Bridge) GetRestToken() int {
+	return r.token.GetLast()
 }

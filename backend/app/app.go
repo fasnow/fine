@@ -2,7 +2,8 @@ package app
 
 import (
 	"context"
-	"fine/backend/config/v2"
+	"fine/backend/config"
+	"fine/backend/constant"
 	"fine/backend/logger"
 	"fine/backend/proxy/v2"
 	"github.com/pkg/errors"
@@ -63,4 +64,50 @@ func (r *App) Fetch(url string) ([]byte, error) {
 	bytes, err := io.ReadAll(response.Body)
 	return bytes, err
 	//return []byte("1"), nil
+}
+
+func (r *App) SaveProxy(proxy config.Proxy) error {
+	config.GlobalConfig.Proxy = proxy
+	err := config.Save()
+	if err != nil {
+		logger.Info(err)
+		return err
+	}
+	return nil
+}
+
+func (r *App) SaveQueryOnEnter(queryOnEnter config.QueryOnEnter) error {
+	config.GlobalConfig.QueryOnEnter = queryOnEnter
+	err := config.Save()
+	if err != nil {
+		logger.Info(err)
+		return err
+	}
+	return nil
+}
+
+func (r *App) SaveWechat(wechat config.Wechat) error {
+	config.GlobalConfig.Wechat = wechat
+	err := config.Save()
+	if err != nil {
+		logger.Info(err)
+		return err
+	}
+	return nil
+}
+
+func (r *App) GetAllConstants() Constant {
+	return Constant{
+		Event:   constant.Events,
+		Status:  constant.Statuses,
+		History: constant.Histories,
+		Config:  config.GlobalConfig,
+	}
+}
+
+type Constant struct {
+	Event   *constant.Event   `json:"event"`
+	Status  *constant.Status  `json:"status"`
+	History *constant.History `json:"history"`
+	Config  *config.Config    `json:"config"`
 }

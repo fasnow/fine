@@ -36,7 +36,7 @@ import {
 import {errorNotification} from '@/component/Notification';
 import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../component/ColumnFilter';
-import {HunterUserType, RootState, configActions, userActions} from '@/store/store';
+import {HunterUserType, RootState, appActions, userActions} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import {ResizeCallbackData} from 'react-resizable';
@@ -54,7 +54,6 @@ import {Fetch} from "../../wailsjs/go/app/App";
 import {toUint8Array} from "js-base64";
 import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import TabLabel from "@/component/TabLabel";
 import {TargetKey} from "@/pages/Constants";
 
@@ -171,6 +170,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [exportable, setExportable] = useState<boolean>(false)
         const dispatch = useDispatch()
         const [disable, setDisable] = useState<boolean>(false)
+        const event = useSelector((state: RootState) => state.app.global.event)
+
         const exportData = (page: number) => {
             setIsExporting(true)
             setDisable(true)
@@ -183,19 +184,15 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             )
         }
         useEffect(() => {
-            GetAllEvents().then(
-                result => {
-                    EventsOn(String(result.hasNewHunterDownloadItem), function () {
-                        setIsExporting(false)
-                        setDisable(false)
-                        GetRestToken().then(
-                            result => {
-                                dispatch(userActions.setHunterUser({restToken: result}))
-                            }
-                        )
-                    })
-                }
-            )
+            EventsOn(String(event?.hasNewHunterDownloadItem), function () {
+                setIsExporting(false)
+                setDisable(false)
+                GetRestToken().then(
+                    result => {
+                        dispatch(userActions.setHunterUser({restToken: result}))
+                    }
+                )
+            })
         }, []);
         useEffect(() => {
             const maxPage = Math.ceil(props.total / pageSize)
@@ -564,7 +561,8 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 234)
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
-        const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.assets)
+        const allowEnterPress = useSelector((state:RootState)=>state.app.global.config?.QueryOnEnter.assets)
+        const event = useSelector((state: RootState) => state.app.global.event)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
@@ -597,17 +595,13 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         }, [])
 
         useEffect(() => {
-            GetAllEvents().then(
-                result => {
-                    EventsOn(String(result.hasNewHunterDownloadItem), function () {
-                        GetRestToken().then(
-                            result => {
-                                dispatch(userActions.setHunterUser({restToken: result}))
-                            }
-                        )
-                    })
-                }
-            )
+            EventsOn(String(event?.hasNewHunterDownloadItem), function () {
+                GetRestToken().then(
+                    result => {
+                        dispatch(userActions.setHunterUser({restToken: result}))
+                    }
+                )
+            })
         }, []);
 
         const handleOnContextMenu = (item: PageDataType, rowIndex: number | undefined, colKey: string) => {
@@ -1144,7 +1138,7 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState)=>state.config.config)
+    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
     const [key, setKey] = useState("")
 
     useEffect(()=>{
@@ -1155,7 +1149,7 @@ const AuthSetting: React.FC = () => {
         SetAuth(key).then(
             ()=>{
                 const t = { ...cfg, Hunter: {...cfg.Hunter, token: key} } as config.Config;
-                dispatch(configActions.setConfig(t))
+                dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
             }
@@ -2119,7 +2113,7 @@ const Help: React.FC = () => {
         </Tooltip>
         <Modal
             style={{top: "10%"}}
-            bodyStyle={{overflowY: 'scroll', height: window.innerHeight - 160}}
+            styles={{body:{overflowY: 'scroll', height: window.innerHeight - 160}}}
             width={800}
             mask={false}
             maskClosable={true}

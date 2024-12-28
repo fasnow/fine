@@ -4,9 +4,9 @@ import * as d3 from 'd3';
 import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, TableColumnsType, Tag, Tooltip} from "antd";
 import TabsV2 from "@/component/TabsV2";
 import {errorNotification} from '@/component/Notification';
-import {configActions, RootState} from '@/store/store';
+import {appActions, RootState} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
-import {config, tianyancha} from '../../wailsjs/go/models';
+import {config, constant, tianyancha} from '../../wailsjs/go/models';
 import {buttonProps} from './Setting';
 import {UserOutlined} from "@ant-design/icons";
 import {GetHolder, GetInvestee, SetAuth, Suggest} from "../../wailsjs/go/tianyancha/Bridge";
@@ -18,6 +18,8 @@ import {WithIndex} from "@/component/Interface";
 import Candidate, {ItemType} from "@/component/Candidate";
 import './TianYanCha.css'
 import PenetrationItem = tianyancha.PenetrationItem;
+import {FindByPartialKey} from "../../wailsjs/go/history/Bridge";
+import History = constant.History;
 
 interface Options {
     width:any
@@ -1311,7 +1313,7 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState)=>state.config.config)
+    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
     const [key, setKey] = useState("")
 
     useEffect(()=>{
@@ -1323,7 +1325,7 @@ const AuthSetting: React.FC = () => {
         SetAuth(key).then(
             ()=>{
                 const t = { ...cfg, TianYanCha: { ...cfg.TianYanCha, token: key } } as config.Config;
-                dispatch(configActions.setConfig(t))
+                dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
             }
@@ -1520,6 +1522,7 @@ const TabContent: React.FC = () => {
     const [ratioMax, setRatioMax] = useState(100)
     const ratioMinRef = useRef(ratioMin)
     const ratioMaxRef = useRef(ratioMax)
+    const history = useSelector((state:RootState)=>state.app.global.history || new History())
 
     useEffect(() => {
         if (filterRef.current){
@@ -1636,27 +1639,57 @@ const TabContent: React.FC = () => {
                         {/*    />*/}
                         {/*</Dropdown>*/}
                         <Candidate
-                            filter={(v)=>{return !!(v && v.length > 1)}}
-                            items={async (v) => {
-                                try {
-                                    const response = await Suggest(v); // 等待Suggest函数执行完成获取原始数据
-                                    const a: ItemType[] = response.map(item => {
-                                        const t:ItemType={
-                                            key: item.graphId,
-                                            label: item.name
+                            style={{width:400}}
+                            size={"small"}
+                            items={[
+                                {
+                                    fetchOnOpen : (items)=>{return items.length===0},
+                                    onSelectItem: (item)=>{
+                                        query(item.label as string, item.data.graphId.toString())
+                                    },
+                                    title: '相关企业',
+                                    filter: (v)=>{return !!(v && v.length > 1)},
+                                    fetch: async (v) => {
+                                        try {
+                                            const response = await Suggest(v); // 等待Suggest函数执行完成获取原始数据
+                                            const a: ItemType[] = response.map(item => {
+                                                const t:ItemType={
+                                                    value: item.name,
+                                                    label: item.name,
+                                                    data: item
+                                                }
+                                                return t;
+                                            });
+                                            return a;
+                                        } catch (e) {
+                                            errorNotification("错误", String(e));
+                                            return []; // 如果出现错误，返回空数组，避免组件出现异常
                                         }
-                                        return t;
-                                    });
-                                    return a;
-                                } catch (e) {
-                                    errorNotification("错误", String(e));
-                                    return []; // 如果出现错误，返回空数组，避免组件出现异常
-                                }
-                            }}
-                            onClick={(item)=>{
-                                console.log(item)
-                                query(item.label as string, item.key)
-                            }}
+                                    }
+                                },
+                                // {
+                                //     title:"历史记录",
+                                //     fetch: async (v) => {
+                                //         try {
+                                //             const response = await FindByPartialKey(history.tyc, v); // 等待Suggest函数执行完成获取原始数据
+                                //             const a: ItemType[] = response.map(item => {
+                                //                 const t:ItemType={
+                                //                     value: item,
+                                //                     label: item,
+                                //                     data: item
+                                //                 }
+                                //                 return t;
+                                //             });
+                                //             return a;
+                                //         } catch (e) {
+                                //             errorNotification("错误", String(e));
+                                //             return []; // 如果出现错误，返回空数组，避免组件出现异常
+                                //         }
+                                //     }
+                                // }
+                            ]
+                            }
+
                         >
                         </Candidate>
                     {/*</Flex>*/}

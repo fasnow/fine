@@ -2,10 +2,11 @@ package zone
 
 import (
 	"fine/backend/app"
-	"fine/backend/config/v2"
-	"fine/backend/db/models"
-	"fine/backend/db/service"
-	"fine/backend/event"
+	"fine/backend/config"
+	"fine/backend/constant"
+	"fine/backend/database"
+	"fine/backend/database/models"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/service/model/zone"
 	"fine/backend/utils"
@@ -20,10 +21,10 @@ import (
 type Bridge struct {
 	app         *app.App
 	zone        *Zone
-	queryLog    *service.ZoneQueryLog
-	downloadLog *service.DownloadLogService
-	dataCache   *service.ZoneDBService
-	cacheTotal  *service.CacheTotal
+	zoneRepo    repository.ZoneRepositoryImpl
+	downloadLog *repository.DownloadLogService
+	cacheTotal  *repository.CacheTotal
+	historyRepo repository.HistoryRepository
 }
 
 func NewZoneBridge(app *app.App) *Bridge {
@@ -31,22 +32,22 @@ func NewZoneBridge(app *app.App) *Bridge {
 	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		zone:        tt,
-		queryLog:    service.NewZoneQueryLog(),
-		downloadLog: service.NewDownloadLogService(),
-		dataCache:   service.NewZoneDBService(),
-		cacheTotal:  service.NewCacheTotal(),
+		zoneRepo:    repository.NewZoneRepository(database.GetConnection()),
+		downloadLog: repository.NewDownloadLogService(),
+		cacheTotal:  repository.NewCacheTotal(),
 		app:         app,
+		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
 	}
 }
 
-func (b *Bridge) SetAuth(key string) error {
+func (r *Bridge) SetAuth(key string) error {
 	config.GlobalConfig.Zone.Token = key
 	if err := config.Save(); err != nil {
 		logger.Info(err.Error())
 		return err
 
 	}
-	b.zone.SetAuth(key)
+	r.zone.SetAuth(key)
 	return nil
 }
 
@@ -98,14 +99,14 @@ type QueryAimResult struct {
 	MaxPage int       `json:"maxPage"`
 }
 
-func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*QuerySiteResult, error) {
+func (r *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*QuerySiteResult, error) {
 	queryResult := &QuerySiteResult{
 		Result: SiteResult{},
 	}
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Site.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Site.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -121,9 +122,17 @@ func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*Que
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.Site.Get(req)
+	result, err := r.zone.Site.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -132,15 +141,15 @@ func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*Que
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.SiteType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Site.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Site.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -148,15 +157,15 @@ func (b *Bridge) QuerySite(taskID int64, query string, page, pageSize int) (*Que
 	return queryResult, nil
 }
 
-func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*QueryDomainResult, error) {
+func (r *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*QueryDomainResult, error) {
 	queryResult := &QueryDomainResult{
 		Result: DomainResult{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Domain.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Domain.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -172,9 +181,17 @@ func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*Q
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.Domain.Get(req)
+	result, err := r.zone.Domain.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -183,15 +200,15 @@ func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*Q
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.DomainType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Domain.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Domain.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -199,15 +216,15 @@ func (b *Bridge) QueryDomain(taskID int64, query string, page, pageSize int) (*Q
 	return queryResult, nil
 }
 
-func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*QueryApkResult, error) {
+func (r *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*QueryApkResult, error) {
 	queryResult := &QueryApkResult{
 		Result: ApkResult{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Apk.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Apk.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -223,9 +240,17 @@ func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*Quer
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.Apk.Get(req)
+	result, err := r.zone.Apk.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -234,15 +259,15 @@ func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*Quer
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.ApkType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Apk.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Apk.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -250,15 +275,15 @@ func (b *Bridge) QueryApk(taskID int64, query string, page, pageSize int) (*Quer
 	return queryResult, nil
 }
 
-func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*QueryMemberResult, error) {
+func (r *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*QueryMemberResult, error) {
 	queryResult := &QueryMemberResult{
 		Result: MemberResult{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Member.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Member.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -274,9 +299,17 @@ func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*Q
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.Member.Get(req)
+	result, err := r.zone.Member.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -285,15 +318,15 @@ func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*Q
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.MemberType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Member.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Member.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -301,15 +334,15 @@ func (b *Bridge) QueryMember(taskID int64, query string, page, pageSize int) (*Q
 	return queryResult, nil
 }
 
-func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*QueryEmailResult, error) {
+func (r *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*QueryEmailResult, error) {
 	queryResult := &QueryEmailResult{
 		Result: EmailResult{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Email.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Email.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -325,9 +358,17 @@ func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*Qu
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.Email.Get(req)
+	result, err := r.zone.Email.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -336,15 +377,15 @@ func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*Qu
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.EmailType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Email.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Email.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -352,15 +393,15 @@ func (b *Bridge) QueryEmail(taskID int64, query string, page, pageSize int) (*Qu
 	return queryResult, nil
 }
 
-func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*QueryCodeResult, error) {
+func (r *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*QueryCodeResult, error) {
 	queryResult := &QueryCodeResult{
 		Result: CodeResult{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Code.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Code.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -376,9 +417,17 @@ func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*Que
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.Code.Get(req)
+	result, err := r.zone.Code.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -387,15 +436,15 @@ func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*Que
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.CodeType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Code.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Code.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -403,15 +452,15 @@ func (b *Bridge) QueryCode(taskID int64, query string, page, pageSize int) (*Que
 	return queryResult, nil
 }
 
-func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*QueryDwmResult, error) {
+func (r *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*QueryDwmResult, error) {
 	queryResult := &QueryDwmResult{
 		Result: DarknetResult{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Dwm.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Dwm.GetBulkByTaskID(taskID)
 		if err != nil {
 			logger.Info(err.Error())
 			return nil, err
@@ -427,9 +476,17 @@ func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*Quer
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.Darknet.Get(req)
+	result, err := r.zone.Darknet.Get(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -438,15 +495,15 @@ func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*Quer
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.DarknetType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Dwm.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Dwm.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -454,15 +511,15 @@ func (b *Bridge) QueryDwm(taskID int64, query string, page, pageSize int) (*Quer
 	return queryResult, nil
 }
 
-func (b *Bridge) QueryAim(taskID int64, query string, page, pageSize int) (*QueryAimResult, error) {
+func (r *Bridge) QueryAim(taskID int64, query string, page, pageSize int) (*QueryAimResult, error) {
 	queryResult := &QueryAimResult{
 		Result: AimResult{},
 	}
 
 	//获取缓存
-	total, _ := b.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems, err := b.dataCache.Aim.GetByTaskID(taskID)
+		cacheItems, err := r.zoneRepo.Aim.GetBulkByTaskID(taskID)
 		if err != nil {
 			return nil, err
 		}
@@ -477,9 +534,17 @@ func (b *Bridge) QueryAim(taskID int64, query string, page, pageSize int) (*Quer
 		return queryResult, nil
 	}
 
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
+
 	//获取新数据
 	req := NewGetDataReqBuilder().Query(query).Page(page).Size(pageSize).Build()
-	result, err := b.zone.AIM.Get(req)
+	result, err := r.zone.AIM.Get(req)
 	if err != nil {
 		return nil, err
 	}
@@ -487,15 +552,15 @@ func (b *Bridge) QueryAim(taskID int64, query string, page, pageSize int) (*Quer
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = b.queryLog.Add(&models.ZoneQueryLog{
+			_ = r.zoneRepo.CreateQueryField(&models.ZoneQueryLog{
 				Query:     query,
 				Page:      page,
 				PageSize:  pageSize,
 				QueryType: zone.AIMType,
 			}, id)
 		}
-		b.cacheTotal.Add(id, result.Total, query)
-		_ = b.dataCache.Aim.BatchInsert(id, result.Items)
+		r.cacheTotal.Add(id, result.Total, query)
+		_ = r.zoneRepo.Aim.CreateBulk(id, result.Items)
 		queryResult.TaskID = id
 		queryResult.MaxPage = int(math.Ceil(float64(result.Total) / float64(pageSize)))
 	}
@@ -503,8 +568,8 @@ func (b *Bridge) QueryAim(taskID int64, query string, page, pageSize int) (*Quer
 	return queryResult, nil
 }
 
-func (b *Bridge) ExportSite(taskID int64, page int) error {
-	queryLog, err := b.queryLog.GetByTaskID(taskID)
+func (r *Bridge) ExportSite(taskID int64, page int) error {
+	zoneRepo, err := r.zoneRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		return errors.New("查询后再导出")
 	}
@@ -512,7 +577,7 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(models.DownloadLog{
+	_ = r.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -524,14 +589,14 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 		retry := 3
 		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
-			req := NewGetDataReqBuilder().Query(queryLog.Query).
+			req := NewGetDataReqBuilder().Query(zoneRepo.Query).
 				Page(index).
 				Size(40).
 				Build()
-			result, err2 := b.zone.Site.Get(req)
+			result, err2 := r.zone.Site.Get(req)
 			if err2 != nil {
 				if retry == 0 {
-					cacheItems, err := b.dataCache.Site.GetByTaskID(exportDataTaskID)
+					cacheItems, err := r.zoneRepo.Site.GetBulkByTaskID(exportDataTaskID)
 					if err != nil {
 						return
 					}
@@ -549,11 +614,11 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 				time.Sleep(interval)
 				continue
 			}
-			_ = b.dataCache.Site.BatchInsert(exportDataTaskID, result.Items)
+			_ = r.zoneRepo.Site.CreateBulk(exportDataTaskID, result.Items)
 			time.Sleep(interval)
 		}
 
-		cacheItems, err := b.dataCache.Site.GetByTaskID(exportDataTaskID)
+		cacheItems, err := r.zoneRepo.Site.GetBulkByTaskID(exportDataTaskID)
 		if err != nil {
 			return
 		}
@@ -564,13 +629,13 @@ func (b *Bridge) ExportSite(taskID int64, page int) error {
 		if err := SiteDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneSiteDownloadItem)
+		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNew0zoneSiteDownloadItem)
 	}()
 	return nil
 }
 
-func (b *Bridge) ExportDomain(taskID int64, page int) error {
-	queryLog, err := b.queryLog.GetByTaskID(taskID)
+func (r *Bridge) ExportDomain(taskID int64, page int) error {
+	zoneRepo, err := r.zoneRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		return errors.New("查询后再导出")
 	}
@@ -578,7 +643,7 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(models.DownloadLog{
+	_ = r.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -590,14 +655,14 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 		retry := 3
 		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
-			req := NewGetDataReqBuilder().Query(queryLog.Query).
+			req := NewGetDataReqBuilder().Query(zoneRepo.Query).
 				Page(index).
 				Size(40).
 				Build()
-			result, err2 := b.zone.Domain.Get(req)
+			result, err2 := r.zone.Domain.Get(req)
 			if err2 != nil {
 				if retry == 0 {
-					cacheItems, err := b.dataCache.Domain.GetByTaskID(exportDataTaskID)
+					cacheItems, err := r.zoneRepo.Domain.GetBulkByTaskID(exportDataTaskID)
 					if err != nil {
 						return
 					}
@@ -615,11 +680,11 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 				time.Sleep(interval)
 				continue
 			}
-			_ = b.dataCache.Domain.BatchInsert(exportDataTaskID, result.Items)
+			_ = r.zoneRepo.Domain.CreateBulk(exportDataTaskID, result.Items)
 			time.Sleep(interval)
 		}
 
-		cacheItems, err := b.dataCache.Domain.GetByTaskID(exportDataTaskID)
+		cacheItems, err := r.zoneRepo.Domain.GetBulkByTaskID(exportDataTaskID)
 		if err != nil {
 			return
 		}
@@ -630,13 +695,13 @@ func (b *Bridge) ExportDomain(taskID int64, page int) error {
 		if err := DomainDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneMemberDownloadItem)
+		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
 
-func (b *Bridge) ExportMember(taskID int64, page int) error {
-	queryLog, err := b.queryLog.GetByTaskID(taskID)
+func (r *Bridge) ExportMember(taskID int64, page int) error {
+	zoneRepo, err := r.zoneRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		return errors.New("查询后再导出")
 	}
@@ -644,7 +709,7 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(models.DownloadLog{
+	_ = r.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -656,14 +721,14 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 		retry := 3
 		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
-			req := NewGetDataReqBuilder().Query(queryLog.Query).
+			req := NewGetDataReqBuilder().Query(zoneRepo.Query).
 				Page(index).
 				Size(40).
 				Build()
-			result, err2 := b.zone.Member.Get(req)
+			result, err2 := r.zone.Member.Get(req)
 			if err2 != nil {
 				if retry == 0 {
-					cacheItems, err := b.dataCache.Member.GetByTaskID(exportDataTaskID)
+					cacheItems, err := r.zoneRepo.Member.GetBulkByTaskID(exportDataTaskID)
 					if err != nil {
 						return
 					}
@@ -681,11 +746,11 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 				time.Sleep(interval)
 				continue
 			}
-			_ = b.dataCache.Member.BatchInsert(exportDataTaskID, result.Items)
+			_ = r.zoneRepo.Member.CreateBulk(exportDataTaskID, result.Items)
 			time.Sleep(interval)
 		}
 
-		cacheItems, err := b.dataCache.Member.GetByTaskID(exportDataTaskID)
+		cacheItems, err := r.zoneRepo.Member.GetBulkByTaskID(exportDataTaskID)
 		if err != nil {
 			return
 		}
@@ -696,13 +761,13 @@ func (b *Bridge) ExportMember(taskID int64, page int) error {
 		if err := MemberDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneMemberDownloadItem)
+		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }
 
-func (b *Bridge) ExportEmail(taskID int64, page int) error {
-	queryLog, err := b.queryLog.GetByTaskID(taskID)
+func (r *Bridge) ExportEmail(taskID int64, page int) error {
+	zoneRepo, err := r.zoneRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		return errors.New("查询后再导出")
 	}
@@ -710,7 +775,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 	dataDir := config.GlobalConfig.DataDir
 	filename := fmt.Sprintf("0.zone_%s.xlsx", utils.GenFilenameTimestamp())
 	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = b.downloadLog.Insert(models.DownloadLog{
+	_ = r.downloadLog.Insert(models.DownloadLog{
 		Dir:      dataDir,
 		Filename: filename,
 		Deleted:  false,
@@ -722,14 +787,14 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 		retry := 3
 		interval := config.GlobalConfig.Zone.Interval
 		for index := 1; index <= page; index++ {
-			req := NewGetDataReqBuilder().Query(queryLog.Query).
+			req := NewGetDataReqBuilder().Query(zoneRepo.Query).
 				Page(index).
 				Size(40).
 				Build()
-			result, err2 := b.zone.Email.Get(req)
+			result, err2 := r.zone.Email.Get(req)
 			if err2 != nil {
 				if retry == 0 {
-					cacheItems, err := b.dataCache.Email.GetByTaskID(exportDataTaskID)
+					cacheItems, err := r.zoneRepo.Email.GetBulkByTaskID(exportDataTaskID)
 					if err != nil {
 						return
 					}
@@ -747,11 +812,11 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 				time.Sleep(interval)
 				continue
 			}
-			_ = b.dataCache.Email.BatchInsert(exportDataTaskID, result.Items)
+			_ = r.zoneRepo.Email.CreateBulk(exportDataTaskID, result.Items)
 			time.Sleep(interval)
 		}
 
-		cacheItems, err := b.dataCache.Email.GetByTaskID(exportDataTaskID)
+		cacheItems, err := r.zoneRepo.Email.GetBulkByTaskID(exportDataTaskID)
 		if err != nil {
 			return
 		}
@@ -762,7 +827,7 @@ func (b *Bridge) ExportEmail(taskID int64, page int) error {
 		if err := EmailDataExport(exportItems, outputAbsFilepath); err != nil {
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.Events.HasNew0zoneMemberDownloadItem)
+		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNew0zoneMemberDownloadItem)
 	}()
 	return nil
 }

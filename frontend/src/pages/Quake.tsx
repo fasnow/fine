@@ -33,7 +33,7 @@ import {errorNotification} from '@/component/Notification';
 import {QUERY_FIRST} from '@/component/type';
 import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '../component/ColumnFilter';
-import {RootState, configActions, userActions} from '@/store/store';
+import {RootState, appActions, userActions} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
@@ -44,10 +44,9 @@ import {buttonProps} from './Setting';
 import {copy, localeCompare, RangePresets} from '@/util/util';
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {GetUserInfo, RealtimeServiceDataExport, RealtimeServiceDataQuery, SetAuth} from "../../wailsjs/go/quake/Bridge";
-import {config, fofa, quake} from "../../wailsjs/go/models";
+import {config, quake} from "../../wailsjs/go/models";
 import {MenuItemType} from "antd/es/menu/interface";
 import {MenuItems, WithIndex} from "@/component/Interface";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import TabLabel from "@/component/TabLabel";
 import type {Tab} from "rc-tabs/lib/interface"
 import {TargetKey} from "@/pages/Constants";
@@ -212,7 +211,7 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState)=>state.config.config)
+    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
     const [key, setKey] = useState("")
 
     useEffect(()=>{
@@ -224,7 +223,7 @@ const AuthSetting: React.FC = () => {
         SetAuth(key).then(
             ()=>{
                 const t = { ...cfg, Quake: {...cfg.Quake, token: key} } as config.Config;
-                dispatch(configActions.setConfig(t))
+                dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
             }
@@ -325,6 +324,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [exportable, setExportable] = useState<boolean>(false)
         const [maxPage, setMaxPage] = useState<number>(0)
         const [disable, setDisable] = useState<boolean>(false)
+        const event = useSelector((state: RootState) => state.app.global.event)
 
         useEffect(() => {
             const maxPage = Math.ceil(props.total / pageSize)
@@ -338,15 +338,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         }, [pageSize, props.total])
 
         useEffect(() => {
-            GetAllEvents().then(
-                result => {
-                    EventsOn(String(result.hasNewQuakeDownloadItem), function () {
-                        updateRestToken()
-                        setIsExporting(false)
-                        setDisable(false)
-                    })
-                }
-            )
+            EventsOn(String(event?.hasNewQuakeDownloadItem), function () {
+                updateRestToken()
+                setIsExporting(false)
+                setDisable(false)
+            })
         }, []);
 
         const updateRestToken = () => {
@@ -685,7 +681,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 260)
-        const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.assets)
+        const allowEnterPress = useSelector((state:RootState)=>state.app.global.config?.QueryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
@@ -1091,7 +1087,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             >
                 <div>
                     <Table
-                        // locale={{ emptyText: "暂无数据" }}
                         showSorterTooltip={false}
                         virtual
                         scroll={{y: tableScrollHeight,x: '100%', scrollToFirstRowOnChange: true}}
@@ -1641,7 +1636,7 @@ const Help: React.FC = () => {
             footer={null}
             onCancel={() => setOpen(false)}
             destroyOnClose={true}
-            bodyStyle={{height: window.innerHeight - 200, overflowY: "scroll"}}
+            styles={{body:{height: window.innerHeight - 200, overflowY: "scroll"}}}
         >
 
             <Space direction="vertical">

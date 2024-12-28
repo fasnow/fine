@@ -2,8 +2,8 @@ package domain2ip
 
 import (
 	"fine/backend/app"
-	"fine/backend/config/v2"
-	"fine/backend/event"
+	"fine/backend/config"
+	"fine/backend/constant"
 	"fine/backend/logger"
 	"fine/backend/utils"
 	"fmt"
@@ -55,7 +55,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 	go func() {
 		defer func() {
 			cache.Delete(taskIDStr)
-			event.Emit(event.Events.Domain2IPDown, Detail{TaskID: taskID})
+			constant.Emit(constant.Events.Domain2IPDown, Detail{TaskID: taskID})
 		}()
 		dnss := config.GlobalConfig.DNS.Value
 		var details []Detail
@@ -83,7 +83,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 					if err != nil {
 						ttt := fmt.Sprintf("%s get CNAME record using dns %s :%v", domain, d, err)
 						logger.Info(ttt)
-						event.Emit(event.Events.Domain2IPOutput, Detail{
+						constant.Emit(constant.Events.Domain2IPOutput, Detail{
 							TaskID: taskID,
 							Domain: domain,
 							Error:  ttt,
@@ -104,7 +104,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 					if err != nil {
 						ttt := fmt.Sprintf("%s get A record using dns %s :%v", domain, d, err)
 						logger.Info(ttt)
-						event.Emit(event.Events.Domain2IPOutput, Detail{
+						constant.Emit(constant.Events.Domain2IPOutput, Detail{
 							TaskID: taskID,
 							Domain: domain,
 							Error:  ttt,
@@ -127,7 +127,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 						IPs:    ipDetails,
 						IsCDN:  isCDN,
 					}
-					event.Emit(event.Events.Domain2IPOutput, detail)
+					constant.Emit(constant.Events.Domain2IPOutput, detail)
 					logger.Info(detail)
 					return
 				}
@@ -150,7 +150,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 					IPs:    ipDetails,
 					IsCDN:  isCDN,
 				}
-				event.Emit(event.Events.Domain2IPOutput, detail)
+				constant.Emit(constant.Events.Domain2IPOutput, detail)
 				logger.Info(detail)
 				details = append(details, detail)
 			}(domain)
@@ -194,7 +194,7 @@ func (b *Bridge) GetDetail(domains []string) int64 {
 			"data":   tt,
 		}
 		logger.Info(ttt)
-		event.Emit(event.Events.Domain2IPOutput, ttt)
+		constant.Emit(constant.Events.Domain2IPOutput, ttt)
 	}()
 	return taskID
 }

@@ -16,16 +16,10 @@ import {
 } from 'antd';
 import {FileTextOutlined, FileZipOutlined, FolderOpenOutlined} from "@ant-design/icons";
 import {Join} from "../../wailsjs/go/runtime/Path";
-import {Allotment} from "allotment";
 import TextArea from "antd/es/input/TextArea";
 import "@/pages/Wechat.css"
 import {Environment, EventsOn} from "../../wailsjs/runtime";
 import {OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/runtime/Runtime";
-import {
-    GetWechatMatchRules,
-    SaveWechat,
-    SaveWechatMatchRules
-} from "../../wailsjs/go/config/Config";
 import {config, wechat} from "../../wailsjs/go/models";
 import {errorNotification} from "@/component/Notification";
 import {
@@ -38,9 +32,9 @@ import {
 import {DecompileIcon} from "@/component/Icon";
 import InfoToFront = wechat.InfoToFront;
 import {CssConfig} from "@/pages/Constants";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {useDispatch, useSelector} from "react-redux";
-import {configActions, RootState} from "@/store/store";
+import {appActions, RootState} from "@/store/store";
+import {SaveWechat} from "../../wailsjs/go/app/App";
 
 export const MiniProgram: React.FC = () => {
     const [data, setData] = useState<InfoToFront[]>([])
@@ -59,7 +53,8 @@ export const MiniProgram: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [rules, setRules] = useState<string>("")
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState) => state.config.config )
+    const cfg = useSelector((state:RootState) => state.app.global.config || new config.Config())
+    const event = useSelector((state: RootState) => state.app.global.event)
 
     useEffect(() => {
         Environment().then(
@@ -67,37 +62,35 @@ export const MiniProgram: React.FC = () => {
                 setPlatform(r.platform)
             }
         )
-        GetAllEvents().then((result) => {
-            //获取反编译输出
-            EventsOn(String(result.decompileWxMiniProgram), (data) => {
-                _setDecompileResult(data)
-            })
+        //获取反编译输出
+        EventsOn(String(event?.decompileWxMiniProgram), (data) => {
+            _setDecompileResult(data)
+        })
 
-            //获取提取内容输出
-            EventsOn(String(result.extractWxMiniProgramInfoOutput), (data) => {
-                _setDecompileResult(data)
-            })
+        //获取提取内容输出
+        EventsOn(String(event?.extractWxMiniProgramInfoOutput), (data) => {
+            _setDecompileResult(data)
+        })
 
-            //提取内容结束就展示
-            EventsOn(String(result.extractWxMiniProgramInfoDone), (data) => {
-                _setDecompileResult(`[${data.appid} ${data.version}] 信息提取完成\n`)
-                if (data.appid != appIdRef.current || data.version != versionRef.current) {
-                    return
-                }
-                GetMatchedString(data.appid, data.version).then(
-                    r => {
-                        if (!r.taskDown) {
-                            setMatchedResult(`[${data.appid} ${data.version}]正在提取关键字内容`)
-                        }
-                        setMatchedResult(pre => pre + r.matched + "\n")
+        //提取内容结束就展示
+        EventsOn(String(event?.extractWxMiniProgramInfoDone), (data) => {
+            _setDecompileResult(`[${data.appid} ${data.version}] 信息提取完成\n`)
+            if (data.appid !== appIdRef.current || data.version != versionRef.current) {
+                return
+            }
+            GetMatchedString(data.appid, data.version).then(
+                r => {
+                    if (!r.taskDown) {
+                        setMatchedResult(`[${data.appid} ${data.version}]正在提取关键字内容`)
                     }
-                )
-            })
+                    setMatchedResult(pre => pre + r.matched + "\n")
+                }
+            )
+        })
 
-            //反编译完成后重绘列表
-            EventsOn(String(result.decompileWxMiniProgramDone), (data) => {
-                _setDecompileResult(data)
-            })
+        //反编译完成后重绘列表
+        EventsOn(String(event?.decompileWxMiniProgramDone), (data) => {
+            _setDecompileResult(data)
         })
 
         //自动获取新的
@@ -168,14 +161,35 @@ export const MiniProgram: React.FC = () => {
         )
     }
 
+    const saveRules=(rules:string[])=>{
+        const t = {...cfg.Wechat, rules: rules}
+        SaveWechat(t).then(
+            () => {
+                const tt = {...cfg, Wechat:{...t}} as config.Config
+                dispatch(appActions.setConfig(tt))
+                GetAllMiniProgram().then(
+                    result => {
+                        scheduledTask(result)
+                    }
+                )
+            }
+        ).catch(
+            e=>{
+                errorNotification("错误",e)
+                setRules(cfg.Wechat.rules.join("\n"))
+            }
+        )
+    }
+
     const configAppletPath = () => {
         OpenDirectoryDialog().then(
             result => {
                 if (result) {
-                    SaveWechat({applet: result, rules: cfg.Wechat.rules}).then(
+                    const t = {...cfg.Wechat, applet: result}
+                    SaveWechat(t).then(
                         () => {
-                            const t = {...cfg, Wechat: {...cfg.Wechat, applet: result}} as config.Config
-                            dispatch(configActions.setConfig(t))
+                            const tt = {...cfg, Wechat: {...t}} as config.Config
+                            dispatch(appActions.setConfig(tt))
                             GetAllMiniProgram().then(
                                 result => {
                                     scheduledTask(result)
@@ -260,7 +274,7 @@ export const MiniProgram: React.FC = () => {
                         <Flex gap={5}>
                             <Button size={"small"} type={"primary"} onClick={() => {
                                 setOpen(false)
-                                SaveWechatMatchRules(rules.split("\n"))
+                                saveRules(rules.split("\n"))
                             }}>保存</Button>
                             <Button size={"small"} type={"primary"} onClick={() => {
                                 setOpen(false)
@@ -280,9 +294,7 @@ export const MiniProgram: React.FC = () => {
                     open={open}
                     onOpenChange={(v) => {
                         if (v) {
-                            GetWechatMatchRules().then(
-                                rules => setRules(rules.join("\n"))
-                            )
+                            setRules(cfg.Wechat.rules.join("\n"))
                         } else {
                             setRules("")
                         }

@@ -2,23 +2,22 @@ import React, {useEffect, useRef, useState} from 'react';
 import TextArea from "antd/es/input/TextArea";
 import {Button, Dropdown, Input, InputNumber, MenuProps, Space, Splitter, Table, Tooltip} from "antd";
 import "@/pages/Httpx.css"
-import {SaveHttpx} from "../../wailsjs/go/config/Config";
 import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
 import {errorNotification} from "@/component/Notification";
 import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {SyncOutlined} from "@ant-design/icons";
-import {Run, Stop} from "../../wailsjs/go/httpx/Bridge";
+import {Run, SetConfig, Stop} from "../../wailsjs/go/httpx/Bridge";
 import {useDispatch, useSelector} from "react-redux";
-import {RootState, configActions} from "@/store/store";
+import {RootState, appActions} from "@/store/store";
 import {ResizeCallbackData} from "react-resizable";
 import {ColumnsType} from "antd/es/table";
 import ResizableTitle from "@/component/ResizableTitle";
 import {Chrome} from "@/component/Icon";
 import {copy, strSplit} from "@/util/util";
 import {MenuItems} from "@/component/Interface";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
-import {config} from "../../wailsjs/go/models";
+import {config, constant} from "../../wailsjs/go/models";
 import TabsV2 from "@/component/TabsV2";
+import Event = constant.Event;
 
 const items: MenuProps['items'] = [
     MenuItems.CopyCell,
@@ -35,7 +34,8 @@ const onCell = (index: any, record: any, colKey: any) => {
     }
 }
 let selectedRow: any
-const defaultColumns: ColumnsType = [
+interface DataType { "index": number, "url": string, "detail": string }
+const defaultColumns: ColumnsType<DataType> = [
     {
         title: '序号',
         dataIndex: "index",
@@ -78,13 +78,14 @@ const TabContent = () => {
     const [limit, setLimit] = useState<number>(15)
     const taskID = useRef<number>(0)
     useRef<HTMLDivElement>(null);
-    const cfg = useSelector((state: RootState) => state.config.config)
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
     const dispatch = useDispatch()
     const [height, setHeight] = useState(window.innerHeight - 200)
-    const [dataList, setDataList] = useState<{ "index": number, "url": string, "detail": string }[]>([])
+    const [dataList, setDataList] = useState<DataType[]>([])
     const [columns, setColumns] = useState(defaultColumns)
     const tblRef: Parameters<typeof Table>[0]['ref'] = React.useRef(null);
     const [open, setOpen] = useState(false)
+    const event = useSelector((state: RootState) => state.app.global.event || new Event())
 
     useEffect(() => {
         window.addEventListener("resize", () => {
@@ -92,32 +93,28 @@ const TabContent = () => {
         })
 
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
-        GetAllEvents().then(
-            result => {
-                EventsOn(String(result.httpxOutput), (value) => {
-                    if (!value.taskID || value.taskID !== taskID.current) {
-                        return
-                    }
-                    let data = value.data
-                    data = data.replaceAll(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
-                    if (!data.startsWith("http")) {
-                        return;
-                    }
-                    console.log(data)
-                    let t = strSplit(data, ' ', 2)
-                    setDataList((prevState) => {
-                        return [...prevState, {index: ++prevState.length, url: t[0], detail: t[1]}]
-                    })
-                })
-                EventsOn(String(result.httpxOutputDone), (value) => {
-                    if (!value.taskID || value.taskID !== taskID.current) {
-                        return
-                    }
-                    taskID.current = 0
-                    setRunning(false)
-                })
+        EventsOn(String(event?.httpxOutput), (value) => {
+            if (!value.taskID || value.taskID !== taskID.current) {
+                return
             }
-        )
+            let data = value.data
+            data = data.replaceAll(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
+            if (!data.startsWith("http")) {
+                return;
+            }
+            console.log(data)
+            let t = strSplit(data, ' ', 2)
+            setDataList((prevState) => {
+                return [...prevState, {index: ++prevState.length, url: t[0], detail: t[1]}]
+            })
+        })
+        EventsOn(String(event.httpxOutputDone), (value) => {
+            if (!value.taskID || value.taskID !== taskID.current) {
+                return
+            }
+            taskID.current = 0
+            setRunning(false)
+        })
     }, []);
 
     useEffect(() => {
@@ -126,10 +123,10 @@ const TabContent = () => {
     }, [cfg.Httpx])
 
     const saveHttpx = () => {
-        SaveHttpx({path: path, flags: flags}).then(
+        SetConfig(path, flags).then(
             ()=>{
                 const t = { ...cfg, Httpx: {...cfg.Httpx, flags: flags, path: path} } as config.Config;
-                dispatch(configActions.setConfig(t))
+                dispatch(appActions.setConfig(t))
             }
         ).catch(e=> {
             errorNotification("错误", e)
@@ -327,7 +324,7 @@ const TabContent = () => {
                                     size={"small"}
                                     dataSource={dataList}
                                     pagination={false}
-                                    rowKey={"dataIndex"}
+                                    rowKey={'index'}
                                     onChange={handleSortChange}
                                 />
                             </div>

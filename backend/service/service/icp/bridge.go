@@ -3,10 +3,11 @@ package icp
 import (
 	"context"
 	"fine/backend/app"
-	"fine/backend/config/v2"
-	"fine/backend/db/models"
-	"fine/backend/db/service"
-	"fine/backend/event"
+	"fine/backend/config"
+	"fine/backend/constant"
+	"fine/backend/database"
+	"fine/backend/database/models"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/service/model/icp"
 	"fine/backend/utils"
@@ -20,10 +21,11 @@ import (
 type Bridge struct {
 	app         *app.App
 	icp         *ICP
-	queryLog    *service.ICPQueryLog
-	downloadLog *service.DownloadLogService
+	queryLog    *repository.ICPQueryLog
+	downloadLog *repository.DownloadLogService
 	proxy       string
-	dataCache   *service.IcpDBService
+	icpRepo     repository.IcpRepository
+	historyRepo repository.HistoryRepository
 }
 
 func NewICPBridge(app *app.App) *Bridge {
@@ -31,9 +33,9 @@ func NewICPBridge(app *app.App) *Bridge {
 	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		icp:         tt,
-		queryLog:    service.NewICPQueryLog(),
-		downloadLog: service.NewDownloadLogService(),
-		dataCache:   service.NewIcpDBService(),
+		downloadLog: repository.NewDownloadLogService(),
+		icpRepo:     repository.NewIcpRepository(database.GetConnection()),
+		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
 		app:         app,
 	}
 }
@@ -51,13 +53,13 @@ func (r *Bridge) GetItem() *icp.Item {
 
 func (r *Bridge) Query(taskID int64, query string, pageNum, pageSize int, serviceType string) (map[string]any, error) {
 	//获取缓存
-	log, err := r.queryLog.GetByTaskID(taskID)
+	log, err := r.icpRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
 	}
 	if log.Total != 0 {
-		cacheItems := r.dataCache.GetByTaskID(taskID)
+		cacheItems, _ := r.icpRepo.GetBulkByTaskID(taskID)
 		items := make([]*icp.Item, 0)
 		for _, cacheItem := range cacheItems {
 			items = append(items, cacheItem.Item)
@@ -69,6 +71,10 @@ func (r *Bridge) Query(taskID int64, query string, pageNum, pageSize int, servic
 			"pageSize": pageSize,
 			"total":    log.Total,
 		}, nil
+	}
+	err = r.historyRepo.CreateHistory(&models.History{Key: query, Type: constant.Histories.ICP})
+	if err != nil {
+		logger.Info(err.Error())
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	var e error
@@ -100,13 +106,13 @@ func (r *Bridge) Query(taskID int64, query string, pageNum, pageSize int, servic
 	}
 	taskID = idgen.NextId()
 	if pageNum == 1 { //用于导出
-		_ = r.queryLog.Add(&models.ICPQueryLog{
+		_ = r.icpRepo.CreateQueryField(&models.ICPQueryLog{
 			UnitName:    query,
 			ServiceType: serviceType,
 			Total:       result.Total,
 		}, taskID)
 	}
-	_ = r.dataCache.BatchInsert(taskID, result.Items)
+	_ = r.icpRepo.CreateBulk(taskID, result.Items)
 	return map[string]any{
 		"taskID":   taskID,
 		"items":    result.Items,
@@ -117,7 +123,7 @@ func (r *Bridge) Query(taskID int64, query string, pageNum, pageSize int, servic
 }
 
 func (r *Bridge) Export(taskID int64) error {
-	queryLog, err := r.queryLog.GetByTaskID(taskID)
+	queryLog, err := r.icpRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		logger.Info(err.Error())
 		return errors.New("查询后再导出")
@@ -137,13 +143,13 @@ func (r *Bridge) Export(taskID int64) error {
 	result, err := r.icp.PageNum(1).PageSize(1).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
 	if err != nil {
 		logger.Info(err.Error())
-		r.downloadLog.UpdateStatus(fileID, event.Statuses.Error, err.Error())
+		r.downloadLog.UpdateStatus(fileID, constant.Statuses.Error, err.Error())
 		return err
 	}
 	result, err = r.icp.PageNum(1).PageSize(result.Total).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName)
 	if err != nil {
 		logger.Info(err.Error())
-		r.downloadLog.UpdateStatus(fileID, event.Statuses.Error, err.Error())
+		r.downloadLog.UpdateStatus(fileID, constant.Statuses.Error, err.Error())
 		return err
 	}
 	items = append(items, result.Items...)
@@ -165,11 +171,11 @@ func (r *Bridge) Export(taskID int64) error {
 	}
 	if err := utils.SaveToExcel(data, outputAbsFilepath); err != nil {
 		logger.Info(err.Error())
-		r.downloadLog.UpdateStatus(fileID, event.Statuses.Error, err.Error())
+		r.downloadLog.UpdateStatus(fileID, constant.Statuses.Error, err.Error())
 		return err
 	}
-	r.downloadLog.UpdateStatus(fileID, event.Statuses.Completed, "")
-	event.HasNewDownloadLogItemEventEmit(event.Events.HasNewIcpDownloadItem)
+	r.downloadLog.UpdateStatus(fileID, constant.Statuses.Completed, "")
+	constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNewIcpDownloadItem)
 	return nil
 }
 
@@ -185,20 +191,20 @@ func (r *Bridge) BatchQuery(unitList []string, serviceTypeList []string) {
 		for j, serviceType := range serviceTypeList {
 			result, err := client.PageNum(1).PageSize(1).ServiceType(serviceType).Query(unitName)
 			if err != nil {
-				event.Emit(event.Events.ICPBatchQuery, map[string]any{
-					"code":    event.Statuses.Error,
+				constant.Emit(constant.Events.ICPBatchQuery, map[string]any{
+					"code":    constant.Statuses.Error,
 					"message": err.Error(),
 				})
 				return
 			}
 			if i == len(unitList)-1 && j == len(serviceTypeList)-1 {
-				event.Emit(event.Events.ICPBatchQuery, map[string]any{
-					"code":  event.Statuses.Completed,
+				constant.Emit(constant.Events.ICPBatchQuery, map[string]any{
+					"code":  constant.Statuses.Completed,
 					"items": result.Items,
 				})
 			} else {
-				event.Emit(event.Events.ICPBatchQuery, map[string]any{
-					"code":  event.Statuses.InProgress,
+				constant.Emit(constant.Events.ICPBatchQuery, map[string]any{
+					"code":  constant.Statuses.InProgress,
 					"items": result.Items,
 				})
 			}

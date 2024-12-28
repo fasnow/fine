@@ -1,6 +1,6 @@
 import {SearchOutlined} from '@ant-design/icons';
 import {Button, Divider, Empty, Input, List as AntdList, Modal, Space, Spin, Tabs} from 'antd';
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import Copy from '../component/Copy';
 import {List, WindowScroller} from "react-virtualized"
 import TextArea from 'antd/es/input/TextArea';
@@ -31,7 +31,7 @@ const TabContent: React.FC = () => {
     const [wornning, setWarnnig] = useState<string>("")
     const running = useRef<boolean>(false)
     const interval = useRef<number>(1000)
-    const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.ip138)
+    const allowEnterPress = useSelector((state:RootState)=>state.app.global.config?.QueryOnEnter.ip138)
 
     function isIPAddress(input: string): boolean {
         // IPv4 正则表达式

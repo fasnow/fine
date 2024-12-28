@@ -46,7 +46,7 @@ import NotFound from './Notfound';
 import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '../component/ResizableTitle';
 import {useDispatch, useSelector} from 'react-redux';
-import {RootState, configActions} from '@/store/store';
+import {RootState, appActions} from '@/store/store';
 import {ExportDataPanelProps} from './Props';
 import {buttonProps} from './Setting';
 import {copy, localeCompare} from '@/util/util';
@@ -68,7 +68,6 @@ import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {config, quake, zone} from "../../wailsjs/go/models";
 import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import TabLabel from "@/component/TabLabel";
 import type {Tab} from "rc-tabs/lib/interface"
 import {TargetKey} from "@/pages/Constants";
@@ -157,7 +156,7 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState)=>state.config.config)
+    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
     const [key, setKey] = useState("")
 
     useEffect(()=>{
@@ -169,7 +168,7 @@ const AuthSetting: React.FC = () => {
         SetAuth(key).then(
             ()=>{
                 const t = { ...cfg, Zone: {...cfg.Zone, token: key} } as config.Config;
-                dispatch(configActions.setConfig(t))
+                dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
             }
@@ -405,7 +404,7 @@ const TabContent: React.FC = () => {
         // { label: <>AIM情报  </>, key: "aim", children: <AimTabContent ref={ref.aim} />, closable: false, forceRender: true },
     ]
     const [activeKey, setActiveKey] = useState<TabKey>("site")
-    const allowEnterPress = useSelector((state:RootState)=>state.config.config.QueryOnEnter.assets)
+    const allowEnterPress = useSelector((state:RootState)=>state.app.global.config?.QueryOnEnter.assets)
 
     async function query() {
         // console.log(ref[activeKey] == ref.site)
@@ -694,20 +693,16 @@ const SiteTabContent = forwardRef((props, ref) => {
     const [isExporting, setIsExporting] = useState<boolean>(false)
     const dispatch = useDispatch()
     const [openContextMenu, setOpenContextMenu] = useState(false);
-
+    const event = useSelector((state: RootState) => state.app.global.event)
 
     useImperativeHandle(ref, () => ({
         query: (input: string, pageSize: number) => handleFirstQuery(input, pageSize),
     }));
 
     useEffect(() => {
-        GetAllEvents().then(
-            result => {
-                EventsOn(String(result.hasNew0ZoneSiteDownloadItem), function () {
-                    setIsExporting(false)
-                })
-            }
-        )
+        EventsOn(String(event?.hasNew0ZoneSiteDownloadItem), function () {
+            setIsExporting(false)
+        })
     }, [])
 
     const handleFirstQuery = async (input: string, pageSize: number) => {
@@ -1017,19 +1012,16 @@ const DomainTabContent = forwardRef((props, ref) => {
     const dispatch = useDispatch()
     const [isExporting, setIsExporting] = useState<boolean>(false)
     const [openContextMenu, setOpenContextMenu] = useState(false);
+    const event = useSelector((state: RootState) => state.app.global.event)
 
     useImperativeHandle(ref, () => ({
         query: (input: string, pageSize: number) => handleFirstQuery(input, pageSize),
     }));
 
     useEffect(() => {
-        GetAllEvents().then(
-            result => {
-                EventsOn(String(result.hasNew0ZoneDomainDownloadItem), function () {
-                    setIsExporting(false)
-                })
-            }
-        )
+        EventsOn(String(event?.hasNew0ZoneDomainDownloadItem), function () {
+            setIsExporting(false)
+        })
     }, [])
 
     const handleFirstQuery = async (input: string, pageSize: number) => {
@@ -1664,20 +1656,16 @@ const EmailTabContent = forwardRef((props, ref) => {
     const dispatch = useDispatch()
     const [isExporting, setIsExporting] = useState<boolean>(false)
     const [openContextMenu, setOpenContextMenu] = useState(false);
+    const event = useSelector((state: RootState) => state.app.global.event)
 
     useImperativeHandle(ref, () => ({
         query: (input: string, pageSize: number) => handleQuery(input, pageSize),
     }));
 
-
     useEffect(() => {
-        GetAllEvents().then(
-            result => {
-                EventsOn(String(result.hasNew0ZoneEmailDownloadItem), function () {
-                    setIsExporting(false)
-                })
-            }
-        )
+        EventsOn(String(event?.hasNew0ZoneEmailDownloadItem), function () {
+            setIsExporting(false)
+        })
     }, [])
 
     const handleQuery = async (input: string, pageSize: number) => {
@@ -1991,6 +1979,7 @@ const MemberTabContent = forwardRef((props, ref) => {
     }>({item: undefined, rowIndex: undefined, colKey: undefined})
     const [isExporting, setIsExporting] = useState<boolean>(false)
     const [openContextMenu, setOpenContextMenu] = useState(false);
+    const event = useSelector((state: RootState) => state.app.global.event)
 
     useImperativeHandle(ref, () => ({
         query: (input: string, pageSize: number) => handlFirstQuery(input, pageSize),
@@ -1998,13 +1987,9 @@ const MemberTabContent = forwardRef((props, ref) => {
 
 
     useEffect(() => {
-        GetAllEvents().then(
-            result => {
-                EventsOn(String(result.hasNew0ZoneMemberDownloadItem), function () {
-                    setIsExporting(false)
-                })
-            }
-        )
+        EventsOn(String(event?.hasNew0ZoneMemberDownloadItem), function () {
+            setIsExporting(false)
+        })
     }, [])
 
     const handlFirstQuery = async (input: string, pageSize: number) => {
@@ -3710,7 +3695,7 @@ const Help: React.FC = () => {
             footer={null}
             onCancel={() => setOpen(false)}
             destroyOnClose={true}
-            bodyStyle={{height: window.innerHeight - 200, overflowY: "scroll"}}
+            styles={{body:{height: window.innerHeight - 200, overflowY: "scroll"}}}
             getContainer={false}
         >
 

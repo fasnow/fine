@@ -192,8 +192,8 @@
       // 宿主元素的DOMRect
       let domRect = dom.getBoundingClientRect();
       // svg的宽度和高度
-      this.config.width = domRect.width;
-      this.config.height = domRect.height;
+      this.app.width = domRect.width;
+      this.app.height = domRect.height;
 
       let oldSvg = d3.select('svg')
       // 如果宿主元素中包含svg标签了，那么则删除这个标签，再重新生成一个
@@ -206,11 +206,11 @@
               .attr("viewBox", () => {
                 let parentsLength = this.originTreeData.parents ? this.originTreeData.parents.length : 0;
                 return [
-                  -this.config.width / 2,
+                  -this.app.width / 2,
                   // 如果有父节点，则根节点居中，否则根节点上浮一段距离
-                  parentsLength > 0 ? -this.config.height / 2 : -this.config.height / 3,
-                  this.config.width,
-                  this.config.height,
+                  parentsLength > 0 ? -this.app.height / 2 : -this.app.height / 3,
+                  this.app.width,
+                  this.app.height,
                 ]
               })
               .style("user-select", "none")
@@ -235,7 +235,7 @@
       // 节点集合
       this.gNodes = gAll.append("g").attr("id", "nodeGroup");
       // 设置好节点之间距离的tree方法
-      this.tree = d3.tree().nodeSize([this.config.dx, this.config.dy]);
+      this.tree = d3.tree().nodeSize([this.app.dx, this.app.dy]);
 
       this.rootOfDown = d3.hierarchy(this.originTreeData,(d) => d.children);
       this.rootOfUp = d3.hierarchy(this.originTreeData,(d) => d.parents);
@@ -345,25 +345,25 @@
                 if (d.depth === 0) {
                   return (d.data.name.length + 2) * 16;
                 }
-                return this.config.rectWidth;
+                return this.app.rectWidth;
               })
               .attr("height", (d) => {
                 if (d.depth === 0) {
                   return 30;
                 }
-                return this.config.rectHeight;
+                return this.app.rectHeight;
               })
               .attr("x", (d) => {
                 if (d.depth === 0) {
                   return (-(d.data.name.length + 2) * 16) / 2;
                 }
-                return -this.config.rectWidth / 2;
+                return -this.app.rectWidth / 2;
               })
               .attr("y", (d) => {
                 if (d.depth === 0) {
                   return -15;
                 }
-                return -this.config.rectHeight / 2;
+                return -this.app.rectHeight / 2;
               })
               .attr("rx", 5)
               .attr("stroke-width", 1)
@@ -466,7 +466,7 @@
               .append("g")
               .attr("class", "expandBtn")
               .attr("transform", (d) => {
-                return `translate(${0},${this.config.rectHeight / 2})`;
+                return `translate(${0},${this.app.rectHeight / 2})`;
               })
               .style("display", (d) => {
                 // 如果是根节点，不显示
@@ -602,25 +602,25 @@
                 if (d.depth === 0) {
                   return (d.data.name.length + 2) * 16;
                 }
-                return this.config.rectWidth;
+                return this.app.rectWidth;
               })
               .attr("height", (d) => {
                 if (d.depth === 0) {
                   return 30;
                 }
-                return this.config.rectHeight;
+                return this.app.rectHeight;
               })
               .attr("x", (d) => {
                 if (d.depth === 0) {
                   return (-(d.data.name.length + 2) * 16) / 2;
                 }
-                return -this.config.rectWidth / 2;
+                return -this.app.rectWidth / 2;
               })
               .attr("y", (d) => {
                 if (d.depth === 0) {
                   return -15;
                 }
-                return -this.config.rectHeight / 2;
+                return -this.app.rectHeight / 2;
               })
               .attr("rx", 5)
               .attr("stroke-width", 1)
@@ -723,7 +723,7 @@
               .append("g")
               .attr("class", "expandBtn")
               .attr("transform", (d) => {
-                return `translate(${0},${-this.config.rectHeight / 2})`;
+                return `translate(${0},${-this.app.rectHeight / 2})`;
               })
               .style("display", (d) => {
                 // 如果是根节点，不显示

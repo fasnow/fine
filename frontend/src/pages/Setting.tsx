@@ -4,12 +4,8 @@ import {Button, Divider, Flex, Input, Select, Space, Switch} from 'antd';
 import "./Setting.css"
 import ScrollBar from '../component/ScrollBar';
 import {useDispatch, useSelector} from 'react-redux';
-import {RootState, configActions} from '@/store/store';
+import {RootState, appActions} from '@/store/store';
 import {errorNotification} from '@/component/Notification';
-import {
-    SaveProxy,
-    SaveQueryOnEnter,
-} from "../../wailsjs/go/config/Config";
 import {SetAuth as SetHunterAuth} from "../../wailsjs/go/hunter/Bridge";
 import {SetAuth as SetFofaAuth} from "../../wailsjs/go/fofa/Bridge";
 import {SetAuth as Set0zoneAuth} from "../../wailsjs/go/zone/Bridge";
@@ -17,6 +13,7 @@ import {SetAuth as SetQuakeAuth} from "../../wailsjs/go/quake/Bridge";
 import {SetAuth as SetTianYanChaAuth} from "../../wailsjs/go/tianyancha/Bridge";
 import {CssConfig} from "@/pages/Constants";
 import {config} from "../../wailsjs/go/models";
+import {SaveProxy, SaveQueryOnEnter} from "../../wailsjs/go/app/App";
 
 
 export const buttonProps: ButtonProps = {
@@ -34,7 +31,7 @@ const InputCssProps:CSSProperties={
 export const Proxy=()=>{
     const dispatch = useDispatch()
     const [editable, setEditable] = useState(false)
-    const cfg = useSelector((state: RootState) => state.config.config)
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
     const [proxyConf,setProxyConf] = useState<config.Proxy>({
         enable:false,
         host:"",
@@ -52,7 +49,7 @@ export const Proxy=()=>{
         const t = {...proxyConf, enable: enable}
         SaveProxy(t).then(() => {
             const tt = { ...cfg, Proxy: t } as config.Config;
-            dispatch(configActions.setConfig(tt))
+            dispatch(appActions.setConfig(tt))
             setEditable(false)
         }).catch(
             err => {
@@ -140,7 +137,7 @@ export const Proxy=()=>{
 
 export const Other=()=>{
     const dispatch = useDispatch()
-    const cfg = useSelector((state: RootState) => state.config.config)
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
     const saveAssets=(enable:boolean)=>{
         const t = {...cfg.QueryOnEnter}
@@ -148,7 +145,7 @@ export const Other=()=>{
         SaveQueryOnEnter(t).then(
             ()=> {
                 const tt = { ...cfg, QueryOnEnter: t } as config.Config;
-                dispatch(configActions.setConfig(tt))
+                dispatch(appActions.setConfig(tt))
             }
         ).catch(
             err => {
@@ -164,7 +161,7 @@ export const Other=()=>{
             ()=> {
                 const tt = { ...cfg } as config.Config;
                 tt.QueryOnEnter = t;
-                dispatch(configActions.setConfig(tt))
+                dispatch(appActions.setConfig(tt))
             }
         ).catch(
             err => errorNotification("错误", err, 3)
@@ -178,7 +175,7 @@ export const Other=()=>{
             ()=> {
                 const tt = { ...cfg } as config.Config;
                 tt.QueryOnEnter = t;
-                dispatch(configActions.setConfig(tt))
+                dispatch(appActions.setConfig(tt))
             }
         ).catch(
             err => errorNotification("错误", err, 3)
@@ -252,7 +249,7 @@ export const Setting: React.FC = () => {
     const FofaForm: React.FC = () => {
         const [editable, setEditable] = useState(false)
         const [key, setKey] = useState("")
-        const cfg = useSelector((state: RootState) => state.config.config)
+        const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
         useEffect(() => {
             setKey(cfg.Fofa.token)
@@ -263,7 +260,7 @@ export const Setting: React.FC = () => {
             SetFofaAuth(key).then(
                 r=> {
                     const t = { ...cfg, Fofa: {...cfg.Fofa, token: key} } as config.Config;
-                    dispatch(configActions.setConfig(t))
+                    dispatch(appActions.setConfig(t))
                     setEditable(false)
                 }
             ).catch(
@@ -306,7 +303,7 @@ export const Setting: React.FC = () => {
     const HunterForm: React.FC = () => {
         const [editable, setEditable] = useState(false)
         const [key, setKey] = useState("")
-        const cfg = useSelector((state: RootState) => state.config.config)
+        const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
         useEffect(() => {
             setKey(cfg.Hunter.token)
@@ -316,7 +313,7 @@ export const Setting: React.FC = () => {
             SetHunterAuth(key).then(
                 r=> {
                     const t = { ...cfg, Hunter: {...cfg.Hunter, token: key} } as config.Config;
-                    dispatch(configActions.setConfig(t))
+                    dispatch(appActions.setConfig(t))
                     setEditable(false)
                 }
             ).catch(
@@ -358,7 +355,7 @@ export const Setting: React.FC = () => {
     const ZoneForm: React.FC = () => {
         const [editable, setEditable] = useState(false)
         const [key, setKey] = useState("")
-        const cfg = useSelector((state: RootState) => state.config.config)
+        const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
 
         useEffect(() => {
@@ -370,7 +367,7 @@ export const Setting: React.FC = () => {
             Set0zoneAuth(key).then(
                 r=> {
                     const t = { ...cfg, Zone: {...cfg.Zone, token: key} } as config.Config;
-                    dispatch(configActions.setConfig(t))
+                    dispatch(appActions.setConfig(t))
                     setEditable(false)
                 }
             ).catch(
@@ -413,7 +410,7 @@ export const Setting: React.FC = () => {
     const QuakeForm: React.FC = () => {
         const [editable, setEditable] = useState(false)
         const [key, setKey] = useState("")
-        const cfg = useSelector((state: RootState) => state.config.config)
+        const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
         useEffect(() => {
             setKey(cfg.Quake.token)
@@ -424,7 +421,7 @@ export const Setting: React.FC = () => {
             SetQuakeAuth(key).then(
                 r=> {
                     const t = { ...cfg, Quake: {...cfg.Quake, token: key} } as config.Config;
-                    dispatch(configActions.setConfig(t))
+                    dispatch(appActions.setConfig(t))
                     setEditable(false)
                 }
             ).catch(
@@ -467,7 +464,7 @@ export const Setting: React.FC = () => {
     const TianYanChaForm: React.FC = () => {
         const [editable, setEditable] = useState(false)
         const [key, setKey] = useState("")
-        const cfg = useSelector((state: RootState) => state.config.config)
+        const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
         useEffect(() => {
             setKey(cfg.TianYanCha.token)
@@ -478,7 +475,7 @@ export const Setting: React.FC = () => {
             SetTianYanChaAuth(key).then(
                 r=> {
                     const t = { ...cfg, TianYanCha: {...cfg.TianYanCha, token: key} } as config.Config;
-                    dispatch(configActions.setConfig(t))
+                    dispatch(appActions.setConfig(t))
                     setEditable(false)
                 }
             ).catch(

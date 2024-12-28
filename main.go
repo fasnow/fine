@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"embed"
+	_ "fine/backend" // 用于初始化，不可更改import先后顺序
 	"fine/backend/app"
-	"fine/backend/config/v2"
-	"fine/backend/db/service"
-	"fine/backend/event"
+	"fine/backend/config"
+	"fine/backend/constant"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/runtime"
 	"fine/backend/service/service/domain2ip"
 	"fine/backend/service/service/fofa"
+	"fine/backend/service/service/history"
 	"fine/backend/service/service/httpx"
 	"fine/backend/service/service/hunter"
 	"fine/backend/service/service/icp"
@@ -77,7 +79,7 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			mainApp.SetContext(ctx)
-			event.SetContext(ctx)
+			constant.SetContext(ctx)
 
 			//适配小屏
 			screens, _ := wailsRuntime.ScreenGetAll(ctx)
@@ -98,7 +100,7 @@ func main() {
 		Bind: []interface{}{
 			mainApp,
 			config.GlobalConfig,
-			event.Events,
+			constant.Events,
 			runtime.NewRuntime(mainApp),
 			runtime.NewPath(),
 			httpx.NewHttpxBridge(mainApp),
@@ -108,9 +110,9 @@ func main() {
 			hunter.NewHunterBridge(mainApp),
 			quake.NewQuakeBridge(mainApp),
 			zone.NewZoneBridge(mainApp),
+			history.NewHistoryBridge(mainApp),
 			wechat.NewWechatBridge(mainApp),
-			service.NewDownloadLogService(),
-			service.NewFofaDBService(),
+			repository.NewDownloadLogService(),
 			domain2ip.NewDomain2IPBridge(mainApp),
 			tianyancha.NewTianYanChaBridge(),
 		},
@@ -122,4 +124,5 @@ func main() {
 		logger.Info(err.Error())
 		println("Error:", err.Error())
 	}
+
 }

@@ -6,8 +6,24 @@ export function Fetch(arg1) {
   return window['go']['app']['App']['Fetch'](arg1);
 }
 
+export function GetAllConstants() {
+  return window['go']['app']['App']['GetAllConstants']();
+}
+
 export function GetContext() {
   return window['go']['app']['App']['GetContext']();
+}
+
+export function SaveProxy(arg1) {
+  return window['go']['app']['App']['SaveProxy'](arg1);
+}
+
+export function SaveQueryOnEnter(arg1) {
+  return window['go']['app']['App']['SaveQueryOnEnter'](arg1);
+}
+
+export function SaveWechat(arg1) {
+  return window['go']['app']['App']['SaveWechat'](arg1);
 }
 
 export function SetContext(arg1) {

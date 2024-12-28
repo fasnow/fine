@@ -17,10 +17,11 @@ import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
 import {Export,Query} from "../../wailsjs/go/icp/Bridge";
 import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {icp, zone} from "../../wailsjs/go/models";
+import {icp} from "../../wailsjs/go/models";
 import {RootState} from "@/store/store";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import TabsV2 from "@/component/TabsV2";
+import Candidate, {ItemType} from "@/component/Candidate";
+import {FindByPartialKey} from "../../wailsjs/go/history/Bridge";
 
 let selectedRow: { item: PageDataType | undefined, rowIndex: number | undefined, colKey: string } = {
     item: undefined,
@@ -98,7 +99,6 @@ const TabContent: React.FC = () => {
     ];
     const [columns, setColumns] = useState<ColumnsType<PageDataType>>(defaultColumns)
     const pageSizeOptions = [40, 80, 100]
-    const [input, setInput] = useState<string>("")
     const [inputCache, setInputCache] = useState<string>("")
     const [total, setTotal] = useState<number>(0)
     const [currentPageNum, setCurrentPageNum] = useState<number>(1)
@@ -111,22 +111,10 @@ const TabContent: React.FC = () => {
     const [serviceTypeCache, setServiceTypeCache] = useState<string>(serviceType)
     const pageIDMap = useRef<{ [key: number]: number }>({})
     const [pageData, setPageData] = useState<PageDataType[]>([])
-    const allowEnterPress = useSelector((state: RootState) => state.config.config.QueryOnEnter.icp)
+    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.icp)
     const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 195)
-
-    useEffect(() => {
-        window.addEventListener("resize", () => {
-            setTableScrollHeight(window.innerHeight - 195)
-        })
-        GetAllEvents().then(
-            result=>{
-                EventsOn(String(result.hasNewIcpDownloadItem),()=>{
-                    setDisable(false)
-                    setIsExporting(false)
-                })
-            }
-        )
-    }, [])
+    const event = useSelector((state: RootState) => state.app.global.event)
+    const history = useSelector((state: RootState) => state.app.global.history)
 
     const copyCell = (value: string | number | boolean) => {
         if (!value) {
@@ -136,14 +124,13 @@ const TabContent: React.FC = () => {
         messageApi.success("复制成功", 0.5)
     }
 
-    const preHandleQuery = async () => {
-        const tmpInput = input.trim()
-        if (tmpInput === "") {
+    const preHandleQuery = async (v:string) => {
+        if (v === "") {
             return
         }
-        setInputCache(tmpInput)
+        setInputCache(v)
         setServiceTypeCache(serviceType)
-        handleNewQuery(0,tmpInput, currentPageSize)
+        handleNewQuery(0,v, currentPageSize)
     }
 
     async function handleNewQuery(taskID:number,unitName: string, pageSize: number) {
@@ -281,92 +268,156 @@ const TabContent: React.FC = () => {
             colKey:""
         }
     };
-    return (<Flex vertical>
-        {contextHolder}
-        <Flex vertical align={"center"}>
-            <Space.Compact size={"small"}>
-                <Select
-                    onChange={(value)=>{
-                        setServiceType(value)
-                    }}
-                    defaultValue="1"
-                    options={[
-                        {value: '1',label: '网站',},
-                        {value: '6',label: 'APP',},
-                        {value: '7',label: '小程序',},
-                        {value: '8',label: '快应用',},
-                    ]}
-                    style={{width:100}}
-                />
-                <Input
-                    style={{ width: "600px" }}
-                    allowClear
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onPressEnter={()=> {
-                        if(!allowEnterPress)return
-                        preHandleQuery()
-                    }}
-                />
-                <Space.Compact >
-                    <Button  size="small" icon={<SearchOutlined />} onClick={() => preHandleQuery()} />
-                </Space.Compact>
-            </Space.Compact>
-            <span style={{ textAlign: 'center' }}>ICP备案查询：请输入单位名称或域名或备案号查询，请勿使用子域名或者带http://www等字符的网址查询</span>
-        </Flex>
-        <ContextMenu
-            items={menuItems}
-            onItemClick={
-            (key: string) => {
-                handleMenuItemClick(key)
-            }
-        }
-            hidden={pageData.length === 0}
-        >
-            <Table
-                // locale={{ emptyText: "暂无数据" }}
-                showSorterTooltip={false}
-                virtual
-                scroll={{ y: tableScrollHeight,x: '100%', scrollToFirstRowOnChange: true }}
-                bordered
-                columns={getMergeColumns()}
-                components={{
-                    header: {
-                        cell: ResizableTitle,
-                    },
+    return (<Flex vertical justify={'center'} align={"center"}>
+        <Candidate
+            size={"small"}
+            style={{width:600}}
+            placeholder='Search...'
+            allowClear
+            onPressEnter={(v)=> {
+                if(!allowEnterPress)return
+                preHandleQuery(v)
+            }}
+            onSearch={(v) => preHandleQuery(v)}
+            items={[
+                {
+                    fetch:async (v) => {
+                        try {
+                            // @ts-ignore
+                            const response = await FindByPartialKey(history.icp,!v?"":v.toString());
+                            const a: ItemType[] = response?.map(item => {
+                                const t:ItemType={
+                                    value: item,
+                                    label: item,
+                                    data: item
+                                }
+                                return t;
+                            });
+                            return a;
+                        } catch (e) {
+                            errorNotification("错误", String(e));
+                            return []; // 如果出现错误，返回空数组，避免组件出现异常
+                        }
+                    }
+                }
+            ]}
+            addonBefore={<Select
+                onChange={(value)=>{
+                    setServiceType(value)
                 }}
-                dataSource={pageData}
-                loading={loading}
-                size="small"
-                pagination={false}
-                footer={() => <div style={{ height:'100%', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Pagination
-                        showQuickJumper
-                        showSizeChanger
-                        total={total}
-                        pageSizeOptions={pageSizeOptions}
-                        defaultPageSize={pageSizeOptions[0]}
-                        defaultCurrent={1}
-                        current={currentPageNum}
-                        showTotal={(total) => `${total} items`}
-                        size="small"
-                        onChange={(page, size) => handlePaginationChange(page, size)}
-                    />
-                    <Button
-                        disabled={disable}
-                        size="small"
-                        onClick={async () => {
-                            exportData()
-                        }}
-                        icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}
-                    >
-                        {isExporting ? "正在导出" : "导出结果"}
-                    </Button>
-                </div>}
-                sticky
-                rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
-            />
-        </ContextMenu>
+                defaultValue="1"
+                options={[
+                    {value: '1',label: '网站',},
+                    {value: '6',label: 'APP',},
+                    {value: '7',label: '小程序',},
+                    {value: '8',label: '快应用',},
+                ]}
+                style={{minWidth:85}}
+            />}
+        />
+        {/*{contextHolder}*/}
+        {/*<Flex vertical justify={'center'} align={"center"}>*/}
+        {/*    <Candidate*/}
+        {/*        size={"small"}*/}
+        {/*        style={{width:600}}*/}
+        {/*        placeholder='Search...'*/}
+        {/*        allowClear*/}
+        {/*        onPressEnter={(v)=> {*/}
+        {/*            if(!allowEnterPress)return*/}
+        {/*            preHandleQuery(v)*/}
+        {/*        }}*/}
+        {/*        onSearch={(v) => preHandleQuery(v)}*/}
+        {/*        items={[*/}
+        {/*            {*/}
+        {/*                fetch:async (v) => {*/}
+        {/*                    try {*/}
+        {/*                        // @ts-ignore*/}
+        {/*                        const response = await FindByPartialKey(history.icp,!v?"":v.toString());*/}
+        {/*                        const a: ItemType[] = response?.map(item => {*/}
+        {/*                            const t:ItemType={*/}
+        {/*                                value: item,*/}
+        {/*                                label: item,*/}
+        {/*                                data: item*/}
+        {/*                            }*/}
+        {/*                            return t;*/}
+        {/*                        });*/}
+        {/*                        return a;*/}
+        {/*                    } catch (e) {*/}
+        {/*                        errorNotification("错误", String(e));*/}
+        {/*                        return []; // 如果出现错误，返回空数组，避免组件出现异常*/}
+        {/*                    }*/}
+        {/*                }*/}
+        {/*            }*/}
+        {/*        ]}*/}
+        {/*        addonBefore={<Select*/}
+        {/*            onChange={(value)=>{*/}
+        {/*                setServiceType(value)*/}
+        {/*            }}*/}
+        {/*            defaultValue="1"*/}
+        {/*            options={[*/}
+        {/*                {value: '1',label: '网站',},*/}
+        {/*                {value: '6',label: 'APP',},*/}
+        {/*                {value: '7',label: '小程序',},*/}
+        {/*                {value: '8',label: '快应用',},*/}
+        {/*            ]}*/}
+        {/*            style={{minWidth:85}}*/}
+        {/*        />}*/}
+        {/*    />*/}
+        {/*    ICP备案查询：请输入单位名称或域名或备案号查询，请勿使用子域名或者带http://www等字符的网址查询*/}
+        {/*</Flex>*/}
+        {/*<ContextMenu*/}
+        {/*    items={menuItems}*/}
+        {/*    onItemClick={*/}
+        {/*    (key: string) => {*/}
+        {/*        handleMenuItemClick(key)*/}
+        {/*    }*/}
+        {/*}*/}
+        {/*    hidden={pageData.length === 0}*/}
+        {/*>*/}
+        {/*    <Table*/}
+        {/*        // locale={{ emptyText: "暂无数据" }}*/}
+        {/*        showSorterTooltip={false}*/}
+        {/*        virtual*/}
+        {/*        scroll={{ y: tableScrollHeight,x: '100%', scrollToFirstRowOnChange: true }}*/}
+        {/*        bordered*/}
+        {/*        columns={getMergeColumns()}*/}
+        {/*        components={{*/}
+        {/*            header: {*/}
+        {/*                cell: ResizableTitle,*/}
+        {/*            },*/}
+        {/*        }}*/}
+        {/*        dataSource={pageData}*/}
+        {/*        loading={loading}*/}
+        {/*        size="small"*/}
+        {/*        pagination={false}*/}
+        {/*        footer={() => <div style={{ height:'100%', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>*/}
+        {/*            <Pagination*/}
+        {/*                showQuickJumper*/}
+        {/*                showSizeChanger*/}
+        {/*                total={total}*/}
+        {/*                pageSizeOptions={pageSizeOptions}*/}
+        {/*                defaultPageSize={pageSizeOptions[0]}*/}
+        {/*                defaultCurrent={1}*/}
+        {/*                current={currentPageNum}*/}
+        {/*                showTotal={(total) => `${total} items`}*/}
+        {/*                size="small"*/}
+        {/*                onChange={(page, size) => handlePaginationChange(page, size)}*/}
+        {/*            />*/}
+        {/*            <Button*/}
+        {/*                disabled={disable}*/}
+        {/*                size="small"*/}
+        {/*                onClick={async () => {*/}
+        {/*                    exportData()*/}
+        {/*                }}*/}
+        {/*                icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}*/}
+        {/*            >*/}
+        {/*                {isExporting ? "正在导出" : "导出结果"}*/}
+        {/*            </Button>*/}
+        {/*        </div>}*/}
+        {/*        sticky*/}
+        {/*        rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】*/}
+        {/*    />*/}
+        {/*</ContextMenu>*/}
     </Flex>)
 }
 

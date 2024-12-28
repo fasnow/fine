@@ -6,6 +6,10 @@ export function Run(arg1, arg2, arg3) {
   return window['go']['httpx']['Bridge']['Run'](arg1, arg2, arg3);
 }
 
+export function SetConfig(arg1, arg2) {
+  return window['go']['httpx']['Bridge']['SetConfig'](arg1, arg2);
+}
+
 export function Stop(arg1) {
   return window['go']['httpx']['Bridge']['Stop'](arg1);
 }

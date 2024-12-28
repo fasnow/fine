@@ -2,7 +2,7 @@ package quake
 
 import (
 	"fine/backend/app"
-	"fine/backend/config/v2"
+	"fine/backend/config"
 	"fmt"
 	"testing"
 )

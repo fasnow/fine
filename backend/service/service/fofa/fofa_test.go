@@ -2,7 +2,7 @@ package fofa
 
 import (
 	"fine/backend/app"
-	"fine/backend/config/v2"
+	"fine/backend/config"
 	"fmt"
 	"testing"
 )

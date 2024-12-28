@@ -3,17 +3,16 @@ import {ConfigProvider, Layout as Lay, Spin, Tabs, TabsProps} from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import locale from 'antd/locale/zh_CN';
-import {Get} from "../wailsjs/go/config/Config";
 import {errorNotification} from "@/component/Notification";
 import Bar from "@/pages/Bar";
-import Fofa from "@/pages/Fofa";
+import Fofa from "@/pages/FofaV2";
 import {Setting} from "@/pages/Setting";
 import IP138 from "@/pages/Ip138";
 import Icp from "@/pages/Icp";
-import Hunter from "@/pages/Hunter";
-import Quake from "@/pages/Quake";
+import Hunter from "@/pages/HunterV2";
+import Quake from "@/pages/QuakeV2";
 import {useDispatch} from "react-redux";
-import {configActions} from "@/store/store";
+import {appActions} from "@/store/store";
 import Zone from "@/pages/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
@@ -23,6 +22,8 @@ import {CssConfig} from "@/pages/Constants";
 import TianYanCha from "@/pages/TianYanCha";
 import { createStyles } from 'antd-style';
 import {Test} from "@/pages/Test";
+import {GetAllConstants} from "../wailsjs/go/app/App";
+import {sleep} from "@/util/util";
 
 const { Header } = Lay;
 
@@ -56,14 +57,16 @@ const App: React.FC = () => {
     }, [])
 
     useEffect(() => {
-        Get().then(
-            config=> {
-                dispatch(configActions.setConfig(config))
+        (async () => {
+            try {
+                const constant = await GetAllConstants()
+                console.log(constant)
+                dispatch(appActions.setGlobal(constant))
                 setLoading(false)
+            } catch (e) {
+                errorNotification("错误", "初始化失败: " + e)
             }
-        ).catch(
-            e=>errorNotification("错误","无法获取配置文件: "+e)
-        )
+        })()
     }, []);
 
     return (
@@ -130,29 +133,6 @@ const App: React.FC = () => {
 
 export default  App
 
-const item2: TabsProps['items'] = [
-    {
-        key: 'Fofa',
-        label: 'Fofa',
-        children: <Fofa/>,
-    },
-    {
-        key: 'Hunter',
-        label: 'Hunter',
-        children: <div style={{display:"flow"}}><Hunter/></div>,
-    },
-    {
-        key: 'Quake',
-        label: 'Quake',
-        children: <Quake/>,
-    },
-    {
-        key: '0.zone',
-        label: '0.zone',
-        children: <Zone/>,
-    },
-];
-
 const items: TabsProps['items'] = [
     {
         key: '设置',
@@ -162,10 +142,15 @@ const items: TabsProps['items'] = [
     {
         key: '网络资产测绘',
         label: '网络资产测绘',
-        children: <Tabs items={item2} tabBarStyle={{
-            backgroundColor:'#F2F2F2FF',
-            padding: "0 10px",
-            }}/>,
+        children: <Tabs
+            items={[
+                {key: 'Fofa',label: 'Fofa',children: <Fofa/>,},
+                {key: 'Hunter',label: 'Hunter',children: <Hunter/>,},
+                {key: 'Quake',label: 'Quake',children: <Quake/>,},
+                // {key: '0.zone',label: '0.zone',children: <Zone/>,}
+            ]}
+            tabBarStyle={{backgroundColor: '#F2F2F2FF', padding : "0 10px",}}
+        />,
     },
     {
         key: 'ICP',

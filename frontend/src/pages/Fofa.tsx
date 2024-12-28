@@ -34,7 +34,7 @@ import {errorNotification} from '@/component/Notification';
 import {QUERY_FIRST} from '@/component/type';
 import {ColumnGroupType, ColumnsType, ColumnType} from 'antd/es/table';
 import ColumnsFilter, {CheckboxValueType, DataSourceItemType} from '@/component/ColumnFilter';
-import {RootState, configActions, userActions} from '@/store/store';
+import {RootState, appActions, userActions} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
@@ -54,10 +54,11 @@ import {toUint8Array} from "js-base64";
 import {copy} from "@/util/util";
 import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
 import {TargetKey} from "@/pages/Constants";
 import TabLabel from "@/component/TabLabel";
 import type {Tab} from "rc-tabs/lib/interface"
+import Candidate, {ItemType} from "@/component/Candidate";
+import {FindByPartialKey} from "../../wailsjs/go/history/Bridge";
 
 type InputRefType = GetRef<typeof Input>; // BaseSelectRef
 
@@ -227,17 +228,14 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [maxPage, setMaxPage] = useState<number>(0)
         const [disable, setDisable] = useState<boolean>(false)
         const dispatch = useDispatch()
+        const event = useSelector((state:RootState) => state.app.global.event)
 
         useEffect(() => {
-            GetAllEvents().then(
-                result => {
-                    EventsOn(String(result.hasNewFofaDownloadItem), () => {
-                        updateRestToken()
-                        setIsExporting(false)
-                        setDisable(false)
-                    })
-                }
-            )
+            EventsOn(String(event?.hasNewFofaDownloadItem), () => {
+                updateRestToken()
+                setIsExporting(false)
+                setDisable(false)
+            })
         }, []);
 
         useEffect(() => {
@@ -819,7 +817,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const [openContextMenu, setOpenContextMenu] = useState(false);
         const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 200)
         const [menuItems, setMenuItems] = useState(defaultMenuItems)
-        const allowEnterPress = useSelector((state:RootState) =>state.config.config.QueryOnEnter.assets)
+        const allowEnterPress = useSelector((state:RootState) =>state.app.global.config?.QueryOnEnter.assets)
 
         useEffect(() => {
             window.addEventListener("resize", () => {
@@ -1112,7 +1110,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             }
         }
 
-        const iconSearchPanel = (<>
+        const iconSearchPanel = (
             <Popover
                 placement={"bottom"}
                 style={{width: 500}}
@@ -1167,8 +1165,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 >
                     <Button size={"small"} type={"text"} icon={<Dots/>}/>
                 </Popover>
-            </Popover>
-        </>)
+            </Popover>)
 
         const tableFooter = () => (
             <div style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -1189,21 +1186,43 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
         return <div >
             <div style={{display: "flex", justifyContent: 'center', alignItems: "center"}}>
-                <Input
-                    ref={inputRef}
-                    style={{width: "600px"}}
-                    size="small"
-                    allowClear
-                    value={input}
-                    onChange={(e) => this.setState({input: e.target.value})}
-                    placeholder='Search...'
-                    suffix={iconSearchPanel}
-                    onPressEnter={()=> {
-                        if(!allowEnterPress)return
-                        preHandleFirstQuery()
+                {/*<Input*/}
+                {/*    ref={inputRef}*/}
+                {/*    style={{width: "600px"}}*/}
+                {/*    size="small"*/}
+                {/*    allowClear*/}
+                {/*    value={input}*/}
+                {/*    onChange={(e) => this.setState({input: e.target.value})}*/}
+                {/*    placeholder='Search...'*/}
+                {/*    suffix={iconSearchPanel}*/}
+                {/*    onPressEnter={()=> {*/}
+                {/*        if(!allowEnterPress)return*/}
+                {/*        preHandleFirstQuery()*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Button type='text' size="small" icon={<SearchOutlined/>} onClick={preHandleFirstQuery}/>*/}
+                <Candidate
+                    onSelectItem={(item)=>{
+                        return item.data
+                    }}
+                    items={async (v) => {
+                        try {
+                            const response = await FindByPartialKey(0,!v?"":v.toString());
+                            const a: ItemType[] = response?.map(item => {
+                                const t:ItemType={
+                                    value: item,
+                                    label: item,
+                                    data: item
+                                }
+                                return t;
+                            });
+                            return a;
+                        } catch (e) {
+                            errorNotification("错误", String(e));
+                            return []; // 如果出现错误，返回空数组，避免组件出现异常
+                        }
                     }}
                 />
-                <Button type='text' size="small" icon={<SearchOutlined/>} onClick={preHandleFirstQuery}/>
                 <Help/>
                 <ColumnsFilter
                     dataSource={columnFilterDataSource}
@@ -1483,7 +1502,7 @@ const Help: React.FC = () => {
             footer={null}
             onCancel={() => setOpen(false)}
             destroyOnClose={true}
-            bodyStyle={{height: window.innerHeight - 200, overflowY: "scroll"}}
+            styles={{body:{height: window.innerHeight - 200, overflowY: "scroll"}}}
         >
             <Space direction="vertical">
                 <span style={{color: "red"}}>【查询字段】与【导出字段】在"列展示"中设置，设置后需要重新搜索</span>
@@ -1507,7 +1526,7 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState)=>state.config.config)
+    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
     const [key, setKey] = useState("")
 
     useEffect(()=>{
@@ -1519,7 +1538,7 @@ const AuthSetting: React.FC = () => {
         SetAuth(key).then(
             ()=>{
                 const t = { ...cfg, Fofa: { ...cfg.Fofa, token: key } } as config.Config;
-                dispatch(configActions.setConfig(t))
+                dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
             }

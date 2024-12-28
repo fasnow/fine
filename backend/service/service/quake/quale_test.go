@@ -1,15 +1,15 @@
 package quake
 
 import (
-	"fine/backend/db"
-	"fine/backend/db/service"
+	"fine/backend/database"
+	"fine/backend/database/repository"
 	"fmt"
 	"github.com/yitter/idgenerator-go/idgen"
 	"testing"
 )
 
 func TestQuakeDBService_GetByTaskID(t *testing.T) {
-	db.SetDBAbsFilepath("data.db")
+	database.Init("data.db")
 	client := NewClient("76b63b88-83c5-49ed-bcf5-9c340a75ac39")
 	req := NewGetRealtimeDataBuilder().
 		Query("baidu.com").
@@ -21,7 +21,7 @@ func TestQuakeDBService_GetByTaskID(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	c := service.NewQuakeDBService()
+	c := repository.NewQuakeDBService()
 	id := idgen.NextId()
 	err = c.BatchInsert(id, result.Items)
 	if err != nil {

@@ -1,5 +1,8 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
-import {config, fofa, quake} from "../../wailsjs/go/models";
+import {app, config, constant, fofa, quake} from "../../wailsjs/go/models";
+import Status = constant.Status;
+import Event = constant.Event;
+import History = constant.History;
 
 export type HunterUserType = {
     restToken: number
@@ -96,18 +99,36 @@ const initialQuakeUserState: QuakeUserType = {
     role: [],
 }
 
+const t = new app.Constant()
 
-const configSlice = createSlice({
+const {convertValues, ...rest} = t // 把不能序列化的去除掉
+
+const appSlice = createSlice({
     //切片名称
-    name: "config",
+    name: "app",
     //初始值
     initialState: {
-        config: new config.Config(),
+        global: rest as app.Constant,
     } ,
     //方法
     reducers: {
-        setConfig: (state, action: { payload:config.Config, type: string }) => {
-            state.config = action.payload
+        setGlobal: (state, action) => {
+            state.global.config = action.payload.config
+            state.global.event = action.payload.event
+            state.global.status = action.payload.status
+            state.global.history = action.payload.history
+        },
+        setEvent: (state, action) => {
+            state.global.event = action.payload
+        },
+        setStatus: (state, action) => {
+            state.global.status = action.payload
+        },
+        setHistory: (state, action) => {
+            state.global.history = action.payload
+        },
+        setConfig: (state, action) => {
+            state.global.config = action.payload
         },
     }
 })
@@ -123,35 +144,26 @@ const userSlice = createSlice({
     },
     //方法
     reducers: {
-        setFofaUser: (state, action: {
-            payload: fofa.User,
-            type: string
-        }) => {
+        setFofaUser: (state, action) => {
             state.fofa = action.payload
         },
-        setHunterUser: (state, action: {
-            payload: HunterUserType,
-            type: string
-        }) => {
+        setHunterUser: (state, action) => {
             state.hunter = action.payload
         },
-        setQuakeUser: (state, action: {
-            payload: quake.User,
-            type: string
-        }) => {
+        setQuakeUser: (state, action) => {
             state.quake = action.payload
         },
     }
 })
 
-export const configActions = configSlice.actions
+export const appActions = appSlice.actions
 
 export const userActions = userSlice.actions
 
 const store = configureStore({
     reducer: {
-        config: configSlice.reducer,
-        user:userSlice.reducer,//主要用于存储剩余token
+        app: appSlice.reducer,
+        user: userSlice.reducer,//主要用于存储剩余token
     }
 })
 

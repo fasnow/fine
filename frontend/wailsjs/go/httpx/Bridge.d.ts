@@ -3,4 +3,6 @@
 
 export function Run(arg1:string,arg2:string,arg3:string):Promise<number>;
 
+export function SetConfig(arg1:string,arg2:string):Promise<void>;
+
 export function Stop(arg1:number):Promise<void>;

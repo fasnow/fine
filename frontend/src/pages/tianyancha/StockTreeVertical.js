@@ -107,8 +107,8 @@ class StockTreeVertical {
     // 宿主元素的DOMRect
     let domRect = dom.getBoundingClientRect()
     // svg的宽度和高度
-    this.config.width = domRect.width
-    this.config.height = domRect.height
+    this.app.width = domRect.width
+    this.app.height = domRect.height
 
     let oldSvg = d3.select('svg')
     // 如果宿主元素中包含svg标签了，那么则删除这个标签，再重新生成一个
@@ -121,15 +121,15 @@ class StockTreeVertical {
       .attr('viewBox', () => {
         let parentsLength = this.originTreeData.parents ? this.originTreeData.parents.length : 0
         return [
-          -this.config.width / 2,
+          -this.app.width / 2,
           // 如果有父节点，则根节点居中，否则根节点上浮一段距离
-          parentsLength > 0 ? -this.config.height / 2 : -this.config.height / 3,
-          this.config.width,
-          this.config.height
+          parentsLength > 0 ? -this.app.height / 2 : -this.app.height / 3,
+          this.app.width,
+          this.app.height
         ]
       })
-      .attr('width', this.config.width)
-      .attr('height', this.config.height)
+      .attr('width', this.app.width)
+      .attr('height', this.app.height)
       .style('user-select', 'none')
       .style('cursor', 'move')
 
@@ -158,7 +158,7 @@ class StockTreeVertical {
     // 节点集合
     this.gNodes = gAll.append('g').attr('id', 'nodeGroup')
     // 设置好节点之间距离的tree方法
-    this.tree = d3.tree().nodeSize([this.config.dx, this.config.dy])
+    this.tree = d3.tree().nodeSize([this.app.dx, this.app.dy])
 
     this.rootOfDown = d3.hierarchy(this.originTreeData, (d) => d.children)
     this.rootOfUp = d3.hierarchy(this.originTreeData, (d) => d.parents)
@@ -297,25 +297,25 @@ class StockTreeVertical {
         if (d.depth === 0) {
           return (d.data.name.length + 4) * 16
         }
-        return this.config.rectWidth
+        return this.app.rectWidth
       })
       .attr('height', (d) => {
         if (d.depth === 0) {
-          return this.config.rootRectHeight
+          return this.app.rootRectHeight
         }
-        return this.config.rectHeight
+        return this.app.rectHeight
       })
       .attr('x', (d) => {
         if (d.depth === 0) {
           return (-(d.data.name.length + 4) * 16) / 2
         }
-        return -this.config.rectWidth / 2
+        return -this.app.rectWidth / 2
       })
       .attr('y', (d) => {
         if (d.depth === 0) {
-          return -this.config.rootRectHeight / 2
+          return -this.app.rootRectHeight / 2
         }
-        return -this.config.rectHeight / 2
+        return -this.app.rectHeight / 2
       })
       .attr('stroke-width', 1)
       .attr('stroke', (d) => {
@@ -341,25 +341,25 @@ class StockTreeVertical {
         if (d.depth === 0) {
           return (d.data.name.length + 4) * 16
         }
-        return this.config.rectWidth
+        return this.app.rectWidth
       })
       .attr('height', (d) => {
         if (d.depth === 0) {
-          return this.config.rootRectHeight
+          return this.app.rootRectHeight
         }
-        return this.config.rectHeight
+        return this.app.rectHeight
       })
       .attr('x', (d) => {
         if (d.depth === 0) {
           return (-(d.data.name.length + 4) * 16) / 2
         }
-        return -this.config.rectWidth / 2
+        return -this.app.rectWidth / 2
       })
       .attr('y', (d) => {
         if (d.depth === 0) {
-          return -this.config.rootRectHeight / 2
+          return -this.app.rootRectHeight / 2
         }
-        return -this.config.rectHeight / 2
+        return -this.app.rectHeight / 2
       })
       .append('xhtml:div')
       .style('font-size', (d) => {
@@ -379,7 +379,7 @@ class StockTreeVertical {
       })
       .style('line-height', (d) => {
         if (d.depth === 0) {
-          return `${this.config.rootRectHeight}px`
+          return `${this.app.rootRectHeight}px`
         } else {
           return 2
         }
@@ -424,7 +424,7 @@ class StockTreeVertical {
       .attr('fill', (d) => {
         return that.nodeColorList[1].textColor
       })
-      .attr('x', -this.config.rectWidth / 2 + 15)
+      .attr('x', -this.app.rectWidth / 2 + 15)
       .style('font-size', 12)
       .text('持股比例')
 
@@ -434,7 +434,7 @@ class StockTreeVertical {
         return that.nodeColorList[1].textColor
       })
       .attr('text-anchor', 'end')
-      .attr('x', this.config.rectWidth / 2 - 12)
+      .attr('x', this.app.rectWidth / 2 - 12)
       // .attr('y', 2)
       .style('font-size', 13)
       .text((d) => {
@@ -443,11 +443,11 @@ class StockTreeVertical {
         }
       })
 
-    const percentBarWidth = this.config.rectWidth - 20
+    const percentBarWidth = this.app.rectWidth - 20
     holdingPercentG
       .append('rect')
       .attr('fill', 'rgba(0,0,0,0.1)')
-      .attr('x', -this.config.rectWidth / 2 + 10)
+      .attr('x', -this.app.rectWidth / 2 + 10)
       .attr('y', 6)
       .attr('width', percentBarWidth)
       .attr('height', 6)
@@ -461,7 +461,7 @@ class StockTreeVertical {
     holdingPercentG
       .append('rect')
       .attr('fill', '#95C3FF')
-      .attr('x', -this.config.rectWidth / 2 + 10)
+      .attr('x', -this.app.rectWidth / 2 + 10)
       .attr('y', 6)
       .attr('width', (d) => {
         if (d.data.percent) {
@@ -481,7 +481,7 @@ class StockTreeVertical {
       .append('g')
       .attr('class', 'expandBtn')
       .attr('transform', () => {
-        return `translate(${0},${this.config.rectHeight / 2})`
+        return `translate(${0},${this.app.rectHeight / 2})`
       })
       .style('display', (d) => {
         // 如果是根节点，不显示
@@ -631,25 +631,25 @@ class StockTreeVertical {
         if (d.depth === 0) {
           return (d.data.name.length + 4) * 16
         }
-        return this.config.rectWidth
+        return this.app.rectWidth
       })
       .attr('height', (d) => {
         if (d.depth === 0) {
-          return this.config.rootRectHeight
+          return this.app.rootRectHeight
         }
-        return this.config.rectHeight
+        return this.app.rectHeight
       })
       .attr('x', (d) => {
         if (d.depth === 0) {
           return (-(d.data.name.length + 4) * 16) / 2
         }
-        return -this.config.rectWidth / 2
+        return -this.app.rectWidth / 2
       })
       .attr('y', (d) => {
         if (d.depth === 0) {
-          return -this.config.rootRectHeight / 2
+          return -this.app.rootRectHeight / 2
         }
-        return -this.config.rectHeight / 2
+        return -this.app.rectHeight / 2
       })
       .attr('stroke-width', 1)
       .attr('stroke', (d) => {
@@ -675,25 +675,25 @@ class StockTreeVertical {
         if (d.depth === 0) {
           return (d.data.name.length + 4) * 16
         }
-        return this.config.rectWidth
+        return this.app.rectWidth
       })
       .attr('height', (d) => {
         if (d.depth === 0) {
-          return this.config.rootRectHeight
+          return this.app.rootRectHeight
         }
-        return this.config.rectHeight
+        return this.app.rectHeight
       })
       .attr('x', (d) => {
         if (d.depth === 0) {
           return (-(d.data.name.length + 4) * 16) / 2
         }
-        return -this.config.rectWidth / 2
+        return -this.app.rectWidth / 2
       })
       .attr('y', (d) => {
         if (d.depth === 0) {
-          return -this.config.rootRectHeight / 2
+          return -this.app.rootRectHeight / 2
         }
-        return -this.config.rectHeight / 2 + 5
+        return -this.app.rectHeight / 2 + 5
       })
       .append('xhtml:div')
       .style('font-size', (d) => {
@@ -713,7 +713,7 @@ class StockTreeVertical {
       })
       .style('line-height', (d) => {
         if (d.depth === 0) {
-          return `${this.config.rootRectHeight}px`
+          return `${this.app.rootRectHeight}px`
         } else {
           return 2
         }
@@ -760,7 +760,7 @@ class StockTreeVertical {
           return that.nodeColorList[2].textColor
         }
       })
-      .attr('x', -this.config.rectWidth / 2 + 12)
+      .attr('x', -this.app.rectWidth / 2 + 12)
       .style('font-size', 12)
       .text('持股比例')
 
@@ -772,7 +772,7 @@ class StockTreeVertical {
         }
       })
       .attr('text-anchor', 'end')
-      .attr('x', this.config.rectWidth / 2 - 12)
+      .attr('x', this.app.rectWidth / 2 - 12)
       // .attr('y', 2)
       .style('font-size', 13)
       .text((d) => {
@@ -784,7 +784,7 @@ class StockTreeVertical {
     holdingPercentG2
       .append('rect')
       .attr('fill', 'rgba(0,0,0,0.1)')
-      .attr('x', -this.config.rectWidth / 2 + 10)
+      .attr('x', -this.app.rectWidth / 2 + 10)
       .attr('y', 6)
       .attr('width', percentBarWidth)
       .attr('height', 6)
@@ -800,7 +800,7 @@ class StockTreeVertical {
       .attr('fill', () => {
         return that.nodeColorList[2].percentBarColor
       })
-      .attr('x', -this.config.rectWidth / 2 + 10)
+      .attr('x', -this.app.rectWidth / 2 + 10)
       .attr('y', 6)
       .attr('width', (d) => {
         if (d.data.percent) {
@@ -820,7 +820,7 @@ class StockTreeVertical {
       .append('g')
       .attr('class', 'expandBtn')
       .attr('transform', () => {
-        return `translate(${0},-${this.config.rectHeight / 2 + 5})`
+        return `translate(${0},-${this.app.rectHeight / 2 + 5})`
       })
       .style('display', (d) => {
         // 如果是根节点，不显示
@@ -1015,9 +1015,9 @@ class StockTreeVertical {
     let upTreeWidth_base = sortedNodesOfUp.at(-1).x - sortedNodesOfUp.at(0).x
 
     // 边界的宽度肯定不能直接等于两边节点之间的距离，还得加上留白的地方
-    borderWidth = Math.max(downTreeWidth_base, upTreeWidth_base) + 3 * this.config.rectWidth
-    downSectionHeight = downTreeHeight_base + 2 * this.config.rectHeight
-    upSectionHeight = upTreeHeight_base + 2 * this.config.rectHeight
+    borderWidth = Math.max(downTreeWidth_base, upTreeWidth_base) + 3 * this.app.rectWidth
+    downSectionHeight = downTreeHeight_base + 2 * this.app.rectHeight
+    upSectionHeight = upTreeHeight_base + 2 * this.app.rectHeight
 
     return {
       borderWidth,

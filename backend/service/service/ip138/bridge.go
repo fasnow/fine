@@ -2,16 +2,16 @@ package ip138
 
 import (
 	"fine/backend/app"
-	"fine/backend/config/v2"
-	"fine/backend/db/service"
+	"fine/backend/config"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 )
 
 type Bridge struct {
 	app         *app.App
 	ip138       *IP138
-	queryLog    *service.ICPQueryLog
-	downloadLog *service.DownloadLogService
+	queryLog    *repository.ICPQueryLog
+	downloadLog *repository.DownloadLogService
 }
 
 func NewIP138Bridge(app *app.App) *Bridge {
@@ -19,8 +19,8 @@ func NewIP138Bridge(app *app.App) *Bridge {
 	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		ip138:       tt,
-		queryLog:    service.NewICPQueryLog(),
-		downloadLog: service.NewDownloadLogService(),
+		queryLog:    repository.NewICPQueryLog(),
+		downloadLog: repository.NewDownloadLogService(),
 		app:         app,
 	}
 }

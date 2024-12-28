@@ -2,10 +2,11 @@ package fofa
 
 import (
 	"fine/backend/app"
-	"fine/backend/config/v2"
-	"fine/backend/db/models"
-	"fine/backend/db/service"
-	"fine/backend/event"
+	"fine/backend/config"
+	"fine/backend/constant"
+	"fine/backend/database"
+	"fine/backend/database/models"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/service/model/fofa"
 	service2 "fine/backend/service/service"
@@ -21,10 +22,10 @@ import (
 type Bridge struct {
 	app         *app.App
 	fofa        *Fofa
-	queryLog    *service.FOFAQueryLog
-	downloadLog *service.DownloadLogService
-	dataCache   *service.FofaDBService
-	cacheTotal  *service.CacheTotal
+	fofaRepo    repository.FofaRepository
+	downloadLog *repository.DownloadLogService
+	cacheTotal  *repository.CacheTotal
+	historyRepo repository.HistoryRepository
 }
 
 func NewFofaBridge(app *app.App) *Bridge {
@@ -32,11 +33,11 @@ func NewFofaBridge(app *app.App) *Bridge {
 	tt.UseProxyManager(config.ProxyManager)
 	return &Bridge{
 		fofa:        tt,
-		queryLog:    service.NewFOFAQueryLog(),
-		downloadLog: service.NewDownloadLogService(),
-		dataCache:   service.NewFofaDBService(),
-		cacheTotal:  service.NewCacheTotal(),
+		fofaRepo:    repository.NewFofaRepository(database.GetConnection()),
+		downloadLog: repository.NewDownloadLogService(),
+		cacheTotal:  repository.NewCacheTotal(),
 		app:         app,
+		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
 	}
 }
 
@@ -54,7 +55,7 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 	//获取缓存
 	total, q := r.cacheTotal.GetByTaskID(taskID)
 	if total != 0 {
-		cacheItems := r.dataCache.GetByTaskID(taskID)
+		cacheItems := r.fofaRepo.GetByTaskID(taskID)
 		queryResult.Query = q
 		queryResult.Total = total
 		queryResult.PageNum = int(page)
@@ -64,6 +65,14 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 			queryResult.Items = append(queryResult.Items, cacheItem.Item)
 		}
 		return queryResult, nil
+	}
+
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
 	}
 
 	//获取新数据
@@ -80,7 +89,7 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 		id := idgen.NextId()
 		if page == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = r.queryLog.Add(&models.FOFAQueryLog{
+			_ = r.fofaRepo.CreateQueryField(&models.FOFAQueryLog{
 				Query:  query,
 				Fields: fields,
 				Full:   full,
@@ -88,7 +97,7 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 			}, id)
 		}
 		r.cacheTotal.Add(id, result.Total, query)
-		_ = r.dataCache.BatchInsert(id, result.Items)
+		_ = r.fofaRepo.BatchInsert(id, result.Items)
 		queryResult.TaskID = id
 	}
 	queryResult.Result = result
@@ -96,7 +105,7 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields 
 }
 
 func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
-	queryLog, err := r.queryLog.GetByTaskID(taskID)
+	queryLog, err := r.fofaRepo.GetQueryFieldByTaskID(taskID)
 	if err != nil {
 		return errors.New("查询后再导出")
 	}
@@ -133,10 +142,10 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 				logger.Info(err.Error())
 				break
 			}
-			_ = r.dataCache.BatchInsert(exportDataTaskID, result.Items)
+			_ = r.fofaRepo.BatchInsert(exportDataTaskID, result.Items)
 			time.Sleep(config.GlobalConfig.Fofa.Interval)
 		}
-		cacheItems := r.dataCache.GetByTaskID(exportDataTaskID)
+		cacheItems := r.fofaRepo.GetByTaskID(exportDataTaskID)
 		exportItems := make([]*fofa.Item, 0)
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)
@@ -145,7 +154,7 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 			logger.Info(err.Error())
 			return
 		}
-		event.HasNewDownloadLogItemEventEmit(event.Events.HasNewFofaDownloadItem)
+		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNewFofaDownloadItem)
 	}()
 	return nil
 }

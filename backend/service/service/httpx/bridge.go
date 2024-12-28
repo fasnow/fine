@@ -3,7 +3,8 @@ package httpx
 import (
 	"bufio"
 	"fine/backend/app"
-	"fine/backend/event"
+	"fine/backend/config"
+	"fine/backend/constant"
 	"fine/backend/logger"
 	"fine/backend/runtime"
 	"fine/backend/utils"
@@ -65,7 +66,7 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			event.Emit(event.Events.HttpxOutput, map[string]any{
+			constant.Emit(constant.Events.HttpxOutput, map[string]any{
 				"taskID": taskID,
 				"data":   string(scanner.Bytes()),
 			})
@@ -74,7 +75,7 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			event.Emit(event.Events.HttpxOutput, map[string]any{
+			constant.Emit(constant.Events.HttpxOutput, map[string]any{
 				"taskID": taskID,
 				"data":   string(scanner.Bytes()),
 			})
@@ -87,7 +88,7 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 		if err != nil {
 			logger.Info(err.Error())
 		}
-		event.Emit(event.Events.HttpxOutputDone, map[string]any{
+		constant.Emit(constant.Events.HttpxOutputDone, map[string]any{
 			"taskID": taskID,
 			"data":   "",
 		})
@@ -111,6 +112,17 @@ func (r *Bridge) Stop(taskID int64) error {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func (r *Bridge) SetConfig(path, flags string) error {
+	config.GlobalConfig.Httpx.Flags = flags
+	config.GlobalConfig.Httpx.Path = path
+	err := config.Save()
+	if err != nil {
+		logger.Info(err)
+		return err
 	}
 	return nil
 }

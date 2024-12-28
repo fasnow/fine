@@ -3,7 +3,7 @@ package runtime
 import (
 	"encoding/base64"
 	"fine/backend/app"
-	"fine/backend/config/v2"
+	"fine/backend/config"
 	"fine/backend/proxy/v2"
 	"github.com/buger/jsonparser"
 	"github.com/pkg/errors"

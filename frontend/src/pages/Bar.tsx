@@ -33,13 +33,12 @@ import {
 } from "../../wailsjs/runtime";
 import {CheckUpdate, GetPlatform, OpenFile, OpenFolder, ShowItemInFolder} from "../../wailsjs/go/runtime/Runtime";
 import {errorNotification, infoNotification} from "@/component/Notification";
-import {Clear, GetByOffset, MarkAsDeleted} from "../../wailsjs/go/service/DownloadLogService";
-import {models} from "../../wailsjs/go/models";
+import {Clear, GetByOffset, MarkAsDeleted} from "../../wailsjs/go/repository/DownloadLogService";
+import {config, constant, models} from "../../wailsjs/go/models";
 import semver from "semver/preload";
-import {GetDataDir} from "../../wailsjs/go/config/Config";
 import DownloadLog = models.DownloadLog;
 import {Title} from "@/component/Title";
-import {GetAllEvents} from "../../wailsjs/go/event/Event";
+import Event = constant.Event;
 
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
@@ -124,22 +123,19 @@ class TitleBarOverlay extends React.Component {
 }
 
 const DownloadViewContent: React.FC = () => {
-
     const [data, setData] = useState<DownloadLog[]>([])
     const [total, setTotal] = useState<number>(0)
+    const event = useSelector((state: RootState) => state.app.global.event || new Event())
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
+
     useEffect(() => {
         loadMoreData()
-        GetAllEvents().then(
-            result => {
-                EventsOn(String(result.hasNewDownloadItem), function () {
-                    loadMoreData()
-                })
-            }
-        )
+        EventsOn(String(event.hasNewDownloadItem), function () {
+            loadMoreData()
+        })
     }, []);
     const openDataFolder = async () => {
-        const dir = await GetDataDir()
-        OpenFolder(dir).catch(
+        OpenFolder(cfg.DataDir).catch(
             err => errorNotification("错误", err)
         )
     }
@@ -418,7 +414,7 @@ const Update: React.FC = () => {
 }
 
 const Proxy: React.FC = () => {
-    const proxy = useSelector((state: RootState) => state.config.config.Proxy)
+    const proxy = useSelector((state: RootState) => state.app.global.config?.Proxy)
     const [url, setUrl] = useState<string>("")
     const [open, setOpen] = useState<boolean>(false)
     useEffect(() => {
@@ -483,14 +479,12 @@ const Proxy: React.FC = () => {
 
 const DownloadHistory: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
+    const event = useSelector((state: RootState) => state.app.global.event)
+
     useEffect(() => {
-        GetAllEvents().then(
-            result => {
-                EventsOn(String(result.hasNewDownloadItem), function () {
-                    setOpen(true)
-                })
-            }
-        )
+        EventsOn(String(event?.hasNewDownloadItem), function () {
+            setOpen(true)
+        })
     }, [])
     return <>
         <Proxy/>
@@ -498,7 +492,7 @@ const DownloadHistory: React.FC = () => {
             theme={{
                 components: {
                     Popover: {
-                        minWidth: 250,
+                        titleMinWidth: 250,
                     },
                     Divider: {
                         marginLG: 5,
@@ -536,27 +530,23 @@ const Bar: React.FC = () => {
     //必须搭配使用,EventsOn里面获取不到isFullScreen更新后的值
     const [isFullScreen, setIsFullScreen] = useState<boolean>(false)
     const f = useRef<boolean>(false)
-
     const [open, setOpen] = useState<boolean>(false)
-
+    const event = useSelector((state: RootState) => state.app.global.event)
     useEffect(() => {
         GetPlatform().then(
             result => {
                 setPlatform(result)
             }
         )
-        const t = async () => {
-            EventsOn(String((await GetAllEvents()).windowSizeChange), (r) => {
-                if (r === 0 && f.current) {
-                    setIsFullScreen(false)
-                    f.current = false
-                } else if (r === 1 && !f.current) {
-                    setIsFullScreen(true)
-                    f.current = true
-                }
-            })
-        }
-        t()
+        EventsOn(String(event?.windowSizeChange), (r) => {
+            if (r === 0 && f.current) {
+                setIsFullScreen(false)
+                f.current = false
+            } else if (r === 1 && !f.current) {
+                setIsFullScreen(true)
+                f.current = true
+            }
+        })
     }, [])
 
     return (

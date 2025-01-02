@@ -2,7 +2,9 @@ import {Empty} from "antd";
 import React from "react";
 
 const NotFound: React.FC = () => (
-    <Empty style={{
+    <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        style={{
         textAlign: 'center',
         display: "flex",
         flexDirection: "column",
@@ -10,7 +12,7 @@ const NotFound: React.FC = () => (
         justifyContent: "center",
         height: "100%",
     }}
-           description={"404"}
+           description={"暂无数据"}
     />
 )
 export default NotFound;

@@ -1,8 +1,7 @@
 import React, {ReactNode, useEffect, useRef, useState} from 'react';
-import {Allotment} from "allotment";
 import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
-import {Button, Popover, Tabs} from "antd";
+import {Button, Popover, Splitter, Tabs} from "antd";
 import "@/pages/Domain2IP.css"
 import {errorNotification} from "@/component/Notification";
 import {EventsOn} from "../../wailsjs/runtime";
@@ -87,8 +86,8 @@ const TabContent = () => {
             height: `calc(100vh - ${CssConfig.title.height} - ${CssConfig.tab.height})`,
             padding: "5px 0 5px 0",
         }}>
-            <Allotment>
-                <Allotment.Pane preferredSize={"250"} className={"domain2ip-left"}>
+            <Splitter>
+                <Splitter.Panel>
                     {!running && <Button size={"small"} style={{width: "100%"}} onClick={run}>查询</Button>}
                     {running && <Button size={"small"} style={{width: "100%"}} onClick={stop}
                                         icon={<SyncOutlined spin={running}/>}>终止</Button>}
@@ -99,8 +98,8 @@ const TabContent = () => {
                         style={{height: "100%"}}
                         onChange={e => setTargets(e.target.value)}
                     />
-                </Allotment.Pane>
-                <Allotment.Pane className={"domain2ip-right"}>
+                </Splitter.Panel>
+                <Splitter.Panel>
                     <TextArea
                         wrap={"off"}
                         value={output}
@@ -108,8 +107,8 @@ const TabContent = () => {
                         style={{height: "100%"}}
                         onChange={e => setOutput(e.target.value)}
                     />
-                </Allotment.Pane>
-            </Allotment>
+                </Splitter.Panel>
+            </Splitter>
         </div>
     );
 }

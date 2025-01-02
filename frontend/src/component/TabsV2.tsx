@@ -16,7 +16,7 @@ const TabsV2: React.FC<TianYanChaProps> = (props) => {
     // 初始化时添加默认的 Tab
     useEffect(() => {
         addTab(props.defaultTabContent);
-    }, [props.defaultTabContent]);
+    }, []);
 
     // Tab 切换
     const onTabChange = (newActiveKey: string) => {
@@ -67,6 +67,7 @@ const TabsV2: React.FC<TianYanChaProps> = (props) => {
     };
 
     return <Tabs
+        style={{height: '100%', width: '100%'}}
         size="small"
         type="editable-card"
         onChange={onTabChange}

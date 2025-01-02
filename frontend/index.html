@@ -4,6 +4,40 @@
     <meta charset="UTF-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Fine</title>
+    <style media="only screen">
+        :root,
+        body,
+        #root {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        html {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0;
+            overflow: auto;
+            font-family: -apple-system, "system-ui", "Segoe UI", Roboto,
+            "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
+            "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+            "Noto Color Emoji";
+        }
+
+        body {
+            padding: 16px;
+            overflow: auto;
+            background-color: transparent;
+        }
+
+        /* Hide codesandbox highlighter */
+        body > #highlighter {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>

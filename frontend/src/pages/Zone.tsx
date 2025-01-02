@@ -42,7 +42,7 @@ import {RadioOption} from '@/component/Rdg';
 import Copy from '../component/Copy';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
-import NotFound from './Notfound';
+import NotFound from '../component/Notfound';
 import {ResizeCallbackData} from 'react-resizable';
 import ResizableTitle from '../component/ResizableTitle';
 import {useDispatch, useSelector} from 'react-redux';

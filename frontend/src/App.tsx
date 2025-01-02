@@ -5,33 +5,36 @@ import 'dayjs/locale/zh-cn';
 import locale from 'antd/locale/zh_CN';
 import {errorNotification} from "@/component/Notification";
 import Bar from "@/pages/Bar";
-import Fofa from "@/pages/FofaV2";
+import Fofa from "@/pages/Fofa";
 import {Setting} from "@/pages/Setting";
 import IP138 from "@/pages/Ip138";
 import Icp from "@/pages/Icp";
-import Hunter from "@/pages/HunterV2";
-import Quake from "@/pages/QuakeV2";
+import Hunter from "@/pages/Hunter";
+import Quake from "@/pages/Quake";
 import {useDispatch} from "react-redux";
 import {appActions} from "@/store/store";
-import Zone from "@/pages/Zone";
 import Httpx from "@/pages/Httpx";
 import {Environment} from "../wailsjs/runtime";
 import {MiniProgram} from "@/pages/Wechat";
 import {Cipher} from "@/pages/Cipher";
 import {CssConfig} from "@/pages/Constants";
 import TianYanCha from "@/pages/TianYanCha";
-import { createStyles } from 'antd-style';
-import {Test} from "@/pages/Test";
+import Test from "@/pages/Test";
 import {GetAllConstants} from "../wailsjs/go/app/App";
-import {sleep} from "@/util/util";
+import {themeQuartz} from "ag-grid-community";
+import { ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
+import { AllEnterpriseModule, LicenseManager } from 'ag-grid-enterprise';
+
+LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
+ModuleRegistry.registerModules([AllEnterpriseModule]);
+
+// Mark all grids as using legacy themes
+provideGlobalGridOptions({ theme: themeQuartz.withParams({
+        rowBorder: true,
+        columnBorder: true,
+    })});
 
 const { Header } = Lay;
-
-const useGlobalStyles = createStyles(() => ({
-    customDrawerMask: {
-        top: '30px',  // 修改 Drawer 遮罩层的 top 属性
-    },
-}));
 
 const App: React.FC = () => {
     const dispatch = useDispatch()
@@ -96,7 +99,7 @@ const App: React.FC = () => {
                         borderRadius: 0,
                         horizontalItemPadding: "0px 0px 0px 0px",
                         horizontalMargin:"0 0 0 0",
-                        inkBarColor:"#ffa940"
+                        inkBarColor:"#ffa940",
                     },
                     Table: {
                         cellPaddingBlockSM: 4,
@@ -121,8 +124,8 @@ const App: React.FC = () => {
                                 height:'100%',
                             }}><Spin spinning={true} /></div>
                             :
-                            <Lay style={{backgroundColor: '#ffffff'}}>
-                                <Tabs items={items} tabBarStyle={{backgroundColor:'rgba(242, 242, 242,1)',padding: "0 10px", borderBottom:"solid 1px #eaecf2"}}/>
+                            <Lay style={{backgroundColor: '#ffffff',width:"100%",height:'100%'}}>
+                                <Tabs style={{width:"100%",height:'100%'}} items={items} tabBarStyle={{backgroundColor:'rgba(242, 242, 242,1)',padding: "0 10px", borderBottom:"solid 1px #eaecf2"}}/>
                             </Lay>
                     }
                 </div>
@@ -143,6 +146,7 @@ const items: TabsProps['items'] = [
         key: '网络资产测绘',
         label: '网络资产测绘',
         children: <Tabs
+            style={{height: '100%', width: '100%'}}
             items={[
                 {key: 'Fofa',label: 'Fofa',children: <Fofa/>,},
                 {key: 'Hunter',label: 'Hunter',children: <Hunter/>,},
@@ -185,7 +189,7 @@ const items: TabsProps['items'] = [
     // {
     //     key: 'TEST',
     //     label: 'TEST',
-    //     children: <Test/>,
+    //     children: <Fofa/>,
     // },
 ];
 

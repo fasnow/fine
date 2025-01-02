@@ -1,80 +1,58 @@
-import {Button, Drawer, Pagination, Table, Tabs, theme} from "antd";
-import {CSSProperties, useState} from "react";
+import React, { useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-enterprise";
+import { ColDef } from "ag-grid-community";
+interface RowData {
+    country: string;
+    // year: string;
+    gold: number;
+    silver: number;
+    bronze: number;
+}
 
-export const Test = () => {
-    const { token } = theme.useToken();
-    const [open, setOpen] = useState(false);
-    const showDrawer = () => {
-        setOpen(true);
-    };
-    const onClose = () => {
-        setOpen(false);
-    };
-    const containerStyle:CSSProperties = {
-        position: 'relative',
-        height: 200,
-        padding: 48,
-        overflow: 'hidden',
-        background: token.colorFillAlter,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        borderRadius: token.borderRadiusLG,
-    };
-    const dataSource = [
-        {
-            key: "1",
-            name: "胡彦斌",
-            age: 32,
-            address: "西湖区湖底公园1号",
-        },
-        {
-            key: "2",
-            name: "胡彦祖",
-            age: 42,
-            address: "西湖区湖底公园1号",
-        },
-    ];
+const Test: React.FC = () => {
+    const [rowData] = useState<RowData[]>([
+        { country: "USA", gold: 10, silver: 15, bronze: 20 },
+        { country: "USA", gold: 12, silver: 14, bronze: 18 },
+        { country: "UK",gold: 8, silver: 10, bronze: 12 },
+        { country: "UK", gold: 9, silver: 11, bronze: 13 },
+        { country: "China",  gold: 15, silver: 18, bronze: 22 },
+        { country: "China",gold: 18, silver: 20, bronze: 25 },
+    ]);
 
-    const columns = [
-        {
-            title: "姓名",
-            dataIndex: "name",
-            key: "name",
-            with: 200,
-        },
-        {
-            title: "年龄",
-            dataIndex: "age",
-            key: "age",
-            with: 200,
-        },
-        {
-            title: "住址",
-            dataIndex: "address",
-            key: "address",
-            with: 200,
-        },
-    ];
+    const [columnDefs] = useState<ColDef<RowData>[]>([
+        { field: "country", sortable: true, filter: true },
+        // { field: "year", pivot: true, sortable: true, filter: true },
+        { field: "gold", aggFunc: "sum" },
+        { field: "silver", aggFunc: "sum" },
+        { field: "bronze", aggFunc: "sum" },
+    ]);
+
+    const defaultColDef = {
+        sortable: true,
+        filter: true,
+        // resizable: true,
+    };
+
     return (
-        <Tabs
-            type={"editable-card"}
-
-        items={[1,2].map((i)=>{
-            return {
-                key:`${i}`,
-                label:`${i}`,
-                children: <Table
-                    size={'small'}
-                    pagination={false}
-                    virtual
-                    columns={columns}
-                    scroll={{x:800,y:400}}
-                    footer={()=><Pagination
-                    showSizeChanger
-                />}
-                />
-            }
-        })}
-        />
+        <div
+            className="ag-theme-alpine"
+            style={{ height: "500px", width: "100%" }}
+        >
+            <AgGridReact
+                rowData={rowData}
+                columnDefs={columnDefs}
+                defaultColDef={defaultColDef}
+                animateRows={true}
+                // groupIncludeFooter={true}
+                pivotMode={true}
+                // containerStyle={{width: "100%" }}
+                // style={{ width: '100%', height: '100%' }}
+            />
+        </div>
     );
 };
 
+export default Test;

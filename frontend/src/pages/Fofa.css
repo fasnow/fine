@@ -1,0 +1,29 @@
+.professional-privilege::after {
+    content: '专业版';
+    font-size: 1em;
+    top: 50%;
+    left: 100%;
+    background-color: #ffb200;
+    padding: 0 3px;
+    border-radius: 3px;
+}
+
+.commercial-privilege::after {
+    content: '商业版';
+    font-size: 1em;
+    top: 50%;
+    left: 100%;
+    background-color: #ffb200;
+    padding: 0 3px;
+    border-radius: 3px;
+}
+
+.enterprise-privilege::after {
+    content: '企业版';
+    font-size: 1em;
+    top: 50%;
+    left: 100%;
+    background-color: #ffb200;
+    padding: 0 3px;
+    border-radius: 3px;
+}

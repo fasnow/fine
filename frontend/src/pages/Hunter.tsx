@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     Button,
     Col,
@@ -6,7 +6,7 @@ import {
     DatePicker,
     Divider,
     Dropdown,
-    Flex,
+    Flex, GetRef,
     Input,
     InputNumber,
     List,
@@ -56,9 +56,16 @@ import {MenuItems, WithIndex} from "@/component/Interface";
 import {MenuItemType} from "antd/es/menu/interface";
 import TabLabel from "@/component/TabLabel";
 import {TargetKey} from "@/pages/Constants";
+import Candidate, {ItemType} from "@/component/Candidate";
+import {FindByPartialKey} from "../../wailsjs/go/history/Bridge";
+import {AgGridReact} from "ag-grid-react";
+import NotFound from "@/component/Notfound";
+import Loading from "@/component/Loading";
+import {ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, SideBarDef} from "ag-grid-community";
 
 const pageSizeOptions = [10, 20, 50, 100]
-const defaultCheckedColsDataIndex: string[] = [
+
+const defaultCheckedColKeys: string[] = [
     "index",
     "ip",
     "port",
@@ -70,51 +77,18 @@ const defaultCheckedColsDataIndex: string[] = [
     "number"
 ]
 
-interface HunterComponentType {
-    name: string,//组件名称
-    version: string,//组件版本
+const defaultQueryOption:QueryOptions = {
+    isWeb: 3,
+    statusCode: "",
+    portFilter: false,
+    dateRange: []
 }
 
-const columnFilterDataSource: DataSourceItemType[] = [
-    {label: '序号', value: "index"},
-    {label: 'IP', value: "ip"},
-    {label: '域名', value: "domain"},
-    {label: '端口', value: "port"},
-    {label: '协议', value: "protocol"},
-    {label: '网站标题', value: "web_title"},
-    {label: 'URL', value: "url"},
-    {label: '响应码', value: "status_code"},
-    {label: '组件', value: "component",},
-    {label: '操作系统', value: "os",},
-    {label: '备案单位', value: "company",},
-    {label: '城市', value: "city",},
-    {label: '更新时间', value: "updated_at",},
-    {label: 'web应用', value: "is_web",},
-    {label: 'Banner', value: "banner",},
-    {label: '风险资产', value: "is_risk",},
-    {label: '备案号', value: "number",},
-    {label: '注册机构', value: "as_org",},
-    {label: '运营商', value: "isp",},
-]
-type TabContentProps = {
-    user?: HunterUserType
-    setHunterUser?: (user: HunterUserType) => void
-    onContextMenu?: {
-        addTab: (input: string) => void,
-        input: string,
-    }
-    checkedColsValue: string[],
-    onCost?: () => string[],
-}
-type TabContentState = {
-    checkedColsValue: string[],
-    input: string,
-    inputCache: string,
-    checkedFields: string[],
-    isWeb: 1 | 2 | 3,//资产类型，1代表”web资产“，2代表”非web资产“，3代表”全部“
-    statusCode: string,//状态码列表，以逗号分隔，如”200,401“
-    portFilter: boolean//数据过滤参数，true为开启，false为关闭
-    dateRange: string[]
+interface TabContentProps {
+    colDefs?: ColDef[] | undefined | null,
+    input?: string,
+    newTab?: (input:string,colDefs:ColDef[] | undefined | null, opts:QueryOptions)=>void,
+    queryOption?: QueryOptions
 }
 
 const defaultMenuItems = [
@@ -128,1228 +102,14 @@ const defaultMenuItems = [
     MenuItems.CopyUrlCol
 ];
 
-type  PageDataType = WithIndex<hunter.Item>
+type PageDataType = WithIndex<hunter.Item>
 
-let selectedRow: { item: PageDataType | undefined, rowIndex: number | undefined, colKey: string } | undefined = {
-    item: undefined,
-    rowIndex: 0,
-    colKey: ''
+interface QueryOptions{
+    isWeb: 1|2|3;
+    statusCode: string;
+    portFilter: boolean;
+    dateRange: string[]
 }
-
-class TabContent extends React.Component<TabContentProps, TabContentState> {
-    constructor(props: TabContentProps) {
-        super(props);
-        this.state = {
-            checkedColsValue: props.checkedColsValue || defaultCheckedColsDataIndex,
-            input: props.onContextMenu?.input || "",
-            inputCache: '',
-            checkedFields: props.checkedColsValue || defaultCheckedColsDataIndex,
-            isWeb: 3,
-            statusCode: "",
-            portFilter: false,
-            dateRange: []
-        }
-    }
-
-    getCheckedFields = () => {
-        return this.state.checkedFields;
-    };
-
-    getInput = () => {
-        return this.state.inputCache
-    }
-
-    private ExportDataPanel = (props: { id: number, total: number, currentPageSize: number }) => {
-        const user = useSelector((state: RootState) => state.user.hunter)
-        const [page, setPage] = useState<number>(0)
-        const [pageSize, setPageSize] = useState<number>(props.currentPageSize)
-        const [maxPage, setMaxPage] = useState<number>(0)
-        const [cost, setCost] = useState<number>(0)
-        const [status, setStatus] = useState<"" | "error" | "warning">("")
-        const [isExporting, setIsExporting] = useState<boolean>(false)
-        const [exportable, setExportable] = useState<boolean>(false)
-        const dispatch = useDispatch()
-        const [disable, setDisable] = useState<boolean>(false)
-        const event = useSelector((state: RootState) => state.app.global.event)
-
-        const exportData = (page: number) => {
-            setIsExporting(true)
-            setDisable(true)
-            Export(props.id, page, pageSize).then().catch(
-                err => {
-                    errorNotification("错误", err)
-                    setIsExporting(false)
-                    setDisable(false)
-                }
-            )
-        }
-        useEffect(() => {
-            EventsOn(String(event?.hasNewHunterDownloadItem), function () {
-                setIsExporting(false)
-                setDisable(false)
-                GetRestToken().then(
-                    result => {
-                        dispatch(userActions.setHunterUser({restToken: result}))
-                    }
-                )
-            })
-        }, []);
-        useEffect(() => {
-            const maxPage = Math.ceil(props.total / pageSize)
-            setMaxPage(maxPage)
-            if (page >= maxPage) {
-                setPage(maxPage)
-                setCost(props.total)
-            } else {
-                setCost(page * pageSize)
-            }
-        }, [pageSize, props.total])
-        return <>
-            <Button
-                disabled={disable}
-                size="small"
-                onClick={() => setExportable(true)}
-                icon={isExporting ? <LoadingOutlined/> : <CloudDownloadOutlined/>}
-            >
-                {isExporting ? "正在导出" : "导出结果"}
-            </Button>
-            <Modal
-                {...ExportDataPanelProps}
-                title="导出结果"
-                open={exportable}
-                onOk={() => {
-                    if ((maxPage === 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
-                        setStatus("error")
-                        return
-                    } else {
-                        setStatus("")
-                    }
-                    setExportable(false)
-                    exportData(page)
-                }}
-                onCancel={() => {
-                    setExportable(false);
-                    setStatus("")
-                }}
-            >
-                <span style={{display: 'grid', gap: "3px"}}>
-                    <Row>
-                        <span style={{
-                            display: 'flex',
-                            flexDirection: "row",
-                            gap: "10px",
-                            backgroundColor: '#f3f3f3',
-                            width: "100%"
-                        }}>当前积分: <span style={{color: "red"}}>{user.restToken}</span></span>
-                    </Row>
-                    <Row>
-                        <Col span={10}>
-                            <span>导出分页大小</span>
-                        </Col>
-                        <Col span={14}>
-                            <Select
-                                size='small'
-                                style={{width: '80px'}}
-                                defaultValue={pageSize}
-                                options={pageSizeOptions.map(size => ({label: size.toString(), value: size}))}
-                                onChange={(size) => {
-                                    setPageSize(size)
-                                }}
-                            />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span={10}>
-                            <span style={{display: 'flex', whiteSpace: 'nowrap'}}>导出页数(max:{maxPage})</span>
-                        </Col>
-                        <Col span={14}>
-                            <InputNumber
-                                size='small'
-                                status={status}
-                                value={page}
-                                min={0}
-                                onChange={(value: number | null) => {
-                                    if (value) {
-                                        if (value >= maxPage) {
-                                            setPage(maxPage);
-                                            setCost(props.total)
-                                        } else {
-                                            setCost(pageSize * value)
-                                            setPage(value)
-                                        }
-                                    }
-                                }}
-                                keyboard={true}
-                            />=
-                            <Input
-                                style={{width: '100px'}}
-                                size='small'
-                                value={cost}
-                                suffix={"积分"}
-                            />
-                        </Col>
-                    </Row>
-                </span>
-            </Modal></>
-    }
-
-    Content = () => {
-        const defaultColumns: ColumnsType<PageDataType> = [
-            {
-                title: '序号',
-                dataIndex: "index",
-                width: 50,
-                ellipsis: true,
-                fixed: "left",
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "index"),
-                    }
-                }
-            },
-            {
-                title: 'URL',
-                dataIndex: "url",
-                ellipsis: true,
-                width: 250,
-                fixed: "left",
-                sorter: ((a, b) => localeCompare(a.url, b.url)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "url"),
-                        onClick: () => copy(record.url)
-                    }
-                }
-            },
-            {
-                title: '域名',
-                dataIndex: "domain",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.domain, b.domain)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "domain"),
-                        onClick: () => copy(record.domain)
-                    }
-                }
-            },
-            {
-                title: 'IP',
-                dataIndex: "ip",
-                ellipsis: true,
-                width: 90,
-                sorter: ((a, b) => localeCompare(a.ip, b.ip)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "ip"),
-                        onClick: () => copy(record.ip)
-                    }
-                }
-            },
-            {
-                title: '端口',
-                dataIndex: "port",
-                ellipsis: true,
-                width: 70,
-                sorter: ((a, b) => localeCompare(a.port, b.port)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "port"),
-                        onClick: () => copy(record.port)
-                    }
-                }
-            },
-            {
-                title: '协议',
-                dataIndex: "protocol",
-                ellipsis: true,
-                width: 70,
-                sorter: ((a, b) => localeCompare(a.protocol, b.protocol)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "protocol"),
-                        onClick: () => copy(record.protocol)
-                    }
-                }
-            },
-            {
-                title: '网站标题',
-                dataIndex: "web_title",
-                ellipsis: true,
-                width: 200,
-                sorter: ((a, b) => localeCompare(a.web_title, b.web_title)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "web_title"),
-                        onClick: () => copy(record.web_title)
-                    }
-                }
-            },
-            {
-                title: '响应码',
-                dataIndex: "status_code",
-                ellipsis: true,
-                width: 80,
-                sorter: ((a, b) => localeCompare(a.status_code, b.status_code)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "status_code"),
-                        onClick: () => copy(record.status_code)
-                    }
-                }
-            },
-            {
-                title: '组件',
-                dataIndex: "component",
-                ellipsis: true,
-                width: 100,
-                render: (components: HunterComponentType[]) => {
-                    const tmp = components?.map((component) => {
-                        return component.name + component.version
-                    })
-                    return <>
-                        {
-                            tmp?.join(" | ")
-                        }
-                    </>
-                },
-                onCell: (record, index) => {
-                    const tmp = record.component?.map((component) => {
-                        return component.name + component.version
-                    })
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "component"),
-                        onClick: () => copy(tmp?.join(" | "))
-                    }
-                }
-            },
-            {
-                title: '操作系统',
-                dataIndex: "os",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.os, b.os)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "os"),
-                        onClick: () => copy(record.os)
-                    }
-                }
-            },
-            {
-                title: '备案单位',
-                dataIndex: "company",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.company, b.company)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "company"),
-                        onClick: () => copy(record.company)
-                    }
-                }
-            },
-            {
-                title: '城市',
-                dataIndex: "city",
-                ellipsis: true,
-                sorter: ((a, b) => localeCompare(a.city, b.city)),
-                width: 100,
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "city"),
-                        onClick: () => copy(record.city)
-                    }
-                }
-            },
-            {
-                title: '更新时间', dataIndex: "updated_at", ellipsis: true, width: 100, onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "updated_at"),
-                        onClick: () => copy(record.updated_at)
-                    }
-                }
-            },
-            {
-                title: 'web应用',
-                dataIndex: "is_web",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.is_web, b.is_web)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "is_web"),
-                        onClick: () => copy(record.is_web)
-                    }
-                }
-            },
-            {
-                title: 'Banner', dataIndex: "banner", ellipsis: true, width: 100, onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "banner"),
-                        onClick: () => copy(record.banner)
-                    }
-                }
-            },
-            {
-                title: '风险资产',
-                dataIndex: "is_risk",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.is_risk, b.is_risk)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "is_risk"),
-                        onClick: () => copy(record.is_risk)
-                    }
-                }
-            },
-            {
-                title: '备案号',
-                dataIndex: "number",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.number, b.number)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "number"),
-                        onClick: () => copy(record.number)
-                    }
-                }
-            },
-            {
-                title: '注册机构',
-                dataIndex: "as_org",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.as_org, b.as_org)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "as_org"),
-                        onClick: () => copy(record.as_org)
-                    }
-                }
-            },
-            {
-                title: '运营商',
-                dataIndex: "isp",
-                ellipsis: true,
-                width: 100,
-                sorter: ((a, b) => localeCompare(a.isp, b.isp)),
-                onCell: (record, index) => {
-                    return {
-                        onContextMenu: () => handleOnContextMenu(record, index, "isp"),
-                        onClick: () => copy(record.isp)
-                    }
-                }
-            },
-        ];
-        const [columns, setColumns] = useState<ColumnsType<PageDataType>>(defaultColumns)
-        const [loading, setLoading] = useState<boolean>(false)
-        const [loading2, setLoading2] = useState<boolean>(false)
-        const [pageData, setPageData] = useState<PageDataType[]>([])
-        const pageIDMap = useRef<{ [key: number]: number }>({})
-        const dispatch = useDispatch()
-        const [total, setTotal] = useState<number>(0)
-        const [currentPage, setCurrentPage] = useState<number>(1)
-        const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
-        const {input, checkedColsValue} = this.state
-        const [clicked, setClicked] = useState(false);
-        const [hovered, setHovered] = useState(false);
-        const [faviconUrl, setFaviconUrl] = useState("");
-        const [openContextMenu, setOpenContextMenu] = useState(false);
-        const [tableScrollHeight, setTableScrollHeight] = useState<number>(window.innerHeight - 234)
-        const [menuItems, setMenuItems] = useState(defaultMenuItems)
-        const allowEnterPress = useSelector((state:RootState)=>state.app.global.config?.QueryOnEnter.assets)
-        const event = useSelector((state: RootState) => state.app.global.event)
-
-        useEffect(() => {
-            window.addEventListener("resize", () => {
-                setTableScrollHeight(window.innerHeight - 234)
-            })
-            let tmpCols: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
-            let tmp: (ColumnGroupType<PageDataType> | ColumnType<PageDataType>)[]
-            if (this.props.checkedColsValue) {
-                tmpCols = defaultColumns.filter(col => this.props.checkedColsValue.includes((col as any)["dataIndex"]))
-                tmp = tmpCols.map(col => ({...col}));
-            } else {
-                tmpCols = defaultColumns.filter(col => defaultCheckedColsDataIndex.includes((col as any)["dataIndex"]))
-                tmp = tmpCols.map(col => ({...col}));
-
-            }
-            // if (tmp.length > 0) {
-            //     delete tmp[tmp.length - 1]["width"]
-            // }
-            setColumns(tmp)
-            if (this.props.onContextMenu?.input) {
-                handleNewQuery(this.props.onContextMenu?.input, currentPageSize)
-            }
-
-            let index = 0;
-            // setPageData(result?.map((item) => {
-            //     const instance = new PageDataType(item)
-            //     const {convertValues, ...reset} = instance
-            //     return {index: ++index, ...item, convertValues, ...reset}
-            // }))
-        }, [])
-
-        useEffect(() => {
-            EventsOn(String(event?.hasNewHunterDownloadItem), function () {
-                GetRestToken().then(
-                    result => {
-                        dispatch(userActions.setHunterUser({restToken: result}))
-                    }
-                )
-            })
-        }, []);
-
-        const handleOnContextMenu = (item: PageDataType, rowIndex: number | undefined, colKey: string) => {
-            selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
-            beforeContextMenuOpen();
-        }
-
-        const beforeContextMenuOpen = () => {
-            if (!selectedRow || !selectedRow.item) {
-                return
-            }
-            let t: MenuItemType[] = []
-            for (const key in menuItems) {
-                const tt = menuItems[key]
-                switch (menuItems[key].key) {
-                    case MenuItems.OpenUrl.key:
-                        tt["disabled"] = !selectedRow.item.url;
-                        break;
-                    case MenuItems.CopyCell.key:
-                        tt["disabled"] = !selectedRow.item[selectedRow?.colKey as keyof PageDataType];
-                        break;
-                    case MenuItems.QueryTitle.key:
-                        tt["disabled"] = !selectedRow.item.web_title;
-                        break;
-                }
-                t.push(tt)
-            }
-            setMenuItems(t)
-        }
-
-        const handleMenuItemClick: MenuProps['onClick'] = (e) => {
-            if (!this.props.onContextMenu || !selectedRow || !selectedRow.item || !selectedRow.colKey) {
-                return
-            }
-            switch (e.key) {
-                case MenuItems.QueryTitle.key:
-                    this.props?.onContextMenu.addTab("web.title=" + selectedRow.item.web_title)
-                    break
-                case MenuItems.QueryIpCidr.key:
-                    this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip + "/24")
-                    break
-                case MenuItems.QueryIP.key:
-                    this.props?.onContextMenu.addTab("ip=" + selectedRow.item.ip)
-                    break
-                case MenuItems.OpenUrl.key:
-                    if (selectedRow.item.url) {
-                        BrowserOpenURL(selectedRow.item.url)
-                    }
-                    break
-                case MenuItems.CopyCell.key: {
-                    const item = selectedRow.item
-                    for (const key in item) {
-                        if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow.colKey) {
-                            const value = item[key as keyof PageDataType]
-                            copy(value)
-                        }
-                    }
-                }
-                    break
-                case MenuItems.CopyRow.key:
-                    copy(selectedRow)
-                    break
-                case MenuItems.CopyUrlCol.key: {
-                    const colValues = pageData.map(item => {
-                        for (const key in item) {
-                            if (Object.prototype.hasOwnProperty.call(item, key) && key === 'url') {
-                                return item[key as keyof PageDataType]
-                            }
-                        }
-                        return ""
-                    })
-                    copy(colValues)
-                    break
-                }
-                case MenuItems.CopyCol.key: {
-                    const colValues = pageData.map(item => {
-                        for (const key in item) {
-                            if (Object.prototype.hasOwnProperty.call(item, key) && key === selectedRow?.colKey) {
-                                return item[key as keyof PageDataType]
-                            }
-                        }
-                        return ""
-                    })
-                    copy(colValues)
-                    break
-                }
-            }
-            selectedRow = undefined
-        };
-
-        const handleHeaderResize =
-            (index: number) => (_: React.SyntheticEvent<Element>, {size}: ResizeCallbackData) => {
-                const newColumns = [...columns];
-                newColumns[index] = {
-                    ...newColumns[index],
-                    width: size.width,
-                };
-                setColumns(newColumns)
-            };
-
-        const getMergeColumns = (): ColumnsType<PageDataType> => {
-
-            if (!columns) {
-                return defaultColumns
-            }
-
-            return columns?.map((col, index) => ({
-                ...col,
-                onHeaderCell: (column: ColumnsType<PageDataType>[number]) => ({
-                    width: column.width,
-                    onResize: handleHeaderResize(index) as React.ReactEventHandler<any>,
-                }),
-            }));
-        }
-
-        const handleNewQuery = async (query:string, pageSize: number) => {
-            const { isWeb, dateRange, statusCode, portFilter} = this.state
-            const tmpInput = query.trim()
-            setCurrentPageSize(pageSize)
-            if (tmpInput === "") {
-                return
-            }
-            setLoading(true)
-            setCurrentPage(1)
-            setTotal(0)
-            pageIDMap.current = []
-            this.setState({
-                inputCache: tmpInput,
-            })
-
-            //不能使用ineputCache，setInputCache(tmpInput)为异步更新，此时inputCache还没有更新
-            Query(0, tmpInput, 1, pageSize, dateRange[0] ? dateRange[0] : "", dateRange[1] ? dateRange[1] : "", isWeb, statusCode, portFilter).then(
-                result => {
-                    let index = 0
-                    setPageData(result.items?.map((item) => {
-                        const instance = new hunter.Item(item)
-                        const {convertValues, ...reset} = instance
-                        return {index: ++index, ...item, convertValues, ...reset}
-                    }))
-                    setTotal(result.total)
-                    setLoading(false)
-                    pageIDMap.current[1] = result.taskID
-                    dispatch(userActions.setHunterUser({
-                        restToken: result.restQuota
-                    }))
-                }
-            ).catch(
-                err => {
-                    errorNotification("Hunter查询出错", err)
-                    setLoading(false)
-                    setPageData([])
-                }
-            )
-        }
-
-        const handlePaginationChange = async (newPage: number, newSize: number) => {
-            const {isWeb, statusCode, portFilter, dateRange, inputCache} = this.state
-
-            //page发生变换，size使用原size
-            if (newPage !== currentPage && newSize === currentPageSize) {
-                setLoading(true)
-                let pageID = pageIDMap.current[newPage]
-                pageID = pageID ? pageID : 0
-                Query(pageID, inputCache, newPage, currentPageSize, dateRange[0] ? dateRange[0] : "", dateRange[1] ? dateRange[1] : "", isWeb, statusCode, portFilter).then(
-                    result => {
-                        let index = (newPage - 1) * currentPageSize
-                        setPageData(result.items.map(item => {
-                            const instance = new hunter.Item(item)
-                            const {convertValues, ...rest} = instance
-                            return {index: ++index, ...rest, convertValues}
-                        }))
-                        setCurrentPage(newPage)
-                        setTotal(result.total)
-                        pageIDMap.current[newPage] = result.taskID
-                        dispatch(userActions.setHunterUser({
-                            restToken: result.restQuota
-                        }))
-                        setLoading(false)
-                    }
-                ).catch(
-                    err => {
-                        errorNotification("Hunter查询出错", err)
-                        setLoading(false)
-                    }
-                )
-                // const result = await $hunterQuery({
-                //     page: newPage, size: currentPageSize, query: inputCache,
-                //     isWeb: isWeb,
-                //     startTime: dateRange[0] ? dateRange[0] : "",
-                //     endTime: dateRange[1] ? dateRange[1] : "",
-                //     statusCode: statusCode,
-                //     portFilter: portFilter
-                // })
-                // if (result.error) {
-                //     errorNotification("Hunter查询出错", result.error)
-                //     setLoading(false)
-                //     return
-                // }
-
-            }
-
-            //size发生变换，page设为1
-            if (newSize !== currentPageSize) {
-                handleNewQuery(inputCache, newSize)
-            }
-        }
-
-        const onFieldsChange = (fields: CheckboxValueType[]) => {
-            const tmpCols = defaultColumns.filter(col => fields.includes((col as any)["dataIndex"]))
-            const tmp = tmpCols.map(col => ({...col}));
-            // if (tmp.length > 0) {
-            //     delete tmp[tmp.length - 1]["width"]
-            // }
-            setColumns(tmp)
-            this.setState({
-                checkedFields: tmp.map(item => (item as any).dataIndex)
-            })
-        }
-
-        const hide = () => {
-            setClicked(false);
-            setHovered(false);
-        };
-
-        const handleHoverChange = (open: boolean) => {
-            setHovered(open);
-            setClicked(false);
-        };
-
-        const handleClickChange = (open: boolean) => {
-            setHovered(false);
-            setClicked(open);
-        };
-
-        const getFaviconFromUrl = () => {
-            if (!faviconUrl) {
-                return
-            }
-            setLoading2(true)
-            Fetch(faviconUrl)
-                .then(data => {
-                    // @ts-ignore
-                    queryIconHash(toUint8Array(data).buffer)
-                })
-                .catch(error => {
-                    errorNotification("获取favicon出现错误", error);
-                }).finally(() => {
-                setLoading2(false)
-            })
-
-        }
-
-        const queryIconHash = (iconArrayBuffer: string | ArrayBuffer | null | undefined) => {
-            if (iconArrayBuffer instanceof ArrayBuffer) {
-                const hash = md5(iconArrayBuffer)
-                this.setState({input: `web.icon="${hash}"`})
-                handleNewQuery(`web.icon="${hash}"`, currentPageSize)
-                hide()
-            }
-        }
-
-        return <div>
-            <Flex justify={"center"} style={{marginBottom: "5px"}}>
-                <Input
-                    style={{width: "600px"}}
-                    size="small"
-                    allowClear
-                    value={input}
-                    onChange={(e) => this.setState({input: e.target.value})}
-                    suffix={
-                        <Popover
-                            placement={"bottom"}
-                            style={{width: 500}}
-                            content={<Button size={"small"} type={"text"}
-                                             onClick={() => handleClickChange(true)}>icon查询</Button>}
-                            trigger="hover"
-                            open={hovered}
-                            onOpenChange={handleHoverChange}
-                        >
-                            <Popover
-                                placement={"bottom"}
-                                title={"填入Icon URL或上传文件"}
-                                content={
-                                    <Spin spinning={loading2}>
-                                        <Flex vertical gap={5} style={{width: "600px"}}>
-                                            <Input
-                                                onChange={e => setFaviconUrl(e.target.value)}
-                                                size={"small"}
-                                                placeholder={"icon地址"}
-                                                suffix={<Button type='text' size="small" icon={<SearchOutlined/>}
-                                                                onClick={getFaviconFromUrl}/>}
-                                            />
-                                            <Upload.Dragger
-                                                showUploadList={false}
-                                                multiple={false}
-                                                customRequest={(options) => {
-                                                    const {file, onError} = options;
-                                                    ;
-                                                    if (file instanceof Blob) {
-                                                        const reader = new FileReader();
-                                                        reader.onload = (e) => {
-                                                            const arrayBuffer = e.target?.result;
-                                                            queryIconHash(arrayBuffer)
-                                                        };
-                                                        reader.readAsArrayBuffer(file);
-                                                    }
-                                                }
-                                                }
-                                            >
-                                                <p className="ant-upload-drag-icon">
-                                                    <InboxOutlined/>
-                                                </p>
-                                                <p className="ant-upload-hint">
-                                                    点击或拖拽文件
-                                                </p>
-                                            </Upload.Dragger>
-                                        </Flex>
-                                    </Spin>
-                                }
-                                trigger="click"
-                                open={clicked}
-                                onOpenChange={handleClickChange}
-                            >
-                                <Button size={"small"} type={"text"} icon={<Dots/>}/>
-                            </Popover>
-                        </Popover>
-                    }
-                    onPressEnter={()=>{
-                        if(!allowEnterPress)return
-                        handleNewQuery(input, currentPageSize)
-                    }}
-                    placeholder='Search...'
-                />
-                <Button type='text' size="small" icon={<SearchOutlined/>}
-                        onClick={() => handleNewQuery(input, currentPageSize)}/>
-                <Help/>
-            </Flex>
-            <Space
-                style={{display: "flex", justifyContent: 'center', alignItems: "center", marginBottom: "5px"}}
-                split={<Divider type="vertical" style={{margin: "0px"}}/>}
-            >
-                <label style={{fontSize: "14px", marginRight: "5px"}}>
-                    资产类型
-                    <Select size="small"
-                            style={{width: "110px"}}
-                            defaultValue={3 as 1 | 2 | 3}
-                            options={[{label: "web资产", value: 1}, {label: "非web资产", value: 2}, {
-                                label: "全部",
-                                value: 3
-                            },]}
-                            onChange={(value) => this.setState({isWeb: value})}/>
-                </label>
-                <DatePicker.RangePicker
-                    presets={[
-                        ...RangePresets,
-                    ]}
-                    style={{width: "230px"}}
-                    size="small"
-                    onChange={async (_dates, dateStrings) => {
-                        this.setState({dateRange: dateStrings})
-                    }}
-                    allowEmpty={[true, true]}
-                    showNow
-                />
-                <Input style={{width: "300px"}} size="small" placeholder='状态码列表，以逗号分隔，如”200,401“'
-                       onChange={(e) => this.setState({statusCode: e.target.value})}/>
-                <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                }}>
-                    <label style={{marginRight: "5px"}}>数据过滤</label><Switch size="small" checkedChildren="开启"
-                                                                                unCheckedChildren="关闭"
-                                                                                onChange={(value) => this.setState({portFilter: value})}/>
-                </div>
-                <div>
-                    <label>列设置</label>
-                    <ColumnsFilter
-                        dataSource={columnFilterDataSource}
-                        checkedSource={checkedColsValue}
-                        onChange={(checkedList: CheckboxValueType[]) => onFieldsChange(checkedList)}/>
-                </div>
-            </Space>
-            <Dropdown
-                menu={{items: menuItems, onClick: handleMenuItemClick}}
-                trigger={['contextMenu']}
-                open={openContextMenu}
-                onOpenChange={(v) => {
-                    setOpenContextMenu(v ? pageData.length > 0 : false)
-                }}
-            >
-                <div>
-                    <Table
-                        // locale={{ emptyText: "暂无数据" }}
-                        showSorterTooltip={false}
-                        virtual
-                        scroll={{y: tableScrollHeight, x: "100%", scrollToFirstRowOnChange: true}}
-                        bordered
-                        columns={getMergeColumns()}
-                        components={{
-                            header: {
-                                cell: ResizableTitle,
-                            },
-                        }}
-                        dataSource={pageData}
-                        loading={loading}
-                        size="small"
-                        pagination={false}
-                        footer={() => <div
-                            style={{
-                                width: '100%',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                            <Pagination
-                                showQuickJumper
-                                showSizeChanger
-                                total={total}
-                                pageSizeOptions={pageSizeOptions}
-                                defaultPageSize={pageSizeOptions[0]}
-                                defaultCurrent={1}
-                                current={currentPage}
-                                showTotal={(total) => `${total} items`}
-                                size="small"
-                                onChange={(page, size) => handlePaginationChange(page, size)}
-                            />
-                            <this.ExportDataPanel id={pageIDMap.current[1]} total={total}
-                                                  currentPageSize={currentPageSize}/>
-                        </div>}
-                        rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
-                    />
-                </div>
-            </Dropdown>
-
-        </div>
-        // const result = Array.from({ length: 100 }, ()=>{
-        //     return {
-        //         is_risk: "1",
-        //         url: "baidu.com",
-        //         ip: "string",
-        //         port: 8080,
-        //         web_title: "string",
-        //         domain: "string",
-        //         is_risk_protocol: "string",
-        //         protocol: "string",
-        //         base_protocol: "string",
-        //         status_code: 200,
-        //         component: [],
-        //         os: "string",
-        //         company: "string",
-        //         number: "string",
-        //         country: "string",
-        //         province: "string",
-        //         city: "string",
-        //         updated_at: "string",
-        //         is_web: "string",
-        //         as_org: "string",
-        //         isp: "string",
-        //         banner: "string",
-        //     };
-        // })
-        // return <div style={{maxHeight:"calc(100vh - 110px)",overflow:"scroll"}}>
-        //     <Table
-        //         sticky={{ offsetHeader: 0 }}
-        //         summary={() => (
-        //             <Table.Summary fixed={'bottom'}>
-        //                 <Table.Summary.Row>
-        //                     <Table.Summary.Cell index={0} colSpan={columns.length}>
-        //                         <div
-        //                             style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        //                             <Pagination
-        //                                 showQuickJumper
-        //                                 showSizeChanger
-        //                                 total={total}
-        //                                 pageSizeOptions={pageSizeOptions}
-        //                                 defaultPageSize={pageSizeOptions[0]}
-        //                                 defaultCurrent={1}
-        //                                 current={currentPage}
-        //                                 showTotal={(total) => `${total} items`}
-        //                                 size="small"
-        //                                 onChange={(page, size) => handlePaginationChange(page, size)}
-        //                             />
-        //                             <this.ExportDataPanel id={pageIDMap.current[1]} total={total}
-        //                                                   currentPageSize={currentPageSize}/>
-        //                         </div>
-        //                     </Table.Summary.Cell>
-        //                 </Table.Summary.Row>
-        //             </Table.Summary>
-        //         )}
-        //
-        //         // locale={{ emptyText: "暂无数据" }}
-        //         showSorterTooltip={false}
-        //         // scroll={{y: 'calc(100vh - 229px)', scrollToFirstRowOnChange: true}}
-        //         // scroll={{y: 1500, scrollToFirstRowOnChange: true}}
-        //         bordered
-        //         columns={getMergeColumns()}
-        //         components={{
-        //             header: {
-        //                 cell: ResizableTitle,
-        //             },
-        //         }}
-        //         dataSource={pageData}
-        //         loading={loading}
-        //         size="small"
-        //         pagination={false}
-        //         // footer={() => <div
-        //         //     style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        //         //     <Pagination
-        //         //         showQuickJumper
-        //         //         showSizeChanger
-        //         //         total={total}
-        //         //         pageSizeOptions={pageSizeOptions}
-        //         //         defaultPageSize={pageSizeOptions[0]}
-        //         //         defaultCurrent={1}
-        //         //         current={currentPage}
-        //         //         showTotal={(total) => `${total} items`}
-        //         //         size="small"
-        //         //         onChange={(page, size) => handlePaginationChange(page, size)}
-        //         //     />
-        //         //     <this.ExportDataPanel id={pageIDMap.current[1]} total={total}
-        //         //                           currentPageSize={currentPageSize}/>
-        //         // </div>}
-        //         rowKey={"index"} //如果不为每个列数据添加一个key属性，则应该设置此项，这里设置为对应columns里序号的dataIndex值，参考【https://ant.design/components/table-cn#design-token #注意】
-        //     />
-        // </div>
-    }
-
-    render() {
-        return <this.Content/>
-    }
-}
-
-const AuthSetting: React.FC = () => {
-    const [open, setOpen] = useState<boolean>(false)
-    const [editable, setEditable] = useState(false)
-    const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
-    const [key, setKey] = useState("")
-
-    useEffect(()=>{
-        setKey(cfg.Hunter.token)
-    }, [cfg.Hunter])
-
-    const save=()=> {
-        SetAuth(key).then(
-            ()=>{
-                const t = { ...cfg, Hunter: {...cfg.Hunter, token: key} } as config.Config;
-                dispatch(appActions.setConfig(t))
-                setOpen(false)
-                setEditable(false)
-            }
-        ).catch(
-            err => {
-                errorNotification("错误", err)
-                setKey(cfg.Hunter.token)
-            }
-        )
-    }
-
-    const cancel=()=> {
-        setEditable(false);
-        setOpen(false)
-        setKey(cfg.Hunter.token)
-    }
-
-    return <>
-        <Tooltip title="设置" placement={"right"}>
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
-        </Tooltip>
-        <Modal
-            open={open}
-            onCancel={() => setOpen(false)}
-            onOk={() => {
-                setOpen(false)
-            }}
-            footer={null}
-            closeIcon={null}
-            width={420}
-            destroyOnClose
-            getContainer={false}
-        >
-            <Flex vertical gap={10}>
-                <Input.Password value={key} placeholder="token" onChange={
-                    e=>{
-                        if(!editable)return
-                        setKey(e.target.value)
-                    }
-                }/>
-                <Flex gap={10} justify={"end"}>
-                    {
-                        !editable ?
-                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                            :
-                            <>
-                                <Button {...buttonProps} htmlType="submit"
-                                        onClick={save}
-                                >保存</Button>
-                                <Button {...buttonProps} htmlType="submit"
-                                        onClick={cancel}
-                                >取消</Button>
-                            </>
-                    }
-                </Flex>
-            </Flex>
-        </Modal>
-    </>
-}
-
-class Hunter extends React.Component {
-    state = {
-        activeKey: "",
-        tabCount: 0,
-        tabRefs: [] as TabContent[],
-        items: [] as Tab[],
-    };
-
-    componentDidMount(): void {
-        const initialTabKey = `${++this.state.tabCount}`;
-        this.setState({
-            activeKey: initialTabKey,
-            items: [{
-                label: <TabLabel label={initialTabKey}/>,
-                key: initialTabKey,
-                // children: <TabContent ref={(r: TabContent) => {
-                //     if (r) {
-                //         this.setState({ tabRefs: [r] });
-                //     }
-                // }}
-                //     runCallBack={(e) => this.addTab(e)}
-                // />,
-                children: <TabContent
-                    ref={(r: TabContent) => {
-                        if (r) {
-                            this.setState({tabRefs: [r]});
-                        }
-                    }}
-                    onContextMenu={{
-                        addTab: (i) => this.addTab(i),
-                        input: "",
-                    }}
-                    checkedColsValue={defaultCheckedColsDataIndex}/>,
-            }],
-        });
-    }
-
-    onTabChange = (newActiveKey: string) => {
-        this.setState({activeKey: newActiveKey});
-    };
-
-    addTab = (input: string) => {
-        const newActiveKey = `${++this.state.tabCount}`;
-        const checkedFields = this.state.tabRefs[parseInt(this.state.activeKey) - 1]?.getCheckedFields()
-
-        const newPanes = [
-            ...this.state.items,
-            {
-                label: <TabLabel label={newActiveKey}/>,
-                key: newActiveKey,
-                children: <TabContent
-                    ref={(r: TabContent) => {
-                        if (r) {
-                            this.setState({tabRefs: [r]});
-                        }
-                    }}
-                    checkedColsValue={checkedFields}
-                    onContextMenu={{
-                        addTab: (i) => this.addTab(i),
-                        input: input,
-                    }}
-                />,
-
-            },
-        ];
-        this.setState({items: newPanes, activeKey: newActiveKey});
-    };
-
-    removeTab = (targetKey: TargetKey) => {
-        let newActiveKey = this.state.activeKey;
-        const lastIndex = -1;
-        const newPanes = this.state.items.filter((item) => item.key !== targetKey);
-        if (newPanes.length && newActiveKey === targetKey) {
-            if (lastIndex >= 0) {
-                newActiveKey = newPanes[lastIndex].key;
-            } else {
-                newActiveKey = newPanes[0].key;
-            }
-        }
-        this.setState({items: newPanes, activeKey: newActiveKey});
-    };
-
-    onEditTab = (
-        targetKey: React.MouseEvent | React.KeyboardEvent | string,
-        action: 'add' | 'remove',
-    ) => {
-        if (action === 'add') {
-            this.addTab("");
-        } else {
-            this.removeTab(targetKey);
-        }
-    };
-
-    UserPanel = () => {
-        const user = useSelector((state: RootState) => state.user.hunter)
-        return <div style={{
-            width: "auto",
-            height: "23px",
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "#f1f3f4"
-        }}>
-            <AuthSetting/>
-            <Divider type="vertical"/>
-            <Space>
-                <Tooltip title="剩余总积分">
-                    <div style={{
-                        height: "24px",
-                        display: "flex",
-                        alignItems: "center",
-                        color: "#f5222d"
-                    }}>
-                        <img src={PointBuy}/>
-                        {user.restToken}
-                    </div>
-                </Tooltip>
-                <Tooltip title="查询后自动获取">
-                    <Button size="small" shape="circle" type="text" icon={<ExclamationCircleOutlined/>}/>
-                </Tooltip>
-            </Space>
-        </div>
-    }
-
-    render(): React.ReactNode {
-        return (
-            <Tabs
-                size="small"
-                tabBarExtraContent={{
-                    left: <this.UserPanel/>
-                }}
-                type="editable-card"
-                onChange={this.onTabChange}
-                activeKey={this.state.activeKey}
-                onEdit={this.onEditTab}
-                items={this.state.items}
-            />
-        );
-    }
-}
-
 
 interface AdvancedHelpDataType {
     index: number;
@@ -2134,5 +894,792 @@ const Help: React.FC = () => {
         </Modal></>
 }
 
+const AuthSetting: React.FC = () => {
+    const [open, setOpen] = useState<boolean>(false)
+    const [editable, setEditable] = useState(false)
+    const dispatch = useDispatch()
+    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
+    const [key, setKey] = useState("")
+
+    useEffect(()=>{
+        setKey(cfg.Hunter.token)
+    }, [cfg.Hunter])
+
+    const save=()=> {
+        SetAuth(key).then(
+            ()=>{
+                const t = { ...cfg, Hunter: {...cfg.Hunter, token: key} } as config.Config;
+                dispatch(appActions.setConfig(t))
+                setOpen(false)
+                setEditable(false)
+            }
+        ).catch(
+            err => {
+                errorNotification("错误", err)
+                setKey(cfg.Hunter.token)
+            }
+        )
+    }
+
+    const cancel=()=> {
+        setEditable(false);
+        setOpen(false)
+        setKey(cfg.Hunter.token)
+    }
+
+    return <>
+        <Tooltip title="设置" placement={"right"}>
+            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
+        </Tooltip>
+        <Modal
+            open={open}
+            onCancel={() => setOpen(false)}
+            onOk={() => {
+                setOpen(false)
+            }}
+            footer={null}
+            closeIcon={null}
+            width={420}
+            destroyOnClose
+            getContainer={false}
+        >
+            <Flex vertical gap={10}>
+                <Input.Password value={key} placeholder="token" onChange={
+                    e=>{
+                        if(!editable)return
+                        setKey(e.target.value)
+                    }
+                }/>
+                <Flex gap={10} justify={"end"}>
+                    {
+                        !editable ?
+                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                            :
+                            <>
+                                <Button {...buttonProps} htmlType="submit"
+                                        onClick={save}
+                                >保存</Button>
+                                <Button {...buttonProps} htmlType="submit"
+                                        onClick={cancel}
+                                >取消</Button>
+                            </>
+                    }
+                </Flex>
+            </Flex>
+        </Modal>
+    </>
+}
+
+const ExportDataPanel = (props: { id: number, total: number, currentPageSize: number }) => {
+    const user = useSelector((state: RootState) => state.user.hunter)
+    const [page, setPage] = useState<number>(0)
+    const [pageSize, setPageSize] = useState<number>(props.currentPageSize)
+    const [maxPage, setMaxPage] = useState<number>(0)
+    const [cost, setCost] = useState<number>(0)
+    const [status, setStatus] = useState<"" | "error" | "warning">("")
+    const [isExporting, setIsExporting] = useState<boolean>(false)
+    const [exportable, setExportable] = useState<boolean>(false)
+    const dispatch = useDispatch()
+    const [disable, setDisable] = useState<boolean>(false)
+    const event = useSelector((state: RootState) => state.app.global.event)
+
+    const exportData = (page: number) => {
+        setIsExporting(true)
+        setDisable(true)
+        Export(props.id, page, pageSize).then().catch(
+            err => {
+                errorNotification("错误", err)
+                setIsExporting(false)
+                setDisable(false)
+            }
+        )
+    }
+    useEffect(() => {
+        EventsOn(String(event?.hasNewHunterDownloadItem), function () {
+            setIsExporting(false)
+            setDisable(false)
+            GetRestToken().then(
+                result => {
+                    dispatch(userActions.setHunterUser({restToken: result}))
+                }
+            )
+        })
+    }, []);
+    useEffect(() => {
+        const maxPage = Math.ceil(props.total / pageSize)
+        setMaxPage(maxPage)
+        if (page >= maxPage) {
+            setPage(maxPage)
+            setCost(props.total)
+        } else {
+            setCost(page * pageSize)
+        }
+    }, [pageSize, props.total])
+    return <>
+        <Button
+            disabled={disable}
+            size="small"
+            onClick={() => setExportable(true)}
+            icon={isExporting ? <LoadingOutlined/> : <CloudDownloadOutlined/>}
+        >
+            {isExporting ? "正在导出" : "导出结果"}
+        </Button>
+        <Modal
+            {...ExportDataPanelProps}
+            title="导出结果"
+            open={exportable}
+            onOk={() => {
+                if ((maxPage === 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
+                    setStatus("error")
+                    return
+                } else {
+                    setStatus("")
+                }
+                setExportable(false)
+                exportData(page)
+            }}
+            onCancel={() => {
+                setExportable(false);
+                setStatus("")
+            }}
+        >
+                <span style={{display: 'grid', gap: "3px"}}>
+                    <Row>
+                        <span style={{
+                            display: 'flex',
+                            flexDirection: "row",
+                            gap: "10px",
+                            backgroundColor: '#f3f3f3',
+                            width: "100%"
+                        }}>当前积分: <span style={{color: "red"}}>{user.restToken}</span></span>
+                    </Row>
+                    <Row>
+                        <Col span={10}>
+                            <span>导出分页大小</span>
+                        </Col>
+                        <Col span={14}>
+                            <Select
+                                size='small'
+                                style={{width: '80px'}}
+                                defaultValue={pageSize}
+                                options={pageSizeOptions.map(size => ({label: size.toString(), value: size}))}
+                                onChange={(size) => {
+                                    setPageSize(size)
+                                }}
+                            />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={10}>
+                            <span style={{display: 'flex', whiteSpace: 'nowrap'}}>导出页数(max:{maxPage})</span>
+                        </Col>
+                        <Col span={14}>
+                            <InputNumber
+                                size='small'
+                                status={status}
+                                value={page}
+                                min={0}
+                                onChange={(value: number | null) => {
+                                    if (value) {
+                                        if (value >= maxPage) {
+                                            setPage(maxPage);
+                                            setCost(props.total)
+                                        } else {
+                                            setCost(pageSize * value)
+                                            setPage(value)
+                                        }
+                                    }
+                                }}
+                                keyboard={true}
+                            />=
+                            <Input
+                                style={{width: '100px'}}
+                                size='small'
+                                value={cost}
+                                suffix={"积分"}
+                            />
+                        </Col>
+                    </Row>
+                </span>
+        </Modal></>
+}
+
+const TabContent:React.FC<TabContentProps>=(props)=> {
+    const gridRef = useRef<AgGridReact>(null);
+    const [input, setInput] = useState<string>(props.input || "")
+    const [inputCache, setInputCache] = useState<string>(input)
+    const [queryOption,setQueryOption] = useState<QueryOptions>(props.queryOption || defaultQueryOption)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [loading2, setLoading2] = useState<boolean>(false)
+    const [pageData, setPageData] = useState<PageDataType[]>([])
+    const pageIDMap = useRef<{ [key: number]: number }>({})
+    const dispatch = useDispatch()
+    const [total, setTotal] = useState<number>(0)
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
+    const [clicked, setClicked] = useState(false);
+    const [hovered, setHovered] = useState(false);
+    const [faviconUrl, setFaviconUrl] = useState("");
+    const allowEnterPress = useSelector((state:RootState)=>state.app.global.config?.QueryOnEnter.assets)
+    const event = useSelector((state: RootState) => state.app.global.event)
+    const history = useSelector((state: RootState) => state.app.global.history)
+    const [columnDefs] = useState<ColDef[]>(props.colDefs || [
+        {headerName: '序号', field: "index", width : 80, pinned: 'left'},
+        {headerName: 'URL', field: "url", width : 250, hide: true},
+        {headerName: '域名', field: "domain", width : 200, pinned: 'left'},
+        {headerName: 'IP', field: "ip", width : 150,},
+        {headerName: '端口', field: "port", width : 80,},
+        {headerName: '协议', field: "protocol", width : 80,},
+        {headerName: '网站标题', field: "web_title", width : 200,},
+        {headerName: '备案号', field: "number", width : 180,},
+        {headerName: '备案单位', field: "company", width : 100,},
+        {headerName: '响应码', field: "status_code", width : 80,},
+        {headerName: '组件', field: "components", width : 100, cellRenderer:(params: ICellRendererParams)=>{
+            const tmp = params.data.component?.map((component:hunter.Component) => {
+                    return component.name + component.version
+                })
+                return tmp?.join(" | ") || ""
+            }},
+        {headerName: '操作系统', field: "os", width : 100, hide: true},
+        {headerName: '城市', field: "city", width : 100, hide: true},
+        {headerName: '更新时间', field: "updated_at", width : 100,},
+        {headerName: 'web应用', field: "is_web", width : 100, hide: true},
+        {headerName: 'Banner', field: "banner", width : 100, hide: true},
+        {headerName: '风险资产', field: "is_risk", width : 100, hide: true},
+        {headerName: '注册机构', field: "as_org", width : 100, hide: true},
+        {headerName: '运营商', field: "isp", width : 100, hide: true},
+    ]);
+    const defaultSideBarDef = useMemo<SideBarDef>(()=>{
+        return {
+            toolPanels: [
+                {
+                    id: "columns",
+                    labelDefault: "表格字段",
+                    labelKey: "columns",
+                    iconKey: "columns",
+                    toolPanel: "agColumnsToolPanel",
+                    toolPanelParams: {
+                        suppressRowGroups: false,
+                        suppressValues: false,
+                        suppressPivots: true,
+                        suppressPivotMode: true,
+                        suppressColumnFilter: false,
+                        suppressColumnSelectAll: true,
+                        suppressColumnExpandAll: true,
+                    },
+                },
+            ],
+        }
+    },[])
+    const defaultColDef = useMemo<ColDef>(()=>{
+        return {
+            // allow every column to be aggregated
+            enableValue: true,
+            // allow every column to be grouped
+            enableRowGroup: true,
+            // allow every column to be pivoted
+            enablePivot: true,
+            filter: true,
+            suppressHeaderMenuButton: true,
+            suppressHeaderFilterButton: true,
+        }
+    },[])
+
+    useEffect(() => {
+        EventsOn(String(event?.hasNewHunterDownloadItem), function () {
+            GetRestToken().then(
+                result => {
+                    dispatch(userActions.setHunterUser({restToken: result}))
+                }
+            )
+        })
+        if (props.input) {
+            handleNewQuery(input, currentPageSize)
+        }
+    }, [])
+
+    const getContextMenuItems = useCallback(
+        (
+            params: GetContextMenuItemsParams,
+        ): (MenuItemDef)[] => {
+            let value:any
+            if('components' === params.column?.getColId()){
+                const tmp = params.node?.data.component?.map((component:hunter.Component) => {
+                    return component.name + component.version
+                })
+                value = tmp?.join(" | ")
+            }else {
+                value = params.value
+            }
+        return [
+            {
+                name: "浏览器打开URL",
+                disabled: !params.node?.data.url,
+                action: () => {
+                    props.newTab && BrowserOpenURL(params.node?.data.url)
+                },
+            },
+            {
+                name: "查询C段",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip + "/24", getColDefs(), queryOption)
+                },
+            },
+            {
+                name: "查询IP",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip, getColDefs(), queryOption)
+                },
+            },
+            {
+                name: "查询标题",
+                disabled: !params.node?.data.web_title,
+                action: () => {
+                    props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs(), queryOption)
+                },
+            },
+            {
+                name: "复制单元格",
+                disabled: !value,
+                action: () => {
+                    copy(value)
+                },
+            },
+            {
+                name: "复制该行",
+                disabled: !params.node?.data,
+                action: () => {
+                    for (let i = 0;i<pageData.length;i++){
+                        if (pageData[i].index === params.node?.data.index){
+                            copy(pageData[i])
+                            break
+                        }
+                    }
+                },
+            },
+            {
+                name: "复制该列",
+                action: () => {
+                    const colId = params.column?.getColId()
+                    const colValues = pageData.map((item:PageDataType) => {
+                        for (const key in item) {
+                            if (Object.prototype.hasOwnProperty.call(item, key)) {
+                                if('components' === colId){
+                                    const tmp = item.component?.map((component:hunter.Component) => {
+                                        return component.name + component.version
+                                    })
+                                    return tmp?.join(" | ") || ""
+                                }else if(key === colId){
+                                    return item[key as keyof PageDataType]
+                                }
+                            }
+                        }
+                        return ""
+                    })
+                    copy(colValues)
+                },
+            },
+            {
+                name: "复制URL列",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    const colValues = pageData.map(item => {
+                        for (const key in item) {
+                            if (Object.prototype.hasOwnProperty.call(item, key) && key === 'url') {
+                                return item[key as keyof PageDataType]
+                            }
+                        }
+                        return null
+                    })
+                    copy(colValues)
+                },
+            },
+        ]
+    },[pageData, queryOption]);
+
+    const getColDefs=()=>{
+        if (gridRef.current?.api){
+            console.log(gridRef.current.api.getColumnDefs())
+            return gridRef.current.api.getColumnDefs()
+        }
+        return columnDefs
+    }
+
+    const handleNewQuery = async (query:string, pageSize: number) => {
+        const tmpInput = query.trim()
+        setCurrentPageSize(pageSize)
+        if (tmpInput === "") {
+            return
+        }
+        setInputCache(tmpInput)
+        setLoading(true)
+        setCurrentPage(1)
+        setTotal(0)
+        pageIDMap.current = []
+        Query(0, tmpInput, 1, pageSize, queryOption.dateRange[0] ? queryOption.dateRange[0] : "", queryOption.dateRange[1] ? queryOption.dateRange[1] : "", queryOption.isWeb, queryOption.statusCode, queryOption.portFilter).then(
+            result => {
+                let index = 0
+                setPageData(result.items?.map((item) => {
+                    const instance = new hunter.Item(item)
+                    const {convertValues, ...reset} = instance
+                    return {index: ++index, ...item, convertValues, ...reset}
+                }))
+                setTotal(result.total)
+                setLoading(false)
+                pageIDMap.current[1] = result.taskID
+                dispatch(userActions.setHunterUser({
+                    restToken: result.restQuota
+                }))
+            }
+        ).catch(
+            err => {
+                errorNotification("Hunter查询出错", err)
+                setLoading(false)
+                setPageData([])
+            }
+        )
+    }
+
+    const handlePaginationChange = async (newPage: number, newSize: number) => {
+        //page发生变换，size使用原size
+        if (newPage !== currentPage && newSize === currentPageSize) {
+            setLoading(true)
+            let pageID = pageIDMap.current[newPage]
+            pageID = pageID ? pageID : 0
+            Query(pageID, inputCache, newPage, currentPageSize, queryOption.dateRange[0] ? queryOption.dateRange[0] : "", queryOption.dateRange[1] ? queryOption.dateRange[1] : "", queryOption.isWeb, queryOption.statusCode, queryOption.portFilter).then(
+                result => {
+                    let index = (newPage - 1) * currentPageSize
+                    setPageData(result.items.map(item => {
+                        const instance = new hunter.Item(item)
+                        const {convertValues, ...rest} = instance
+                        return {index: ++index, ...rest, convertValues}
+                    }))
+                    setCurrentPage(newPage)
+                    setTotal(result.total)
+                    pageIDMap.current[newPage] = result.taskID
+                    dispatch(userActions.setHunterUser({
+                        restToken: result.restQuota
+                    }))
+                    setLoading(false)
+                }
+            ).catch(
+                err => {
+                    errorNotification("Hunter查询出错", err)
+                    setLoading(false)
+                }
+            )
+        }
+
+        //size发生变换，page设为1
+        if (newSize !== currentPageSize) {
+            handleNewQuery(inputCache, newSize)
+        }
+    }
+
+    const hide = () => {
+        setClicked(false);
+        setHovered(false);
+    };
+
+    const handleHoverChange = (open: boolean) => {
+        setHovered(open);
+        setClicked(false);
+    };
+
+    const handleClickChange = (open: boolean) => {
+        setHovered(false);
+        setClicked(open);
+    };
+
+    const getFaviconFromUrl = () => {
+        if (!faviconUrl) {
+            return
+        }
+        setLoading2(true)
+        Fetch(faviconUrl)
+            .then(data => {
+                // @ts-ignore
+                queryIconHash(toUint8Array(data).buffer)
+            })
+            .catch(error => {
+                errorNotification("获取favicon出现错误", error);
+            }).finally(() => {
+            setLoading2(false)
+        })
+
+    }
+
+    const queryIconHash = (iconArrayBuffer: string | ArrayBuffer | null | undefined) => {
+        if (iconArrayBuffer instanceof ArrayBuffer) {
+            const hash = md5(iconArrayBuffer)
+            setInput(`web.icon="${hash}"`)
+            handleNewQuery(`web.icon="${hash}"`, currentPageSize)
+            hide()
+        }
+    }
+
+    const iconSearchView = (
+        <Popover
+            placement={"bottom"}
+            style={{width: 500}}
+            content={<Button size={"small"} type={"text"}
+                             onClick={() => handleClickChange(true)}>icon查询</Button>}
+            trigger="hover"
+            open={hovered}
+            onOpenChange={handleHoverChange}
+        >
+            <Popover
+                placement={"bottom"}
+                title={"填入Icon URL或上传文件"}
+                content={
+                    <Spin spinning={loading2}>
+                        <Flex vertical gap={5} style={{width: "600px"}}>
+                            <Input
+                                onChange={e => setFaviconUrl(e.target.value)}
+                                size={"small"}
+                                placeholder={"icon地址"}
+                                suffix={<Button type='text' size="small" icon={<SearchOutlined/>}
+                                                onClick={getFaviconFromUrl}/>}
+                            />
+                            <Upload.Dragger
+                                showUploadList={false}
+                                multiple={false}
+                                customRequest={(options) => {
+                                    const {file, onError} = options;
+                                    ;
+                                    if (file instanceof Blob) {
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            const arrayBuffer = e.target?.result;
+                                            queryIconHash(arrayBuffer)
+                                        };
+                                        reader.readAsArrayBuffer(file);
+                                    }
+                                }
+                                }
+                            >
+                                <p className="ant-upload-drag-icon">
+                                    <InboxOutlined/>
+                                </p>
+                                <p className="ant-upload-hint">
+                                    点击或拖拽文件
+                                </p>
+                            </Upload.Dragger>
+                        </Flex>
+                    </Spin>
+                }
+                trigger="click"
+                open={clicked}
+                onOpenChange={handleClickChange}
+            >
+                <Button size={"small"} type={"text"} icon={<Dots/>}/>
+            </Popover>
+        </Popover>
+    )
+
+    const footer =  <Flex justify={"space-between"} align={'center'} style={{padding: '5px'}}>
+        <Pagination
+            showQuickJumper
+            showSizeChanger
+            total={total}
+            pageSizeOptions={pageSizeOptions}
+            defaultPageSize={pageSizeOptions[0]}
+            defaultCurrent={1}
+            current={currentPage}
+            showTotal={(total) => `${total} items`}
+            size="small"
+            onChange={(page, size) => handlePaginationChange(page, size)}
+        />
+        <ExportDataPanel id={pageIDMap.current[1]} total={total}
+                         currentPageSize={currentPageSize}/>
+    </Flex>
+
+    return <Flex vertical gap={5} style={{height: '100%'}}>
+        <Flex vertical gap={5}>
+            <Flex justify={"center"} align={'center'}>
+                <Candidate
+                    size={"small"}
+                    style={{width:600}}
+                    placeholder='Search...'
+                    allowClear
+                    value={input}
+                    onSearch={(value)=>handleNewQuery(value, currentPageSize)}
+                    onPressEnter={(value)=>{
+                        if(!allowEnterPress)return
+                        handleNewQuery(value, currentPageSize)
+                    }}
+                    items={[
+                        {
+                            onSelectItem: (item)=>{
+                                setInput(item.data)
+                            },
+                            fetch: async (v) => {
+                                try {
+                                    // @ts-ignore
+                                    const response = await FindByPartialKey(history.hunter,!v?"":v.toString());
+                                    const a: ItemType[] = response?.map(item => {
+                                        const t:ItemType={
+                                            value: item,
+                                            label: item,
+                                            data: item
+                                        }
+                                        return t;
+                                    });
+                                    return a;
+                                } catch (e) {
+                                    errorNotification("错误", String(e));
+                                    return []; // 如果出现错误，返回空数组，避免组件出现异常
+                                }
+                            }
+                        }
+                    ]}
+                />
+                {iconSearchView}
+                <Help/>
+            </Flex>
+            <Flex justify={"center"} align={'center'} gap={10}>
+                <Flex gap={5} align={'center'}>
+                    资产类型
+                    <Select size="small"
+                            style={{width: "110px"}}
+                            defaultValue={3 as 1 | 2 | 3}
+                            options={[{label: "web资产", value: 1}, {label: "非web资产", value: 2}, {label: "全部",value: 3}]}
+                            onChange={(value) => setQueryOption(prevState => ({...prevState, isWeb: value}))}/>
+                </Flex>
+                <DatePicker.RangePicker
+                    presets={[
+                        ...RangePresets,
+                    ]}
+                    style={{width: "230px"}}
+                    size="small"
+                    onChange={(_dates, dateStrings) => setQueryOption(prevState => ({...prevState, dateRange: dateStrings}))}
+                    allowEmpty={[true, true]}
+                    showNow
+                />
+                <Input style={{width: "300px"}} size="small" placeholder='状态码列表，以逗号分隔，如”200,401“'
+                       onChange={(e) => setQueryOption(prevState => ({...prevState, statusCode: e.target.value}))}/>
+                <Flex gap={5} align={'center'}>
+                    数据过滤
+                    <Switch size="small" checkedChildren="开启" unCheckedChildren="关闭" onChange={(value) => setQueryOption(prevState => ({...prevState, portFilter:value}))}/>
+                </Flex>
+            </Flex>
+        </Flex>
+        <div style={{ width: "100%", height: "100%" }}>
+            <AgGridReact
+                ref={gridRef}
+                loading={loading}
+                embedFullWidthRows
+                rowData={pageData}
+                columnDefs={columnDefs}
+                getContextMenuItems={getContextMenuItems}
+                sideBar={defaultSideBarDef}
+                headerHeight={32}
+                rowHeight={32}
+                defaultColDef={defaultColDef}
+                noRowsOverlayComponent={()=><NotFound/>}
+                loadingOverlayComponent={()=><Loading/>}
+            />
+        </div>
+        {footer}
+    </Flex>
+}
+
+const UserPanel = () => {
+    const user = useSelector((state: RootState) => state.user.hunter)
+    return <div style={{
+        width: "auto",
+        height: "23px",
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#f1f3f4"
+    }}>
+        <AuthSetting/>
+        <Divider type="vertical"/>
+        <Space>
+            <Tooltip title="剩余总积分">
+                <div style={{
+                    height: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    color: "#f5222d"
+                }}>
+                    <img src={PointBuy}/>
+                    {user.restToken}
+                </div>
+            </Tooltip>
+            <Tooltip title="查询后自动获取">
+                <Button size="small" shape="circle" type="text" icon={<ExclamationCircleOutlined/>}/>
+            </Tooltip>
+        </Space>
+    </div>
+}
+
+const Hunter =()=>{
+    const [activeKey, setActiveKey] = useState<string>("")
+    const [items, setItems] = useState<Tab[]>([])
+    const indexRef = useRef(1)
+
+    useEffect(()=>{
+        const key = `${indexRef.current}`;
+        setItems([{
+            label: <TabLabel label={key}/>,
+            key: key,
+            children: <TabContent newTab={addTab}/>,
+        }])
+        setActiveKey(key)
+    },[])
+
+    const onTabChange = (newActiveKey: string) => {
+        setActiveKey(newActiveKey)
+    };
+
+    const addTab = (input: string, colDefs: ColDef[] | undefined | null, opts: QueryOptions) => {
+        const newActiveKey = `${++indexRef.current}`;
+        setActiveKey(newActiveKey)
+        setItems(prevState => [
+            ...prevState,
+            {
+                label: <TabLabel label={newActiveKey}/>,
+                key: newActiveKey,
+                children: <TabContent input={input} colDefs={colDefs} newTab={addTab} queryOption={opts}/>,
+            },
+        ])
+    };
+
+    const removeTab = (targetKey: TargetKey) => {
+        const t = items.filter((item) => item.key !== targetKey);
+        const newActiveKey = t.length && activeKey === targetKey ? t[t.length-1]?.key : activeKey
+        setItems(t)
+        setActiveKey(newActiveKey)
+    };
+
+    const onEditTab = (
+        targetKey: React.MouseEvent | React.KeyboardEvent | string,
+        action: 'add' | 'remove',
+    ) => {
+        if (action === 'add') {
+            addTab("", null, defaultQueryOption);
+        } else {
+            removeTab(targetKey);
+        }
+    };
+
+    return (
+        <Tabs
+            style={{height: '100%', width: '100%'}}
+            size="small"
+            tabBarExtraContent={{
+                left: <UserPanel/>
+            }}
+            type="editable-card"
+            onChange={onTabChange}
+            activeKey={activeKey}
+            onEdit={onEditTab}
+            items={items}
+        />
+    );
+}
 
 export default Hunter;

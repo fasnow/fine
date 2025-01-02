@@ -1648,10 +1648,10 @@ const TabContent: React.FC = () => {
                                         query(item.label as string, item.data.graphId.toString())
                                     },
                                     title: '相关企业',
-                                    filter: (v)=>{return !!(v && v.length > 1)},
+                                    filter: (v)=>{return !!(v && v.toString().length > 1)},
                                     fetch: async (v) => {
                                         try {
-                                            const response = await Suggest(v); // 等待Suggest函数执行完成获取原始数据
+                                            const response = await Suggest(v.toString()); // 等待Suggest函数执行完成获取原始数据
                                             const a: ItemType[] = response.map(item => {
                                                 const t:ItemType={
                                                     value: item.name,

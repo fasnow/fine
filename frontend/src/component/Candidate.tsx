@@ -39,15 +39,11 @@ export type ItemType = {
 
 interface BasePanelType{
     fetchOnOpen?:((items: ItemType[]) =>boolean) | boolean,
-    value?:string
+    value?:string|number
     title?:string
-    fetch?: ((value: string) => ItemType[] | Promise<ItemType[]>) | undefined;
-    filter?: (value: string) => boolean;
+    fetch?: ((value: string|number) => ItemType[] | Promise<ItemType[]>) | undefined;
+    filter?: (value: string|number) => boolean;
     onSelectItem?: (item: ItemType) =>void;
-}
-
-interface PanelProps extends BasePanelType{
-    isComposing?: boolean
 }
 
 const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
@@ -55,14 +51,13 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
     const [selectedKey, setSelectedKey] = useState<string | number | null>(null);
     const [loading, setLoading] = useState(false);
     const [candidates, setCandidates] = useState<ItemType[]>([]);
-    const index = useRef(0)
 
     useEffect(()=>{
-        fetchItems(props.value|| "")
+        props.value !== undefined && fetchItems(props.value)
     }, [props.value])
 
     useImperativeHandle(ref, () => ({
-        fetch: (v:string) => fetchItems(v),
+        fetch: (v:string|number) => fetchItems(v),
         fetchOnOpen:()=>{
             if (props.fetchOnOpen instanceof Function){
                 return  props.fetchOnOpen(candidates)
@@ -71,7 +66,7 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
         }
     }));
 
-    const fetchItems=(v:string)=>{
+    const fetchItems=(v:string|number)=>{
         if (!props.fetch)return;
         if (props.filter) {
             if (!props.filter(v)) return;
@@ -166,8 +161,8 @@ export interface CandidateProps{
 }
 
 const Candidate: React.FC<CandidateProps> = React.memo((props) => {
-    const [localValue, setLocalValue] = useState<string | number>("");
-    const valueRef = useRef<string|number|null>("")
+    const [localValue, setLocalValue] = useState<string | number>(props.value || "");
+    const valueRef = useRef<string|number>("")
     const [isComposing, setIsComposing] = useState(false);
     const rootDivRef = useRef<HTMLDivElement>(null);
     const itemsDivRef = useRef<HTMLDivElement>(null);
@@ -176,7 +171,7 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
     const {items, onChange, onPressEnter,onSearch,...restProps} = props
     const refs = useRef<any[]>([])
     const index = useRef(0)
-    const [value, setValue] = useState("")
+    const [value, setValue] = useState(localValue)
 
     useEffect(() => {
         const handleClick = (event: MouseEvent) => {
@@ -214,6 +209,10 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
         };
     }, []);
 
+    useEffect(()=>{
+        setLocalValue(props.value || "")
+    },[props.value])
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
         setLocalValue(newValue);
@@ -242,13 +241,13 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
         onPressEnter:(e)=>{
             if (onPressEnter){
                 // setOpen(false)
-                onPressEnter(value)
+                onPressEnter(value.toString())
             }
         },
         value: localValue
     }
 
-    const memoizedPanels = useMemo(()=>{
+    const panels = useMemo(()=>{
         return props.items?.map(item=>{
             const r = createRef()
             refs.current.push(r)
@@ -256,6 +255,7 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
                           onSelectItem={(t)=>{
                               setOpen(false)
                               setLocalValue(t.value || "")
+                              setValue(t.value.toString() || "")
                               valueRef.current = t.value || ""
                               if (item.onSelectItem) {
                                   item.onSelectItem(t)
@@ -275,8 +275,9 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
                             ref={inputDivRef}
                             {...SharedProps}
                         /><Button icon={<SearchOutlined/>} size={SharedProps.size} onClick={(e)=>{
-                        if (onSearch){
-                            onSearch(value)
+                        console.log(value)
+                            if (onSearch){
+                            onSearch(value.toString())
                         }
                     }}/>
                     </Space.Compact>:<Input
@@ -296,7 +297,7 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
                 overflowY: 'auto',
                 display: open? 'block' : 'none'
             }}>
-                {memoizedPanels}
+                {panels}
             </div>
         </div>
     );

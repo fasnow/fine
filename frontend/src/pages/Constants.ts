@@ -1,5 +1,5 @@
 import React from "react";
-import {tianyancha} from "../../wailsjs/go/models";
+import { tianyancha } from "../../wailsjs/go/models";
 import SearchCompanyV4Item = tianyancha.SearchCompanyV4Item;
 
 const titleHeight = '30px'
@@ -12,7 +12,7 @@ export const CssConfig = {
         lineHeight: titleHeight,
         margin: '0',
         padding: '0',
-        backgroundColor: "rgb(255,255,255)"
+        // backgroundColor: "rgb(255,255,255)"
     } as React.CSSProperties,
     tab: {
         height: `${tabHeight}px`,

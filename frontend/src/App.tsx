@@ -21,46 +21,93 @@ import {CssConfig} from "@/pages/Constants";
 import TianYanCha from "@/pages/TianYanCha";
 import Test from "@/pages/Test";
 import {GetAllConstants} from "../wailsjs/go/app/App";
+import type {Tab} from 'rc-tabs/lib/interface'
 import {themeQuartz} from "ag-grid-community";
 import { ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
 import { AllEnterpriseModule, LicenseManager } from 'ag-grid-enterprise';
 
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
-
-// Mark all grids as using legacy themes
-provideGlobalGridOptions({ theme: themeQuartz.withParams({
-        rowBorder: true,
-        columnBorder: true,
-    })});
-
-const { Header } = Lay;
+provideGlobalGridOptions({ theme: themeQuartz.withParams({ rowBorder: true, columnBorder: true }) }); // Mark all grids as using legacy themes
 
 const App: React.FC = () => {
     const dispatch = useDispatch()
     const [loading,setLoading] = useState(true)
-    useEffect(() => {
-        window.onerror = function(message, source, lineno, colno, error) {
-            //   message：错误信息（字符串）。可用于HTML onerror=""处理程序中的event。
-            //   source：发生错误的脚本URL（字符串）
-            //   lineno：发生错误的行号（数字）
-            //   colno：发生错误的列号（数字）
-            //   error：Error对象
-            console.error(source,lineno,colno,error)
-        }
-        const currentDate = new Date();
-        const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
-        const bodyElement = document.body;
-        if (isQingmingJie) {
-            bodyElement.style.filter = 'grayscale(100%)';
-        }
-        Environment().then(
-            r=>console.log(r)
-        )
-    }, [])
+    const [tabs, setTabs] = useState<Tab[]>([
+        {
+            key: '设置',
+            label: '设置',
+            children: <Setting/>,
+        },
+        {
+            key: '网络资产测绘',
+            label: '网络资产测绘',
+            children: <Tabs
+                style={{height: '100%', width: '100%'}}
+                items={[
+                    {key: 'Fofa',label: 'Fofa',children: <Fofa/>,},
+                    {key: 'Hunter',label: 'Hunter',children: <Hunter/>,},
+                    {key: 'Quake',label: 'Quake',children: <Quake/>,},
+                    // {key: '0.zone',label: '0.zone',children: <Zone/>,}
+                ]}
+                tabBarStyle={{backgroundColor: '#F2F2F2FF', padding : "0 10px",}}
+            />,
+        },
+        {
+            key: 'ICP',
+            label: 'ICP',
+            children: <Icp/>,
+        },
+        {
+            key: '天眼查',
+            label: '天眼查',
+            children: <TianYanCha/>,
+        },
+        {
+            key: 'HTTPX',
+            label: 'HTTPX',
+            children: <Httpx/>,
+        },
+        {
+            key: 'IP138',
+            label: 'IP138',
+            children: <IP138/>,
+        },
+        {
+            key: '小程序反编译',
+            label: '小程序反编译',
+            children: <MiniProgram/>,
+        },
+        {
+            key: '编码转换',
+            label: '编码转换',
+            children: <Cipher/>,
+        },
+    ]);
 
     useEffect(() => {
         (async () => {
+            window.onerror = function(message, source, lineno, colno, error) {
+                //   message：错误信息（字符串）。可用于HTML onerror=""处理程序中的event。
+                //   source：发生错误的脚本URL（字符串）
+                //   lineno：发生错误的行号（数字）
+                //   colno：发生错误的列号（数字）
+                //   error：Error对象
+                console.error(source,lineno,colno,error)
+            }
+            const currentDate = new Date();
+            const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
+            const bodyElement = document.body;
+            if (isQingmingJie) {
+                bodyElement.style.filter = 'grayscale(100%)';
+            }
+            Environment().then(
+                r=>{
+                    if (r.buildType === 'dev'){
+                        setTabs(prevState => [...prevState, {key: 'TEST', label: 'TEST', children: <Test/>}])
+                    }
+                }
+            )
             try {
                 const constant = await GetAllConstants()
                 console.log(constant)
@@ -112,84 +159,40 @@ const App: React.FC = () => {
                 },
             }}
         >
-            <Lay style={{backgroundColor: '#ffffff', margin: '0', padding:'0'}}>
-                <Header style={CssConfig.title}><Bar /></Header>
-                <div style={{position:"relative",width:"100%", height: `calc(100vh - ${CssConfig.title.height})`, maxHeight: `calc(100vh - ${CssConfig.title.height})`}}>
-                    {
-                        loading ? <div style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height:'100%',
-                            }}><Spin spinning={true} /></div>
-                            :
-                            <Lay style={{backgroundColor: '#ffffff',width:"100%",height:'100%'}}>
-                                <Tabs style={{width:"100%",height:'100%'}} items={items} tabBarStyle={{backgroundColor:'rgba(242, 242, 242,1)',padding: "0 10px", borderBottom:"solid 1px #eaecf2"}}/>
-                            </Lay>
-                    }
-                </div>
-            </Lay>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: '#ffffff',
+                margin: '0',
+                padding:'0',
+                height: '100%',
+                width: '100%',
+            }}>
+                <Lay.Header style={CssConfig.title}><Bar /></Lay.Header>
+                {
+                    loading ? <div style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height:'100%',
+                        }}><Spin spinning={true} /></div>
+                        :
+                        <Tabs
+                            style={{width:"100%",height:'100%', overflow:'hidden'}}
+                            items={tabs}
+                            tabBarStyle={{
+                                backgroundColor:'rgba(242, 242, 242,1)',
+                                padding: "0 10px",
+                                borderBottom:"solid 1px #eaecf2"
+                            }}
+                        />
+                }
+            </div>
         </ConfigProvider>
     )
 }
 
 export default  App
 
-const items: TabsProps['items'] = [
-    {
-        key: '设置',
-        label: '设置',
-        children: <div style={{padding:"0 10px"}}><Setting/></div>,
-    },
-    {
-        key: '网络资产测绘',
-        label: '网络资产测绘',
-        children: <Tabs
-            style={{height: '100%', width: '100%'}}
-            items={[
-                {key: 'Fofa',label: 'Fofa',children: <Fofa/>,},
-                {key: 'Hunter',label: 'Hunter',children: <Hunter/>,},
-                {key: 'Quake',label: 'Quake',children: <Quake/>,},
-                // {key: '0.zone',label: '0.zone',children: <Zone/>,}
-            ]}
-            tabBarStyle={{backgroundColor: '#F2F2F2FF', padding : "0 10px",}}
-        />,
-    },
-    {
-        key: 'ICP',
-        label: 'ICP',
-        children: <Icp/>,
-    },
-    {
-        key: '天眼查',
-        label: '天眼查',
-        children: <TianYanCha/>,
-    },
-    {
-        key: 'HTTPX',
-        label: 'HTTPX',
-        children: <Httpx/>,
-    },
-    {
-        key: 'IP138',
-        label: 'IP138',
-        children: <IP138/>,
-    },
-    {
-        key: '小程序反编译',
-        label: '小程序反编译',
-        children: <MiniProgram/>,
-    },
-    {
-        key: '编码转换',
-        label: '编码转换',
-        children: <Cipher/>,
-    },
-    // {
-    //     key: 'TEST',
-    //     label: 'TEST',
-    //     children: <Fofa/>,
-    // },
-];
 

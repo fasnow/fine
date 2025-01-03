@@ -1,18 +1,18 @@
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import "allotment/dist/style.css";
 import TextArea from "antd/es/input/TextArea";
-import {Button, Popover, Splitter, Tabs} from "antd";
+import { Button, Splitter } from "antd";
 import "@/pages/Domain2IP.css"
-import {errorNotification} from "@/component/Notification";
-import {EventsOn} from "../../wailsjs/runtime";
-import {SyncOutlined} from "@ant-design/icons";
+import { errorNotification } from "@/component/Notification";
+import { EventsOn } from "../../wailsjs/runtime";
+import { SyncOutlined } from "@ant-design/icons";
 import 'xterm/css/xterm.css';
-import {GetDetail, Stop} from "../../wailsjs/go/domain2ip/Bridge";
-import {CssConfig} from "@/pages/Constants";
+import { GetDetail, Stop } from "../../wailsjs/go/domain2ip/Bridge";
+import { CssConfig } from "@/pages/Constants";
 import TabsV2 from "@/component/TabsV2";
-import {useSelector} from "react-redux";
-import {RootState} from "@/store/store";
-import {constant} from "../../wailsjs/go/models";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { constant } from "../../wailsjs/go/models";
 import Event = constant.Event;
 
 const TabContent = () => {
@@ -88,14 +88,14 @@ const TabContent = () => {
         }}>
             <Splitter>
                 <Splitter.Panel>
-                    {!running && <Button size={"small"} style={{width: "100%"}} onClick={run}>查询</Button>}
-                    {running && <Button size={"small"} style={{width: "100%"}} onClick={stop}
-                                        icon={<SyncOutlined spin={running}/>}>终止</Button>}
+                    {!running && <Button size={"small"} style={{ width: "100%" }} onClick={run}>查询</Button>}
+                    {running && <Button size={"small"} style={{ width: "100%" }} onClick={stop}
+                        icon={<SyncOutlined spin={running} />}>终止</Button>}
                     <TextArea
                         value={targets}
                         size={"small"}
                         placeholder={"每行一个\n识别结果仅供参考\n如果有更好的识别方法请欢迎提出\n尽量不使用第三方网站识别cdn"}
-                        style={{height: "100%"}}
+                        style={{ height: "100%" }}
                         onChange={e => setTargets(e.target.value)}
                     />
                 </Splitter.Panel>
@@ -104,7 +104,7 @@ const TabContent = () => {
                         wrap={"off"}
                         value={output}
                         size={"small"}
-                        style={{height: "100%"}}
+                        style={{ height: "100%" }}
                         onChange={e => setOutput(e.target.value)}
                     />
                 </Splitter.Panel>
@@ -114,7 +114,7 @@ const TabContent = () => {
 }
 
 const Domain2IP = () => {
-    return <TabsV2 defaultTabContent={<TabContent/>}/>
+    return <TabsV2 defaultTabContent={<TabContent />} />
 }
 
 export default Domain2IP;

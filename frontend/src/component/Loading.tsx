@@ -1,5 +1,5 @@
 import React from "react";
-import {Empty, Spin} from "antd";
+import { Spin } from "antd";
 
 const Loading: React.FC = () => (
     <Spin spinning={true}

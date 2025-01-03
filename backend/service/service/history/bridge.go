@@ -22,7 +22,7 @@ func NewHistoryBridge(app *app.App) *Bridge {
 
 func (r *Bridge) FindByPartialKey(ht constant.HistoryType, key string) []string {
 	logger.Info(key)
-	items, err := r.historyRepo.FindByPartialKey(ht, key, 10)
+	items, err := r.historyRepo.FindByPartialKey(ht, key, 100)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil

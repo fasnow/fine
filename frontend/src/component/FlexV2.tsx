@@ -3,7 +3,7 @@ import React from "react";
 type Props = {
     children: React.ReactNode;
     gap?: number;
-    vertical?:boolean,
+    vertical?: boolean,
     style?: React.CSSProperties;
 };
 
@@ -22,10 +22,10 @@ const FlexV2: React.FC<Props> = (props) => {
         >
             {
                 childArray.map((child, index) => {
-                    const style:React.CSSProperties = {}
-                    if(props.vertical){
+                    const style: React.CSSProperties = {}
+                    if (props.vertical) {
                         style.marginBottom = index === childArray.length - 1 ? 0 : new_gap
-                    }else {
+                    } else {
                         style.marginRight = index === childArray.length - 1 ? 0 : new_gap
                     }
                     return (

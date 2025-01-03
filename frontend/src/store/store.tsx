@@ -1,5 +1,5 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
-import {app, config, constant, fofa, quake} from "../../wailsjs/go/models";
+import {app, constant, fofa, quake} from "../../wailsjs/go/models";
 import Status = constant.Status;
 import Event = constant.Event;
 import History = constant.History;

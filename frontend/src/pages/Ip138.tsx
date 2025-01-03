@@ -1,13 +1,13 @@
-import {SearchOutlined} from '@ant-design/icons';
-import {Button, Divider, Empty, Input, List as AntdList, Modal, Space, Spin, Tabs} from 'antd';
-import React, {useRef, useState} from 'react';
+import { SearchOutlined } from '@ant-design/icons';
+import { Button, Divider, Empty, Input, List as AntdList, Modal, Space, Spin } from 'antd';
+import React, { useRef, useState } from 'react';
 import Copy from '../component/Copy';
-import {List, WindowScroller} from "react-virtualized"
+import { List, WindowScroller } from "react-virtualized"
 import TextArea from 'antd/es/input/TextArea';
-import {sleep} from '@/util/util';
-import {GetCurrentDomain, GetCurrentIP, GetHistoryIP} from "../../wailsjs/go/ip138/Bridge";
-import {useSelector} from "react-redux";
-import {RootState} from "@/store/store";
+import { sleep } from '@/util/util';
+import { GetCurrentDomain, GetCurrentIP, GetHistoryIP } from "../../wailsjs/go/ip138/Bridge";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import TabsV2 from "@/component/TabsV2";
 
 
@@ -31,7 +31,7 @@ const TabContent: React.FC = () => {
     const [wornning, setWarnnig] = useState<string>("")
     const running = useRef<boolean>(false)
     const interval = useRef<number>(1000)
-    const allowEnterPress = useSelector((state:RootState)=>state.app.global.config?.QueryOnEnter.ip138)
+    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.ip138)
 
     function isIPAddress(input: string): boolean {
         // IPv4 正则表达式
@@ -62,7 +62,7 @@ const TabContent: React.FC = () => {
                 domainCount++
             }
         }
-        return {targetList: targetList, ipCount: ipCount, domainCount: domainCount}
+        return { targetList: targetList, ipCount: ipCount, domainCount: domainCount }
     }
     const preQuery = async () => {
         if (input.trim().indexOf("，") != -1) {
@@ -70,7 +70,7 @@ const TabContent: React.FC = () => {
             return
         }
         const tmpTargetList = input.trim().split(",")
-        const {targetList, ipCount, domainCount} = checkCount(tmpTargetList)
+        const { targetList, ipCount, domainCount } = checkCount(tmpTargetList)
         if (ipCount === 0 && domainCount === 0) return
         let tmpMode: ModeType = ""
         if (domainCount > 0 && ipCount > 0) {
@@ -99,12 +99,12 @@ const TabContent: React.FC = () => {
             if (mode === "ip2domains") {
                 GetCurrentDomain(target).then(
                     async result => {
-                        setDomains((pre) => [...(pre || []), ...[{ip: target, current: result ? result : []}]])
+                        setDomains((pre) => [...(pre || []), ...[{ ip: target, current: result ? result : [] }]])
                         await sleep(interval.current)
                     }
                 ).catch(
                     async err => {
-                        setDomains((pre) => [...(pre || []), ...[{ip: target, msg: err, current: []}]])
+                        setDomains((pre) => [...(pre || []), ...[{ ip: target, msg: err, current: [] }]])
                         await sleep(interval.current)
                     }
                 )
@@ -112,7 +112,7 @@ const TabContent: React.FC = () => {
                 const result = await GetCurrentIP(target).then(
                     result => {
                         if (result.message) {
-                            setIps((pre) => [...(pre || []), ...[{domain: target, msg: result.message, current: []}]])
+                            setIps((pre) => [...(pre || []), ...[{ domain: target, msg: result.message, current: [] }]])
                             return
                         }
                         GetHistoryIP(target).then(
@@ -124,14 +124,14 @@ const TabContent: React.FC = () => {
                             }
                         ).catch(
                             err => {
-                                setIps((pre) => [...(pre || []), ...[{domain: target, current: result.items}]])
+                                setIps((pre) => [...(pre || []), ...[{ domain: target, current: result.items }]])
                                 return;
                             }
                         )
                     }
                 ).catch(
                     err => {
-                        setIps((pre) => [...(pre || []), ...[{domain: target, msg: err, current: []}]])
+                        setIps((pre) => [...(pre || []), ...[{ domain: target, msg: err, current: [] }]])
                     }
                 )
             }
@@ -148,15 +148,15 @@ const TabContent: React.FC = () => {
             <Button type='link' size='small' onClick={() => setOpen(true)}>目标过多?</Button>
             <Modal
                 width={400}
-                cancelButtonProps={{size: "small"}}
-                okButtonProps={{size: "small"}}
+                cancelButtonProps={{ size: "small" }}
+                okButtonProps={{ size: "small" }}
                 cancelText={"取消"} okText={"执行"}
                 destroyOnClose mask={false}
                 open={open}
                 onCancel={() => setOpen(false)}
                 onOk={() => {
                     const tmpTargetList = input.trim().split("\n")
-                    const {targetList, ipCount, domainCount} = checkCount(tmpTargetList)
+                    const { targetList, ipCount, domainCount } = checkCount(tmpTargetList)
                     if (!targetList || targetList.length === 0) {
                         setWarnnig("无效目标")
                         return
@@ -180,13 +180,13 @@ const TabContent: React.FC = () => {
                 }}
 
             >
-                <div style={{display: 'flex', flexDirection: "column"}}>
+                <div style={{ display: 'flex', flexDirection: "column" }}>
                     <TextArea size='small' placeholder='每行一个目标,数量过多会被封的~'
-                              autoSize={{maxRows: 10, minRows: 10}} value={input}
-                              defaultValue={multipleTarget.join("\n")}
-                              onChange={(value) => setInput(value.target.value)}/>
+                        autoSize={{ maxRows: 10, minRows: 10 }} value={input}
+                        defaultValue={multipleTarget.join("\n")}
+                        onChange={(value) => setInput(value.target.value)} />
                     {
-                        warning && <span style={{color: "red"}}>{warning}</span>
+                        warning && <span style={{ color: "red" }}>{warning}</span>
                     }
                 </div>
             </Modal>
@@ -204,23 +204,23 @@ const TabContent: React.FC = () => {
             }}>
                 <Input
                     placeholder='域名或IP,不能同时设置,多个目标以英文逗号分隔,目标过多请右侧设置'
-                    style={{width: "600px"}}
+                    style={{ width: "600px" }}
                     size="small"
                     allowClear
                     suffix={<Space.Compact block>
-                        <Button type='text' size="small" icon={<SearchOutlined/>} onClick={preQuery}/>
+                        <Button type='text' size="small" icon={<SearchOutlined />} onClick={preQuery} />
                         {/* <Tooltip title='帮助信息'>
                             <Button type='text' size="small" icon={<QuestionOutlined />} />
                         </Tooltip> */}
                     </Space.Compact>}
                     value={input}
-                    onPressEnter={()=>{
-                        if(!allowEnterPress)return
+                    onPressEnter={() => {
+                        if (!allowEnterPress) return
                         preQuery()
                     }}
                     onChange={(e) => setInput(e.target.value)}
                 />
-                <MultipleTargetModal/>
+                <MultipleTargetModal />
             </div>
             <div
                 style={{
@@ -231,11 +231,11 @@ const TabContent: React.FC = () => {
             >
                 {
                     wornning && <span
-                        style={{display: 'flex', justifyContent: "center", width: '100%', color: "red"}}>{wornning}</span>
+                        style={{ display: 'flex', justifyContent: "center", width: '100%', color: "red" }}>{wornning}</span>
                 }
                 {
-                    loading && <Button type="link" size='small' icon={<Spin size='small' spinning={true}/>}
-                                       onClick={() => running.current = false}>点击终止</Button>
+                    loading && <Button type="link" size='small' icon={<Spin size='small' spinning={true} />}
+                        onClick={() => running.current = false}>点击终止</Button>
                 }
 
             </div>
@@ -247,16 +247,16 @@ const TabContent: React.FC = () => {
                 width: '100%'
             }}>
                 {
-                    mode === "domain2ips" && <div style={{width: "500px"}}>
+                    mode === "domain2ips" && <div style={{ width: "500px" }}>
                         <WindowScroller>
-                            {({height}) => (
+                            {({ height }) => (
                                 <List
                                     height={height - 160}
                                     width={500}
                                     rowCount={ips ? ips.length : 0}
                                     rowHeight={rowHeight}
                                     rowRenderer={
-                                        ({index, key, style}: any) => {
+                                        ({ index, key, style }: any) => {
                                             const item = ips?.[index]
                                             return (
                                                 <div key={key} style={{
@@ -268,33 +268,33 @@ const TabContent: React.FC = () => {
                                                     borderRadius: "5px",
                                                     padding: "5px",
                                                 }}>
-                                                    <span style={{fontWeight: 'bold'}}>{item?.domain}</span>
-                                                    <Divider style={{margin: "3px 0 3px 0"}}/>
+                                                    <span style={{ fontWeight: 'bold' }}>{item?.domain}</span>
+                                                    <Divider style={{ margin: "3px 0 3px 0" }} />
                                                     {
                                                         item?.msg ? <div style={{
-                                                                height: "100%",
-                                                                color: "red",
-                                                                display: "flex",
-                                                                alignItems: "center",
-                                                                justifyContent: "center"
-                                                            }}>{item.msg}</div> :
+                                                            height: "100%",
+                                                            color: "red",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center"
+                                                        }}>{item.msg}</div> :
                                                             <AntdList
-                                                                style={{overflowY: "auto"}}
+                                                                style={{ overflowY: "auto" }}
                                                                 dataSource={item?.current}
                                                                 split={false}
                                                                 size='small'
                                                                 locale={{
-                                                                    emptyText: <div style={{height: "60px"}}><Empty
-                                                                        image={Empty.PRESENTED_IMAGE_SIMPLE}/></div>
+                                                                    emptyText: <div style={{ height: "60px" }}><Empty
+                                                                        image={Empty.PRESENTED_IMAGE_SIMPLE} /></div>
                                                                 }}
                                                                 renderItem={(item, i) => (
                                                                     <AntdList.Item>
-                                                                        <span style={{width: "100%"}}>
-                                                                            <span style={{float: 'left'}}><Copy
+                                                                        <span style={{ width: "100%" }}>
+                                                                            <span style={{ float: 'left' }}><Copy
                                                                                 title={'点击复制'} placement={"bottom"}
                                                                                 text={item.ip}>{item.ip}</Copy>
                                                                             </span> <span
-                                                                            style={{float: 'right'}}>{item.locationOrDate}</span>
+                                                                                style={{ float: 'right' }}>{item.locationOrDate}</span>
                                                                         </span>
                                                                     </AntdList.Item>
                                                                 )}
@@ -313,7 +313,7 @@ const TabContent: React.FC = () => {
                 {
                     mode === "ip2domains" && <div>
                         <WindowScroller>
-                            {({height}) => (
+                            {({ height }) => (
                                 <List
                                     // className={styles.List}
                                     height={height - 160}
@@ -321,7 +321,7 @@ const TabContent: React.FC = () => {
                                     rowCount={domains?.length || 0}
                                     rowHeight={rowHeight}
                                     rowRenderer={
-                                        ({index, key, style}: any) => {
+                                        ({ index, key, style }: any) => {
                                             const item = domains?.[index] || {
                                                 ip: ""
                                             }
@@ -335,25 +335,25 @@ const TabContent: React.FC = () => {
                                                         borderRadius: "5px",
                                                         padding: "5px",
                                                     }}>
-                                                        <span style={{fontWeight: 'bold'}}>{item.ip}</span>
-                                                        <Divider style={{margin: "3px 0 3px 0"}}/>
+                                                        <span style={{ fontWeight: 'bold' }}>{item.ip}</span>
+                                                        <Divider style={{ margin: "3px 0 3px 0" }} />
                                                         <AntdList
-                                                            style={{overflowY: "auto"}}
+                                                            style={{ overflowY: "auto" }}
                                                             size='small'
                                                             dataSource={item.current}
                                                             split={false}
                                                             locale={{
-                                                                emptyText: <div style={{height: "60px"}}><Empty
-                                                                    image={Empty.PRESENTED_IMAGE_SIMPLE}/></div>
+                                                                emptyText: <div style={{ height: "60px" }}><Empty
+                                                                    image={Empty.PRESENTED_IMAGE_SIMPLE} /></div>
                                                             }}
                                                             renderItem={(item, index) => (
                                                                 <AntdList.Item>
-                                                                    <span style={{width: "100%"}}>
-                                                                        <span style={{float: 'left'}}><Copy
+                                                                    <span style={{ width: "100%" }}>
+                                                                        <span style={{ float: 'left' }}><Copy
                                                                             title={'点击复制'} placement={"bottom"}
                                                                             text={item.domain}>{item.domain}</Copy></span>
                                                                         <span
-                                                                            style={{float: 'right'}}>{item.date}</span>
+                                                                            style={{ float: 'right' }}>{item.date}</span>
                                                                     </span>
                                                                 </AntdList.Item>
                                                             )}
@@ -370,7 +370,7 @@ const TabContent: React.FC = () => {
                     </div>
                 }
                 {
-                    mode === "" && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
+                    mode === "" && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 }
             </div>
         </div>
@@ -378,7 +378,7 @@ const TabContent: React.FC = () => {
 }
 
 const IP138: React.FC = () => {
-    return <TabsV2 defaultTabContent={<TabContent/>}/>
+    return <TabsV2 defaultTabContent={<TabContent />} />
 }
 
 export default IP138

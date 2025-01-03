@@ -1,45 +1,44 @@
 //https://juejin.cn/post/7359203560167178250
-import React, {CSSProperties, useEffect, useRef, useState} from 'react';
+import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, TableColumnsType, Tag, Tooltip} from "antd";
+import { Button, Drawer, Flex, Input, InputNumber, Modal, Spin, TableColumnsType, Tag, Tooltip } from "antd";
 import TabsV2 from "@/component/TabsV2";
-import {errorNotification} from '@/component/Notification';
-import {appActions, RootState} from '@/store/store';
-import {useDispatch, useSelector} from 'react-redux';
-import {config, constant, tianyancha} from '../../wailsjs/go/models';
-import {buttonProps} from './Setting';
-import {UserOutlined} from "@ant-design/icons";
-import {GetHolder, GetInvestee, SetAuth, Suggest} from "../../wailsjs/go/tianyancha/Bridge";
-import {TYC} from "@/pages/Constants";
-import {CheckboxOptionType} from "antd/es/checkbox/Group";
-import type {CascaderProps} from 'antd/es/cascader'
-import {copy} from "@/util/util";
-import {WithIndex} from "@/component/Interface";
-import Candidate, {ItemType} from "@/component/Candidate";
+import { errorNotification } from '@/component/Notification';
+import { appActions, RootState } from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { config, constant, tianyancha } from '../../wailsjs/go/models';
+import { buttonProps } from './Setting';
+import { UserOutlined } from "@ant-design/icons";
+import { GetHolder, GetInvestee, SetAuth, Suggest } from "../../wailsjs/go/tianyancha/Bridge";
+import { TYC } from "@/pages/Constants";
+import { CheckboxOptionType } from "antd/es/checkbox/Group";
+import type { CascaderProps } from 'antd/es/cascader'
+import { copy } from "@/util/util";
+import { WithIndex } from "@/component/Interface";
+import Candidate, { ItemType } from "@/component/Candidate";
 import './TianYanCha.css'
 import PenetrationItem = tianyancha.PenetrationItem;
-import {FindByPartialKey} from "../../wailsjs/go/history/Bridge";
 import History = constant.History;
 
 interface Options {
-    width:any
-    height:any
+    width: any
+    height: any
     nodeGapX: number
     nodeGapY: number
     nodeWidth: number
     nodeHeight: number
     rootNodeHeight: number
-    addChildren?:(item:PenetrationItem, direction:string)=>Promise<PenetrationItem[] | undefined>
-    filterForShow?:(data:PenetrationItem)=>boolean,
-    onNodeClick?:(node:PenetrationItem)=>void
+    addChildren?: (item: PenetrationItem, direction: string) => Promise<PenetrationItem[] | undefined>
+    filterForShow?: (data: PenetrationItem) => boolean,
+    onNodeClick?: (node: PenetrationItem) => void
 }
 
-type  PageDataType = WithIndex<tianyancha.SearchCompanyV4Item>
+type PageDataType = WithIndex<tianyancha.SearchCompanyV4Item>
 
 const pageSizeOptions = [50, 100, 150, 200, 500]
 
-const Data: PageDataType[]=Array.from({ length: 100 }, (v,k) => ({
-    index:k+1,
+const Data: PageDataType[] = Array.from({ length: 100 }, (v, k) => ({
+    index: k + 1,
     "id": 4463868045,
     "name": "平昌县民兴小学工会委员会会会会会会会会会会会会会会会会会会会会会会会会会会会会会会会会",
     "type": 1,
@@ -272,13 +271,13 @@ class StockTreeVertical {
     private rootOfUp: any;
     private nodeColorList: any;
     private transition: any;
-    private zoomHandler:any
-    private opts:Options
-    private treeData:NodeType
-    constructor(ref:any, root:PenetrationItem, children:PenetrationItem[], parents:PenetrationItem[], options:Options) {
+    private zoomHandler: any
+    private opts: Options
+    private treeData: NodeType
+    constructor(ref: any, root: PenetrationItem, children: PenetrationItem[], parents: PenetrationItem[], options: Options) {
         this.opts = options
         this.ref = ref // 宿主元素选择器,是个ref对象
-        this.treeData = {...root,children:children,parents:parents} as NodeType
+        this.treeData = { ...root, children: children, parents: parents } as NodeType
 
         this.onLoad =
             function () {
@@ -335,7 +334,7 @@ class StockTreeVertical {
             upSectionHeight: 0
         }
         this.zoomHandler = d3
-            .zoom<SVGSVGElement,undefined>()
+            .zoom<SVGSVGElement, undefined>()
             .scaleExtent([0.01, 5])
             .on('zoom', (e) => {
                 this.svg
@@ -365,22 +364,22 @@ class StockTreeVertical {
         // })
     }
 
-    private process(){
+    private process() {
         // 投资公司树的根节点
-        const t = {...this.treeData}
-        t.children = t.children?.filter(child=>{
-            if (this.opts.filterForShow){
+        const t = { ...this.treeData }
+        t.children = t.children?.filter(child => {
+            if (this.opts.filterForShow) {
                 return this.opts.filterForShow(child)
             }
             return true
         })
-        this.rootOfDown = d3.hierarchy(t, (d:any) => d.children)
+        this.rootOfDown = d3.hierarchy(t, (d: any) => d.children)
 
         // 股东树的根节点
-        this.rootOfUp = d3.hierarchy(this.treeData, (d:any) => d.parents)
+        this.rootOfUp = d3.hierarchy(this.treeData, (d: any) => d.parents)
         console.log(this.rootOfDown, this.rootOfUp);
         [this.rootOfDown.descendants(), this.rootOfUp.descendants()].forEach((nodes) => {
-            nodes.forEach((node:any) => {
+            nodes.forEach((node: any) => {
                 node._children = node.children || null
                 // if (options.type === 'all') {
                 //     //如果是all的话，则表示全部都展开
@@ -473,7 +472,7 @@ class StockTreeVertical {
         this.gNodes = this.gAll.append('g').attr('id', 'nodeGroup')
     }
 
-    reset(){
+    reset() {
         // const t = {...this.treeData}
         // t.children = t.children?.filter(child=>{
         //     if (this.opts.filterForShow){
@@ -487,7 +486,7 @@ class StockTreeVertical {
     }
 
     // 更新数据
-    private update(source:any) {
+    private update(source: any) {
         if (!source) {
             source = {
                 x0: 0,
@@ -513,7 +512,7 @@ class StockTreeVertical {
         const myTransition = this.svg.transition().duration(500).ease(d3.easeCubicOut);
 
         /***  绘制子公司树  ***/
-        const node1 = this.gNodes.selectAll('g.nodeOfDownItemGroup').data(nodesOfDown, (d:any) => {
+        const node1 = this.gNodes.selectAll('g.nodeOfDownItemGroup').data(nodesOfDown, (d: any) => {
             return d.data.id
         })
 
@@ -521,15 +520,15 @@ class StockTreeVertical {
             .enter()
             .append('g')
             .attr('class', 'nodeOfDownItemGroup')
-            .attr('transform', (d:any) => {
+            .attr('transform', (d: any) => {
                 return `translate(${source.x0},${source.y0})`
             })
             .attr('fill-opacity', 0)
             .attr('stroke-opacity', 0)
             // .style('opacity', 0)
             .style('cursor', 'pointer')
-            .on('click', (e:any, d:any) => {
-                if (this.opts.onNodeClick){
+            .on('click', (e: any, d: any) => {
+                if (this.opts.onNodeClick) {
                     this.opts.onNodeClick(d.data)
                 }
             })
@@ -537,39 +536,39 @@ class StockTreeVertical {
         // 外层的矩形框
         node1Enter
             .append('rect')
-            .attr('width', (d:any) => {
+            .attr('width', (d: any) => {
                 if (d.depth === 0) {
                     return (d.data.name.length + 4) * 16
                 }
                 return this.opts.nodeWidth
             })
-            .attr('height', (d:any) => {
+            .attr('height', (d: any) => {
                 if (d.depth === 0) {
                     return this.opts.rootNodeHeight
                 }
                 return this.opts.nodeHeight
             })
-            .attr('x', (d:any) => {
+            .attr('x', (d: any) => {
                 if (d.depth === 0) {
                     return (-(d.data.name.length + 4) * 16) / 2
                 }
                 return -this.opts.nodeWidth / 2
             })
-            .attr('y', (d:any) => {
+            .attr('y', (d: any) => {
                 if (d.depth === 0) {
                     return -this.opts.rootNodeHeight / 2
                 }
                 return -this.opts.nodeHeight / 2
             })
             .attr('stroke-width', 1)
-            .attr('stroke', (d:any) => {
+            .attr('stroke', (d: any) => {
                 if (d.depth === 0) {
                     return '#EBD1BB'  // 根节点边框颜色
                 }
                 return '#cfd4df' // 其他节点的边框颜色
             })
             .attr('rx', 8)  // 圆角
-            .attr('fill', (d:any) => {
+            .attr('fill', (d: any) => {
                 if (d.depth === 0) {
                     return '#3982f7'  // 根节点背景颜色
                 } else {
@@ -582,10 +581,10 @@ class StockTreeVertical {
             .append('foreignObject')
             .attr('width', '50')
             .attr('height', '20')
-            .attr('x', (d:any) => {
+            .attr('x', (d: any) => {
                 return - this.opts.nodeWidth / 2 - 0.5;
             })
-            .attr('y', (d:any) => {
+            .attr('y', (d: any) => {
                 return -this.opts.nodeHeight / 2 - 10;
             })
             .append('xhtml:div')
@@ -602,40 +601,40 @@ class StockTreeVertical {
             .style('text-align', 'center')
             .style('padding', '3px')
             .style('font-size', '12px')
-            .style('line-height','12px')
+            .style('line-height', '12px')
             .style('border-radius', '3px')
-            .style('color','#eb4e3e')
+            .style('color', '#eb4e3e')
             .style('background-color', '#fcf1ef')
-            .style('display',(d:any)=>{
+            .style('display', (d: any) => {
                 return d.depth !== 0 && d.data.statusTag.name === "注销" ? 'block' : 'none';
             })
             .text((d: any) => {
-                return d.depth!== 0? d.data.statusTag.name : '';
+                return d.depth !== 0 ? d.data.statusTag.name : '';
             })
 
 
         // 添加字体自适应的功能
         node1Enter
             .append('foreignObject')
-            .attr('width', (d:any) => {
+            .attr('width', (d: any) => {
                 if (d.depth === 0) {
                     return (d.data.name.length + 4) * 16
                 }
                 return this.opts.nodeWidth
             })
-            .attr('height', (d:any) => {
+            .attr('height', (d: any) => {
                 if (d.depth === 0) {
                     return this.opts.rootNodeHeight
                 }
                 return this.opts.nodeHeight
             })
-            .attr('x', (d:any) => {
+            .attr('x', (d: any) => {
                 if (d.depth === 0) {
                     return (-(d.data.name.length + 4) * 16) / 2
                 }
                 return -this.opts.nodeWidth / 2
             })
-            .attr('y', (d:any) => {
+            .attr('y', (d: any) => {
                 if (d.depth === 0) {
                     return -this.opts.rootNodeHeight / 2
                 }
@@ -657,29 +656,29 @@ class StockTreeVertical {
             .style('text-align', 'center')
             .style('padding', '0 5px 0 12px')
             .style('font-weight', '500')
-            .style('font-size', (d:any) => {
+            .style('font-size', (d: any) => {
                 if (d.depth === 0) {
                     return '16px'
                 } else {
                     return '14px'
                 }
             }) // 设置字体大小
-            .style('color', (d:any) => {
+            .style('color', (d: any) => {
                 if (d.depth === 0) {
                     return '#ffffff'
                 } else {
                     return 'none'
                 }
             })
-            .style('font-weight', (d:any) => {
+            .style('font-weight', (d: any) => {
                 if (d.depth === 0) {
                     return 'bold'
                 }
             })
-            .attr('title', (d:any) => {
+            .attr('title', (d: any) => {
                 return d.data.name
             })
-            .text((d:any) => {
+            .text((d: any) => {
                 return d.data.name
             })
 
@@ -687,7 +686,7 @@ class StockTreeVertical {
         node1
             .merge(node1Enter)
             .transition(myTransition)
-            .attr('transform', (d:any) => {
+            .attr('transform', (d: any) => {
                 return `translate(${d.x},${d.y})`
             })
             .attr('fill-opacity', 1)
@@ -779,7 +778,7 @@ class StockTreeVertical {
             .attr('transform', () => {
                 return `translate(${0},${this.opts.nodeHeight / 2})`
             })
-            .style('display', (d:any) => {
+            .style('display', (d: any) => {
                 // 如果是根节点，不显示
                 if (d.depth === 0) {
                     return 'none'
@@ -788,7 +787,7 @@ class StockTreeVertical {
                 // if (!d._children) {
                 //     return 'none'
                 // }
-                if (!d.data?.hasInvestor){
+                if (!d.data?.hasInvestor) {
                     return 'none'
                 }
                 // if (!d.data?.hasInvestor || !d.visible){
@@ -817,9 +816,9 @@ class StockTreeVertical {
                 } else {
                     // 如果当前节点没有子节点，通过 addChildren 动态加载，并应用过滤条件
                     if (this.opts.addChildren) {
-                         // 应用过滤条件
+                        // 应用过滤条件
                         const t = (await this.opts.addChildren(d.data, "OUT"))
-                        if (t === undefined){
+                        if (t === undefined) {
                             return
                         }
                         const tt = t
@@ -837,7 +836,7 @@ class StockTreeVertical {
                                 }
                                 return true
                             })
-                        if(!tt || tt.length === 0){
+                        if (!tt || tt.length === 0) {
                             d3.select(d3.select(e.target).node().parentNode).style("display", "none");
                             return
                         }
@@ -877,20 +876,20 @@ class StockTreeVertical {
             .attr('y', 7.5)
             .style('font-size', 30)
             .style('font-family', '黑体')
-            .text((d:any) => {
+            .text((d: any) => {
                 return d.children ? '-' : '+'
                 // return d.children ? '-' : '+'
             })
 
         /***  绘制股东树  ***/
 
-        nodesOfUp.forEach((node:any) => {
+        nodesOfUp.forEach((node: any) => {
             node.y = -node.y
         })
 
         const link2 = this.gLinks
             .selectAll('path.linkOfUpItem')
-            .data(linksOfUp, (d:any) => {
+            .data(linksOfUp, (d: any) => {
                 return d.target.data.id
             })
 
@@ -936,7 +935,7 @@ class StockTreeVertical {
             .attr('class', 'linkLabel2')
             .attr('x', (d: any) => d.source.x) // 初始位置为父节点
             .attr('y', (d: any) => d.source.y) // 初始位置为父节点
-            .attr('dy',10) // 默认字体大小14px，修正基线误差
+            .attr('dy', 10) // 默认字体大小14px，修正基线误差
             .text((d: any) => {
                 return `${Math.round(d.target.data.ratio * 100 * 100) / 100}%`
             }) // 设置标签内容
@@ -956,7 +955,7 @@ class StockTreeVertical {
             .style('opacity', 0)
             .remove();
 
-        const node2 = this.gNodes.selectAll('g.nodeOfUpItemGroup').data(nodesOfUp, (d:any) => {
+        const node2 = this.gNodes.selectAll('g.nodeOfUpItemGroup').data(nodesOfUp, (d: any) => {
             return d.data.id
             // return d.data.id
         })
@@ -972,11 +971,11 @@ class StockTreeVertical {
             .attr('stroke-opacity', 0)
             .style('opacity', 0)
             .style('cursor', 'pointer')
-            .style('display', (d:any) => {
+            .style('display', (d: any) => {
                 if (d.depth === 0) return 'none'
             })
-            .on('click', (e:any, d:any) => {
-                if (this.opts.onNodeClick){
+            .on('click', (e: any, d: any) => {
+                if (this.opts.onNodeClick) {
                     this.opts.onNodeClick(d.data)
                 }
             })
@@ -984,39 +983,39 @@ class StockTreeVertical {
         // 外层的矩形框
         node2Enter
             .append('rect')
-            .attr('width', (d:any) => {
+            .attr('width', (d: any) => {
                 if (d.depth === 0) {
                     return (d.data.name.length + 4) * 16
                 }
                 return this.opts.nodeWidth
             })
-            .attr('height', (d:any) => {
+            .attr('height', (d: any) => {
                 if (d.depth === 0) {
                     return this.opts.rootNodeHeight
                 }
                 return this.opts.nodeHeight
             })
-            .attr('x', (d:any) => {
+            .attr('x', (d: any) => {
                 if (d.depth === 0) {
                     return (-(d.data.name.length + 4) * 16) / 2
                 }
                 return -this.opts.nodeWidth / 2
             })
-            .attr('y', (d:any) => {
+            .attr('y', (d: any) => {
                 if (d.depth === 0) {
                     return -this.opts.rootNodeHeight / 2
                 }
                 return -this.opts.nodeHeight / 2
             })
             .attr('stroke-width', 1)
-            .attr('stroke', (d:any) => {
+            .attr('stroke', (d: any) => {
                 if (d.depth === 0) {
                     return '#EBD1BB'  // 根节点边框颜色
                 }
                 return '#cfd4df' // 其他节点的边框颜色
             })
             .attr('rx', 8)
-            .attr('fill', (d:any) => {
+            .attr('fill', (d: any) => {
                 if (d.depth === 0) {
                     return '#FFF9F1'  // 根节点背景颜色
                 } else {
@@ -1029,25 +1028,25 @@ class StockTreeVertical {
         // 添加字体自适应的功能
         node2Enter
             .append('foreignObject')
-            .attr('width', (d:any) => {
+            .attr('width', (d: any) => {
                 if (d.depth === 0) {
                     return (d.data.name.length + 4) * 16
                 }
                 return this.opts.nodeWidth
             })
-            .attr('height', (d:any) => {
+            .attr('height', (d: any) => {
                 if (d.depth === 0) {
                     return this.opts.rootNodeHeight
                 }
                 return this.opts.nodeHeight
             })
-            .attr('x', (d:any) => {
+            .attr('x', (d: any) => {
                 if (d.depth === 0) {
                     return (-(d.data.name.length + 4) * 16) / 2
                 }
                 return -this.opts.nodeWidth / 2
             })
-            .attr('y', (d:any) => {
+            .attr('y', (d: any) => {
                 if (d.depth === 0) {
                     return -this.opts.rootNodeHeight / 2
                 }
@@ -1069,29 +1068,29 @@ class StockTreeVertical {
             .style('text-align', 'center')
             .style('padding', '0 5px 0 12px')
             .style('font-weight', '500')
-            .style('font-size', (d:any) => {
+            .style('font-size', (d: any) => {
                 if (d.depth === 0) {
                     return '16px'
                 } else {
                     return '14px'
                 }
             }) // 设置字体大小
-            .style('color', (d:any) => {
+            .style('color', (d: any) => {
                 if (d.depth === 0) {
                     return '#ffffff'
                 } else {
                     return 'none'
                 }
             })
-            .style('font-weight', (d:any) => {
+            .style('font-weight', (d: any) => {
                 if (d.depth === 0) {
                     return 'bold'
                 }
             })
-            .attr('title', (d:any) => {
+            .attr('title', (d: any) => {
                 return d.data.name
             })
-            .text((d:any) => {
+            .text((d: any) => {
                 return d.data.name
             })
 
@@ -1099,7 +1098,7 @@ class StockTreeVertical {
         node2
             .merge(node2Enter)
             .transition(myTransition)
-            .attr('transform', (d:any) => {
+            .attr('transform', (d: any) => {
                 return `translate(${d.x},${d.y})`
             })
             .attr('fill-opacity', 1)
@@ -1125,7 +1124,7 @@ class StockTreeVertical {
             .attr('transform', () => {
                 return `translate(${0},-${this.opts.nodeHeight / 2})`
             })
-            .style('display', (d:any) => {
+            .style('display', (d: any) => {
                 // 如果是根节点，不显示
                 if (d.depth === 0) {
                     return 'none'
@@ -1134,7 +1133,7 @@ class StockTreeVertical {
                 // if (!d._children) {
                 //     return 'none'
                 // }
-                if (!d.data?.hasHolder){
+                if (!d.data?.hasHolder) {
                     return 'none'
                 }
             })
@@ -1147,19 +1146,19 @@ class StockTreeVertical {
                     d.children = d._children;
                     d._children = null;
                 } else {
-                    if (this.opts.addChildren){
+                    if (this.opts.addChildren) {
                         const t = (await this.opts.addChildren(d.data, "IN"))
-                        if (t === undefined){
+                        if (t === undefined) {
                             return
                         }
                         d.children = t.map((item) => {
-                                const a = d3.hierarchy(item)
-                                return {
-                                    ...a,
-                                    depth: d.depth + 1,
-                                    parent: d,
-                                }
+                            const a = d3.hierarchy(item)
+                            return {
+                                ...a,
+                                depth: d.depth + 1,
+                                parent: d,
                             }
+                        }
                         )
                     }
                 }
@@ -1183,7 +1182,7 @@ class StockTreeVertical {
             .attr('y', 7.5)
             .style('font-size', 30)
             .style('font-family', '黑体')
-            .text((d:any) => {
+            .text((d: any) => {
                 return d.children ? '-' : '+'
             })
 
@@ -1194,15 +1193,15 @@ class StockTreeVertical {
         expandButtonsSelection
             .select('text')
             .transition()
-            .text((d:any) => {
+            .text((d: any) => {
                 return d.children ? '-' : '+'
             })
 
-        this.rootOfDown.eachBefore((d:any) => {
+        this.rootOfDown.eachBefore((d: any) => {
             d.x0 = d.x
             d.y0 = d.y
         })
-        this.rootOfUp.eachBefore((d:any) => {
+        this.rootOfUp.eachBefore((d: any) => {
             d.x0 = d.x
             d.y0 = d.y
         })
@@ -1226,16 +1225,16 @@ class StockTreeVertical {
     }
 
     // 直角连接线 by wushengyuan
-    private drawLink(direction:any,{source, target}:{source:any,target:any}) {
-        if (direction === "up"){
-            const bottom = target.y + this.opts.nodeHeight/2
+    private drawLink(direction: any, { source, target }: { source: any, target: any }) {
+        if (direction === "up") {
+            const bottom = target.y + this.opts.nodeHeight / 2
             return `M${source.x},${source.y} 
                 L${source.x},
                 ${bottom + 40} ${target.x},
                 ${bottom + 40} ${target.x},
                 ${bottom}`
-        }else if (direction === "down"){
-            const top = target.y - this.opts.nodeHeight/2
+        } else if (direction === "down") {
+            const top = target.y - this.opts.nodeHeight / 2
             return `M${source.x},${source.y} 
                     L${source.x},
                     ${top - 40} ${target.x},
@@ -1244,7 +1243,7 @@ class StockTreeVertical {
         }
     }
 
-    clear(){
+    clear() {
         const container = d3.select(this.ref);
         container.selectAll('*').remove();
     }
@@ -1264,39 +1263,39 @@ type ParentType = {
     hasHolder?: boolean
 }
 
-let childrenItems:ChildType[] = [
+let childrenItems: ChildType[] = [
     {
         id: "BG00001",
         name: "京海控股集团有限公司",
         percent: 1,
-        hasInvestor:false
+        hasInvestor: false
     },
     {
         id: "BG00008",
         name: "中国邮政集团有限公司四川省宜宾市分公司啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
         percent: 1,
-        hasInvestor:true
+        hasInvestor: true
     },
     {
         id: "BG00048",
         name: "京海企业投资有限公司",
         percent: 0.01,
-        hasInvestor:false
+        hasInvestor: false
     },
 ]
 
-let parentsItems:ParentType[] = [
+let parentsItems: ParentType[] = [
     {
         id: "BG00001",
         name: "京海控股集团有限公司",
         percent: 1,
-        hasHolder:false
+        hasHolder: false
     },
     {
         id: "JH00001",
         name: "高启强",
         percent: 0.1,
-        hasHolder:true
+        hasHolder: true
     },
     {
         id: "JH00002",
@@ -1305,25 +1304,25 @@ let parentsItems:ParentType[] = [
     },
 ]
 
-const LabelCssProps:CSSProperties={
-    textAlign:"left",paddingRight:"5px",minWidth:"70px", width:"70px",height:"24px"
+const LabelCssProps: CSSProperties = {
+    textAlign: "left", paddingRight: "5px", minWidth: "70px", width: "70px", height: "24px"
 }
 
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState)=>state.app.global.config || new config.Config())
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
     const [key, setKey] = useState("")
 
-    useEffect(()=>{
+    useEffect(() => {
         setKey(cfg.TianYanCha.token)
     }, [cfg.TianYanCha])
 
 
-    const save = ()=>{
+    const save = () => {
         SetAuth(key).then(
-            ()=>{
+            () => {
                 const t = { ...cfg, TianYanCha: { ...cfg.TianYanCha, token: key } } as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
@@ -1337,7 +1336,7 @@ const AuthSetting: React.FC = () => {
         )
     }
 
-    const cancel=() => {
+    const cancel = () => {
         setEditable(false);
         setOpen(false)
         setKey(cfg.TianYanCha.token)
@@ -1345,7 +1344,7 @@ const AuthSetting: React.FC = () => {
 
     return <>
         <Tooltip title="设置" placement={"right"}>
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
+            <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
         </Tooltip>
         <Modal
             open={open}
@@ -1360,32 +1359,32 @@ const AuthSetting: React.FC = () => {
         >
             <Flex vertical gap={10}>
                 <Input.Password value={key} placeholder="token" onChange={
-                    e=>{
-                        if(!editable)return
+                    e => {
+                        if (!editable) return
                         setKey(e.target.value)
                     }
-                }/>
+                } />
                 <Flex gap={10} justify={"end"}>
-                {
-                    !editable ?
-                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                        :
-                        <>
-                            <Button {...buttonProps} htmlType="submit"
+                    {
+                        !editable ?
+                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                            :
+                            <>
+                                <Button {...buttonProps} htmlType="submit"
                                     onClick={save}
-                            >保存</Button>
-                            <Button {...buttonProps} htmlType="submit"
+                                >保存</Button>
+                                <Button {...buttonProps} htmlType="submit"
                                     onClick={cancel}
-                            >取消</Button>
-                        </>
-                }
+                                >取消</Button>
+                            </>
+                    }
                 </Flex>
             </Flex>
         </Modal>
     </>
 }
 
-const SharedOptions: CascaderProps<any>= {
+const SharedOptions: CascaderProps<any> = {
     allowClear: true,
     multiple: true,
     size: 'small',
@@ -1426,14 +1425,14 @@ const TabContent: React.FC = () => {
             }
         },
         {
-            title: '登记状态', dataIndex: "regStatus", ellipsis: true, width: 80,  onCell: (record, index) => {
+            title: '登记状态', dataIndex: "regStatus", ellipsis: true, width: 80, onCell: (record, index) => {
                 return {
                     onContextMenu: () => handleOnContextMenu(record, index, "regStatus"),
                     onClick: () => copy(record.regStatus)
                 }
-            },render:(text, record, index) =>{
-                return <span>{record.regStatusLabel.map((item:any)=>{
-                    return <Tag color={item.background} style={{color:item.color}}>{item.profileTagNameOnPage}</Tag>
+            }, render: (text, record, index) => {
+                return <span>{record.regStatusLabel.map((item: any) => {
+                    return <Tag color={item.background} style={{ color: item.color }}>{item.profileTagNameOnPage}</Tag>
                 })}</span>
             }
         },
@@ -1478,7 +1477,7 @@ const TabContent: React.FC = () => {
             }
         },
         {
-            title: '电话', dataIndex: "phoneNum", ellipsis: true, width: 150,  onCell: (record, index) => {
+            title: '电话', dataIndex: "phoneNum", ellipsis: true, width: 150, onCell: (record, index) => {
                 return {
                     onContextMenu: () => handleOnContextMenu(record, index, "phoneNum"),
                     onClick: () => copy(record.phoneNum)
@@ -1494,12 +1493,12 @@ const TabContent: React.FC = () => {
             }
         },
         {
-            title: '操作', dataIndex: "operation", ellipsis: true, width: 100,fixed: 'right', render:(text, record, index)=>{
+            title: '操作', dataIndex: "operation", ellipsis: true, width: 100, fixed: 'right', render: (text, record, index) => {
                 return <span><Button size={"small"} color="primary" variant="filled">股权结构图</Button></span>
             }
         },
-        ]
-    const [treeInstance,setTreeInstance] = useState<StockTreeVertical>();
+    ]
+    const [treeInstance, setTreeInstance] = useState<StockTreeVertical>();
     const [processedData, setProcessedData] = useState<any>();
     const graphRef = useRef<HTMLDivElement | null>(null); // 用于绑定 SVG 容器
     const [isComposing, setIsComposing] = useState(false);
@@ -1514,27 +1513,27 @@ const TabContent: React.FC = () => {
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const [open, setOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);
-    const [currentCompany, setCurrentCompany] = React.useState<{name:string,id:string}>({id: "", name: ""});
+    const [currentCompany, setCurrentCompany] = React.useState<{ name: string, id: string }>({ id: "", name: "" });
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const [containerHeight,setContainerHeight] = useState(0)
-    const [tableHeight,setTableHeight] = useState(0)
+    const [containerHeight, setContainerHeight] = useState(0)
+    const [tableHeight, setTableHeight] = useState(0)
     const [ratioMin, setRatioMin] = useState(0)
     const [ratioMax, setRatioMax] = useState(100)
     const ratioMinRef = useRef(ratioMin)
     const ratioMaxRef = useRef(ratioMax)
-    const history = useSelector((state:RootState)=>state.app.global.history || new History())
+    const history = useSelector((state: RootState) => state.app.global.history || new History())
 
     useEffect(() => {
-        if (filterRef.current){
+        if (filterRef.current) {
             setTableHeight(window.innerHeight - filterRef.current?.getBoundingClientRect().height - 153)
-            window.addEventListener("resize", ()=>{
-                if (filterRef.current){
+            window.addEventListener("resize", () => {
+                if (filterRef.current) {
                     setTableHeight(window.innerHeight - filterRef.current?.getBoundingClientRect().height - 153)
                 }
             })
             setContainerHeight(window.innerHeight - 90)
-            window.addEventListener("resize", ()=>{
-                if (filterRef.current){
+            window.addEventListener("resize", () => {
+                if (filterRef.current) {
                     setContainerHeight(window.innerHeight - 90)
                 }
             })
@@ -1542,12 +1541,12 @@ const TabContent: React.FC = () => {
     }, []);
 
     const handleOnContextMenu = (item: PageDataType, rowIndex: number | undefined, colKey: string) => {
-        selectedRow = {item: item, rowIndex: rowIndex, colKey: colKey};
+        selectedRow = { item: item, rowIndex: rowIndex, colKey: colKey };
     }
 
     const query = async (name: string, id: string) => {
         treeInstance?.clear()
-        setCurrentCompany({name: name, id: id})
+        setCurrentCompany({ name: name, id: id })
         setOpen(true)
         setLoading(true)
         try {
@@ -1570,8 +1569,8 @@ const TabContent: React.FC = () => {
                     nodeWidth: 200,
                     rootNodeHeight: 45,
                     addChildren: add,
-                    filterForShow:filterForShow,
-                    onNodeClick:(node)=>{
+                    filterForShow: filterForShow,
+                    onNodeClick: (node) => {
                         copy(node.name)
                     }
                 }
@@ -1583,7 +1582,7 @@ const TabContent: React.FC = () => {
         }
     }
 
-    const add=async (item: PenetrationItem, direction: string) => {
+    const add = async (item: PenetrationItem, direction: string) => {
         try {
             setLoading(true)
             if (direction === "IN") {
@@ -1593,27 +1592,27 @@ const TabContent: React.FC = () => {
             }
 
         } catch (e) {
-            errorNotification("错误",e)
+            errorNotification("错误", e)
         } finally {
             setLoading(false)
         }
     }
 
-    const getRegStatus=()=>{
-        const t:CheckboxOptionType[] = []
-        TYC.regStatus.items.forEach(item=>{
-            item.childList.forEach(i=>{
-                t.push({label: i.name, value: i.value})
+    const getRegStatus = () => {
+        const t: CheckboxOptionType[] = []
+        TYC.regStatus.items.forEach(item => {
+            item.childList.forEach(i => {
+                t.push({ label: i.name, value: i.value })
             })
         })
         return t
     }
 
-    const handlePaginationChange=(page:number,pageSize:number)=>{
+    const handlePaginationChange = (page: number, pageSize: number) => {
 
     }
 
-    const filterForShow=(item:PenetrationItem)=>{
+    const filterForShow = (item: PenetrationItem) => {
         return item.ratio * 100 >= ratioMinRef.current && item.ratio * 100 <= ratioMaxRef.current;
     }
     return (
@@ -1639,21 +1638,22 @@ const TabContent: React.FC = () => {
                         {/*    />*/}
                         {/*</Dropdown>*/}
                         <Candidate
-                            style={{width:400}}
+                            style={{ width: 400 }}
                             size={"small"}
+                            backFillDataOnSelectItem={false}
                             items={[
                                 {
-                                    fetchOnOpen : (items)=>{return items.length===0},
-                                    onSelectItem: (item)=>{
+                                    fetchOnOpen: (items) => { return items.length === 0 },
+                                    onSelectItem: (item) => {
                                         query(item.label as string, item.data.graphId.toString())
                                     },
                                     title: '相关企业',
-                                    filter: (v)=>{return !!(v && v.toString().length > 1)},
+                                    filter: (v) => { return !!(v && v.toString().length > 1) },
                                     fetch: async (v) => {
                                         try {
                                             const response = await Suggest(v.toString()); // 等待Suggest函数执行完成获取原始数据
                                             const a: ItemType[] = response.map(item => {
-                                                const t:ItemType={
+                                                const t: ItemType = {
                                                     value: item.name,
                                                     label: item.name,
                                                     data: item
@@ -1692,83 +1692,83 @@ const TabContent: React.FC = () => {
 
                         >
                         </Candidate>
-                    {/*</Flex>*/}
-                    {/*<Flex gap={10}>*/}
-                    {/*    <span style={LabelCssProps}>{TYC.scopeType.name}</span>*/}
-                    {/*    <Checkbox.Group*/}
-                    {/*        options={TYC.scopeType.items.map(item=>{return {label: item.name, value: item.value}})}*/}
-                    {/*    />*/}
-                    {/*</Flex>*/}
-                    {/*<Flex gap={10} wrap>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <span style={LabelCssProps}>{TYC.industryCode.name}</span>*/}
-                    {/*        <Cascader*/}
-                    {/*            {...SharedOptions}*/}
-                    {/*            style={{width:"140px"}}*/}
-                    {/*            options={TYC.industryCode.items}/>*/}
-                    {/*    </Flex>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <span style={LabelCssProps}>{TYC.areaCode.name}</span>*/}
-                    {/*        <Cascader*/}
-                    {/*            {...SharedOptions}*/}
-                    {/*            style={{width:"140px"}}*/}
-                    {/*            options={TYC.areaCode.items}*/}
-                    {/*        />*/}
-                    {/*    </Flex>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <BadgeWrapper info={TYC.companyScale.right.toUpperCase()}>*/}
-                    {/*            <span style={LabelCssProps}>{TYC.companyScale.name}</span>*/}
-                    {/*        </BadgeWrapper>*/}
-                    {/*        <Cascader*/}
-                    {/*            {...SharedOptions}*/}
-                    {/*            style={{width:"140px"}}*/}
-                    {/*            options={TYC.companyScale.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
-                    {/*    </Flex>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <BadgeWrapper info={TYC.tycScore.right.toUpperCase()}>*/}
-                    {/*            <span style={LabelCssProps}>{TYC.tycScore.name}</span>*/}
-                    {/*        </BadgeWrapper>*/}
-                    {/*        <Cascader*/}
-                    {/*            {...SharedOptions}*/}
-                    {/*            style={{width:"140px"}}*/}
-                    {/*            options={TYC.tycScore.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
-                    {/*    </Flex>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <BadgeWrapper info={TYC.scienceTechnologyGrade.right.toUpperCase()}>*/}
-                    {/*            <span style={LabelCssProps}>{TYC.scienceTechnologyGrade.name}</span>*/}
-                    {/*        </BadgeWrapper>*/}
-                    {/*        <Cascader*/}
-                    {/*            {...SharedOptions}*/}
-                    {/*            style={{width:"140px"}}*/}
-                    {/*            options={TYC.scienceTechnologyGrade.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
-                    {/*    </Flex>*/}
-                    {/*</Flex>*/}
-                    {/*<Flex>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <span style={LabelCssProps}>{TYC.paidCapital.name}</span>*/}
-                    {/*        <Checkbox.Group*/}
-                    {/*            options={TYC.paidCapital.items.map(item=>{return {label: item.name, value: item.value}})}*/}
-                    {/*        />*/}
-                    {/*    </Flex>*/}
-                    {/*</Flex>*/}
-                    {/*<Flex vertical>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <BadgeWrapper info={"VIP"}>*/}
-                    {/*            <span style={{...LabelCssProps}}>{TYC.regStatus.name}</span>*/}
-                    {/*        </BadgeWrapper>*/}
-                    {/*        <Checkbox.Group*/}
-                    {/*            defaultValue={["存续/在业", "迁入", "迁出"]}*/}
-                    {/*            options={getRegStatus()}*/}
-                    {/*        />*/}
-                    {/*    </Flex>*/}
-                    {/*</Flex>*/}
-                    {/*<Flex vertical>*/}
-                    {/*    <Flex gap={10}>*/}
-                    {/*        <span style={LabelCssProps}>{TYC.branchType.name}</span>*/}
-                    {/*        <Checkbox.Group*/}
-                    {/*            options={TYC.branchType.items.map(item=>{return {label: item.name, value: item.value}})}*/}
-                    {/*        />*/}
-                    {/*    </Flex>*/}
+                        {/*</Flex>*/}
+                        {/*<Flex gap={10}>*/}
+                        {/*    <span style={LabelCssProps}>{TYC.scopeType.name}</span>*/}
+                        {/*    <Checkbox.Group*/}
+                        {/*        options={TYC.scopeType.items.map(item=>{return {label: item.name, value: item.value}})}*/}
+                        {/*    />*/}
+                        {/*</Flex>*/}
+                        {/*<Flex gap={10} wrap>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.industryCode.name}</span>*/}
+                        {/*        <Cascader*/}
+                        {/*            {...SharedOptions}*/}
+                        {/*            style={{width:"140px"}}*/}
+                        {/*            options={TYC.industryCode.items}/>*/}
+                        {/*    </Flex>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.areaCode.name}</span>*/}
+                        {/*        <Cascader*/}
+                        {/*            {...SharedOptions}*/}
+                        {/*            style={{width:"140px"}}*/}
+                        {/*            options={TYC.areaCode.items}*/}
+                        {/*        />*/}
+                        {/*    </Flex>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <BadgeWrapper info={TYC.companyScale.right.toUpperCase()}>*/}
+                        {/*            <span style={LabelCssProps}>{TYC.companyScale.name}</span>*/}
+                        {/*        </BadgeWrapper>*/}
+                        {/*        <Cascader*/}
+                        {/*            {...SharedOptions}*/}
+                        {/*            style={{width:"140px"}}*/}
+                        {/*            options={TYC.companyScale.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
+                        {/*    </Flex>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <BadgeWrapper info={TYC.tycScore.right.toUpperCase()}>*/}
+                        {/*            <span style={LabelCssProps}>{TYC.tycScore.name}</span>*/}
+                        {/*        </BadgeWrapper>*/}
+                        {/*        <Cascader*/}
+                        {/*            {...SharedOptions}*/}
+                        {/*            style={{width:"140px"}}*/}
+                        {/*            options={TYC.tycScore.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
+                        {/*    </Flex>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <BadgeWrapper info={TYC.scienceTechnologyGrade.right.toUpperCase()}>*/}
+                        {/*            <span style={LabelCssProps}>{TYC.scienceTechnologyGrade.name}</span>*/}
+                        {/*        </BadgeWrapper>*/}
+                        {/*        <Cascader*/}
+                        {/*            {...SharedOptions}*/}
+                        {/*            style={{width:"140px"}}*/}
+                        {/*            options={TYC.scienceTechnologyGrade.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
+                        {/*    </Flex>*/}
+                        {/*</Flex>*/}
+                        {/*<Flex>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.paidCapital.name}</span>*/}
+                        {/*        <Checkbox.Group*/}
+                        {/*            options={TYC.paidCapital.items.map(item=>{return {label: item.name, value: item.value}})}*/}
+                        {/*        />*/}
+                        {/*    </Flex>*/}
+                        {/*</Flex>*/}
+                        {/*<Flex vertical>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <BadgeWrapper info={"VIP"}>*/}
+                        {/*            <span style={{...LabelCssProps}}>{TYC.regStatus.name}</span>*/}
+                        {/*        </BadgeWrapper>*/}
+                        {/*        <Checkbox.Group*/}
+                        {/*            defaultValue={["存续/在业", "迁入", "迁出"]}*/}
+                        {/*            options={getRegStatus()}*/}
+                        {/*        />*/}
+                        {/*    </Flex>*/}
+                        {/*</Flex>*/}
+                        {/*<Flex vertical>*/}
+                        {/*    <Flex gap={10}>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.branchType.name}</span>*/}
+                        {/*        <Checkbox.Group*/}
+                        {/*            options={TYC.branchType.items.map(item=>{return {label: item.name, value: item.value}})}*/}
+                        {/*        />*/}
+                        {/*    </Flex>*/}
                     </Flex>
                 </Flex>
             </div>
@@ -1812,16 +1812,16 @@ const TabContent: React.FC = () => {
                     }
                 }}
                 placement="right"
-                // drawerRender={(dom)=>{
-                //     return <div style={{height:"100%"}}>{dom}</div>
-                // }}
+            // drawerRender={(dom)=>{
+            //     return <div style={{height:"100%"}}>{dom}</div>
+            // }}
             >
-                <Flex vertical style={{ height: "100%",position:'relative'}}>
+                <Flex vertical style={{ height: "100%", position: 'relative' }}>
                     {/*<Spin spinning={loading} style={{position: "absolute", height: "100%", width: "100%"}}>*/}
                     {/*    */}
                     {/*</Spin>*/}
-                    <Flex gap={20} style={{zIndex: 10, position: "absolute", backgroundColor:"#ffffff", right: "0"}}>
-                        <Tag bordered={false} color="#108ee9" style={{fontSize:"14px", fontWeight:"bold"}}>{currentCompany.name}</Tag>
+                    <Flex gap={20} style={{ zIndex: 10, position: "absolute", backgroundColor: "#ffffff", right: "0" }}>
+                        <Tag bordered={false} color="#108ee9" style={{ fontSize: "14px", fontWeight: "bold" }}>{currentCompany.name}</Tag>
                         {/*<span>*/}
                         {/*    <Tag bordered={false} color="cyan" style={{fontSize:"14px"}}>经营状态</Tag>*/}
                         {/*    <Radio.Group size={"small"} onChange={e=>{}} defaultValue={"存续/在业"}>*/}
@@ -1831,25 +1831,25 @@ const TabContent: React.FC = () => {
                         {/*</span>*/}
 
                         <Flex>
-                            <Tag bordered={false} color="cyan" style={{fontSize:"14px"}}>控股比例</Tag>
+                            <Tag bordered={false} color="cyan" style={{ fontSize: "14px" }}>控股比例</Tag>
                             <InputNumber value={ratioMin} size={"small"} max={100} min={0} suffix={"%"}
-                                         onChange={(v)=>{
-                                             ratioMinRef.current = v===null?0:v
-                                             setRatioMin(ratioMinRef.current)
-                                             treeInstance?.reset()
-                                         }}
+                                onChange={(v) => {
+                                    ratioMinRef.current = v === null ? 0 : v
+                                    setRatioMin(ratioMinRef.current)
+                                    treeInstance?.reset()
+                                }}
                             />-<InputNumber value={ratioMax} size={"small"} max={100} min={0} suffix={"%"}
-                                            onChange={(v)=>{
-                                                ratioMaxRef.current = v===null?100:v
-                                                setRatioMax(ratioMaxRef.current)
-                                                treeInstance?.reset()
-                                            }}
-                        />
+                                onChange={(v) => {
+                                    ratioMaxRef.current = v === null ? 100 : v
+                                    setRatioMax(ratioMaxRef.current)
+                                    treeInstance?.reset()
+                                }}
+                            />
                         </Flex>
-                        <Button color="danger" variant="filled" size={"small"} onClick={()=>{setOpen(false)}}>返回</Button>
+                        <Button color="danger" variant="filled" size={"small"} onClick={() => { setOpen(false) }}>返回</Button>
                     </Flex>
-                    <Spin spinning={loading} style={{height:"100%"}} wrapperClassName={"wrapper"} >
-                        <div ref={graphRef} style={{height:"100%", width: "100%"}}>
+                    <Spin spinning={loading} style={{ height: "100%" }} wrapperClassName={"wrapper"} >
+                        <div ref={graphRef} style={{ height: "100%", width: "100%" }}>
                             {/* 动态生成内容由 D3.js 完成 */}
                         </div>
                     </Spin>
@@ -1859,16 +1859,16 @@ const TabContent: React.FC = () => {
     );
 };
 
-const TianYanCha=()=>{
-    return <TabsV2 defaultTabContent={<TabContent/>} tabBarExtraContent={{
+const TianYanCha = () => {
+    return <TabsV2 defaultTabContent={<TabContent />} tabBarExtraContent={{
         left: <div style={{
             width: "auto",
             height: "23px",
             display: "flex",
             alignItems: "center",
             backgroundColor: "#f1f3f4"
-        }}><AuthSetting/></div>
-    }}/>
+        }}><AuthSetting /></div>
+    }} />
 }
 
 export default TianYanCha;

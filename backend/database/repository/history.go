@@ -43,7 +43,7 @@ func (r *HistoryRepositoryImpl) FindByPartialKey(ht constant.HistoryType, key st
 		Select("histories.*").
 		Joins(fmt.Sprintf("JOIN (%s) AS sub ON histories.key = sub.key AND histories.created_at = sub.max_created_at", subQuery)).
 		Order("sub.max_created_at DESC").
-		Limit(10).
+		Limit(limit).
 		Find(&items).Error
 
 	if err != nil {

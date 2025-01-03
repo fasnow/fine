@@ -1,7 +1,7 @@
 import React from "react";
-import type {MenuProps} from "antd";
-import {ConfigProvider, Menu} from "antd";
-import {useNavigate} from "react-router-dom";
+import type { MenuProps } from "antd";
+import { ConfigProvider, Menu } from "antd";
+import { useNavigate } from "react-router-dom";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -45,7 +45,7 @@ const MainMenu: React.FC = () => {
     const navigate = useNavigate()
     const onClick = (e: any) => {
         // console.log(e)
-        navigate(e.key, {replace: true})
+        navigate(e.key, { replace: true })
         // warningNotification("测试标题","测试内容")
     }
 
@@ -73,7 +73,7 @@ const MainMenu: React.FC = () => {
                 // inlineCollapsed={collapsed}
                 items={items}
                 onClick={onClick}
-                // style={{width:200}}
+            // style={{width:200}}
             />
         </ConfigProvider>
     );

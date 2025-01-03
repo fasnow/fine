@@ -12,62 +12,56 @@ import {
     Flex,
     Spin,
     Input,
-    Empty,
     InputProps,
     Button,
     Space,
     InputRef,
-    GetProp,
-    SelectProps,
     Tag,
     List,
     ConfigProvider
 } from "antd";
-import { errorNotification } from "@/component/Notification";
-import {SearchProps} from "antd/es/input";
-import {SearchOutlined, CaretDownOutlined} from "@ant-design/icons";
-import {SizeType} from "antd/es/config-provider/SizeContext";
-import {prop} from "cheerio/lib/api/attributes";
-import {is} from "cheerio/lib/api/traversing";
+import { SearchProps } from "antd/es/input";
+import { SearchOutlined } from "@ant-design/icons";
+import { SizeType } from "antd/es/config-provider/SizeContext";
 
 // 定义ItemType类型，更明确key的类型为string（可根据实际情况调整类型）
 export type ItemType = {
-    value: string|number;
+    value: string | number;
     label: React.ReactNode;
-    data:any
+    data: any
 };
 
-interface BasePanelType{
-    fetchOnOpen?:((items: ItemType[]) =>boolean) | boolean,
-    value?:string|number
-    title?:string
-    fetch?: ((value: string|number) => ItemType[] | Promise<ItemType[]>) | undefined;
-    filter?: (value: string|number) => boolean;
-    onSelectItem?: (item: ItemType) =>void;
+interface BasePanelType {
+    fetchOnOpen?: ((items: ItemType[]) => boolean) | boolean,
+    value?: string | number
+    title?: string
+    fetch?: ((value: string | number) => ItemType[] | Promise<ItemType[]>) | undefined;
+    filter?: (value: string | number) => boolean;
+    onSelectItem?: (item: ItemType) => void;
 }
 
-const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
+const Panel = React.memo(React.forwardRef<any, BasePanelType>((props, ref) => {
     // 使用useState来管理当前选中项的key，初始值可以设为null，表示没有选中项
     const [selectedKey, setSelectedKey] = useState<string | number | null>(null);
     const [loading, setLoading] = useState(false);
     const [candidates, setCandidates] = useState<ItemType[]>([]);
 
-    useEffect(()=>{
+    useEffect(() => {
         props.value !== undefined && fetchItems(props.value)
     }, [props.value])
 
     useImperativeHandle(ref, () => ({
-        fetch: (v:string|number) => fetchItems(v),
-        fetchOnOpen:()=>{
-            if (props.fetchOnOpen instanceof Function){
-                return  props.fetchOnOpen(candidates)
+        fetch: (v: string | number) => fetchItems(v),
+        fetchOnOpen: () => {
+            if (props.fetchOnOpen instanceof Function) {
+                return props.fetchOnOpen(candidates)
             }
             return props.fetchOnOpen
         }
     }));
 
-    const fetchItems=(v:string|number)=>{
-        if (!props.fetch)return;
+    const fetchItems = (v: string | number) => {
+        if (!props.fetch) return;
         if (props.filter) {
             if (!props.filter(v)) return;
         }
@@ -86,7 +80,7 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
         }
     }
 
-    const handleMouseOver = (key: string|number) => {
+    const handleMouseOver = (key: string | number) => {
         setSelectedKey(key);
     };
 
@@ -97,8 +91,8 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
                 <Tag bordered={false} color="cyan">{props.title}</Tag>
             }
             {
-                loading? (
-                    <Spin spinning={true} style={{ display: "flex", justifyContent: 'center', alignItems: 'center'}} />
+                loading ? (
+                    <Spin spinning={true} style={{ display: "flex", justifyContent: 'center', alignItems: 'center' }} />
                 ) : (
                     <ConfigProvider
                         theme={{
@@ -113,10 +107,10 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
                             dataSource={candidates}
                             size={"small"}
                             split={false}
-                            style={{maxHeight:200}}
-                            renderItem={(item, index)=>{
+                            style={{ maxHeight: 200 }}
+                            renderItem={(item, index) => {
                                 const isSelected = item.value === selectedKey;
-                                return <List.Item key={index} style={{overflow:'hidden'}}>
+                                return <List.Item key={index} style={{ overflow: 'hidden' }}>
                                     <span
                                         onMouseOver={() => handleMouseOver(item.value)}
                                         onClick={(e) => {
@@ -126,7 +120,7 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
                                         }}
                                         style={{
                                             cursor: 'pointer',
-                                            backgroundColor: isSelected? '#f0f0f0' : 'transparent',
+                                            backgroundColor: isSelected ? '#f0f0f0' : 'transparent',
                                             padding: '5px',
                                             borderRadius: '3px',
                                             overflow: "hidden",
@@ -135,8 +129,8 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
                                             width: "100%",
                                         }}
                                     >
-                                    {item.label}
-                                </span>
+                                        {item.label}
+                                    </span>
                                 </List.Item>
                             }}
                         />
@@ -147,7 +141,7 @@ const Panel =React.memo(React.forwardRef<any,BasePanelType>((props, ref) => {
     );
 }));
 
-export interface CandidateProps{
+export interface CandidateProps {
     items?: BasePanelType[];
     size?: SizeType;
     style?: CSSProperties;
@@ -157,22 +151,23 @@ export interface CandidateProps{
     onPressEnter?: (value: string) => void;
     value?: string;
     onChange?: InputProps['onChange'];
-    placeholder?: InputProps['placeholder']
+    placeholder?: InputProps['placeholder'];
+    backFillDataOnSelectItem?: boolean
 }
 
 const Candidate: React.FC<CandidateProps> = React.memo((props) => {
     const [localValue, setLocalValue] = useState<string | number>(props.value || "");
-    const valueRef = useRef<string|number>("")
+    const valueRef = useRef<string | number>("")
     const [isComposing, setIsComposing] = useState(false);
     const rootDivRef = useRef<HTMLDivElement>(null);
     const itemsDivRef = useRef<HTMLDivElement>(null);
     const inputDivRef = useRef<InputRef>(null);
     const [open, setOpen] = useState(false);
-    const {items, onChange, onPressEnter,onSearch,...restProps} = props
+    const { items, onChange, onPressEnter, onSearch, backFillDataOnSelectItem, ...restProps } = props
     const refs = useRef<any[]>([])
     const index = useRef(0)
     const [value, setValue] = useState(localValue)
-
+    const f = useRef(backFillDataOnSelectItem === undefined?true:backFillDataOnSelectItem)
     useEffect(() => {
         const handleClick = (event: MouseEvent) => {
             const rootDiv = rootDivRef.current;
@@ -183,15 +178,15 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
             }
             //点击item后隐藏
             const itemsDiv = itemsDivRef.current;
-            if (itemsDiv?.contains(event.target as Node)){
+            if (itemsDiv?.contains(event.target as Node)) {
                 setOpen(false);
                 return
             }
             //点击input后显示
             const inputDiv = inputDivRef.current;
-            if (inputDiv?.input?.contains(event.target as Node)){
+            if (inputDiv?.input?.contains(event.target as Node)) {
                 setOpen(true)
-                refs.current.forEach(ref=>{
+                refs.current.forEach(ref => {
                     // if (ref.current && ref.current.fetchOnOpen()){
                     //     ref.current.fetch(valueRef.current)
                     // }
@@ -209,14 +204,14 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
         };
     }, []);
 
-    useEffect(()=>{
+    useEffect(() => {
         setLocalValue(props.value || "")
-    },[props.value])
+    }, [props.value])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
         setLocalValue(newValue);
-        if(!isComposing){
+        if (!isComposing) {
             setValue(newValue)
         }
     };
@@ -233,13 +228,13 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
         setValue(newValue)
     };
 
-    const SharedProps:SearchProps = {
+    const SharedProps: SearchProps = {
         ...restProps,
-        onChange:handleChange,
-        onCompositionStart:handleCompositionStart,
-        onCompositionEnd:handleCompositionEnd,
-        onPressEnter:(e)=>{
-            if (onPressEnter){
+        onChange: handleChange,
+        onCompositionStart: handleCompositionStart,
+        onCompositionEnd: handleCompositionEnd,
+        onPressEnter: (e) => {
+            if (onPressEnter) {
                 // setOpen(false)
                 onPressEnter(value.toString())
             }
@@ -247,40 +242,42 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
         value: localValue
     }
 
-    const panels = useMemo(()=>{
-        return props.items?.map(item=>{
+    const panels = useMemo(() => {
+        return props.items?.map(item => {
             const r = createRef()
             refs.current.push(r)
             return <Panel key={index.current++} ref={r} title={item.title} value={value} fetch={item.fetch}
-                          onSelectItem={(t)=>{
-                              setOpen(false)
-                              setLocalValue(t.value || "")
-                              setValue(t.value.toString() || "")
-                              valueRef.current = t.value || ""
-                              if (item.onSelectItem) {
-                                  item.onSelectItem(t)
-                              }
-                          }}
-                          filter={item.filter}
+                onSelectItem={(t) => {
+                    setOpen(false)
+                    if (f.current){
+                        setLocalValue(t.value || "")
+                        setValue(t.value.toString() || "")
+                    }
+                    valueRef.current = t.value || ""
+                    if (item.onSelectItem) {
+                        item.onSelectItem(t)
+                    }
+                }}
+                filter={item.filter}
             />
         })
-    },[value])
+    }, [value])
 
     return (
-        <div ref={rootDivRef} style={{ position: "relative"}}>
+        <div ref={rootDivRef} style={{ position: "relative" }}>
             <Flex justify={'center'} align={'center'}>
                 {
-                    onSearch?<Space.Compact>
+                    onSearch ? <Space.Compact>
                         <Input
                             ref={inputDivRef}
                             {...SharedProps}
-                        /><Button icon={<SearchOutlined/>} size={SharedProps.size} onClick={(e)=>{
-                        console.log(value)
-                            if (onSearch){
-                            onSearch(value.toString())
-                        }
-                    }}/>
-                    </Space.Compact>:<Input
+                        /><Button icon={<SearchOutlined />} size={SharedProps.size} onClick={(e) => {
+                            console.log(value)
+                            if (onSearch) {
+                                onSearch(value.toString())
+                            }
+                        }} />
+                    </Space.Compact> : <Input
                         ref={inputDivRef}
                         {...SharedProps}
                     />
@@ -295,7 +292,7 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
                 borderRadius: '3px',
                 padding: '5px',
                 overflowY: 'auto',
-                display: open? 'block' : 'none'
+                display: open ? 'block' : 'none'
             }}>
                 {panels}
             </div>

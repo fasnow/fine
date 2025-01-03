@@ -1,27 +1,23 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TextArea from "antd/es/input/TextArea";
-import {Button, Dropdown, Flex, Input, InputNumber, MenuProps, Space, Splitter, Table, Tooltip} from "antd";
+import { Button, Flex, Input, InputNumber, Space, Splitter, Tooltip } from "antd";
 import "@/pages/Httpx.css"
-import {OpenFileDialog} from "../../wailsjs/go/runtime/Runtime";
-import {errorNotification} from "@/component/Notification";
-import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
-import {SyncOutlined} from "@ant-design/icons";
-import {Run, SetConfig, Stop} from "../../wailsjs/go/httpx/Bridge";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState, appActions} from "@/store/store";
-import {ResizeCallbackData} from "react-resizable";
-import {ColumnsType} from "antd/es/table";
-import ResizableTitle from "@/component/ResizableTitle";
-import {Chrome} from "@/component/Icon";
-import {copy, strSplit} from "@/util/util";
-import {MenuItems} from "@/component/Interface";
-import {config, constant} from "../../wailsjs/go/models";
+import { OpenFileDialog } from "../../wailsjs/go/runtime/Runtime";
+import { errorNotification } from "@/component/Notification";
+import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
+import { SyncOutlined } from "@ant-design/icons";
+import { Run, SetConfig, Stop } from "../../wailsjs/go/httpx/Bridge";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, appActions } from "@/store/store";
+import { Chrome } from "@/component/Icon";
+import { copy, strSplit } from "@/util/util";
+import { config, constant } from "../../wailsjs/go/models";
 import TabsV2 from "@/component/TabsV2";
 import Event = constant.Event;
-import {AgGridReact} from "ag-grid-react";
+import { AgGridReact } from "ag-grid-react";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
-import {ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, SideBarDef} from "ag-grid-community";
+import { ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, SideBarDef } from "ag-grid-community";
 
 interface PageDataType { "index": number, "url": string, "detail": string }
 
@@ -39,17 +35,19 @@ const TabContent = () => {
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const event = useSelector((state: RootState) => state.app.global.event || new Event())
     const [columnDefs] = useState<ColDef[]>([
-        { headerName : '序号', field : "index", width : 80, pinned: 'left'},
-        { headerName : '链接', field : "url", width : 300, cellRenderer:(params:ICellRendererParams)=>{
-                return <span style={{gap: "10"}}>
+        { headerName: '序号', field: "index", width: 80, pinned: 'left' },
+        {
+            headerName: '链接', field: "url", width: 300, cellRenderer: (params: ICellRendererParams) => {
+                return <span style={{ gap: "10" }}>
                     <Chrome onClick={() => {
                         BrowserOpenURL(params.value);
-                    }}/> {params.value}
+                    }} /> {params.value}
                 </span>
-            }},
-        { headerName : '其他信息', field : "detail",width: 600},
+            }
+        },
+        { headerName: '其他信息', field: "detail", width: 600 },
     ]);
-    const defaultColDef = useMemo<ColDef>(()=>{
+    const defaultColDef = useMemo<ColDef>(() => {
         return {
             // allow every column to be aggregated
             enableValue: true,
@@ -61,8 +59,8 @@ const TabContent = () => {
             suppressHeaderMenuButton: true,
             suppressHeaderFilterButton: true,
         }
-    },[])
-    const defaultSideBarDef = useMemo<SideBarDef>(()=>{
+    }, [])
+    const defaultSideBarDef = useMemo<SideBarDef>(() => {
         return {
             toolPanels: [
                 {
@@ -83,7 +81,7 @@ const TabContent = () => {
                 },
             ],
         }
-    },[])
+    }, [])
     const getContextMenuItems = useCallback(
         (
             params: GetContextMenuItemsParams,
@@ -107,8 +105,8 @@ const TabContent = () => {
                     name: "复制该行",
                     disabled: !params.node?.data,
                     action: () => {
-                        for (let i = 0;i<pageData.length;i++){
-                            if (pageData[i].index === params.node?.data.index){
+                        for (let i = 0; i < pageData.length; i++) {
+                            if (pageData[i].index === params.node?.data.index) {
                                 copy(pageData[i])
                                 break
                             }
@@ -118,7 +116,7 @@ const TabContent = () => {
                 {
                     name: "复制该列",
                     action: () => {
-                        const colValues = pageData.map((item:PageDataType) => {
+                        const colValues = pageData.map((item: PageDataType) => {
                             const colId = params.column?.getColId()
                             for (const key in item) {
                                 if (Object.prototype.hasOwnProperty.call(item, key) && key === colId) {
@@ -148,7 +146,7 @@ const TabContent = () => {
             }
             let t = strSplit(data, ' ', 2)
             setPageData((prevState) => {
-                return [...prevState, {index: ++prevState.length, url: t[0], detail: t[1]}]
+                return [...prevState, { index: ++prevState.length, url: t[0], detail: t[1] }]
             })
         })
         EventsOn(String(event.httpxOutputDone), (value) => {
@@ -167,11 +165,11 @@ const TabContent = () => {
 
     const saveHttpx = () => {
         SetConfig(path, flags).then(
-            ()=>{
-                const t = { ...cfg, Httpx: {...cfg.Httpx, flags: flags, path: path} } as config.Config;
+            () => {
+                const t = { ...cfg, Httpx: { ...cfg.Httpx, flags: flags, path: path } } as config.Config;
                 dispatch(appActions.setConfig(t))
             }
-        ).catch(e=> {
+        ).catch(e => {
             errorNotification("错误", e)
             setPath(cfg.Httpx.path)
             setFlags(cfg.Httpx.flags)
@@ -216,7 +214,7 @@ const TabContent = () => {
     }
 
     const BrowserOpenMultiUrl = () => {
-        const sortedData:PageDataType[] = [];
+        const sortedData: PageDataType[] = [];
         gridRef.current?.api.forEachNodeAfterFilterAndSort((node) => {
             sortedData.push(node.data);
         });
@@ -231,15 +229,15 @@ const TabContent = () => {
     }
 
     return (
-        <Flex vertical gap={5} style={{height: '100%'}}>
+        <Flex vertical gap={5} style={{ height: '100%' }}>
             <Flex gap={5} vertical>
                 <Flex gap={10} justify={"center"}>
                     <Flex gap={5}>
                         <span>Httpx路径</span>
                         <Space.Compact>
-                            <Input value={path} size={"small"} style={{width: "400px"}}
-                                   onChange={e => setPath(e.target.value)}
-                                   onBlur={saveHttpx}
+                            <Input value={path} size={"small"} style={{ width: "400px" }}
+                                onChange={e => setPath(e.target.value)}
+                                onBlur={saveHttpx}
                             />
                             <Button size={"small"} onClick={setHttpxPath}>选择</Button>
                         </Space.Compact>
@@ -247,31 +245,31 @@ const TabContent = () => {
                     <Flex gap={5}>
                         <span>程序参数</span>
                         <Tooltip title={"请勿添加-l或-u"} placement={"bottom"}>
-                            <Input value={flags} size={"small"} style={{width: "200px"}}
-                                   onChange={e => setFlags(e.target.value)}
-                                   onBlur={saveHttpx}
+                            <Input value={flags} size={"small"} style={{ width: "200px" }}
+                                onChange={e => setFlags(e.target.value)}
+                                onBlur={saveHttpx}
                             />
                         </Tooltip>
                     </Flex>
                     {!running && <Button size={"small"} onClick={run}>执行</Button>}
-                    {running && <Button size={"small"} onClick={stop} icon={<SyncOutlined spin={running}/>}>终止</Button>}
+                    {running && <Button size={"small"} onClick={stop} icon={<SyncOutlined spin={running} />}>终止</Button>}
                 </Flex>
                 <Flex gap={20} justify={"center"}>
                     <Space.Compact size={"small"}>
-                        <InputNumber style={{width: "150px"}} prefix={<div>总数:</div>} value={pageData.length}/>
-                        <InputNumber style={{width: "150px"}} prefix={<div>起始:</div>} min={1} value={offset}
-                                     onChange={(value) => value && setOffset(value)}/>
-                        <InputNumber style={{width: "150px"}} prefix={<div>长度:</div>} value={limit}
-                                     onChange={(value) => value && setLimit(value)}/>
+                        <InputNumber style={{ width: "150px" }} prefix={<div>总数:</div>} value={pageData.length} />
+                        <InputNumber style={{ width: "150px" }} prefix={<div>起始:</div>} min={1} value={offset}
+                            onChange={(value) => value && setOffset(value)} />
+                        <InputNumber style={{ width: "150px" }} prefix={<div>长度:</div>} value={limit}
+                            onChange={(value) => value && setLimit(value)} />
                         <Button onClick={BrowserOpenMultiUrl}>默认浏览器打开下一组</Button>
                     </Space.Compact>
                 </Flex>
             </Flex>
-            <Flex style={{height: '100%'}}>
-                <Splitter style={{height: '100%'}}>
+            <Flex style={{ height: '100%' }}>
+                <Splitter style={{ height: '100%' }}>
                     <Splitter.Panel defaultSize="30%" min="20%" max="70%">
                         <TextArea
-                            style={{height: '100%'}}
+                            style={{ height: '100%' }}
                             size={"small"}
                             value={targets}
                             allowClear
@@ -291,8 +289,8 @@ const TabContent = () => {
                                 rowHeight={32}
                                 sideBar={defaultSideBarDef}
                                 defaultColDef={defaultColDef}
-                                noRowsOverlayComponent={()=><NotFound/>}
-                                loadingOverlayComponent={()=><Loading/>}
+                                noRowsOverlayComponent={() => <NotFound />}
+                                loadingOverlayComponent={() => <Loading />}
                             />
                         </div>
                     </Splitter.Panel>
@@ -304,7 +302,7 @@ const TabContent = () => {
 
 
 const Httpx = () => {
-    return <TabsV2 defaultTabContent={<TabContent/>}/>
+    return <TabsV2 defaultTabContent={<TabContent />} />
 }
 
 export default Httpx;

@@ -10,7 +10,6 @@ interface CopyProps extends ButtonProps {
     text: string
 }
 
-
 const Copy: React.FC<CopyProps> = ({ text, onClick, placement = "bottom", children, title, type, size, ...restProps }) => {
     const [copyed, setCopyed] = useState<boolean>(false)
     const [optTitle, setOptTitle] = useState<string>(title || "复制")
@@ -47,8 +46,8 @@ const Copy: React.FC<CopyProps> = ({ text, onClick, placement = "bottom", childr
                     :
                     <Tooltip title={optTitle} placement={placement} destroyTooltipOnHide mouseLeaveDelay={0} mouseEnterDelay={0}>
                         <Button {...restProps}
-                              size={size || "small"}
-                              type={type || "link"}
+                            size={size || "small"}
+                            type={type || "link"}
                             icon={copyed ? <CheckOutlined /> : <CopyOutlined />}
                             onClick={() => {
                                 copy(text)

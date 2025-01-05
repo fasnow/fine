@@ -37,3 +37,50 @@ type Item struct {
 	Fid             string `json:"fid"`              //fid	     		fid					权限：企业会员
 	Structinfo      string `json:"structinfo"`       //structinfo		结构化信息 (部分协议支持、比如elastic、mongodb)	权限：企业会员
 }
+
+type Detail struct {
+	Count int    `json:"count"`
+	Name  string `json:"name"`
+}
+type Country struct {
+	Code     string    `json:"code"`
+	Count    int       `json:"count"`
+	Name     string    `json:"name"`
+	NameCode string    `json:"name_code"`
+	Regions  []Regions `json:"regions"`
+}
+
+type Regions struct {
+	Code  string `json:"code"`
+	Count int    `json:"count"`
+	Name  string `json:"name"`
+}
+type Product struct {
+	Product      string `json:"product"`
+	Category     string `json:"category"`
+	Level        int    `json:"level"`
+	SortHardCode int    `json:"sort_hard_code"`
+	Company      string `json:"company"`
+}
+
+type Port struct {
+	Port       int       `json:"port"`
+	UpdateTime string    `json:"update_time"`
+	Protocol   string    `json:"protocol"`
+	Products   []Product `json:"products"`
+}
+
+type Aggs struct {
+	AsNumber       []Detail  `json:"as_number"`
+	AsOrganization []Detail  `json:"as_organization"`
+	AssetType      []Detail  `json:"asset_type"`
+	Countries      []Country `json:"countries"`
+	Domain         []Detail  `json:"domain"`
+	Fid            []Detail  `json:"fid"`
+	Icp            []Detail  `json:"icp"`
+	Os             []Detail  `json:"os"`
+	Port           []Detail  `json:"port"`
+	Protocol       []Detail  `json:"protocol"`
+	Server         []Detail  `json:"server"`
+	Title          []Detail  `json:"title"`
+}

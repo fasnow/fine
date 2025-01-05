@@ -1,22 +1,18 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-enterprise";
-import {ColDef, ColGroupDef, GetContextMenuItemsParams, ICellRendererParams, SideBarDef} from "ag-grid-community";
-import NotFound from "@/component/Notfound";
-import Loading from "@/component/Loading";
+import React, {forwardRef, useEffect, useImperativeHandle, useState} from "react";
+import {Checkbox, CheckboxProps, Divider, Flex, GetProp} from "antd";
 import {StatisticalAggs} from "../../wailsjs/go/fofa/Bridge";
-import {Button, Checkbox, CheckboxProps, Divider, Flex, GetProp, Spin} from "antd";
-import LineSplit, {Column} from "@/component/LineSplit";
 import {errorNotification} from "@/component/Notification";
+import LineSplit from "@/component/LineSplit";
 import {fofa} from "../../wailsjs/go/models";
 import Detail = fofa.Detail;
 import Country = fofa.Country;
-// import "./Test.css"
+
 interface FofaStatisticalAggsProps {
-    value?:string
+    value?: string;
+    ref?: any;
 }
 
-const FofaStatisticalAggs:React.FC<FofaStatisticalAggsProps> = (props)=>{
+const FofaStatisticalAggs:React.FC<FofaStatisticalAggsProps> = forwardRef((props,ref)=>{
     const [loading, setLoading] = useState<boolean>(false)
     const [protocolData, setProtocolData] = useState<Detail[]>()
     const [domainData, setDomainData] = useState<Detail[]>()
@@ -65,13 +61,12 @@ const FofaStatisticalAggs:React.FC<FofaStatisticalAggsProps> = (props)=>{
     const indeterminate = fields.length > 0 && fields.length < fieldOptions.length;
 
     useEffect(()=>{
-        if (!props.value) return;
-        query("baidu")
-    },[props.value])
-
-    useEffect(()=>{
         update(fields)
     },[fields])
+
+    useImperativeHandle(ref, () => ({
+        query: (value: string) => query(value),
+    }));
 
     const onCheckAllChange: CheckboxProps['onChange'] = (e) => {
         setFields(e.target.checked ? fieldOptions.map(i=>i.value) : []);
@@ -186,16 +181,6 @@ const FofaStatisticalAggs:React.FC<FofaStatisticalAggsProps> = (props)=>{
             </Flex>
         </Flex>
     );
+})
 
-}
-
-const Test: React.FC = () => {
-    const [value, setValue] = useState("")
-
-    return  <Flex style={{height:'100%'}} vertical>
-        <Button onClick={()=>{setValue(prevState => `${value}${value}`)}}>点击</Button>
-        <FofaStatisticalAggs value={value}/>
-    </Flex>
-};
-
-export default Test;
+export default FofaStatisticalAggs

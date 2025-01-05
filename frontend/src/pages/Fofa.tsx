@@ -15,7 +15,8 @@ import {
     Switch,
     Tabs,
     Tooltip,
-    Upload
+    Upload,
+    Radio
 } from 'antd';
 import {
     CloudDownloadOutlined,
@@ -33,7 +34,7 @@ import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
-import { config, constant, fofa } from "../../wailsjs/go/models";
+import { config, fofa } from "../../wailsjs/go/models";
 import { Export, GetUserInfo, Query, SetAuth } from "../../wailsjs/go/fofa/Bridge";
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import { Dots } from "@/component/Icon";
@@ -42,7 +43,7 @@ import { Buffer } from "buffer"
 import { Fetch } from "../../wailsjs/go/app/App";
 import { toUint8Array } from "js-base64";
 import { copy } from "@/util/util";
-import { MenuItems, WithIndex } from "@/component/Interface";
+import { WithIndex } from "@/component/Interface";
 import { TargetKey } from "@/pages/Constants";
 import TabLabel from "@/component/TabLabel";
 import type { Tab } from "rc-tabs/lib/interface"
@@ -51,15 +52,15 @@ import { FindByPartialKey } from "../../wailsjs/go/history/Bridge";
 import '@/pages/Fofa.css'
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-enterprise";
-import {
-    ColDef,
-    GetContextMenuItemsParams, MenuItemDef, SideBarDef
-} from "ag-grid-community";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
 import Help from "@/pages/FofaUsage";
-
-
+import {
+    ColDef,
+    GetContextMenuItemsParams,
+    SideBarDef
+} from "ag-grid-community";
+import FofaStatisticalAggregation from "@/pages/FofaStatisticalAggregation";
 
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
@@ -363,14 +364,14 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const history = useSelector((state: RootState) => state.app.global.history)
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
-        { headerName: 'URL', field: "link", width: 200, pinned: 'left' }, //资产的URL链接, 权限：无
+        { headerName: 'URL', field: "link", width: 300, pinned: 'left' }, //资产的URL链接, 权限：无
         { headerName: '域名', field: "domain", width: 150, hide: true }, //域名, 权限：无
         { headerName: 'IP', field: "ip", width: 150 }, //ip地址, 权限：无
         { headerName: '端口', field: "port", width: 80 }, //端口, 权限：无
         { headerName: '协议名', field: "protocol", width: 80, }, //协议名, 权限：无
         { headerName: '基础协议', field: "base_protocol", width: 100, hide: true }, //基础协议，比如tcp, 权限：无
         { headerName: '网站标题', field: "title", width: 200 }, //网站标题, 权限：无
-        { headerName: 'icp备案号', field: "icp", width: 130 }, //icp备案号, 权限：无
+        { headerName: 'icp备案号', field: "icp", width: 200 }, //icp备案号, 权限：无
         { headerName: '主机名', field: "host", width: 200, hide: true }, //主机名, 权限：无
         { headerName: '证书', field: "cert", width: 100, hide: true }, //证书, 权限：无
         { headerName: '操作系统', field: "os", width: 100, hide: true }, //操作系统, 权限：无
@@ -400,14 +401,123 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: 'jarm指纹', field: "jarm", width: 100, hide: true }, //jarm指纹, 权限：无
     ]);
     const [pageData, setPageData] = useState<PageDataType[]>([]);
-
-    useEffect(() => {
-        if (props.input) {
-            setInput(props.input)
-            handleNewQuery(props.input, currentPageSize)
+    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams):any => {
+        return [
+            {
+                name: "浏览器打开URL",
+                disabled: !params.node?.data.link,
+                action: () => {
+                    props.newTab && BrowserOpenURL(params.node?.data.link)
+                },
+            },
+            {
+                name: "查询C段",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip + "/24", getColDefs())
+                },
+            },
+            {
+                name: "查询IP",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip, getColDefs())
+                },
+            },
+            {
+                name: "查询标题",
+                disabled: !params.node?.data.title,
+                action: () => {
+                    props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs())
+                },
+            },
+            "separator",
+            {
+                name: "复制单元格",
+                disabled: !params.value,
+                action: () => {
+                    copy(params.value)
+                },
+            },
+            {
+                name: "复制该行",
+                disabled: !params.node?.data,
+                action: () => {
+                    for (let i = 0; i < pageData.length; i++) {
+                        if (pageData[i].index === params.node?.data.index) {
+                            copy(pageData[i])
+                            break
+                        }
+                    }
+                },
+            },
+            {
+                name: "复制该列",
+                action: () => {
+                    const colValues = pageData.map((item: PageDataType) => {
+                        const colId = params.column?.getColId()
+                        for (const key in item) {
+                            if (Object.prototype.hasOwnProperty.call(item, key) && key === colId) {
+                                return item[key as keyof PageDataType]
+                            }
+                        }
+                        return ""
+                    })
+                    copy(colValues)
+                },
+            },
+            {
+                name: "复制URL列",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    const colValues = pageData.map(item => {
+                        for (const key in item) {
+                            if (Object.prototype.hasOwnProperty.call(item, key) && key === 'link') {
+                                return item[key as keyof PageDataType]
+                            }
+                        }
+                        return null
+                    })
+                    copy(colValues)
+                },
+            },
+        ];
+    },[pageData]);
+    const defaultColDef = useMemo<ColDef>(() => {
+        return {
+            // allow every column to be aggregated
+            enableValue: true,
+            // allow every column to be grouped
+            enableRowGroup: true,
+            // allow every column to be pivoted
+            enablePivot: true,
+            filter: true,
+            suppressHeaderMenuButton: true,
+            suppressHeaderFilterButton: true,
         }
     }, [])
-
+    const defaultSideBarDef = useMemo<SideBarDef>(() => {
+        return {
+            toolPanels: [
+                {
+                    id: "columns",
+                    labelDefault: "查询字段",
+                    labelKey: "columns",
+                    iconKey: "columns",
+                    toolPanel: "agColumnsToolPanel",
+                    toolPanelParams: {
+                        suppressRowGroups: false,
+                        suppressValues: false,
+                        suppressPivots: true,
+                        suppressPivotMode: true,
+                        suppressColumnFilter: false,
+                        suppressColumnSelectAll: true,
+                        suppressColumnExpandAll: true,
+                    },
+                },
+            ],
+        }
+    }, [])
     const getColKeysNoIndex = useCallback(() => {
         if (gridRef.current?.api) {
             console.log(gridRef.current.api.getColumnDefs())
@@ -428,6 +538,14 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         })
         return fields
     }, [columnDefs])
+    const [searchType, setSearchType] = useState<"普通搜索"|"统计聚合"|"Host聚合">("普通搜索")
+    const statisticalAggsRef = React.createRef<any>()
+    useEffect(() => {
+        if (props.input) {
+            setInput(props.input)
+            handleNewQuery(props.input, currentPageSize)
+        }
+    }, [])
 
     const getColDefs = () => {
         if (gridRef.current?.api) {
@@ -634,142 +752,44 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             <ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />
         </Flex>)
 
-    const getContextMenuItems = useCallback(
-        (
-            params: GetContextMenuItemsParams,
-        ): (MenuItemDef)[] => {
-            return [
-                {
-                    name: "浏览器打开URL",
-                    disabled: !params.node?.data.link,
-                    action: () => {
-                        props.newTab && BrowserOpenURL(params.node?.data.link)
-                    },
-                },
-                {
-                    name: "查询C段",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        props.newTab && props.newTab("ip=" + params.node?.data.ip + "/24", getColDefs())
-                    },
-                },
-                {
-                    name: "查询IP",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        props.newTab && props.newTab("ip=" + params.node?.data.ip, getColDefs())
-                    },
-                },
-                {
-                    name: "查询标题",
-                    disabled: !params.node?.data.title,
-                    action: () => {
-                        props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs())
-                    },
-                },
-                {
-                    name: "复制单元格",
-                    disabled: !params.value,
-                    action: () => {
-                        copy(params.value)
-                    },
-                },
-                {
-                    name: "复制该行",
-                    disabled: !params.node?.data,
-                    action: () => {
-                        for (let i = 0; i < pageData.length; i++) {
-                            if (pageData[i].index === params.node?.data.index) {
-                                copy(pageData[i])
-                                break
-                            }
-                        }
-                    },
-                },
-                {
-                    name: "复制该列",
-                    action: () => {
-                        const colValues = pageData.map((item: PageDataType) => {
-                            const colId = params.column?.getColId()
-                            for (const key in item) {
-                                if (Object.prototype.hasOwnProperty.call(item, key) && key === colId) {
-                                    return item[key as keyof PageDataType]
-                                }
-                            }
-                            return ""
-                        })
-                        copy(colValues)
-                    },
-                },
-                {
-                    name: "复制URL列",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        const colValues = pageData.map(item => {
-                            for (const key in item) {
-                                if (Object.prototype.hasOwnProperty.call(item, key) && key === 'link') {
-                                    return item[key as keyof PageDataType]
-                                }
-                            }
-                            return null
-                        })
-                        copy(colValues)
-                    },
-                },
-            ];
-        },
-        [pageData],
-    );
-
-    const defaultColDef = useMemo<ColDef>(() => {
-        return {
-            // allow every column to be aggregated
-            enableValue: true,
-            // allow every column to be grouped
-            enableRowGroup: true,
-            // allow every column to be pivoted
-            enablePivot: true,
-            filter: true,
-            suppressHeaderMenuButton: true,
-            suppressHeaderFilterButton: true,
-        }
-    }, [])
-
-    const defaultSideBarDef = useMemo<SideBarDef>(() => {
-        return {
-            toolPanels: [
-                {
-                    id: "columns",
-                    labelDefault: "查询字段",
-                    labelKey: "columns",
-                    iconKey: "columns",
-                    toolPanel: "agColumnsToolPanel",
-                    toolPanelParams: {
-                        suppressRowGroups: false,
-                        suppressValues: false,
-                        suppressPivots: true,
-                        suppressPivotMode: true,
-                        suppressColumnFilter: false,
-                        suppressColumnSelectAll: true,
-                        suppressColumnExpandAll: true,
-                    },
-                },
-            ],
-        }
-    }, [])
-
     return <Flex vertical gap={5} style={{ height: '100%' }}>
         <Flex ref={ref} justify={'center'} align={"center"} gap={5}>
             <Candidate
+                addonBefore={<Select
+                    onChange={(value:typeof searchType) => {
+                        setSearchType(value)
+                    }}
+                    defaultValue="普通搜索"
+                    size={"small"}
+                    value={searchType}
+                    options={[
+                        { label: '普通搜索', value: '普通搜索' },
+                        { label: '统计聚合', value: '统计聚合' },
+                        { label: 'Host聚合', value: 'Host聚合' },
+                    ]}
+                    style={{ minWidth: 90 }}
+                />}
                 size={"small"}
                 style={{ width: 600 }}
                 placeholder='Search...'
                 allowClear
                 value={input}
-                onSearch={(value) => handleNewQuery(value, currentPageSize)}
+                onSearch={(value) => {
+                    if(searchType === "普通搜索") {
+                        handleNewQuery(value, currentPageSize)
+                    }else if(searchType === "统计聚合") {
+                        statisticalAggsRef.current.query(value)
+                        setInputCache(value)
+                    }
+                }}
                 onPressEnter={(value) => {
                     if (!allowEnterPress) return
-                    handleNewQuery(value, currentPageSize)
+                    if(searchType === "普通搜索") {
+                        handleNewQuery(value, currentPageSize)
+                    }else if(searchType === "统计聚合") {
+                        statisticalAggsRef.current.query(value)
+                        setInputCache(value)
+                    }
                 }}
                 items={[
                     {
@@ -794,30 +814,35 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     }
                 ]}
             />
-            {IconSearchPanel}
             <Help />
-            <Tooltip title='默认搜索一年内的数据，指定为true即可搜索全部数据' placement='bottom'>
-                <Switch size="small" checkedChildren="开启" unCheckedChildren="关闭"
-                    onChange={(value) => setFull(value)} />
-            </Tooltip>
+            {searchType === "普通搜索" && <>
+                {IconSearchPanel}
+                <Tooltip title='默认搜索一年内的数据，指定为true即可搜索全部数据' placement='bottom'>
+                    <Switch size="small" checkedChildren="开启" unCheckedChildren="关闭"
+                            onChange={(value) => setFull(value)} />
+                </Tooltip>
+            </>}
         </Flex>
-        <div style={{ width: "100%", height: "100%" }}>
-            <AgGridReact
-                ref={gridRef}
-                loading={loading}
-                embedFullWidthRows
-                rowData={pageData}
-                columnDefs={columnDefs}
-                getContextMenuItems={getContextMenuItems}
-                sideBar={defaultSideBarDef}
-                headerHeight={32}
-                rowHeight={32}
-                defaultColDef={defaultColDef}
-                noRowsOverlayComponent={() => <NotFound />}
-                loadingOverlayComponent={() => <Loading />}
-            />
-        </div>
-        {footer}
+        {searchType==="统计聚合" && <FofaStatisticalAggregation ref={statisticalAggsRef} value={input}/>}
+        {searchType === "普通搜索" && <>
+            <div style={{ width: "100%", height: "100%", display: searchType === "普通搜索"?'block':"none"}}>
+                <AgGridReact
+                    ref={gridRef}
+                    loading={loading}
+                    embedFullWidthRows
+                    rowData={pageData}
+                    columnDefs={columnDefs}
+                    getContextMenuItems={getContextMenuItems}
+                    sideBar={defaultSideBarDef}
+                    headerHeight={32}
+                    rowHeight={32}
+                    defaultColDef={defaultColDef}
+                    noRowsOverlayComponent={() => <NotFound />}
+                    loadingOverlayComponent={() => <Loading />}
+                />
+            </div>
+            {footer}
+        </>}
     </Flex>
 }
 

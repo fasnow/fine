@@ -5,6 +5,7 @@ import { ColDef } from "ag-grid-community";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
 import { AgGridReact } from "ag-grid-react";
+import {GridOptions} from "ag-grid-community/dist/types/src/entities/gridOptions";
 
 interface ExampleHelpDataType {
     index: number;
@@ -15,30 +16,46 @@ interface ExampleHelpDataType {
     example: any;
 }
 
+const gridOptions:GridOptions = {
+    defaultColDef:{
+        // allow every column to be aggregated
+        enableValue: true,
+        // allow every column to be grouped
+        enableRowGroup: true,
+        // allow every column to be pivoted
+        enablePivot: true,
+        filter: true,
+        suppressHeaderMenuButton: true,
+        suppressHeaderFilterButton: true,
+    },
+    headerHeight:32,
+    rowHeight:32,
+    noRowsOverlayComponent:() => <NotFound />,
+    loadingOverlayComponent:() => <Loading />,
+    autoSizeStrategy:{ type: 'fitGridWidth' },
+}
+
 const exampleHelpColumns1: ColDef<ExampleHelpDataType>[] = [
-    { headerName: '序号', field: "index", width: 50 },
-    { headerName: '检索语法', field: "field", width: 100 },
-    { headerName: '字段名称', field: "fieldDescription", width: 100 },
-    { headerName: '支持的数据模式', field: "mode", width: 150 },
-    { headerName: '解释说明', field: "description", width: 250 },
-    { headerName: '范例', field: "example" },
+    { headerName: '序号', field: "index", maxWidth: 80 },
+    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true },
+    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true },
+    { headerName: '支持的数据模式', field: "mode", width: 150, autoHeight: true, wrapText: true },
+    { headerName: '解释说明', field: "description", width: 250 , autoHeight: true, wrapText: true},
+    { headerName: '范例', field: "example", autoHeight: true, wrapText: true },
 ];
 
 const exampleHelpColumns2: ColDef<ExampleHelpDataType>[] = [
-    { headerName: '序号', field: "index", width: 50 },
-    { headerName: '检索语法', field: "field", width: 100 },
-    { headerName: '字段名称', field: "fieldDescription", width: 100 },
-    { headerName: '解释说明', field: "description", width: 250 },
-    { headerName: '范例', field: "example" },
+    { headerName: '序号', field: "index", maxWidth: 80 },
+    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true },
+    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true },
+    { headerName: '解释说明', field: "description", width: 250, autoHeight: true, wrapText: true },
+    { headerName: '范例', field: "example", autoHeight: true, wrapText: true },
 ];
 
 const exampleHelpDataTabs: TabsProps['items'] = [
     {
         key: "1", label: "基本信息部分", children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
             rowData={[
                 {
                     index: 1,
@@ -98,17 +115,14 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                 },
             ]}
             columnDefs={exampleHelpColumns1}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "2",
         label: "ASN网络自治域相关部分",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns1}
             rowData={[
                 {
                     index: 1, field: "asn", fieldDescription: "自治域号码", mode: "主机数据 服务数据",
@@ -124,18 +138,15 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                     example: `org:"No.31,Jin-rong Street"`,
                 },
             ]}
-            columnDefs={exampleHelpColumns1}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
+
         />
     },
     {
         key: "3",
         label: "主机名与操作系统部分",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns1}
             rowData={[
                 {
                     index: 1, field: "hostname", fieldDescription: "主机名", mode: "服务数据",
@@ -153,16 +164,12 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                     example: `os:"Windows"`,
                 },
             ]}
-            columnDefs={exampleHelpColumns1}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "4", label: "服务数据部分", children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns1}
             rowData={[
                 {
                     index: 1,
@@ -218,18 +225,14 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                     example: `cert:"奇虎科技"：包含"奇虎科技"的证书 cert:"360.cn"：包含"360.cn"域名的证书`,
                 },
             ]}
-            columnDefs={exampleHelpColumns1}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "5",
         label: "精细化应用识别部分",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns1}
             rowData={[
                 {
                     index: 1, field: "catalog", fieldDescription: "应用类别", mode: "服务数据",
@@ -252,18 +255,14 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                     example: `vendor:"Sangfor深信服科技股份有限公司" vendor:"Sangfor" OR vendor:"微软" vendor:"DrayTek台湾居易科技"`,
                 },
             ]}
-            columnDefs={exampleHelpColumns1}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "6",
         label: "IP归属与定位部分",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns1}
             rowData={[
                 {
                     index: 1,
@@ -319,18 +318,14 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                     example: `isp: "联通" isp: "amazon.com"`,
                 },
             ]}
-            columnDefs={exampleHelpColumns1}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "7",
         label: "图像数据与应用场景部分",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns2}
             rowData={[
                 {
                     index: 1,
@@ -354,8 +349,6 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                     example: `sys_tag:"卫星互联网"`,
                 },
             ]}
-            columnDefs={exampleHelpColumns2}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     }
 ]

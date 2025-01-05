@@ -68,7 +68,7 @@ type ICP struct {
 
 type Config struct {
 	Timeout        time.Duration `ini:"timeout" json:"timeout" comment:"全局HTTP超时（不含Httpx），默认:20s"`
-	Proxy          Proxy
+	Proxy          *Proxy
 	Fofa           Fofa
 	Hunter         Hunter
 	Quake          Quake
@@ -97,7 +97,7 @@ var (
 	GlobalConfig  *Config
 	defaultConfig = &Config{
 		Timeout: 20 * time.Second,
-		Proxy: Proxy{
+		Proxy: &Proxy{
 			Enable: false,
 			Type:   "http",
 			Host:   "127.0.0.1",
@@ -268,7 +268,7 @@ func Save() error {
 }
 
 func SaveProxy(p Proxy) error {
-	GlobalConfig.Proxy = p
+	GlobalConfig.Proxy = &p
 	err := Save()
 	if err != nil {
 		logger.Info("can't store proxy to file")

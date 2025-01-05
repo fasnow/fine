@@ -1,11 +1,12 @@
 import { Button, Collapse, Divider, List, Modal, Popover, Tabs, Tooltip } from "antd";
-import React, { useState } from "react";
+import React, {useMemo, useState} from "react";
 import { QuestionOutlined } from "@ant-design/icons";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import type { Tab } from 'rc-tabs/es/interface'
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
 import { AgGridReact } from "ag-grid-react";
+import {GridOptions} from "ag-grid-community/dist/types/src/entities/gridOptions";
 
 interface AdvancedHelpDataType {
     index: number;
@@ -14,9 +15,9 @@ interface AdvancedHelpDataType {
 }
 
 const advancedHelpColumns: ColDef<AdvancedHelpDataType>[] = [
-    { headerName: '序号', field: "index", width: 50 },
+    { headerName: '序号', field: "index", maxWidth: 80 },
     { headerName: '连接符', field: "connector", width: 100 },
-    { headerName: '查询含义', field: "description", },
+    { headerName: '查询含义', field: "description", autoHeight: true, wrapText: true },
 ];
 
 const advancedHelpData: AdvancedHelpDataType[] = [
@@ -58,17 +59,36 @@ type ExampleHelpDataType = {
     description: any;
 }
 
+const gridOptions:GridOptions = {
+    defaultColDef:{
+        // allow every column to be aggregated
+        enableValue: true,
+        // allow every column to be grouped
+        enableRowGroup: true,
+        // allow every column to be pivoted
+        enablePivot: true,
+        filter: true,
+        suppressHeaderMenuButton: true,
+        suppressHeaderFilterButton: true,
+    },
+    headerHeight:32,
+    rowHeight:32,
+    noRowsOverlayComponent:() => <NotFound />,
+    loadingOverlayComponent:() => <Loading />,
+    autoSizeStrategy:{ type: 'fitGridWidth' },
+}
+
 const exampleHelpColumns: ColDef<ExampleHelpDataType>[] = [
-    { headerName: '序号', field: "index", width: 50 },
+    { headerName: '序号', field: "index", maxWidth: 80 },
     {
         headerName: '语法内容', field: "example", width: 300, cellRenderer: (params: ICellRendererParams) => {
             return params.value
-        }
+        }, autoHeight: true, wrapText: true
     },
     {
         headerName: '语法说明', field: "description", cellRenderer: (params: ICellRendererParams) => {
             return params.value
-        }
+        }, autoHeight: true, wrapText: true, width: 300
     },
 ];
 
@@ -77,10 +97,8 @@ const exampleHelpDataTabs: Tab[] = [
         key: "1",
         label: "hot热门语法",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: <>ip.tag="CDN"</>,
@@ -156,18 +174,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "cert.is_trust=true"
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "2",
         label: "new新上语法",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "is_domain.cname=true",
@@ -299,18 +313,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "查询存在历史漏洞的资产"
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "3",
         label: "char特色语法",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "web.similar=\"baidu.com:443\"",
@@ -366,18 +376,14 @@ const exampleHelpDataTabs: Tab[] = [
                     </>
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "4",
         label: "IP",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "ip.city=\"北京\"",
@@ -421,18 +427,14 @@ const exampleHelpDataTabs: Tab[] = [
                     </>
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "5",
         label: "domain域名",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "is_domain=true",
@@ -489,18 +491,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "搜索含有cname解析记录的网站"
                 }
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "6",
         label: "header请求头",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "header.server==\"Microsoft-IIS/10\"",
@@ -519,18 +517,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "搜索HTTP请求头中含有”elastic“的资产"
                 }
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "7",
         label: "web网站信息",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "is_web=true",
@@ -594,18 +588,14 @@ const exampleHelpDataTabs: Tab[] = [
                 }
 
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "8",
         label: "icp备案信息",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "icp.number=\"京ICP备16020626号-8\"",
@@ -647,18 +637,14 @@ const exampleHelpDataTabs: Tab[] = [
                     </>
                 }
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "9",
         label: "protocol协议/端口响应",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "protocol=\"http\"",
@@ -673,18 +659,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "查询端口响应中包含\"nginx\"的资产"
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "10",
         label: "app组件信息",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "app.name=\"小米 Router\"",
@@ -703,18 +685,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "查询包含组件版本为\"1.8.1\"的资产"
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "11",
         label: "cert证书",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "cert=\"baidu\"",
@@ -766,18 +744,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "搜索证书可信的资产"
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "12",
         label: "vul漏洞信息",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "vul.gev=\"GEV-2021-1075\"",
@@ -796,18 +770,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "web.is_vul=true"
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "13",
         label: "AS",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: "as.number=\"136800\"",
@@ -822,18 +792,14 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "搜索asn注册机构为\"PDR\"的资产"
                 }
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
     {
         key: "14",
         label: "tls-jarm",
         children: <AgGridReact
-            headerHeight={32}
-            rowHeight={32}
-            noRowsOverlayComponent={() => <NotFound />}
-            loadingOverlayComponent={() => <Loading />}
+            {...gridOptions}
+            columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1,
@@ -846,8 +812,6 @@ const exampleHelpDataTabs: Tab[] = [
                     description: "搜索tls-jarmANS为c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,|||,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0303||ff01-0000-0001-000b-0023-0017,c013|0302|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,00c0|0303|h2|ff01-0000-0001-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017,c013|0303|h2|ff01-0000-0001-000b-0023-0010-0017的资产"
                 },
             ]}
-            columnDefs={exampleHelpColumns}
-            autoSizeStrategy={{ type: 'fitCellContents' }}
         />
     },
 ]
@@ -873,14 +837,10 @@ const Help: React.FC = () => {
             <Collapse expandIconPosition={"end"} items={[{
                 key: "1", label: "搜索技巧",
                 children: <AgGridReact
-                    domLayout={"autoHeight"}
-                    headerHeight={32}
-                    rowHeight={32}
-                    noRowsOverlayComponent={() => <NotFound />}
-                    loadingOverlayComponent={() => <Loading />}
-                    rowData={advancedHelpData}
+                    {...gridOptions}
+                    domLayout={'autoHeight'}
                     columnDefs={advancedHelpColumns}
-                    autoSizeStrategy={{ type: 'fitGridWidth' }}
+                    rowData={advancedHelpData}
                 />
             }]} defaultActiveKey={['1']}
             />

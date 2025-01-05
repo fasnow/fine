@@ -7,6 +7,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
+import {GridOptions} from "ag-grid-community/dist/types/src/entities/gridOptions";
 
 interface AdvancedHelpDataType {
     index: number;
@@ -15,7 +16,7 @@ interface AdvancedHelpDataType {
 }
 
 const advancedHelpColumns: ColDef<AdvancedHelpDataType>[] = [
-    { headerName: '序号', field: "index", width: 90, pinned: 'left' },
+    { headerName: '序号', field: "index", maxWidth: 80, pinned: 'left' },
     { headerName: '逻辑连接符', field: "connector", width: 130, pinned: 'left' },
     {
         headerName: '具体含义', field: "description", cellRenderer: (props: ICellRendererParams) => (
@@ -30,7 +31,7 @@ const advancedHelpColumns: ColDef<AdvancedHelpDataType>[] = [
                     </> : props.value
                 }
             </>
-        ),
+        ), wrapText: true, autoHeight: true
     },
 ];
 
@@ -80,10 +81,10 @@ interface ExampleHelpDataType {
 }
 
 const exampleHelpColumns: ColDef<ExampleHelpDataType>[] = [
-    { headerName: '序号', field: "index", width: 90, pinned: 'left' },
-    { headerName: '例句', field: "example", width: 300, pinned: 'left' },
-    { headerName: '用途说明', field: "description", width: 250 },
-    { headerName: '注', field: "tip" },
+    { headerName: '序号', field: "index", maxWidth: 80, pinned: 'left' },
+    { headerName: '例句', field: "example", width: 300, pinned: 'left', autoHeight: true, wrapText: true},
+    { headerName: '用途说明', field: "description", width: 250, autoHeight: true, wrapText: true },
+    { headerName: '注', field: "tip", autoHeight: true, wrapText: true },
 ];
 
 const exampleHelpData: ExampleHelpDataType[] = [
@@ -225,6 +226,24 @@ const exampleHelpData: ExampleHelpDataType[] = [
 
 const Help: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
+    const [gridOptions] = useState<GridOptions>({
+        headerHeight: 32,
+        rowHeight: 32,
+        noRowsOverlayComponent:() => <NotFound />,
+        loadingOverlayComponent:() => <Loading />,
+        defaultColDef: {
+            // allow every column to be aggregated
+            enableValue: true,
+            // allow every column to be grouped
+            enableRowGroup: true,
+            // allow every column to be pivoted
+            enablePivot: true,
+            filter: true,
+            suppressHeaderMenuButton: true,
+            suppressHeaderFilterButton: true,
+        },
+        autoSizeStrategy:{ type: 'fitGridWidth' },
+    })
     return <>
         <Tooltip title='帮助信息' placement='bottom'>
             <Button type='text' size="small" icon={<QuestionOutlined />} onClick={() => setOpen(true)} />
@@ -250,14 +269,10 @@ const Help: React.FC = () => {
                 </div>
                 <div style={{ height: '100%', width: '100%' }}>
                     <AgGridReact
+                        {...gridOptions}
                         domLayout={"autoHeight"}
-                        headerHeight={32}
-                        rowHeight={32}
-                        noRowsOverlayComponent={() => <NotFound />}
-                        loadingOverlayComponent={() => <Loading />}
                         rowData={advancedHelpData}
                         columnDefs={advancedHelpColumns}
-                        autoSizeStrategy={{ type: 'fitCellContents' }}
                     />
                 </div>
 
@@ -266,13 +281,9 @@ const Help: React.FC = () => {
                 >组件列表</Button></span>
                 <div style={{ height: 400 }}>
                     <AgGridReact
-                        headerHeight={32}
-                        rowHeight={32}
-                        noRowsOverlayComponent={() => <NotFound />}
-                        loadingOverlayComponent={() => <Loading />}
+                        {...gridOptions}
                         rowData={exampleHelpData}
                         columnDefs={exampleHelpColumns}
-                        autoSizeStrategy={{ type: 'fitCellContents' }}
                     />
                 </div>
             </Flex>

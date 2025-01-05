@@ -203,7 +203,7 @@ export namespace config {
 	}
 	export class Config {
 	    timeout: number;
-	    Proxy?: Proxy;
+	    Proxy: Proxy;
 	    Fofa: Fofa;
 	    Hunter: Hunter;
 	    Quake: Quake;

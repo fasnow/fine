@@ -2,6 +2,7 @@ package fofa
 
 import (
 	"fine/backend/proxy/v2"
+	"fine/backend/service/model/fofa"
 	"net/http"
 )
 
@@ -125,21 +126,70 @@ var Fields = struct {
 }
 
 type Fofa struct {
-	key  string
-	Http *http.Client
+	key             string
+	http            *http.Client
+	StatisticalAggs *StatisticalAggs
+	HostAggs        *HostAggs
 }
 
 func NewClient(key string) *Fofa {
-	return &Fofa{
+	f := &Fofa{
 		key:  key,
-		Http: &http.Client{},
+		http: &http.Client{},
 	}
+	f.StatisticalAggs = &StatisticalAggs{fofa: f}
+	f.HostAggs = &HostAggs{fofa: f}
+	return f
 }
 
 func (r *Fofa) UseProxyManager(manager *proxy.Manager) {
-	r.Http = manager.GetClient()
+	r.http = manager.GetClient()
 }
 
 func (r *Fofa) SetAuth(key string) {
 	r.key = key
+}
+
+type StatisticalAggs struct {
+	fofa   *Fofa
+	query  string
+	fields string
+}
+
+type StatisticalAggsResult struct {
+	Error           bool `json:"error"`
+	ConsumedFpoint  int  `json:"consumed_fpoint"`
+	RequiredFpoints int  `json:"required_fpoints"`
+	Size            int  `json:"size"`
+	Distinct        struct {
+		Domain int `json:"domain"`
+		Fid    int `json:"fid"`
+		Icp    int `json:"icp"`
+		IP     int `json:"ip"`
+		Ipc    int `json:"ipc"`
+		Server int `json:"server"`
+		Title  int `json:"title"`
+	} `json:"distinct"`
+	Aggs           fofa.Aggs `json:"aggs"`
+	Lastupdatetime string    `json:"lastupdatetime"`
+}
+
+type HostAggs struct {
+	fofa   *Fofa
+	host   string
+	detail bool
+}
+
+type HostAggsResult struct {
+	Error           bool        `json:"error"`
+	Host            string      `json:"host"`
+	ConsumedFpoint  int         `json:"consumed_fpoint"`
+	RequiredFpoints int         `json:"required_fpoints"`
+	IP              string      `json:"ip"`
+	Asn             int         `json:"asn"`
+	Org             string      `json:"org"`
+	CountryName     string      `json:"country_name"`
+	CountryCode     string      `json:"country_code"`
+	Ports           []fofa.Port `json:"ports"`
+	UpdateTime      string      `json:"update_time"`
 }

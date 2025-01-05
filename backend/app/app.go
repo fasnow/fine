@@ -67,7 +67,7 @@ func (r *App) Fetch(url string) ([]byte, error) {
 }
 
 func (r *App) SaveProxy(proxy config.Proxy) error {
-	config.GlobalConfig.Proxy = proxy
+	config.GlobalConfig.Proxy = &proxy
 	err := config.Save()
 	if err != nil {
 		logger.Info(err)

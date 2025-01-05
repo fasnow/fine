@@ -585,7 +585,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const getContextMenuItems = useCallback(
         (
             params: GetContextMenuItemsParams,
-        ): (MenuItemDef)[] => {
+        ): any => {
             const domain = params.node?.data.domain
             const ip = params.node?.data.ip
             const schema = params.node?.data.service?.name
@@ -673,6 +673,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                         props.newTab && props.newTab(`service.http.title:"${params.node?.data.service.http.title}"`, getColDefs(), queryOption)
                     },
                 },
+                'separator',
                 {
                     name: "复制单元格",
                     disabled: !value,

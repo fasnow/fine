@@ -203,7 +203,7 @@ export namespace config {
 	}
 	export class Config {
 	    timeout: number;
-	    Proxy: Proxy;
+	    Proxy?: Proxy;
 	    Fofa: Fofa;
 	    Hunter: Hunter;
 	    Quake: Quake;
@@ -377,6 +377,236 @@ export namespace constant {
 
 export namespace fofa {
 	
+	export class Regions {
+	    code: string;
+	    count: number;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Regions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.count = source["count"];
+	        this.name = source["name"];
+	    }
+	}
+	export class Country {
+	    code: string;
+	    count: number;
+	    name: string;
+	    name_code: string;
+	    regions: Regions[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Country(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.count = source["count"];
+	        this.name = source["name"];
+	        this.name_code = source["name_code"];
+	        this.regions = this.convertValues(source["regions"], Regions);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Detail {
+	    count: number;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Detail(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.count = source["count"];
+	        this.name = source["name"];
+	    }
+	}
+	export class Aggs {
+	    as_number: Detail[];
+	    as_organization: Detail[];
+	    asset_type: Detail[];
+	    countries: Country[];
+	    domain: Detail[];
+	    fid: Detail[];
+	    icp: Detail[];
+	    os: Detail[];
+	    port: Detail[];
+	    protocol: Detail[];
+	    server: Detail[];
+	    title: Detail[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Aggs(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.as_number = this.convertValues(source["as_number"], Detail);
+	        this.as_organization = this.convertValues(source["as_organization"], Detail);
+	        this.asset_type = this.convertValues(source["asset_type"], Detail);
+	        this.countries = this.convertValues(source["countries"], Country);
+	        this.domain = this.convertValues(source["domain"], Detail);
+	        this.fid = this.convertValues(source["fid"], Detail);
+	        this.icp = this.convertValues(source["icp"], Detail);
+	        this.os = this.convertValues(source["os"], Detail);
+	        this.port = this.convertValues(source["port"], Detail);
+	        this.protocol = this.convertValues(source["protocol"], Detail);
+	        this.server = this.convertValues(source["server"], Detail);
+	        this.title = this.convertValues(source["title"], Detail);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	export class Product {
+	    product: string;
+	    category: string;
+	    level: number;
+	    sort_hard_code: number;
+	    company: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Product(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.product = source["product"];
+	        this.category = source["category"];
+	        this.level = source["level"];
+	        this.sort_hard_code = source["sort_hard_code"];
+	        this.company = source["company"];
+	    }
+	}
+	export class Port {
+	    port: number;
+	    update_time: string;
+	    protocol: string;
+	    products: Product[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Port(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.port = source["port"];
+	        this.update_time = source["update_time"];
+	        this.protocol = source["protocol"];
+	        this.products = this.convertValues(source["products"], Product);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class HostAggsResult {
+	    error: boolean;
+	    host: string;
+	    consumed_fpoint: number;
+	    required_fpoints: number;
+	    ip: string;
+	    asn: number;
+	    org: string;
+	    country_name: string;
+	    country_code: string;
+	    ports: Port[];
+	    update_time: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HostAggsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.error = source["error"];
+	        this.host = source["host"];
+	        this.consumed_fpoint = source["consumed_fpoint"];
+	        this.required_fpoints = source["required_fpoints"];
+	        this.ip = source["ip"];
+	        this.asn = source["asn"];
+	        this.org = source["org"];
+	        this.country_name = source["country_name"];
+	        this.country_code = source["country_code"];
+	        this.ports = this.convertValues(source["ports"], Port);
+	        this.update_time = source["update_time"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	export class Item {
 	    ip: string;
 	    port: string;
@@ -479,6 +709,50 @@ export namespace fofa {
 	        this.items = this.convertValues(source["items"], Item);
 	        this.maxPage = source["maxPage"];
 	        this.taskID = source["taskID"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class StatisticalAggsResult {
+	    error: boolean;
+	    consumed_fpoint: number;
+	    required_fpoints: number;
+	    size: number;
+	    // Go type: struct { Domain int "json:\"domain\""; Fid int "json:\"fid\""; Icp int "json:\"icp\""; IP int "json:\"ip\""; Ipc int "json:\"ipc\""; Server int "json:\"server\""; Title int "json:\"title\"" }
+	    distinct: any;
+	    aggs: Aggs;
+	    lastupdatetime: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new StatisticalAggsResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.error = source["error"];
+	        this.consumed_fpoint = source["consumed_fpoint"];
+	        this.required_fpoints = source["required_fpoints"];
+	        this.size = source["size"];
+	        this.distinct = this.convertValues(source["distinct"], Object);
+	        this.aggs = this.convertValues(source["aggs"], Aggs);
+	        this.lastupdatetime = source["lastupdatetime"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

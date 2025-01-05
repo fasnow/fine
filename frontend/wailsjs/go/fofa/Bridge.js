@@ -10,10 +10,18 @@ export function GetUserInfo() {
   return window['go']['fofa']['Bridge']['GetUserInfo']();
 }
 
+export function HostAggs(arg1) {
+  return window['go']['fofa']['Bridge']['HostAggs'](arg1);
+}
+
 export function Query(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['fofa']['Bridge']['Query'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 export function SetAuth(arg1) {
   return window['go']['fofa']['Bridge']['SetAuth'](arg1);
+}
+
+export function StatisticalAggs(arg1, arg2) {
+  return window['go']['fofa']['Bridge']['StatisticalAggs'](arg1, arg2);
 }

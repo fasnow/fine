@@ -387,7 +387,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const getContextMenuItems = useCallback(
         (
             params: GetContextMenuItemsParams,
-        ): (MenuItemDef)[] => {
+        ): any => {
             let value: any
             if ('components' === params.column?.getColId()) {
                 const tmp = params.node?.data.component?.map((component: hunter.Component) => {
@@ -426,6 +426,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                         props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs(), queryOption)
                     },
                 },
+                'separator',
                 {
                     name: "复制单元格",
                     disabled: !value,

@@ -175,3 +175,11 @@ func (r *Bridge) SetAuth(key string) error {
 	r.fofa.SetAuth(key)
 	return nil
 }
+
+func (r *Bridge) StatisticalAggs(fields, query string) (*StatisticalAggsResult, error) {
+	return r.fofa.StatisticalAggs.Fields(fields).Query(query)
+}
+
+func (r *Bridge) HostAggs(host string) (*HostAggsResult, error) {
+	return r.fofa.HostAggs.Detail(true).Host(host)
+}

@@ -17,21 +17,22 @@ interface AdvancedHelpDataType {
 
 const advancedHelpColumns: ColDef<AdvancedHelpDataType>[] = [
     { headerName: '序号', field: "index", maxWidth: 80, pinned: 'left' },
-    { headerName: '逻辑连接符', field: "connector", width: 130, pinned: 'left' },
+    { headerName: '逻辑连接符', field: "connector", width: 130, },
     {
-        headerName: '具体含义', field: "description", cellRenderer: (props: ICellRendererParams) => (
-            <>
+        headerName: '具体含义', field: "description", cellRenderer: (params: ICellRendererParams) => {
+            if(!params.value || !params.node || !params.node.data)return <></>
+            return <>
                 {
-                    props.node.data.index === 5 ? <>
+                    params.node.data.index === 5 ? <>
                         模糊匹配，使用*或者?进行搜索，比如banner*=\"mys??\" (个人版及以上可用)
                         <Button
                             size='small' icon={<img style={{ height: "12px" }} src={helpIcon}></img>} type="link"
                             onClick={() => BrowserOpenURL("https://github.com/FofaInfo/Awesome-FOFA/blob/main/Basic%20scenario/Basic%20scenario_ZH/FOFA%E6%A8%A1%E7%B3%8A%E6%90%9C%E7%B4%A2%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF.md")}
                         />。
-                    </> : props.value
+                    </> : params.value
                 }
             </>
-        ), wrapText: true, autoHeight: true
+        }, wrapText: true, autoHeight: true, flex: 1
     },
 ];
 
@@ -82,9 +83,9 @@ interface ExampleHelpDataType {
 
 const exampleHelpColumns: ColDef<ExampleHelpDataType>[] = [
     { headerName: '序号', field: "index", maxWidth: 80, pinned: 'left' },
-    { headerName: '例句', field: "example", width: 300, pinned: 'left', autoHeight: true, wrapText: true},
-    { headerName: '用途说明', field: "description", width: 250, autoHeight: true, wrapText: true },
-    { headerName: '注', field: "tip", autoHeight: true, wrapText: true },
+    { headerName: '例句', field: "example", width: 300, pinned: 'left', autoHeight: true, wrapText: true, flex: 1},
+    { headerName: '用途说明', field: "description", width: 250, autoHeight: true, wrapText: true, flex: 1 },
+    { headerName: '注', field: "tip", autoHeight: true, wrapText: true, flex: 1 },
 ];
 
 const exampleHelpData: ExampleHelpDataType[] = [
@@ -242,7 +243,6 @@ const Help: React.FC = () => {
             suppressHeaderMenuButton: true,
             suppressHeaderFilterButton: true,
         },
-        autoSizeStrategy:{ type: 'fitGridWidth' },
     })
     return <>
         <Tooltip title='帮助信息' placement='bottom'>

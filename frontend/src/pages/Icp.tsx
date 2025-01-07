@@ -7,7 +7,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { QUERY_FIRST } from "@/component/type";
 import { errorNotification } from '@/component/Notification';
 import { useSelector } from 'react-redux';
-import { copy } from '@/util/util';
+import {copy, getAllDisplayedColumnKeys, getSortedData} from '@/util/util';
 import { BrowserOpenURL } from "../../wailsjs/runtime";
 
 import { Export, Query } from "../../wailsjs/go/icp/Bridge";
@@ -25,6 +25,7 @@ import { ColDef, GetContextMenuItemsParams, MenuItemDef } from "ag-grid-communit
 type PageDataType = WithIndex<icp.Item>
 
 const TabContent: React.FC = () => {
+    const gridRef = useRef<AgGridReact>(null)
     const [pageSizeOptions] = useState([40, 80, 100])
     const [inputCache, setInputCache] = useState<string>("")
     const [total, setTotal] = useState<number>(0)
@@ -61,11 +62,8 @@ const TabContent: React.FC = () => {
             suppressHeaderFilterButton: true,
         }
     }, [])
-
-    const getContextMenuItems = useCallback(
-        (
-            params: GetContextMenuItemsParams,
-        ): (MenuItemDef)[] => {
+    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): (MenuItemDef)[] => {
+            if(!pageData || pageData.length === 0)return []
             return [
                 {
                     name: "浏览器打开URL",
@@ -85,33 +83,25 @@ const TabContent: React.FC = () => {
                     name: "复制该行",
                     disabled: !params.node?.data,
                     action: () => {
-                        for (let i = 0; i < pageData.length; i++) {
-                            if (pageData[i].index === params.node?.data.index) {
-                                copy(pageData[i])
-                                break
-                            }
-                        }
+                        const data:PageDataType = params.node?.data
+                        const values:any[] = [];
+                        getAllDisplayedColumnKeys(gridRef.current?.api, columnDefs).forEach(key=>{
+                            values.push(data[key as keyof PageDataType]);
+                        })
+                        copy(values.join(gridRef.current?.api.getGridOption("clipboardDelimiter")))
                     },
                 },
                 {
                     name: "复制该列",
                     action: () => {
-                        const colValues = pageData.map((item: PageDataType) => {
-                            const colId = params.column?.getColId()
-                            for (const key in item) {
-                                if (Object.prototype.hasOwnProperty.call(item, key) && key === colId) {
-                                    return item[key as keyof PageDataType]
-                                }
-                            }
-                            return ""
+                        const colValues = getSortedData<PageDataType>(gridRef.current?.api).map((item: PageDataType) => {
+                            return item[params.column?.getColId() as keyof PageDataType]
                         })
-                        copy(colValues)
+                        copy(colValues.join('\n'))
                     },
-                },
+                }
             ];
-        },
-        [pageData, serviceType],
-    );
+        }, [pageData, serviceType]);
 
     const preHandleQuery = async (v: string) => {
         if (v === "") {
@@ -273,6 +263,7 @@ const TabContent: React.FC = () => {
         </Flex>
         <div style={{ width: "100%", height: "100%" }}>
             <AgGridReact
+                ref={gridRef}
                 loading={loading}
                 embedFullWidthRows
                 rowData={pageData}

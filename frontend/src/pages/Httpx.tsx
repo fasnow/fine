@@ -30,14 +30,15 @@ const TabContent = () => {
     const [offset, setOffset] = useState<number>(1)
     const [limit, setLimit] = useState<number>(15)
     const taskID = useRef<number>(0)
-    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
     const dispatch = useDispatch()
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const event = useSelector((state: RootState) => state.app.global.event || new Event())
     const [columnDefs] = useState<ColDef[]>([
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
         {
             headerName: '链接', field: "url", width: 300, cellRenderer: (params: ICellRendererParams) => {
+                if(!params.value)return <></>
                 return <span style={{ gap: "10" }}>
                     <Chrome onClick={() => {
                         BrowserOpenURL(params.value);
@@ -82,10 +83,8 @@ const TabContent = () => {
             ],
         }
     }, [])
-    const getContextMenuItems = useCallback(
-        (
-            params: GetContextMenuItemsParams,
-        ): (MenuItemDef)[] => {
+    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams, ): (MenuItemDef)[] => {
+            if(!pageData || pageData.length === 0)return []
             return [
                 {
                     name: "浏览器打开URL",
@@ -129,9 +128,7 @@ const TabContent = () => {
                     },
                 },
             ];
-        },
-        [pageData],
-    );
+        }, [pageData]);
 
     useEffect(() => {
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
@@ -281,7 +278,6 @@ const TabContent = () => {
                         <div style={{ width: "100%", height: "100%" }}>
                             <AgGridReact
                                 ref={gridRef}
-                                embedFullWidthRows
                                 rowData={pageData}
                                 columnDefs={columnDefs}
                                 getContextMenuItems={getContextMenuItems}

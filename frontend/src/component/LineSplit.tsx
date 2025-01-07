@@ -101,6 +101,7 @@ const LineSplit: React.FC<Column> = (props) => {
                     loadingOverlayComponent={() => <Loading />}
                     rowData={props.data}
                     columnDefs={props.columnDefs}
+                    cellSelection={true}
                 />
             </Flex>
         </Flex>

@@ -31,10 +31,10 @@ import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
-import { copy, RangePresets } from '@/util/util';
+import {copy, getAllDisplayedColumnKeys, getSortedData, RangePresets} from '@/util/util';
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import { GetUserInfo, RealtimeServiceDataExport, RealtimeServiceDataQuery, SetAuth } from "../../wailsjs/go/quake/Bridge";
-import { config, quake } from "../../wailsjs/go/models";
+import {config, quake} from "../../wailsjs/go/models";
 import { MenuItemType } from "antd/es/menu/interface";
 import { MenuItems, WithIndex } from "@/component/Interface";
 import TabLabel from "@/component/TabLabel";
@@ -42,7 +42,12 @@ import type { Tab } from "rc-tabs/lib/interface"
 import { TargetKey } from "@/pages/Constants";
 import Candidate, { ItemType } from "@/component/Candidate";
 import { FindByPartialKey } from "../../wailsjs/go/history/Bridge";
-import { ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, SideBarDef } from "ag-grid-community";
+import {
+    ColDef,
+    GetContextMenuItemsParams,
+    ICellRendererParams,
+    ProcessCellForExportParams, SideBarDef
+} from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
@@ -142,16 +147,6 @@ interface QueryOptions {
     include: string[],
     ipList: string[],
 }
-
-const defaultMenuItems: MenuItemType[] = [
-    MenuItems.OpenUrl,
-    MenuItems.QueryIP,
-    MenuItems.QueryIpCidr,
-    MenuItems.QueryTitle,
-    MenuItems.CopyRow,
-    MenuItems.CopyCol,
-    MenuItems.CopyUrlCol
-];
 
 type PageDataType = WithIndex<quake.RealtimeServiceItem>
 
@@ -395,7 +390,6 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const [inputCache, setInputCache] = useState<string>(input)
     const [queryOption, setQueryOption] = useState<QueryOptions>(props.queryOption || defaultQueryOption)
     const [loading, setLoading] = useState<boolean>(false)
-    const [pageData, setPageData] = useState<PageDataType[]>([])
     const pageIDMap = useRef<{ [key: number]: number }>({})
     const [total, setTotal] = useState<number>(0)
     const [currentPage, setCurrentPage] = useState<number>(1)
@@ -403,6 +397,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const dispatch = useDispatch()
     const history = useSelector((state: RootState) => state.app.global.history)
     const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.assets)
+    const [pageData, setPageData] = useState<PageDataType[]>([])
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
         { headerName: 'IP', field: "ip", width: 150, pinned: 'left' },
@@ -413,7 +408,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: '响应码', field: "status_code", width: 80, cellRenderer: (params: ICellRendererParams) => params.data?.service?.http?.status_code },
         {
             headerName: '产品应用', field: "components", width: 100, cellRenderer: (params: ICellRendererParams) => {
-                const tmp = params.data.components?.map((component: quake.Component) => {
+                const tmp = params.data?.components?.map((component: quake.Component) => {
                     return component.product_name_en + component.version
                 })
                 return tmp?.join(" | ") || ""
@@ -423,6 +418,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: '网站路径', field: "path", width: 100, cellRenderer: (params: ICellRendererParams) => params.data?.service?.http?.path },
         {
             headerName: '地理位置', field: "location", width: 100, cellRenderer: (params: ICellRendererParams) => {
+                if(!params.data) return <></>
                 const location: string[] = []
                 if (params.data.location.country_cn) {
                     location.push(params.data.location.country_cn)
@@ -444,6 +440,117 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: '运营商', field: "isp", width: 100, cellRenderer: (params: ICellRendererParams) => params.data?.location?.isp },
     ]);
     const gridRef = useRef<AgGridReact>(null);
+    const defaultColDef = useMemo<ColDef>(() => {
+        return {
+            // allow every column to be aggregated
+            enableValue: true,
+            // allow every column to be grouped
+            enableRowGroup: true,
+            // allow every column to be pivoted
+            enablePivot: true,
+            filter: true,
+            suppressHeaderMenuButton: true,
+            suppressHeaderFilterButton: true,
+        }
+    }, [])
+    const defaultSideBarDef = useMemo<SideBarDef>(() => {
+        return {
+            toolPanels: [
+                {
+                    id: "columns",
+                    labelDefault: "表格字段",
+                    labelKey: "columns",
+                    iconKey: "columns",
+                    toolPanel: "agColumnsToolPanel",
+                    toolPanelParams: {
+                        suppressRowGroups: false,
+                        suppressValues: false,
+                        suppressPivots: true,
+                        suppressPivotMode: true,
+                        suppressColumnFilter: false,
+                        suppressColumnSelectAll: true,
+                        suppressColumnExpandAll: true,
+                    },
+                },
+            ],
+        }
+    }, [])
+    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): any => {
+            if(!pageData || pageData.length === 0)return []
+            const url = formattedUrl(params.node?.data)
+            const cellValue = formattedValueForCopy(params.column?.getColId(), params.node?.data)
+            return [
+                {
+                    name: "浏览器打开URL",
+                    disabled: !url,
+                    action: () => {
+                        BrowserOpenURL(url)
+                    },
+                },
+                {
+                    name: "查询C段",
+                    disabled: !params.node?.data?.ip,
+                    action: () => {
+                        props.newTab && props.newTab("ip=" + params.node?.data?.ip + "/24", getColDefs(), queryOption)
+                    },
+                },
+                {
+                    name: "查询IP",
+                    disabled: !params.node?.data?.ip,
+                    action: () => {
+                        props.newTab && props.newTab(`ip:"${params.node?.data?.ip}"`, getColDefs(), queryOption)
+                    },
+                },
+                {
+                    name: "查询标题",
+                    disabled: !params.node?.data?.service?.http?.title,
+                    action: () => {
+                        props.newTab && props.newTab(`service.http.title:"${params.node?.data?.service?.http?.title}"`, getColDefs(), queryOption)
+                    },
+                },
+                'separator',
+                {
+                    name: "复制单元格",
+                    disabled: !cellValue,
+                    action: () => {
+                        copy(cellValue)
+                    },
+                },
+                {
+                    name: "复制该行",
+                    disabled: !params.node?.data,
+                    action: () => {
+                        const data:PageDataType = params.node?.data
+                        const values:any[] = [];
+                        getAllDisplayedColumnKeys(gridRef.current?.api, columnDefs).forEach(key=>{
+                            values.push(formattedValueForCopy(key, data));
+                        })
+                        copy(values.join(gridRef.current?.api.getGridOption("clipboardDelimiter")))
+                    },
+                },
+                {
+                    name: "复制该列",
+                    action: () => {
+                        const colValues = getSortedData<PageDataType>(gridRef.current?.api).map(item => {
+                            return formattedValueForCopy(params.column?.getColId(),item)
+                        })
+                        copy(colValues.join('\n'))
+                    },
+                },
+                {
+                    name: "复制URL列",
+                    action: () => {
+                        const t: string[] = getSortedData<PageDataType>(gridRef.current?.api).map(item => {
+                            return formattedUrl(item)
+                        })
+                        copy(t.join("\n"))
+                    },
+                },
+            ];
+        }, [pageData, queryOption]);
+    const processCellForClipboard = useCallback((params: ProcessCellForExportParams) => {
+        return formattedValueForCopy(params.column?.getColId(), params.node?.data)
+    }, []);
 
     useEffect(() => {
         if (props.input) {
@@ -451,6 +558,65 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             handleNewQuery(props.input, currentPageSize)
         }
     }, [])
+
+    const formattedValueForCopy = (colId:string | undefined, item:PageDataType)=>{
+        switch (colId) {
+            case "protocol":
+                return item.service?.name ? item.service?.name : ""
+            case "web_title":
+                return item.service?.http?.title ? item.service?.http?.title : ""
+            case "status_code":
+                return item.service?.http?.status_code ? item.service?.http?.status_code : ""
+            case "path":
+                return item.service?.http?.path ? item.service?.http?.path : ""
+            case "isp":
+                return item?.location?.isp ? item?.location?.isp : ""
+            case "location": {
+                return formattedLocation(item.location).join(" ")
+            }
+            case "components": {
+                const tmp = item.components?.map((component: quake.Component) => {
+                    return component.product_name_en + component.version
+                })
+                return tmp?.join(" | ") || ""
+            }
+            default:
+                const t = item[colId as keyof PageDataType]
+                return t === null ? undefined : t
+        }
+    }
+
+    const formattedLocation = (location:quake.Location)=>{
+        const t: string[] = []
+        if (location.country_cn) {
+            t.push(location.country_cn)
+        }
+        if (location.province_cn) {
+            t.push(location.province_cn)
+        }
+        if (location.city_cn) {
+            t.push(location.city_cn)
+        }
+        if (location.street_cn) {
+            t.push(location.street_cn)
+        }
+        return t
+    }
+
+    const formattedUrl = (data:PageDataType)=>{
+        const domain = data.domain
+        const ip = data.ip
+        const schema = data.service?.name
+        const port = data.port
+        let url
+        const host = domain || ip
+        if (schema === 'http/ssl') {
+            url = (port === 443 ? 'https://' : 'http://') + host + ":" + port
+        } else {
+            url = schema + '://' + host + ":" + port
+        }
+        return url
+    }
 
     const getColDefs = () => {
         if (gridRef.current?.api) {
@@ -582,232 +748,6 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         </Flex>
     )
 
-    const getContextMenuItems = useCallback(
-        (
-            params: GetContextMenuItemsParams,
-        ): any => {
-            const domain = params.node?.data.domain
-            const ip = params.node?.data.ip
-            const schema = params.node?.data.service?.name
-            const port = params.node?.data.port
-            let url = ""
-            if (schema && schema.startsWith("http") && (domain || ip.indexOf("*") === -1)) {
-                if (schema.startsWith("http/ssl")) {
-                    url = `https://${(domain || ip)}:${port.toString()}`
-                } else if (schema.startsWith("http")) {
-                    url = `http://${(domain || ip)}:${port.toString()}`
-                }
-            }
-
-            const colId = params.column?.getColId()
-            let value: any
-            switch (colId) {
-                case "protocol":
-                    value = params.node?.data.service?.name
-                    break
-                case "web_title":
-                    value = params.node?.data.service?.http?.title
-                    break
-                case "status_code":
-                    value = params.node?.data.service?.http?.status_code
-                    break
-                case "path":
-                    value = params.node?.data.service?.http?.path
-                    break
-                case "isp":
-                    value = params.node?.data?.location?.isp
-                    break
-                case "location": {
-                    const location: string[] = []
-                    if (params.node?.data.location.country_cn) {
-                        location.push(params.node?.data.location.country_cn)
-                    }
-                    if (params.node?.data.location.province_cn) {
-                        location.push(params.node?.data.location.province_cn)
-                    }
-                    if (params.node?.data.location.city_cn) {
-                        location.push(params.node?.data.location.city_cn)
-                    }
-                    if (params.node?.data.location.street_cn) {
-                        location.push(params.node?.data.location.street_cn)
-                    }
-                    value = location.join(" ")
-                    break
-                }
-                case "components": {
-                    const tmp = params.node?.data.components?.map((component: quake.Component) => {
-                        return component.product_name_en + component.version
-                    })
-                    value = tmp?.join(" | ")
-                    break
-                }
-                default:
-                    value = params.value
-            }
-            return [
-                {
-                    name: "浏览器打开URL",
-                    disabled: !url,
-                    action: () => {
-                        BrowserOpenURL(url)
-                    },
-                },
-                {
-                    name: "查询C段",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        props.newTab && props.newTab("ip=" + params.node?.data.ip + "/24", getColDefs(), queryOption)
-                    },
-                },
-                {
-                    name: "查询IP",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        props.newTab && props.newTab(`ip:"${params.node?.data.ip}"`, getColDefs(), queryOption)
-                    },
-                },
-                {
-                    name: "查询标题",
-                    disabled: !params.node?.data.service.http.title,
-                    action: () => {
-                        props.newTab && props.newTab(`service.http.title:"${params.node?.data.service.http.title}"`, getColDefs(), queryOption)
-                    },
-                },
-                'separator',
-                {
-                    name: "复制单元格",
-                    disabled: !value,
-                    action: () => {
-                        copy(value)
-                    },
-                },
-                {
-                    name: "复制该行",
-                    disabled: !params.node?.data,
-                    action: () => {
-                        for (let i = 0; i < pageData.length; i++) {
-                            if (pageData[i].index === params.node?.data.index) {
-                                copy(pageData[i])
-                                break
-                            }
-                        }
-                    },
-                },
-                {
-                    name: "复制该列",
-                    action: () => {
-                        const colId = params.column?.getColId()
-                        const colValues = pageData.map(item => {
-                            for (const key in item) {
-                                if (Object.prototype.hasOwnProperty.call(item, key)) {
-                                    switch (colId) {
-                                        case "protocol":
-                                            return item.service?.name ? item.service?.name : ""
-                                        case "web_title":
-                                            return item.service?.http?.title ? item.service?.http?.title : ""
-                                        case "status_code":
-                                            return item.service?.http?.status_code ? item.service?.http?.status_code : ""
-                                        case "path":
-                                            return item.service?.http?.path ? item.service?.http?.path : ""
-                                        case "isp":
-                                            return item?.location?.isp ? item?.location?.isp : ""
-                                        case "location": {
-                                            const location: string[] = []
-                                            if (item.location.country_cn) {
-                                                location.push(item.location.country_cn)
-                                            }
-                                            if (item.location.province_cn) {
-                                                location.push(item.location.province_cn)
-                                            }
-                                            if (item.location.city_cn) {
-                                                location.push(item.location.city_cn)
-                                            }
-                                            if (item.location.street_cn) {
-                                                location.push(item.location.street_cn)
-                                            }
-                                            return location.join(" ")
-                                        }
-                                        case "components": {
-                                            const tmp = item.components?.map((component: quake.Component) => {
-                                                return component.product_name_en + component.version
-                                            })
-                                            return tmp?.join(" | ") || ""
-                                        }
-                                    }
-                                    return item[key as keyof PageDataType];
-                                }
-
-                            }
-                            return ""
-                        })
-                        copy(colValues)
-                    },
-                },
-                {
-                    name: "复制URL列",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        const t: string[] = pageData.map(item => {
-                            const domain = item.domain
-                            const ip = item.ip
-                            const schema = item.service?.name
-                            const port = item.port
-                            let url
-                            const host = domain || ip
-                            console.log(host, domain, ip)
-                            if (schema === 'http/ssl') {
-                                url = (port === 443 ? 'https://' : 'http://') + host + ":" + port
-                            } else {
-                                url = schema + '://' + host + ":" + port
-                            }
-                            return url
-                        })
-                        copy(t.join("\n"))
-                    },
-                },
-            ];
-        },
-        [pageData, queryOption],
-    );
-
-    const defaultColDef = useMemo<ColDef>(() => {
-        return {
-            // allow every column to be aggregated
-            enableValue: true,
-            // allow every column to be grouped
-            enableRowGroup: true,
-            // allow every column to be pivoted
-            enablePivot: true,
-            filter: true,
-            suppressHeaderMenuButton: true,
-            suppressHeaderFilterButton: true,
-        }
-    }, [])
-
-    const defaultSideBarDef = useMemo<SideBarDef>(() => {
-        return {
-            toolPanels: [
-                {
-                    id: "columns",
-                    labelDefault: "表格字段",
-                    labelKey: "columns",
-                    iconKey: "columns",
-                    toolPanel: "agColumnsToolPanel",
-                    toolPanelParams: {
-                        suppressRowGroups: false,
-                        suppressValues: false,
-                        suppressPivots: true,
-                        suppressPivotMode: true,
-                        suppressColumnFilter: false,
-                        suppressColumnSelectAll: true,
-                        suppressColumnExpandAll: true,
-                    },
-                },
-            ],
-        }
-    }, [])
-
-
     return <Flex vertical gap={5} style={{ height: '100%' }}>
         <Flex vertical gap={5}>
             <Flex align={'center'} justify={'center'}>
@@ -932,6 +872,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 defaultColDef={defaultColDef}
                 noRowsOverlayComponent={() => <NotFound />}
                 loadingOverlayComponent={() => <Loading />}
+                processCellForClipboard={processCellForClipboard}
+                cellSelection={true}
             />
         </div>
         {footer}

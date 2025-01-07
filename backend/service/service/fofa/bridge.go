@@ -177,9 +177,23 @@ func (r *Bridge) SetAuth(key string) error {
 }
 
 func (r *Bridge) StatisticalAggs(fields, query string) (*StatisticalAggsResult, error) {
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  query,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
 	return r.fofa.StatisticalAggs.Fields(fields).Query(query)
 }
 
 func (r *Bridge) HostAggs(host string) (*HostAggsResult, error) {
+	err := r.historyRepo.CreateHistory(&models.History{
+		Key:  host,
+		Type: constant.Histories.FOFA,
+	})
+	if err != nil {
+		logger.Info(err)
+	}
 	return r.fofa.HostAggs.Detail(true).Host(host)
 }

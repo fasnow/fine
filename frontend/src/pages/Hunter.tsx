@@ -33,8 +33,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import PointBuy from "@/assets/images/point-buy.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
-import { copy, RangePresets } from '@/util/util';
-import { config, hunter } from "../../wailsjs/go/models";
+import {copy, getAllDisplayedColumnKeys, getSortedData, RangePresets} from '@/util/util';
+import {config, hunter} from "../../wailsjs/go/models";
 import { Export, GetRestToken, Query, SetAuth } from "../../wailsjs/go/hunter/Bridge";
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import type { Tab } from 'rc-tabs/lib/interface';
@@ -50,7 +50,14 @@ import { FindByPartialKey } from "../../wailsjs/go/history/Bridge";
 import { AgGridReact } from "ag-grid-react";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
-import { ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, SideBarDef } from "ag-grid-community";
+import {
+    ColDef,
+    GetContextMenuItemsParams,
+    ICellRendererParams,
+    MenuItemDef,
+    ProcessCellForExportParams,
+    SideBarDef
+} from "ag-grid-community";
 import Help from "@/pages/HunterUsage";
 
 const pageSizeOptions = [10, 20, 50, 100]
@@ -295,18 +302,18 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const [queryOption, setQueryOption] = useState<QueryOptions>(props.queryOption || defaultQueryOption)
     const [loading, setLoading] = useState<boolean>(false)
     const [loading2, setLoading2] = useState<boolean>(false)
-    const [pageData, setPageData] = useState<PageDataType[]>([])
     const pageIDMap = useRef<{ [key: number]: number }>({})
-    const dispatch = useDispatch()
     const [total, setTotal] = useState<number>(0)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
     const [clicked, setClicked] = useState(false);
     const [hovered, setHovered] = useState(false);
     const [faviconUrl, setFaviconUrl] = useState("");
+    const dispatch = useDispatch()
     const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.assets)
     const event = useSelector((state: RootState) => state.app.global.event)
     const history = useSelector((state: RootState) => state.app.global.history)
+    const [pageData, setPageData] = useState<PageDataType[]>([])
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
         { headerName: 'URL', field: "url", width: 250, hide: true },
@@ -319,7 +326,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: '备案单位', field: "company", width: 100, },
         { headerName: '响应码', field: "status_code", width: 80, },
         {
-            headerName: '组件', field: "components", width: 100, cellRenderer: (params: ICellRendererParams) => {
+            headerName: '组件', field: "component", width: 100, cellRenderer: (params: ICellRendererParams) => {
+                if(!params.data) return <></>
                 const tmp = params.data.component?.map((component: hunter.Component) => {
                     return component.name + component.version
                 })
@@ -370,6 +378,81 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             suppressHeaderFilterButton: true,
         }
     }, [])
+    const processCellForClipboard = useCallback((params: ProcessCellForExportParams) => {
+            return formattedValueForCopy(params.column?.getColId(), params.node?.data)
+        }, []);
+    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): any => {
+        if(!pageData || pageData.length === 0)return []
+        const cellValue = formattedValueForCopy(params.column?.getColId(), params.node?.data)
+        return [
+            {
+                name: "浏览器打开URL",
+                disabled: !params.node?.data.url,
+                action: () => {
+                    BrowserOpenURL(params.node?.data.url)
+                },
+            },
+            {
+                name: "查询C段",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip + "/24", getColDefs(), queryOption)
+                },
+            },
+            {
+                name: "查询IP",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip, getColDefs(), queryOption)
+                },
+            },
+            {
+                name: "查询标题",
+                disabled: !params.node?.data.web_title,
+                action: () => {
+                    props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs(), queryOption)
+                },
+            },
+            'separator',
+            {
+                name: "复制单元格",
+                disabled: !cellValue,
+                action: () => {
+                    copy(cellValue)
+                },
+            },
+            {
+                name: "复制该行",
+                action: () => {
+                    const data:PageDataType = params.node?.data
+                    const values:any[] = [];
+                    getAllDisplayedColumnKeys(gridRef.current?.api, columnDefs).forEach(key=>{
+                        values.push(formattedValueForCopy(key, data));
+                    })
+                    copy(values.join(gridRef.current?.api.getGridOption("clipboardDelimiter")))
+                },
+            },
+            {
+                name: "复制该列",
+                action: () => {
+                    const colValues = getSortedData<PageDataType>(gridRef.current?.api).map(item => {
+                        return formattedValueForCopy(params.column?.getColId(),item)
+                    })
+                    copy(colValues.join('\n'))
+                },
+            },
+            {
+                name: "复制URL列",
+                disabled: !params.node?.data?.ip,
+                action: () => {
+                    const colValues = getSortedData<PageDataType>(gridRef.current?.api).map(item => {
+                        return formattedValueForCopy("url", item)
+                    })
+                    copy(colValues)
+                },
+            },
+        ]
+    }, [pageData, queryOption]);
 
     useEffect(() => {
         EventsOn(String(event?.hasNewHunterDownloadItem), function () {
@@ -384,111 +467,22 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         }
     }, [])
 
-    const getContextMenuItems = useCallback(
-        (
-            params: GetContextMenuItemsParams,
-        ): any => {
-            let value: any
-            if ('components' === params.column?.getColId()) {
-                const tmp = params.node?.data.component?.map((component: hunter.Component) => {
+    const formattedValueForCopy = (colId:string | undefined, item:PageDataType)=>{
+        switch (colId) {
+            case "component": {
+                const tmp = item.component?.map((component: hunter.Component) => {
                     return component.name + component.version
                 })
-                value = tmp?.join(" | ")
-            } else {
-                value = params.value
+                return tmp?.join(" | ")
             }
-            return [
-                {
-                    name: "浏览器打开URL",
-                    disabled: !params.node?.data.url,
-                    action: () => {
-                        props.newTab && BrowserOpenURL(params.node?.data.url)
-                    },
-                },
-                {
-                    name: "查询C段",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        props.newTab && props.newTab("ip=" + params.node?.data.ip + "/24", getColDefs(), queryOption)
-                    },
-                },
-                {
-                    name: "查询IP",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        props.newTab && props.newTab("ip=" + params.node?.data.ip, getColDefs(), queryOption)
-                    },
-                },
-                {
-                    name: "查询标题",
-                    disabled: !params.node?.data.web_title,
-                    action: () => {
-                        props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs(), queryOption)
-                    },
-                },
-                'separator',
-                {
-                    name: "复制单元格",
-                    disabled: !value,
-                    action: () => {
-                        copy(value)
-                    },
-                },
-                {
-                    name: "复制该行",
-                    disabled: !params.node?.data,
-                    action: () => {
-                        for (let i = 0; i < pageData.length; i++) {
-                            if (pageData[i].index === params.node?.data.index) {
-                                copy(pageData[i])
-                                break
-                            }
-                        }
-                    },
-                },
-                {
-                    name: "复制该列",
-                    action: () => {
-                        const colId = params.column?.getColId()
-                        const colValues = pageData.map((item: PageDataType) => {
-                            for (const key in item) {
-                                if (Object.prototype.hasOwnProperty.call(item, key)) {
-                                    if ('components' === colId) {
-                                        const tmp = item.component?.map((component: hunter.Component) => {
-                                            return component.name + component.version
-                                        })
-                                        return tmp?.join(" | ") || ""
-                                    } else if (key === colId) {
-                                        return item[key as keyof PageDataType]
-                                    }
-                                }
-                            }
-                            return ""
-                        })
-                        copy(colValues)
-                    },
-                },
-                {
-                    name: "复制URL列",
-                    disabled: !params.node?.data.ip,
-                    action: () => {
-                        const colValues = pageData.map(item => {
-                            for (const key in item) {
-                                if (Object.prototype.hasOwnProperty.call(item, key) && key === 'url') {
-                                    return item[key as keyof PageDataType]
-                                }
-                            }
-                            return null
-                        })
-                        copy(colValues)
-                    },
-                },
-            ]
-        }, [pageData, queryOption]);
+            default:
+                const t = item[colId as keyof PageDataType]
+                return t === null ? undefined : t
+        }
+    }
 
     const getColDefs = () => {
         if (gridRef.current?.api) {
-            console.log(gridRef.current.api.getColumnDefs())
             return gridRef.current.api.getColumnDefs()
         }
         return columnDefs
@@ -767,6 +761,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 defaultColDef={defaultColDef}
                 noRowsOverlayComponent={() => <NotFound />}
                 loadingOverlayComponent={() => <Loading />}
+                processCellForClipboard={processCellForClipboard}
+                cellSelection={true}
             />
         </div>
         {footer}

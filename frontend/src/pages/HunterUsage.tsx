@@ -17,7 +17,7 @@ interface AdvancedHelpDataType {
 const advancedHelpColumns: ColDef<AdvancedHelpDataType>[] = [
     { headerName: '序号', field: "index", maxWidth: 80 },
     { headerName: '连接符', field: "connector", width: 100 },
-    { headerName: '查询含义', field: "description", autoHeight: true, wrapText: true },
+    { headerName: '查询含义', field: "description", autoHeight: true, wrapText: true, flex: 1 },
 ];
 
 const advancedHelpData: AdvancedHelpDataType[] = [
@@ -75,7 +75,6 @@ const gridOptions:GridOptions = {
     rowHeight:32,
     noRowsOverlayComponent:() => <NotFound />,
     loadingOverlayComponent:() => <Loading />,
-    autoSizeStrategy:{ type: 'fitGridWidth' },
 }
 
 const exampleHelpColumns: ColDef<ExampleHelpDataType>[] = [
@@ -83,12 +82,12 @@ const exampleHelpColumns: ColDef<ExampleHelpDataType>[] = [
     {
         headerName: '语法内容', field: "example", width: 300, cellRenderer: (params: ICellRendererParams) => {
             return params.value
-        }, autoHeight: true, wrapText: true
+        }, autoHeight: true, wrapText: true,flex: 1
     },
     {
         headerName: '语法说明', field: "description", cellRenderer: (params: ICellRendererParams) => {
             return params.value
-        }, autoHeight: true, wrapText: true, width: 300
+        }, autoHeight: true, wrapText: true, width: 300,flex: 1
     },
 ];
 

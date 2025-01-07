@@ -1,6 +1,56 @@
 import copyToClipboard from "copy-to-clipboard";
 import dayjs, {Dayjs} from "dayjs";
 import {message} from "antd";
+import {ColDef, GridApi} from "ag-grid-community";
+
+export const getSortedData = <T>(api:GridApi | undefined): T[]=>{
+    if(!api)return []
+    const sortedData: T[] = [];
+    api.forEachNodeAfterFilterAndSort((node) => {
+        sortedData.push(node.data);
+    });
+    return sortedData
+}
+
+export const getAllDisplayedColumnKeysNoIndex = (api:GridApi | undefined, columnDefs:ColDef[])=>{
+    if (api) {
+        const selectedCols = api.getAllDisplayedColumns()
+        const fields: string[] = []
+        selectedCols?.forEach(col => {
+            const field = col.getColId()
+            field !== 'index' && fields.push(field)
+        })
+        return fields
+    }
+    const fields: string[] = []
+    columnDefs?.forEach(col => {
+        const hide = col.hide === undefined ? false : col.hide
+        if (!hide && col.field && col.field !== 'index') {
+            fields.push(col.field)
+        }
+    })
+    return fields
+}
+
+export const getAllDisplayedColumnKeys = (api:GridApi | undefined, columnDefs:ColDef[])=>{
+    if (api) {
+        const selectedCols = api.getAllDisplayedColumns()
+        const fields: string[] = []
+        selectedCols?.forEach(col => {
+            const field = col.getColId()
+            fields.push(field)
+        })
+        return fields
+    }
+    const fields: string[] = []
+    columnDefs?.forEach(col => {
+        const hide = col.hide === undefined ? false : col.hide
+        if (!hide && col.field) {
+            fields.push(col.field)
+        }
+    })
+    return fields
+}
 
 export const dataFormat = (date: string, fmt: string): string => {
     if (date && fmt) {

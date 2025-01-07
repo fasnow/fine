@@ -8,7 +8,6 @@ import Detail = fofa.Detail;
 import Country = fofa.Country;
 
 interface FofaStatisticalAggsProps {
-    value?: string;
     ref?: any;
 }
 
@@ -116,8 +115,8 @@ const FofaStatisticalAggs:React.FC<FofaStatisticalAggsProps> = forwardRef((props
     return (
         <Flex vertical style={{height: '100%'}} gap={10}>
             <Flex vertical gap={5} >
-                <Flex justify={'center'} align={'center'}>
-                    <Checkbox indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll}>
+                <Flex justify={'center'} align={'center'} wrap={false} style={{padding:'0 10px'}}>
+                    <Checkbox indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll} style={{textWrap:'nowrap'}}>
                         全选
                     </Checkbox>
                     <Checkbox.Group

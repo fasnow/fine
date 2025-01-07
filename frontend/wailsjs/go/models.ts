@@ -567,6 +567,7 @@ export namespace fofa {
 	    country_code: string;
 	    ports: Port[];
 	    update_time: string;
+	    domain: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new HostAggsResult(source);
@@ -585,6 +586,7 @@ export namespace fofa {
 	        this.country_code = source["country_code"];
 	        this.ports = this.convertValues(source["ports"], Port);
 	        this.update_time = source["update_time"];
+	        this.domain = source["domain"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

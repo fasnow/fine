@@ -32,24 +32,23 @@ const gridOptions:GridOptions = {
     rowHeight:32,
     noRowsOverlayComponent:() => <NotFound />,
     loadingOverlayComponent:() => <Loading />,
-    autoSizeStrategy:{ type: 'fitGridWidth' },
 }
 
 const exampleHelpColumns1: ColDef<ExampleHelpDataType>[] = [
     { headerName: '序号', field: "index", maxWidth: 80 },
-    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true },
-    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true },
-    { headerName: '支持的数据模式', field: "mode", width: 150, autoHeight: true, wrapText: true },
-    { headerName: '解释说明', field: "description", width: 250 , autoHeight: true, wrapText: true},
-    { headerName: '范例', field: "example", autoHeight: true, wrapText: true },
+    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true, flex: 0.5},
+    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true, flex: 0.5 },
+    { headerName: '支持的数据模式', field: "mode", width: 150, autoHeight: true, wrapText: true, flex: 0.7 },
+    { headerName: '解释说明', field: "description", width: 250 , autoHeight: true, wrapText: true, flex: 1},
+    { headerName: '范例', field: "example", autoHeight: true, wrapText: true, flex: 1 },
 ];
 
 const exampleHelpColumns2: ColDef<ExampleHelpDataType>[] = [
     { headerName: '序号', field: "index", maxWidth: 80 },
-    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true },
-    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true },
-    { headerName: '解释说明', field: "description", width: 250, autoHeight: true, wrapText: true },
-    { headerName: '范例', field: "example", autoHeight: true, wrapText: true },
+    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true, flex: 1 },
+    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true, flex: 1 },
+    { headerName: '解释说明', field: "description", width: 250, autoHeight: true, wrapText: true, flex: 4 },
+    { headerName: '范例', field: "example", autoHeight: true, wrapText: true, flex: 2 },
 ];
 
 const exampleHelpDataTabs: TabsProps['items'] = [

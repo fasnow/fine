@@ -192,4 +192,5 @@ type HostAggsResult struct {
 	CountryCode     string      `json:"country_code"`
 	Ports           []fofa.Port `json:"ports"`
 	UpdateTime      string      `json:"update_time"`
+	Domain          []string    `json:"domain"`
 }

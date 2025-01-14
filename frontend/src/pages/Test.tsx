@@ -17,6 +17,7 @@ import {
 import {WithIndex} from "@/component/Interface";
 import Port = fofa.Port;
 import Product = fofa.Product;
+import Aiqicha from "@/pages/Aiqicha";
 
 const SpanCssProperties:CSSProperties={
     display: "inline-block",
@@ -181,8 +182,7 @@ const FofaHostAggs:React.FC = React.forwardRef((props, ref)=>{
 const Test: React.FC = () => {
 
     return  <Flex style={{height:'100%'}} vertical>
-        <Button onClick={()=>{}}>点击</Button>
-        <FofaHostAggs />
+        <Aiqicha />
     </Flex>
 };
 

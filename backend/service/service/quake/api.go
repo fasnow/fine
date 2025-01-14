@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-type RSDQueryResult struct {
+type RealtimeServiceDataResult struct {
 	Items    []quake.RealtimeServiceItem `json:"items"` //用指针wails会无法生成正确的映射
 	PageNum  int                         `json:"pageNum"`
 	PageSize int                         `json:"pageSize"`
@@ -87,10 +87,10 @@ type RSDQueryResult struct {
 //	Asn        int         `json:"asn"` //自治域编号
 //}
 
-func (r *realtimeData) Service(req *GetRealtimeDataReq) (*RSDQueryResult, error) {
+func (r *realtimeService) Service(req *GetRealtimeDataReq) (*RealtimeServiceDataResult, error) {
 	postOptions, _ := json.Marshal(req.req.Body)
 	postData := strings.NewReader(string(postOptions))
-	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApiUrl, postData)
+	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApi, postData)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -106,7 +106,7 @@ func (r *realtimeData) Service(req *GetRealtimeDataReq) (*RSDQueryResult, error)
 		logger.Info(err.Error())
 		return nil, err
 	}
-	result := &RSDQueryResult{
+	result := &RealtimeServiceDataResult{
 		Items:    resultItems,
 		PageNum:  page,
 		PageSize: size,
@@ -186,10 +186,10 @@ type RHDQueryResult struct {
 //	Asn  int       `json:"asn"` //自治域编号
 //}
 
-func (r *realtimeData) Host(req *GetRealtimeDataReq) (*RHDQueryResult, error) {
+func (r *realtimeService) Host(req *GetRealtimeDataReq) (*RHDQueryResult, error) {
 	postOptions, _ := json.Marshal(req.req.Body)
 	postData := strings.NewReader(string(postOptions))
-	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApiUrl, postData)
+	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApi, postData)
 	if err != nil {
 		return nil, err
 	}

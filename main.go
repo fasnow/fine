@@ -10,6 +10,7 @@ import (
 	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/runtime"
+	"fine/backend/service/service/aiqicha"
 	"fine/backend/service/service/domain2ip"
 	"fine/backend/service/service/fofa"
 	"fine/backend/service/service/history"
@@ -115,6 +116,7 @@ func main() {
 			repository.NewDownloadLogService(),
 			domain2ip.NewDomain2IPBridge(mainApp),
 			tianyancha.NewTianYanChaBridge(),
+			aiqicha.NewAiQiChaBridge(),
 		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: true,

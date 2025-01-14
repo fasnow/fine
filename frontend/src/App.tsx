@@ -25,6 +25,7 @@ import type {Tab} from 'rc-tabs/lib/interface'
 import {themeQuartz} from "ag-grid-community";
 import { ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
 import { AllEnterpriseModule, LicenseManager } from 'ag-grid-enterprise';
+import Aiqicha from "@/pages/Aiqicha";
 
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
@@ -62,6 +63,11 @@ const App: React.FC = () => {
             key: '天眼查',
             label: '天眼查',
             children: <TianYanCha/>,
+        },
+        {
+            key: '爱企查',
+            label: '爱企查',
+            children: <Aiqicha/>,
         },
         {
             key: 'HTTPX',

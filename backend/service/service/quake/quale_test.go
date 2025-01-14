@@ -16,7 +16,7 @@ func TestQuakeDBService_GetByTaskID(t *testing.T) {
 		Page(1).
 		Size(1).
 		Build()
-	result, err := client.Realtime.Service(req)
+	result, err := client.RealtimeServer.Service(req)
 	if err != nil {
 		t.Error(err)
 		return

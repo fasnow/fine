@@ -4,7 +4,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
 import {errorNotification} from "@/component/Notification";
 import {Button} from "antd";
-import {StockTreeVerticalV2} from "@/pages/tianyancha/TianYanCha2";
+import {StockTreeVerticalV2} from "@/pages/dev/TianYanCha2";
 
 interface TreeProps {
     data: any;

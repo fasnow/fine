@@ -10,6 +10,7 @@ import { SetAuth as SetFofaAuth } from "../../wailsjs/go/fofa/Bridge";
 import { SetAuth as Set0zoneAuth } from "../../wailsjs/go/zone/Bridge";
 import { SetAuth as SetQuakeAuth } from "../../wailsjs/go/quake/Bridge";
 import { SetAuth as SetTianYanChaAuth } from "../../wailsjs/go/tianyancha/Bridge";
+import { SetAuth as SetAiQiChaAuth } from "../../wailsjs/go/aiqicha/Bridge";
 import { config } from "../../wailsjs/go/models";
 import { SaveProxy, SaveQueryOnEnter } from "../../wailsjs/go/app/App";
 import TextArea from "antd/es/input/TextArea";
@@ -513,13 +514,67 @@ export const Setting: React.FC = () => {
         </Flex>
     }
 
+    const AiQiChaForm: React.FC = () => {
+        const [editable, setEditable] = useState(false)
+        const [key, setKey] = useState("")
+        const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
+
+        useEffect(() => {
+            setKey(cfg.AiQiCha.cookie)
+        }, [cfg.AiQiCha]);
+
+
+        const save = () => {
+            SetAiQiChaAuth(key).then(
+                r => {
+                    const t = { ...cfg, AiQiCha: { ...cfg.AiQiCha, cookie: key } } as config.Config;
+                    dispatch(appActions.setConfig(t))
+                    setEditable(false)
+                }
+            ).catch(
+                err => {
+                    errorNotification("错误", err, 3)
+                    setKey(cfg.AiQiCha.cookie)
+                }
+            )
+        }
+
+        const cancel = () => {
+            setKey(cfg.AiQiCha.cookie)
+            setEditable(false)
+        }
+
+        return <Flex justify={"left"}>
+            <span style={LabelCssProps}>爱企查</span>
+            <span style={InputCssProps}>
+                <Input.Password value={key} onChange={(e) => { if (editable) setKey(e.target.value) }} size={"small"} />
+            </span>
+            <Flex gap={10}>
+                {
+                    !editable ?
+                        <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
+                        :
+                        <Flex gap={10}>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={save}
+                            >保存</Button>
+                            <Button {...buttonProps} htmlType="submit"
+                                    onClick={cancel}
+                            >取消</Button>
+                        </Flex>
+                }
+            </Flex>
+        </Flex>
+    }
+
     return (
         <Flex vertical gap={20} style={{height:'100%',overflow: 'auto', padding: '10px', boxSizing: 'border-box'}}>
             <FofaForm />
             <HunterForm />
-            <ZoneForm />
+            {/*<ZoneForm />*/}
             <QuakeForm />
             <TianYanChaForm />
+            <AiQiChaForm/>
             <Divider style={{ marginTop: "5px", marginBottom: "5px" }} />
             <Proxy />
             <Divider style={{ marginTop: "5px", marginBottom: "5px" }} />

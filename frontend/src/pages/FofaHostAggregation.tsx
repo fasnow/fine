@@ -26,19 +26,24 @@ const LabelCssProperties:CSSProperties={
 }
 
 interface FofaHostAggsProps {
-    ref?: any;
+    // ref?: React.RefObject<FofaHostAggsRef>;
+}
+
+export interface FofaHostAggsRef {
+    query: (value:string)=>void;
 }
 
 type PageDataType = WithIndex<Port>
 
-const FofaHostAggs:React.FC<FofaHostAggsProps> = React.forwardRef((_,ref)=>{
+const FofaHostAggs = React.forwardRef<FofaHostAggsRef, FofaHostAggsProps>((props, ref) => {
+    const [host, setHost] = useState("")
     const [pageData, setPageData] = useState<PageDataType[]>()
     const [uniqueProtocol, setUniqueProtocol] = useState<string[]>()
     const [ports, setPorts] = useState<number[]>()
     const [countryName, setCountryName] = useState<string>("")
     const [countryCode, setCountryCode] = useState<string>("")
     const [org, setOrg] = useState<string>("")
-    const [asn, setAsn] = useState<number>()
+    const [asn, setAsn] = useState<number | null>(null)
     const [updateTime, setUpdateTime] = useState<string>("")
     const [domain, setDomain] = useState<string[]>([])
     const [loading, setLoading] = useState<boolean>(false)
@@ -104,6 +109,18 @@ const FofaHostAggs:React.FC<FofaHostAggsProps> = React.forwardRef((_,ref)=>{
     }))
 
     const query = (host:string)=>{
+        setPageData([])
+        setUniqueProtocol([])
+        setPorts([])
+        setCountryCode("")
+        setCountryName("")
+        setOrg("")
+        setAsn(null)
+        setUpdateTime("")
+        setDomain([])
+        host = host.trim()
+        if (!host)return
+        setHost(host)
         setLoading(true)
         HostAggs(host)
             .then(r=>{
@@ -135,6 +152,9 @@ const FofaHostAggs:React.FC<FofaHostAggsProps> = React.forwardRef((_,ref)=>{
 
     return <Flex vertical gap={10} align={"center"} style={{height: '100%', width: '100%'}}>
         <Flex vertical gap={5} justify={"center"} >
+            <span style={SpanCssProperties}><label style={LabelCssProperties}>Host:</label><Tag bordered={false} color="cyan">
+                    {host || ''}
+                </Tag></span>
             <span style={SpanCssProperties}><label style={LabelCssProperties}>国家/地区:</label><Tag bordered={false} color="cyan">
                     {countryName || ''}
                 </Tag></span>
@@ -145,7 +165,7 @@ const FofaHostAggs:React.FC<FofaHostAggsProps> = React.forwardRef((_,ref)=>{
                     {org || ''}
                 </Tag></span>
             <span style={SpanCssProperties}><label style={LabelCssProperties}>ASN:</label><Tag bordered={false} color="cyan">
-                    {asn || ''}
+                    {asn === null ? '' : asn}
                 </Tag></span>
             <span style={SpanCssProperties}><label style={LabelCssProperties}>最后更新时间:</label><Tag bordered={false} color="cyan">
                     {updateTime || ''}

@@ -61,6 +61,10 @@ type TianYanCha struct {
 	Token string `ini:"token" json:"token" comment:"X-AUTH-TOKEN"`
 }
 
+type AiQiCha struct {
+	Cookie string `ini:"cookie" json:"cookie" comment:"cookie"`
+}
+
 type ICP struct {
 	Proxy    string        `ini:"proxy" json:"proxy" comment:"ICP代理,优先级高于全局"`
 	Interval time.Duration `ini:"interval" json:"interval"`
@@ -75,6 +79,7 @@ type Config struct {
 	Zone           Zone `ini:"0.zone"`
 	ICP            ICP
 	TianYanCha     TianYanCha
+	AiQiCha        AiQiCha
 	Wechat         Wechat
 	Httpx          Httpx
 	DNS            DNS    `comment:"获取IP和判断CDN时会用到"`
@@ -121,6 +126,7 @@ var (
 			Interval: 1000 * time.Millisecond,
 		},
 		TianYanCha: TianYanCha{Token: ""},
+		AiQiCha:    AiQiCha{Cookie: ""},
 		Httpx: Httpx{
 			Path:  "",
 			Flags: "-sc -cl -title",

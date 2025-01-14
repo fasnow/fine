@@ -1,33 +1,23 @@
 import React, {CSSProperties, useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
-import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, TableColumnsType, Tag, Tooltip} from "antd";
+import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, Tag, Tooltip} from "antd";
 import TabsV2 from "@/component/TabsV2";
 import {errorNotification} from '@/component/Notification';
 import {appActions, RootState} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
-import {config, constant, tianyancha} from '../../wailsjs/go/models';
+import {aiqicha, config, constant} from '../../wailsjs/go/models';
 import {buttonProps} from './Setting';
 import {UserOutlined} from "@ant-design/icons";
-import {GetHolder, GetInvestee, SetAuth, Suggest} from "../../wailsjs/go/tianyancha/Bridge";
 import {TYC} from "@/pages/Constants";
 import {CheckboxOptionType} from "antd/es/checkbox/Group";
 import type {CascaderProps} from 'antd/es/cascader'
-import {copy} from "@/util/util";
-import {WithIndex} from "@/component/Interface";
 import Candidate, {ItemType} from "@/component/Candidate";
-import './TianYanCha.css'
-import PenetrationItem = tianyancha.PenetrationItem;
+import './Aiqicha.css'
+import {GetInvestRecord, GetShareholder, GetStockChart, SetAuth, Suggest} from "../../wailsjs/go/aiqicha/Bridge";
 import History = constant.History;
-
-interface BaseNodeType {
-    nodeName: string
-    nodeId: string | number
-}
-
-interface NodeType<T1, T2 = T1> extends BaseNodeType{
-    children?: (T1 & BaseNodeType) []
-    parents?: (T2 & BaseNodeType)[]
-}
+import InvestRecord = aiqicha.InvestRecord;
+import Shareholder = aiqicha.Shareholder;
+import {copy} from "@/util/util";
 
 interface Options<T1, T2=T1> {
     width: any
@@ -50,9 +40,16 @@ interface Options<T1, T2=T1> {
     nodeTopRightText?: (node: T1 | T2) => {text:string | number, backgroundColor:string},
 }
 
-type PageDataType = WithIndex<tianyancha.SearchCompanyV4Item>
+type BaseNodeType = {
+    nodeName: string
+    nodeId: string | number
+    // current?:T1 | T2
+}
 
-const pageSizeOptions = [50, 100, 150, 200, 500]
+type NodeType<T1, T2 = T1> = BaseNodeType & {
+    children?: (T1 & BaseNodeType) []
+    parents?: (T2 & BaseNodeType)[]
+}
 
 //https://juejin.cn/post/7359203560167178250
 class StockTreeVertical<T1,T2=T1> {
@@ -990,61 +987,6 @@ class StockTreeVertical<T1,T2=T1> {
     }
 }
 
-type ChildType = {
-    id: string,
-    name: string,
-    percent: number,
-    hasInvestor?: boolean
-}
-
-type ParentType = {
-    id: string,
-    name: string,
-    percent: number,
-    hasHolder?: boolean
-}
-
-let childrenItems: ChildType[] = [
-    {
-        id: "BG00001",
-        name: "京海控股集团有限公司",
-        percent: 1,
-        hasInvestor: false
-    },
-    {
-        id: "BG00008",
-        name: "中国邮政集团有限公司四川省宜宾市分公司啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
-        percent: 1,
-        hasInvestor: true
-    },
-    {
-        id: "BG00048",
-        name: "京海企业投资有限公司",
-        percent: 0.01,
-        hasInvestor: false
-    },
-]
-
-let parentsItems: ParentType[] = [
-    {
-        id: "BG00001",
-        name: "京海控股集团有限公司",
-        percent: 1,
-        hasHolder: false
-    },
-    {
-        id: "JH00001",
-        name: "高启强",
-        percent: 0.1,
-        hasHolder: true
-    },
-    {
-        id: "JH00002",
-        name: "高启盛",
-        percent: 0.1,
-    },
-]
-
 const LabelCssProps: CSSProperties = {
     textAlign: "left", paddingRight: "5px", minWidth: "70px", width: "70px", height: "24px"
 }
@@ -1057,13 +999,14 @@ const AuthSetting: React.FC = () => {
     const [key, setKey] = useState("")
 
     useEffect(() => {
-        setKey(cfg.TianYanCha.token)
-    }, [cfg.TianYanCha])
+        setKey(cfg.AiQiCha.cookie)
+    }, [cfg.AiQiCha])
+
 
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, TianYanCha: { ...cfg.TianYanCha, token: key } } as config.Config;
+                const t = { ...cfg, AiQiCha: { ...cfg.AiQiCha, cookie: key } } as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -1071,7 +1014,7 @@ const AuthSetting: React.FC = () => {
         ).catch(
             err => {
                 errorNotification("错误", err)
-                setKey(cfg.TianYanCha.token)
+                setKey(cfg.AiQiCha.cookie)
             }
         )
     }
@@ -1079,7 +1022,7 @@ const AuthSetting: React.FC = () => {
     const cancel = () => {
         setEditable(false);
         setOpen(false)
-        setKey(cfg.TianYanCha.token)
+        setKey(cfg.AiQiCha.cookie)
     }
 
     return <>
@@ -1140,44 +1083,20 @@ const SharedOptions: CascaderProps<any> = {
     expandTrigger: 'hover',
 };
 
-
 const TabContent: React.FC = () => {
-    const [treeInstance, setTreeInstance] = useState<StockTreeVertical<PenetrationItem,PenetrationItem>>();
+    const [treeInstance, setTreeInstance] = useState<StockTreeVertical<aiqicha.InvestRecord,aiqicha.Shareholder>>();
     const graphRef = useRef<HTMLDivElement | null>(null); // 用于绑定 SVG 容器
     const filterRef = useRef<HTMLDivElement | null>(null);
-    const [total, setTotal] = useState<number>(0)
-    const [currentPage, setCurrentPage] = useState<number>(1)
-    const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[1])
-    const [pageData, setPageData] = useState<PageDataType[]>([])
     const [open, setOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);
     const [currentCompany, setCurrentCompany] = React.useState<{ name: string, id: string }>({ id: "", name: "" });
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [containerHeight, setContainerHeight] = useState(0)
-    const [, setTableHeight] = useState(0)
     const [ratioMin, setRatioMin] = useState(0)
     const [ratioMax, setRatioMax] = useState(100)
     const ratioMinRef = useRef(ratioMin)
     const ratioMaxRef = useRef(ratioMax)
     const history = useSelector((state: RootState) => state.app.global.history || new History())
-
-    useEffect(() => {
-        if (filterRef.current) {
-            setTableHeight(window.innerHeight - filterRef.current?.getBoundingClientRect().height - 153)
-            window.addEventListener("resize", () => {
-                if (filterRef.current) {
-                    setTableHeight(window.innerHeight - filterRef.current?.getBoundingClientRect().height - 153)
-                }
-            })
-            setContainerHeight(window.innerHeight - 90)
-            window.addEventListener("resize", () => {
-                if (filterRef.current) {
-                    setContainerHeight(window.innerHeight - 90)
-                }
-            })
-        }
-    }, []);
-
 
     const query = async (name: string, id: string) => {
         treeInstance?.clear()
@@ -1185,15 +1104,14 @@ const TabContent: React.FC = () => {
         setOpen(true)
         setLoading(true)
         try {
-            const t: PenetrationItem[] = await GetInvestee(id)
-            const tt: PenetrationItem[] = await GetHolder(id)
-            setTreeInstance(new StockTreeVertical<PenetrationItem, PenetrationItem>(
+            const t: aiqicha.Penetration = await GetStockChart(id)
+            setTreeInstance(new StockTreeVertical<InvestRecord,Shareholder>(
                 graphRef.current,
                 {
-                    nodeId: id,
-                    nodeName: name,
-                    children:t.map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType))),
-                    parents:tt.map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType))),
+                    nodeName:name,
+                    nodeId:id,
+                    children: t.investRecords.map(item=>({...item, nodeId: item.pid, nodeName: item.entName})),
+                    parents: t.shareholders.map(item=>({...item, nodeId: item.pid, nodeName: item.name})),
                 },
                 {
                     width: "100%",
@@ -1204,24 +1122,32 @@ const TabContent: React.FC = () => {
                     nodeWidth: 200,
                     rootNodeHeight: 45,
                     addChildren: add,
-                    showLoadBtn:(data)=>{
-                        return data.hasInvestor || data.hasHolder
-                    },
                     filterForShow: filterForShow,
-                    linkText:(data)=>{
-                        return (data.ratio * 100).toString()+"%"
-                    },
-                    onNodeClick: (node) => {
-                        if('nodeName' in node ) {
-                            copy(node["nodeName"])
+                    onNodeClick: (data) => {
+                        if('name' in data) {
+                            copy(data.name)
                             return
                         }
-                        copy(node.name)
-                    },
-                    nodeTopLeftText:(node)=>{
-                        if (node.statusTag.name === "注销"){
-                            return {text: node.statusTag.name, backgroundColor:"#fcf1ef", color: "#eb4e3e"}
+                        if('entName' in data ) {
+                            copy(data.entName)
+                            return
                         }
+                        if('nodeName' in data ) {
+                            copy(data["nodeName"])
+                            return
+                        }
+                    },
+                    showLoadBtn:(item)=>{
+                        if('investment' in item){
+                            return item.investment
+                        }
+                        return item.shareholder
+                    },
+                    linkText:(data)=>{
+                        if('regRate' in data){
+                            return data.regRate
+                        }
+                        return data.subRate
                     }
                 }
             ))
@@ -1232,13 +1158,13 @@ const TabContent: React.FC = () => {
         }
     }
 
-    const add = async (item: PenetrationItem, direction: string) => {
+    const add = async (item: aiqicha.Shareholder | aiqicha.InvestRecord, direction: string) => {
         try {
             setLoading(true)
             if (direction === "IN") {
-                return (await GetHolder(item.id)).map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType)))
+                return (await GetShareholder(item.pid)).map(item=>({...item, nodeId: item.pid, nodeName: item.name}))
             } else if (direction === "OUT") {
-                return (await GetInvestee(item.id)).map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType)))
+                return (await GetInvestRecord(item.pid)).map(item=>({...item, nodeId: item.pid, nodeName: item.entName}))
             }
 
         } catch (e) {
@@ -1262,32 +1188,24 @@ const TabContent: React.FC = () => {
 
     }
 
-    const filterForShow = (item: PenetrationItem) => {
-        return item.ratio * 100 >= ratioMinRef.current && item.ratio * 100 <= ratioMaxRef.current;
+    const filterForShow = (item: aiqicha.Shareholder | aiqicha.InvestRecord) => {
+        if ('regRate' in item){
+            if (item.regRate === '-') return true // 注销状态
+            const t =  parseFloat(item.regRate.replace('%', ''));
+            return t >= ratioMinRef.current && t <= ratioMaxRef.current;
+        }
+        return true
     }
     return (
         <div ref={containerRef} style={{
-            height: containerHeight,
             overflow: 'hidden',
+            height: '100%'
         }}
         >
             <div ref={filterRef}>
                 <Flex vertical gap={10}>
                     <Flex justify={'center'}>
-                        {/*<Dropdown menu={{ items: suggestItem, onClick:handleSelectSuggest }} placement="bottomCenter">*/}
-                        {/*    <Input.Search size={"small"}*/}
-                        {/*                  style={{width:"400px"}}*/}
-                        {/*                  value={value}*/}
-                        {/*                  onChange={handleChange}*/}
-                        {/*                  onCompositionStart={handleCompositionStart}*/}
-                        {/*                  onCompositionEnd={handleCompositionEnd}*/}
-                        {/*                  placeholder="输入内容"*/}
-                        {/*                  onSearch={()=>{*/}
-
-                        {/*                  }}*/}
-                        {/*    />*/}
-                        {/*</Dropdown>*/}
-                        <Candidate<tianyancha.SuggestItem>
+                        <Candidate<aiqicha.SuggestItem>
                             style={{ width: 400 }}
                             size={"small"}
                             backFillDataOnSelectItem={false}
@@ -1295,15 +1213,16 @@ const TabContent: React.FC = () => {
                                 {
                                     fetchOnOpen: (items) => { return items.length === 0 },
                                     onSelectItem: (item) => {
-                                        query(item.label as string, item.data.graphId.toString())
+                                        query(item.data.name, item.data.pid)
                                     },
                                     title: '相关企业',
-                                    filter: (v) => { return !!(v && v.toString().length > 1) },
+                                    filter: (v) => { return !!(v && v.toString().length >= 6) },
                                     fetch: async (v) => {
                                         try {
-                                            const response = await Suggest(v.toString()); // 等待Suggest函数执行完成获取原始数据
+                                            const response = await Suggest(v.toString());
+                                            console.log(response)
                                             return response.map(item => {
-                                                const t: ItemType<tianyancha.SuggestItem> = {
+                                                const t: ItemType<aiqicha.SuggestItem> = {
                                                     value: item.name,
                                                     label: item.name,
                                                     data: item
@@ -1316,26 +1235,6 @@ const TabContent: React.FC = () => {
                                         }
                                     }
                                 },
-                                // {
-                                //     title:"历史记录",
-                                //     fetch: async (v) => {
-                                //         try {
-                                //             const response = await FindByPartialKey(history.tyc, v); // 等待Suggest函数执行完成获取原始数据
-                                //             const a: ItemType[] = response.map(item => {
-                                //                 const t:ItemType={
-                                //                     value: item,
-                                //                     label: item,
-                                //                     data: item
-                                //                 }
-                                //                 return t;
-                                //             });
-                                //             return a;
-                                //         } catch (e) {
-                                //             errorNotification("错误", String(e));
-                                //             return []; // 如果出现错误，返回空数组，避免组件出现异常
-                                //         }
-                                //     }
-                                // }
                             ]
                             }
 
@@ -1343,21 +1242,21 @@ const TabContent: React.FC = () => {
                         </Candidate>
                         {/*</Flex>*/}
                         {/*<Flex gap={10}>*/}
-                        {/*    <span style={LabelCssProps}>{TYC.scopeType.name}</span>*/}
+                        {/*    <span style={LabelCssProps}>{TYC.scopeType.nodeName}</span>*/}
                         {/*    <Checkbox.Group*/}
-                        {/*        options={TYC.scopeType.items.map(item=>{return {label: item.name, value: item.value}})}*/}
+                        {/*        options={TYC.scopeType.items.map(item=>{return {label: item.nodeName, value: item.value}})}*/}
                         {/*    />*/}
                         {/*</Flex>*/}
                         {/*<Flex gap={10} wrap>*/}
                         {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.industryCode.name}</span>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.industryCode.nodeName}</span>*/}
                         {/*        <Cascader*/}
                         {/*            {...SharedOptions}*/}
                         {/*            style={{width:"140px"}}*/}
                         {/*            options={TYC.industryCode.items}/>*/}
                         {/*    </Flex>*/}
                         {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.areaCode.name}</span>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.areaCode.nodeName}</span>*/}
                         {/*        <Cascader*/}
                         {/*            {...SharedOptions}*/}
                         {/*            style={{width:"140px"}}*/}
@@ -1366,44 +1265,44 @@ const TabContent: React.FC = () => {
                         {/*    </Flex>*/}
                         {/*    <Flex gap={10}>*/}
                         {/*        <BadgeWrapper info={TYC.companyScale.right.toUpperCase()}>*/}
-                        {/*            <span style={LabelCssProps}>{TYC.companyScale.name}</span>*/}
+                        {/*            <span style={LabelCssProps}>{TYC.companyScale.nodeName}</span>*/}
                         {/*        </BadgeWrapper>*/}
                         {/*        <Cascader*/}
                         {/*            {...SharedOptions}*/}
                         {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.companyScale.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
+                        {/*            options={TYC.companyScale.items.map(item=>{return {label: item.nodeName, value: item.value}})}/>*/}
                         {/*    </Flex>*/}
                         {/*    <Flex gap={10}>*/}
                         {/*        <BadgeWrapper info={TYC.tycScore.right.toUpperCase()}>*/}
-                        {/*            <span style={LabelCssProps}>{TYC.tycScore.name}</span>*/}
+                        {/*            <span style={LabelCssProps}>{TYC.tycScore.nodeName}</span>*/}
                         {/*        </BadgeWrapper>*/}
                         {/*        <Cascader*/}
                         {/*            {...SharedOptions}*/}
                         {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.tycScore.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
+                        {/*            options={TYC.tycScore.items.map(item=>{return {label: item.nodeName, value: item.value}})}/>*/}
                         {/*    </Flex>*/}
                         {/*    <Flex gap={10}>*/}
                         {/*        <BadgeWrapper info={TYC.scienceTechnologyGrade.right.toUpperCase()}>*/}
-                        {/*            <span style={LabelCssProps}>{TYC.scienceTechnologyGrade.name}</span>*/}
+                        {/*            <span style={LabelCssProps}>{TYC.scienceTechnologyGrade.nodeName}</span>*/}
                         {/*        </BadgeWrapper>*/}
                         {/*        <Cascader*/}
                         {/*            {...SharedOptions}*/}
                         {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.scienceTechnologyGrade.items.map(item=>{return {label: item.name, value: item.value}})}/>*/}
+                        {/*            options={TYC.scienceTechnologyGrade.items.map(item=>{return {label: item.nodeName, value: item.value}})}/>*/}
                         {/*    </Flex>*/}
                         {/*</Flex>*/}
                         {/*<Flex>*/}
                         {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.paidCapital.name}</span>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.paidCapital.nodeName}</span>*/}
                         {/*        <Checkbox.Group*/}
-                        {/*            options={TYC.paidCapital.items.map(item=>{return {label: item.name, value: item.value}})}*/}
+                        {/*            options={TYC.paidCapital.items.map(item=>{return {label: item.nodeName, value: item.value}})}*/}
                         {/*        />*/}
                         {/*    </Flex>*/}
                         {/*</Flex>*/}
                         {/*<Flex vertical>*/}
                         {/*    <Flex gap={10}>*/}
                         {/*        <BadgeWrapper info={"VIP"}>*/}
-                        {/*            <span style={{...LabelCssProps}}>{TYC.regStatus.name}</span>*/}
+                        {/*            <span style={{...LabelCssProps}}>{TYC.regStatus.nodeName}</span>*/}
                         {/*        </BadgeWrapper>*/}
                         {/*        <Checkbox.Group*/}
                         {/*            defaultValue={["存续/在业", "迁入", "迁出"]}*/}
@@ -1413,14 +1312,42 @@ const TabContent: React.FC = () => {
                         {/*</Flex>*/}
                         {/*<Flex vertical>*/}
                         {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.branchType.name}</span>*/}
+                        {/*        <span style={LabelCssProps}>{TYC.branchType.nodeName}</span>*/}
                         {/*        <Checkbox.Group*/}
-                        {/*            options={TYC.branchType.items.map(item=>{return {label: item.name, value: item.value}})}*/}
+                        {/*            options={TYC.branchType.items.map(item=>{return {label: item.nodeName, value: item.value}})}*/}
                         {/*        />*/}
                         {/*    </Flex>*/}
                     </Flex>
                 </Flex>
             </div>
+            {/*<Table*/}
+            {/*    rowKey={"index"}*/}
+            {/*    bordered*/}
+            {/*    sticky*/}
+            {/*    size="small"*/}
+            {/*    virtual*/}
+            {/*    columns={defaultColumns}*/}
+            {/*    scroll={{y: tableHeight, x: '100%', scrollToFirstRowOnChange: true}}*/}
+            {/*    dataSource={pageData}*/}
+            {/*    pagination={false}*/}
+            {/*    footer={()=>{*/}
+            {/*        return <div style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>*/}
+            {/*            <Pagination*/}
+            {/*                showQuickJumper*/}
+            {/*                showSizeChanger*/}
+            {/*                total={total}*/}
+            {/*                pageSizeOptions={pageSizeOptions}*/}
+            {/*                defaultPageSize={pageSizeOptions[1]}*/}
+            {/*                defaultCurrent={1}*/}
+            {/*                current={currentPage}*/}
+            {/*                showTotal={(total) => `${total} items`}*/}
+            {/*                size="small"*/}
+            {/*                onChange={(page, size) => handlePaginationChange(page, size)}*/}
+            {/*            />*/}
+            {/*            /!*<this.ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize}/>*!/*/}
+            {/*        </div>*/}
+            {/*    }}*/}
+            {/*/>*/}
             <Drawer
                 closable={false}
                 open={open}
@@ -1433,10 +1360,24 @@ const TabContent: React.FC = () => {
                     }
                 }}
                 placement="right"
+            // drawerRender={(dom)=>{
+            //     return <div style={{height:"100%"}}>{dom}</div>
+            // }}
             >
                 <Flex vertical style={{ height: "100%", position: 'relative' }}>
+                    {/*<Spin spinning={loading} style={{position: "absolute", height: "100%", width: "100%"}}>*/}
+                    {/*    */}
+                    {/*</Spin>*/}
                     <Flex gap={20} style={{ zIndex: 10, position: "absolute", backgroundColor: "#ffffff", right: "0" }}>
                         <Tag bordered={false} color="#108ee9" style={{ fontSize: "14px", fontWeight: "bold" }}>{currentCompany.name}</Tag>
+                        {/*<span>*/}
+                        {/*    <Tag bordered={false} color="cyan" style={{fontSize:"14px"}}>经营状态</Tag>*/}
+                        {/*    <Radio.Group size={"small"} onChange={e=>{}} defaultValue={"存续/在业"}>*/}
+                        {/*        <Radio value={"不限"}>不限</Radio>*/}
+                        {/*        <Radio value={"存续/在业"}>存续/在业</Radio>*/}
+                        {/*    </Radio.Group>*/}
+                        {/*</span>*/}
+
                         <Flex>
                             <Tag bordered={false} color="cyan" style={{ fontSize: "14px" }}>控股比例</Tag>
                             <InputNumber value={ratioMin} size={"small"} max={100} min={0} suffix={"%"}
@@ -1466,7 +1407,7 @@ const TabContent: React.FC = () => {
     );
 };
 
-const TianYanCha = () => {
+const Aiqicha = () => {
     return <TabsV2 defaultTabContent={<TabContent />} tabBarExtraContent={{
         left: <div style={{
             width: "auto",
@@ -1478,4 +1419,4 @@ const TianYanCha = () => {
     }} />
 }
 
-export default TianYanCha;
+export default Aiqicha;

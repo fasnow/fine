@@ -680,7 +680,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     return <Flex vertical gap={5} style={{ height: '100%' }}>
         <Flex vertical gap={5}>
             <Flex justify={"center"} align={'center'}>
-                <Candidate
+                <Candidate<string>
                     size={"small"}
                     style={{ width: 600 }}
                     placeholder='Search...'
@@ -700,8 +700,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                                 try {
                                     // @ts-ignore
                                     const response = await FindByPartialKey(history.hunter, !v ? "" : v.toString());
-                                    const a: ItemType[] = response?.map(item => {
-                                        const t: ItemType = {
+                                    const a: ItemType<string>[] = response?.map(item => {
+                                        const t: ItemType<string> = {
                                             value: item,
                                             label: item,
                                             data: item

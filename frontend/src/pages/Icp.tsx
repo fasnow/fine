@@ -213,7 +213,7 @@ const TabContent: React.FC = () => {
 
     return (<Flex vertical style={{ width: "100%", height: "100%" }}>
         <Flex vertical justify={'center'} align={"center"}>
-            <Candidate
+            <Candidate<string>
                 size={"small"}
                 style={{ width: 600 }}
                 placeholder='Search...'
@@ -229,8 +229,8 @@ const TabContent: React.FC = () => {
                             try {
                                 // @ts-ignore
                                 const response = await FindByPartialKey(history.icp, !v ? "" : v.toString());
-                                const a: ItemType[] = response?.map(item => {
-                                    const t: ItemType = {
+                                const a: ItemType<string>[] = response?.map(item => {
+                                    const t: ItemType<string> = {
                                         value: item,
                                         label: item,
                                         data: item

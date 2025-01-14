@@ -9,6 +9,7 @@ type History struct {
 	Zone   HistoryType `json:"zone"`
 	ICP    HistoryType `json:"icp"`
 	TYC    HistoryType `json:"tyc"`
+	AQC    HistoryType `json:"aqc"`
 }
 
 var Histories = &History{
@@ -18,4 +19,5 @@ var Histories = &History{
 	Zone:   3,
 	ICP:    4,
 	TYC:    5,
+	AQC:    6,
 }

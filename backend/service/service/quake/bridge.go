@@ -56,9 +56,9 @@ func (r *Bridge) SetAuth(key string) error {
 }
 
 type RealtimeServiceQueryResult struct {
-	Result  RSDQueryResult `json:"result"`
-	TaskID  int64          `json:"taskID"`
-	MaxPage int            `json:"maxPage"`
+	Result  RealtimeServiceDataResult `json:"result"`
+	TaskID  int64                     `json:"taskID"`
+	MaxPage int                       `json:"maxPage"`
 }
 
 type RealtimeDataQueryOptions struct {
@@ -86,7 +86,7 @@ func (r *Bridge) GetUserInfo() (*User, error) {
 
 func (r *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQueryOptions) (*RealtimeServiceQueryResult, error) {
 	queryResult := &RealtimeServiceQueryResult{
-		Result: RSDQueryResult{},
+		Result: RealtimeServiceDataResult{},
 	}
 
 	//获取缓存
@@ -128,7 +128,7 @@ func (r *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 		IgnoreCache(options.IgnoreCache).
 		Rule(options.Rule).
 		Build()
-	result, err := r.quake.Realtime.Service(req)
+	result, err := r.quake.RealtimeServer.Service(req)
 	if err != nil {
 		logger.Info(err.Error())
 		return nil, err
@@ -210,7 +210,7 @@ func (r *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 	go func() {
 		exportDataTaskID := idgen.NextId()
 		for index := 1; index <= page; index++ {
-			result, err := backoff.RetryWithData(func() (*RSDQueryResult, error) {
+			result, err := backoff.RetryWithData(func() (*RealtimeServiceDataResult, error) {
 				req := NewGetRealtimeDataBuilder().
 					Query(queryLog.Query).
 					Page(index).
@@ -224,7 +224,7 @@ func (r *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 					IgnoreCache(queryLog.IgnoreCache).
 					Rule(queryLog.Rule).
 					Build()
-				result, err := r.quake.Realtime.Service(req)
+				result, err := r.quake.RealtimeServer.Service(req)
 				if err != nil {
 					logger.Info(err.Error())
 					return nil, err

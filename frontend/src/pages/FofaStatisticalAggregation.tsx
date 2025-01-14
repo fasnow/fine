@@ -7,11 +7,15 @@ import {fofa} from "../../wailsjs/go/models";
 import Detail = fofa.Detail;
 import Country = fofa.Country;
 
-interface FofaStatisticalAggsProps {
+export interface FofaStatisticalAggsProps {
     ref?: any;
 }
 
-const FofaStatisticalAggs:React.FC<FofaStatisticalAggsProps> = forwardRef((props,ref)=>{
+export interface FofaStatisticalAggsRef {
+    query:(value: string)=>void
+}
+
+const FofaStatisticalAggs = forwardRef<FofaStatisticalAggsRef, FofaStatisticalAggsProps>((props,ref)=>{
     const [loading, setLoading] = useState<boolean>(false)
     const [protocolData, setProtocolData] = useState<Detail[]>()
     const [domainData, setDomainData] = useState<Detail[]>()

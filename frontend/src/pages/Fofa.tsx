@@ -57,11 +57,10 @@ import Loading from "@/component/Loading";
 import Help from "@/pages/FofaUsage";
 import {
     ColDef,
-    GetContextMenuItemsParams, ProcessCellForExportParams,
-    SideBarDef
+    GetContextMenuItemsParams, SideBarDef
 } from "ag-grid-community";
-import FofaStatisticalAggregation from "@/pages/FofaStatisticalAggregation";
-import FofaHostAggs from "@/pages/FofaHostAggregation";
+import FofaStatisticalAggregation, {FofaStatisticalAggsRef} from "@/pages/FofaStatisticalAggregation";
+import FofaHostAggs, {FofaHostAggsRef} from "@/pages/FofaHostAggregation";
 
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
@@ -436,9 +435,10 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             ],
         }
     }, [])
-    const statisticalAggsRef = React.createRef<any>()
-    const hostAggsRef = React.createRef<any>()
+    const statisticalAggsRef = useRef<FofaStatisticalAggsRef>(null)
+    const hostAggsRef = useRef<FofaHostAggsRef>(null)
     const gridRef = useRef<AgGridReact>(null)
+    const ipCache = useRef(null)
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams):any => {
         if(!pageData || pageData.length === 0)return []
         return [
@@ -468,6 +468,14 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 disabled: !params.node?.data.title,
                 action: () => {
                     props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs())
+                },
+            },
+            {
+                name: "IP聚合",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    setSearchType("Host聚合")
+                    hostAggsRef.current?.query(params.node?.data.ip)
                 },
             },
             "separator",
@@ -518,6 +526,15 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             handleNewQuery(props.input, currentPageSize)
         }
     }, [])
+
+    // IP聚合菜单项
+    useEffect(()=>{
+        console.log(hostAggsRef.current, ipCache.current)
+        if (hostAggsRef.current && ipCache.current){
+            hostAggsRef.current?.query(ipCache.current)
+            ipCache.current = null
+        }
+    }, [hostAggsRef.current, searchType])
 
     const getColDefs = () => {
         if (gridRef.current?.api) {
@@ -750,9 +767,9 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     if(searchType === "普通搜索") {
                         handleNewQuery(value, currentPageSize)
                     }else if(searchType === "统计聚合") {
-                        statisticalAggsRef.current.query(value)
+                        statisticalAggsRef.current?.query(value)
                     }else if(searchType === "Host聚合") {
-                        hostAggsRef.current.query(value)
+                        hostAggsRef.current?.query(value)
                     }
                 }}
                 onPressEnter={(value) => {
@@ -760,9 +777,9 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     if(searchType === "普通搜索") {
                         handleNewQuery(value, currentPageSize)
                     }else if(searchType === "统计聚合") {
-                        statisticalAggsRef.current.query(value)
+                        statisticalAggsRef.current?.query(value)
                     }else if(searchType === "Host聚合") {
-                        hostAggsRef.current.query(value)
+                        hostAggsRef.current?.query(value)
                     }
                 }}
                 items={[
@@ -771,8 +788,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                             try {
                                 // @ts-ignore
                                 const response = await FindByPartialKey(history.fofa, !v ? "" : v.toString());
-                                const a: ItemType[] = response?.map(item => {
-                                    const t: ItemType = {
+                                const a: ItemType<string>[] = response?.map(item => {
+                                    const t: ItemType<string> = {
                                         value: item,
                                         label: item,
                                         data: item
@@ -797,10 +814,10 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 </Tooltip>
             </>}
         </Flex>
-        {searchType === "统计聚合" && <FofaStatisticalAggregation ref={statisticalAggsRef}/>}
-        {searchType === "Host聚合" && <FofaHostAggs ref={hostAggsRef}/>}
-        {searchType === "普通搜索" && <>
-            <div style={{ width: "100%", height: "100%", display: searchType === "普通搜索"?'block':"none"}}>
+        <div style={{display: searchType === "统计聚合" ? 'block' : 'none', width: "100%", height: "100%"}}><FofaStatisticalAggregation ref={statisticalAggsRef}/></div>
+        <div style={{display: searchType === "Host聚合" ? 'block' : 'none', width: "100%", height: "100%"}}><FofaHostAggs ref={hostAggsRef}/></div>
+        <div style={{display: searchType === "普通搜索"?'block':"none", width: "100%", height: "100%"}}><>
+            <div style={{ width: "100%", height: "100%"}}>
                 <AgGridReact
                     ref={gridRef}
                     loading={loading}
@@ -818,7 +835,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 />
             </div>
             {footer}
-        </>}
+        </></div>
     </Flex>
 }
 

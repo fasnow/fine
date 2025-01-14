@@ -25,26 +25,26 @@ import { SearchOutlined } from "@ant-design/icons";
 import { SizeType } from "antd/es/config-provider/SizeContext";
 
 // 定义ItemType类型，更明确key的类型为string（可根据实际情况调整类型）
-export type ItemType = {
+export interface ItemType<T> {
     value: string | number;
     label: React.ReactNode;
-    data: any
-};
-
-interface BasePanelType {
-    fetchOnOpen?: ((items: ItemType[]) => boolean) | boolean,
-    value?: string | number
-    title?: string
-    fetch?: ((value: string | number) => ItemType[] | Promise<ItemType[]>) | undefined;
-    filter?: (value: string | number) => boolean;
-    onSelectItem?: (item: ItemType) => void;
+    data: T
 }
 
-const Panel = React.memo(React.forwardRef<any, BasePanelType>((props, ref) => {
+interface BasePanelProps<T> {
+    fetchOnOpen?: ((items: ItemType<T>[]) => boolean) | boolean,
+    value?: string | number
+    title?: string
+    fetch?: ((value: string | number) => ItemType<T>[] | Promise<ItemType<T>[]>) | undefined;
+    filter?: (value: string | number) => boolean;
+    onSelectItem?: (item: ItemType<T>) => void;
+}
+
+const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
     // 使用useState来管理当前选中项的key，初始值可以设为null，表示没有选中项
     const [selectedKey, setSelectedKey] = useState<string | number | null>(null);
     const [loading, setLoading] = useState(false);
-    const [candidates, setCandidates] = useState<ItemType[]>([]);
+    const [candidates, setCandidates] = useState<ItemType<T>[]>([]);
 
     useEffect(() => {
         props.value !== undefined && fetchItems(props.value)
@@ -71,6 +71,7 @@ const Panel = React.memo(React.forwardRef<any, BasePanelType>((props, ref) => {
         if (result instanceof Promise) {
             result.then((newItems) => {
                 setCandidates(newItems);
+                console.log(newItems)
             }).finally(() => {
                 setLoading(false);
             });
@@ -92,7 +93,8 @@ const Panel = React.memo(React.forwardRef<any, BasePanelType>((props, ref) => {
             }
             {
                 loading ? (
-                    <Spin spinning={true} style={{ display: "flex", justifyContent: 'center', alignItems: 'center' }} />
+                    <Spin spinning={true}
+                          style={{display: "flex", justifyContent: 'center', alignItems: 'center'}}/>
                 ) : (
                     <ConfigProvider
                         theme={{
@@ -107,10 +109,10 @@ const Panel = React.memo(React.forwardRef<any, BasePanelType>((props, ref) => {
                             dataSource={candidates}
                             size={"small"}
                             split={false}
-                            style={{ maxHeight: 200 }}
+                            style={{maxHeight: 200}}
                             renderItem={(item, index) => {
                                 const isSelected = item.value === selectedKey;
-                                return <List.Item key={index} style={{ overflow: 'hidden' }}>
+                                return <List.Item key={index} style={{overflow: 'hidden'}}>
                                     <span
                                         onMouseOver={() => handleMouseOver(item.value)}
                                         onClick={(e) => {
@@ -139,10 +141,10 @@ const Panel = React.memo(React.forwardRef<any, BasePanelType>((props, ref) => {
             }
         </>
     );
-}));
+})
 
-export interface CandidateProps {
-    items?: BasePanelType[];
+export interface CandidateProps<T> {
+    items?: BasePanelProps<T>[];
     size?: SizeType;
     style?: CSSProperties;
     addonBefore?: ReactNode;
@@ -155,7 +157,7 @@ export interface CandidateProps {
     backFillDataOnSelectItem?: boolean
 }
 
-const Candidate: React.FC<CandidateProps> = React.memo((props) => {
+const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
     const [localValue, setLocalValue] = useState<string | number>(props.value || "");
     const valueRef = useRef<string | number>("")
     const [isComposing, setIsComposing] = useState(false);
@@ -246,8 +248,9 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
         return props.items?.map(item => {
             const r = createRef()
             refs.current.push(r)
-            return <Panel key={index.current++} ref={r} title={item.title} value={value} fetch={item.fetch}
-                onSelectItem={(t) => {
+            const A = Panel<T>()
+            return <A key={index.current++} ref={r} title={item.title} value={value} fetch={item.fetch}
+                onSelectItem={(t:ItemType<T>) => {
                     setOpen(false)
                     if (f.current){
                         setLocalValue(t.value || "")
@@ -287,7 +290,7 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
                 position: 'absolute',
                 width: '100%',
                 backgroundColor: "#ffffff",
-                zIndex: "1002",
+                zIndex: "9999",
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1)',
                 borderRadius: '3px',
                 padding: '5px',
@@ -298,6 +301,6 @@ const Candidate: React.FC<CandidateProps> = React.memo((props) => {
             </div>
         </div>
     );
-});
+}) as <T>(props: CandidateProps<T>) => JSX.Element;
 
 export default Candidate;

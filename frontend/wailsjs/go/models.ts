@@ -1,3 +1,115 @@
+export namespace aiqicha {
+	
+	export class InvestRecord {
+	    pid: string;
+	    entName: string;
+	    logo: string;
+	    logoWord: string;
+	    regRate: string;
+	    regCapital: string;
+	    investment: boolean;
+	    yid: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new InvestRecord(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pid = source["pid"];
+	        this.entName = source["entName"];
+	        this.logo = source["logo"];
+	        this.logoWord = source["logoWord"];
+	        this.regRate = source["regRate"];
+	        this.regCapital = source["regCapital"];
+	        this.investment = source["investment"];
+	        this.yid = source["yid"];
+	    }
+	}
+	export class Shareholder {
+	    pid: string;
+	    name: string;
+	    subRate: string;
+	    logo: string;
+	    logoWord: string;
+	    subMoney: string;
+	    personLink: string;
+	    personId: string;
+	    personLogo: string;
+	    shareholder: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Shareholder(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pid = source["pid"];
+	        this.name = source["name"];
+	        this.subRate = source["subRate"];
+	        this.logo = source["logo"];
+	        this.logoWord = source["logoWord"];
+	        this.subMoney = source["subMoney"];
+	        this.personLink = source["personLink"];
+	        this.personId = source["personId"];
+	        this.personLogo = source["personLogo"];
+	        this.shareholder = source["shareholder"];
+	    }
+	}
+	export class Penetration {
+	    shareholders: Shareholder[];
+	    investRecords: InvestRecord[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Penetration(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.shareholders = this.convertValues(source["shareholders"], Shareholder);
+	        this.investRecords = this.convertValues(source["investRecords"], InvestRecord);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class SuggestItem {
+	    pid: string;
+	    legalPerson: string;
+	    resultStr: string;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SuggestItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pid = source["pid"];
+	        this.legalPerson = source["legalPerson"];
+	        this.resultStr = source["resultStr"];
+	        this.name = source["name"];
+	    }
+	}
+
+}
+
 export namespace app {
 	
 	export class Constant {
@@ -41,6 +153,18 @@ export namespace app {
 
 export namespace config {
 	
+	export class AiQiCha {
+	    cookie: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AiQiCha(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.cookie = source["cookie"];
+	    }
+	}
 	export class QueryOnEnter {
 	    assets: boolean;
 	    icp: boolean;
@@ -210,6 +334,7 @@ export namespace config {
 	    Zone: Zone;
 	    ICP: ICP;
 	    TianYanCha: TianYanCha;
+	    AiQiCha: AiQiCha;
 	    Wechat: Wechat;
 	    Httpx: Httpx;
 	    DNS: DNS;
@@ -233,6 +358,7 @@ export namespace config {
 	        this.Zone = this.convertValues(source["Zone"], Zone);
 	        this.ICP = this.convertValues(source["ICP"], ICP);
 	        this.TianYanCha = this.convertValues(source["TianYanCha"], TianYanCha);
+	        this.AiQiCha = this.convertValues(source["AiQiCha"], AiQiCha);
 	        this.Wechat = this.convertValues(source["Wechat"], Wechat);
 	        this.Httpx = this.convertValues(source["Httpx"], Httpx);
 	        this.DNS = this.convertValues(source["DNS"], DNS);
@@ -337,6 +463,7 @@ export namespace constant {
 	    zone: number;
 	    icp: number;
 	    tyc: number;
+	    aqc: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new History(source);
@@ -350,6 +477,7 @@ export namespace constant {
 	        this.zone = source["zone"];
 	        this.icp = source["icp"];
 	        this.tyc = source["tyc"];
+	        this.aqc = source["aqc"];
 	    }
 	}
 	export class Status {
@@ -1249,6 +1377,38 @@ export namespace quake {
 	        this.radius = source["radius"];
 	    }
 	}
+	export class RealtimeDataQueryOptions {
+	    query?: string;
+	    rule?: string;
+	    ipList?: string[];
+	    page?: number;
+	    size?: number;
+	    ignoreCache?: boolean;
+	    startTime?: string;
+	    endTime?: string;
+	    include?: string[];
+	    exclude?: string[];
+	    latest?: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RealtimeDataQueryOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.query = source["query"];
+	        this.rule = source["rule"];
+	        this.ipList = source["ipList"];
+	        this.page = source["page"];
+	        this.size = source["size"];
+	        this.ignoreCache = source["ignoreCache"];
+	        this.startTime = source["startTime"];
+	        this.endTime = source["endTime"];
+	        this.include = source["include"];
+	        this.exclude = source["exclude"];
+	        this.latest = source["latest"];
+	    }
+	}
 	export class Service {
 	    ItemID: number;
 	    response: string;
@@ -1345,14 +1505,14 @@ export namespace quake {
 		    return a;
 		}
 	}
-	export class RSDQueryResult {
+	export class RealtimeServiceDataResult {
 	    items: RealtimeServiceItem[];
 	    pageNum: number;
 	    pageSize: number;
 	    total: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new RSDQueryResult(source);
+	        return new RealtimeServiceDataResult(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -1381,41 +1541,9 @@ export namespace quake {
 		    return a;
 		}
 	}
-	export class RealtimeDataQueryOptions {
-	    query?: string;
-	    rule?: string;
-	    ipList?: string[];
-	    page?: number;
-	    size?: number;
-	    ignoreCache?: boolean;
-	    startTime?: string;
-	    endTime?: string;
-	    include?: string[];
-	    exclude?: string[];
-	    latest?: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new RealtimeDataQueryOptions(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.query = source["query"];
-	        this.rule = source["rule"];
-	        this.ipList = source["ipList"];
-	        this.page = source["page"];
-	        this.size = source["size"];
-	        this.ignoreCache = source["ignoreCache"];
-	        this.startTime = source["startTime"];
-	        this.endTime = source["endTime"];
-	        this.include = source["include"];
-	        this.exclude = source["exclude"];
-	        this.latest = source["latest"];
-	    }
-	}
 	
 	export class RealtimeServiceQueryResult {
-	    result: RSDQueryResult;
+	    result: RealtimeServiceDataResult;
 	    taskID: number;
 	    maxPage: number;
 	
@@ -1425,7 +1553,7 @@ export namespace quake {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.result = this.convertValues(source["result"], RSDQueryResult);
+	        this.result = this.convertValues(source["result"], RealtimeServiceDataResult);
 	        this.taskID = source["taskID"];
 	        this.maxPage = source["maxPage"];
 	    }

@@ -434,20 +434,7 @@ const IcpTaskResult:React.FC<IcpTaskResultProps> = (props)=>{
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
         { headerName: '名称', field: "unitName", width: 250, pinned: 'left' },
         { headerName: '备案内容', field: "serviceName", width: 200 },
-        { headerName: '备案类型', field: "ServiceType", width: 100 ,cellRenderer:(params:ICellRendererParams)=>{
-                const serviceType = params.data.serviceType
-                if (serviceType === "网站"){
-                    return <Tag color="#2db7f5">网站</Tag>
-                }else if (serviceType === "APP"){
-                    return <Tag color="#87d068">APP</Tag>
-                }else if (serviceType === "小程序"){
-                    return <Tag color="#108ee9">小程序</Tag>
-                }else if (serviceType === "快应用"){
-                    return <Tag color="#d48806">快应用</Tag>
-                }else {
-                    return <></>
-                }
-            }},
+        { headerName: '备案类型', field: "serviceType", width: 100 },
         { headerName: '备案号', field: "serviceLicence", width: 200 },
         { headerName: '备案法人', field: "leaderName", width: 150 },
         { headerName: '单位性质', field: "natureName", width: 100 },
@@ -495,6 +482,7 @@ const IcpTaskResult:React.FC<IcpTaskResultProps> = (props)=>{
                 let index=0
                 setTotal(r.Total)
                 setPageData(r.Items.map(item=>({index:++index,...item} as PageDataType2)))
+                console.log(r)
             })
             .catch(e=>errorNotification("错误",e))
         setLoading(false)

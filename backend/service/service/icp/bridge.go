@@ -395,12 +395,11 @@ func (r *Bridge) executeTask(taskID int64) {
 		}
 		if r.taskControlCh[taskID] == status.Error {
 			r.taskMutex.Unlock()
-			r.app.Logger.Debug("错误")
 			task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
 			_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
 			event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
 				ID:     taskID,
-				Status: task.Status,
+				Status: status.Error,
 				Data:   task.Task,
 			})
 			return
@@ -410,9 +409,11 @@ func (r *Bridge) executeTask(taskID int64) {
 		r.wg.Add(1)
 		wg2.Add(1)
 		go func(slice *models.ICPTaskSlice) {
-			defer r.wg.Done()
-			defer wg2.Done()
-			defer func() { <-r.limiter }() // 释放并发令牌
+			defer func() {
+				r.wg.Done()
+				wg2.Done()
+				<-r.limiter
+			}() // 释放并发令牌
 			r.taskMutex.Lock()
 			if r.taskControlCh[taskID] != status.Waiting && r.taskControlCh[taskID] != status.Running {
 				r.taskMutex.Unlock()
@@ -448,8 +449,6 @@ func (r *Bridge) executeTask(taskID int64) {
 			slice.Status = status.Stopped
 			r.taskMutex.Lock()
 			task.Current++
-			r.taskMutex.Unlock()
-			r.taskMutex.Lock()
 			if r.taskControlCh[taskID] == status.Running {
 				task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
 				_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
@@ -464,16 +463,19 @@ func (r *Bridge) executeTask(taskID int64) {
 	}
 	wg2.Wait()
 	r.taskMutex.Lock()
-	if r.taskControlCh[taskID] == status.Running {
-		task.Task.Status = status.Stopped
-		task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
-		_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
-		event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-			ID:     taskID,
-			Status: status.Stopped,
-			Data:   task.Task,
-		})
+	if r.taskControlCh[taskID] == status.Error {
+		task.Task.Status = status.Error
 	}
+	if r.taskControlCh[taskID] == status.Running || r.taskControlCh[taskID] == status.Pausing || r.taskControlCh[taskID] == status.Paused {
+		task.Task.Status = status.Stopped
+	}
+	task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
+	_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
+	event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
+		ID:     taskID,
+		Status: task.Task.Status,
+		Data:   task.Task,
+	})
 	r.taskMutex.Unlock()
 }
 

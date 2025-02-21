@@ -68,30 +68,31 @@ func (r *ICP) ServiceType(serviceType string) *ICP {
 }
 
 func (r *ICP) Query(unitName string) (*Result, error) {
+	var t = *r
 	unitName = strings.TrimSpace(unitName)
 	if unitName == "" {
 		return nil, errors.New("查询内容不能为空")
 	}
-	if r.page <= 0 {
-		r.page = 1
+	if t.page <= 0 {
+		t.page = 1
 	}
-	if r.size <= 0 {
-		r.size = 40
+	if t.size <= 0 {
+		t.size = 40
 	}
 	postData := map[string]string{
-		"pageNum":     strconv.Itoa(r.page),
-		"pageSize":    strconv.Itoa(r.size),
+		"pageNum":     strconv.Itoa(t.page),
+		"pageSize":    strconv.Itoa(t.size),
 		"unitName":    unitName,
-		"serviceType": r.serviceType,
+		"serviceType": t.serviceType,
 	}
 	bytesData, _ := json.Marshal(postData)
 	req, err := http.NewRequest("POST", queryUrl, bytes.NewReader(bytesData))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Token", r.token)
-	req.Header.Set("Sign", r.sign)
+	req.Header.Set("Token", t.token)
+	req.Header.Set("Sign", t.sign)
 	req.Header.Set("Referer", referer)
 	req.Header.Set("Cookie", "__jsluid_s=8e209cf6c7c40f530a300ac8dd0eb6c7")
-	response, err := r.http.Do(req)
+	response, err := t.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -119,25 +120,25 @@ func (r *ICP) Query(unitName string) (*Result, error) {
 	list := gjson.Get(bodyStr, "params.list").Array()
 
 	serviceTypeName := ""
-	if r.serviceType == "1" {
+	if t.serviceType == "1" {
 		serviceTypeName = "网站"
-	} else if r.serviceType == "6" {
+	} else if t.serviceType == "6" {
 		serviceTypeName = "APP"
-	} else if r.serviceType == "7" {
+	} else if t.serviceType == "7" {
 		serviceTypeName = "小程序"
-	} else if r.serviceType == "8" {
+	} else if t.serviceType == "8" {
 		serviceTypeName = "快应用"
 	}
 	items := make([]*icp.Item, 0)
 	for _, item := range list {
 		itemStr := item.String()
 		serviceName := ""
-		if r.serviceType == "1" {
+		if t.serviceType == "1" {
 			serviceName = gjson.Get(itemStr, "domain").String()
 		} else {
 			serviceName = gjson.Get(itemStr, "serviceName").String()
 		}
-		t := &icp.Item{
+		tt := &icp.Item{
 			ServiceName:      serviceName,
 			LeaderName:       gjson.Get(itemStr, "leaderName").String(),
 			NatureName:       gjson.Get(itemStr, "natureName").String(),
@@ -146,7 +147,7 @@ func (r *ICP) Query(unitName string) (*Result, error) {
 			UpdateRecordTime: gjson.Get(itemStr, "updateRecordTime").String(),
 			ServiceType:      serviceTypeName,
 		}
-		items = append(items, t)
+		items = append(items, tt)
 	}
 
 	return &Result{

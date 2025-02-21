@@ -62,6 +62,9 @@ func NewWechatBridge(app *application.Application) *Bridge {
 
 func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
 	items := make([]wechat.InfoToFront, 0)
+	if r.app.Config.Wechat.Applet == "" {
+		return items, nil
+	}
 
 	// 获取所有的小程序，按修改时间排序
 	entries, err := os.ReadDir(r.app.Config.Wechat.Applet)

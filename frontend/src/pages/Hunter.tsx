@@ -34,13 +34,12 @@ import PointBuy from "@/assets/images/point-buy.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
 import {copy, getAllDisplayedColumnKeys, getSortedData, RangePresets} from '@/util/util';
-import {config, hunter} from "../../wailsjs/go/models";
+import {config, event, hunter} from "../../wailsjs/go/models";
 import { Export, GetRestToken, Query, SetAuth } from "../../wailsjs/go/hunter/Bridge";
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import type { Tab } from 'rc-tabs/lib/interface';
 import { Dots } from "@/component/Icon";
 import { md5 } from "js-md5"
-import { Fetch } from "../../wailsjs/go/app/App";
 import { toUint8Array } from "js-base64";
 import { WithIndex } from "@/component/Interface";
 import TabLabel from "@/component/TabLabel";
@@ -54,11 +53,11 @@ import {
     ColDef,
     GetContextMenuItemsParams,
     ICellRendererParams,
-    MenuItemDef,
     ProcessCellForExportParams,
     SideBarDef
 } from "ag-grid-community";
 import Help from "@/pages/HunterUsage";
+import {Fetch} from "../../wailsjs/go/application/Application";
 
 const pageSizeOptions = [10, 20, 50, 100]
 
@@ -93,13 +92,13 @@ const AuthSetting: React.FC = () => {
     const [key, setKey] = useState("")
 
     useEffect(() => {
-        setKey(cfg.Hunter.token)
+        setKey(cfg.Hunter.Token)
     }, [cfg.Hunter])
 
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, Hunter: { ...cfg.Hunter, token: key } } as config.Config;
+                const t = { ...cfg, Hunter: { ...cfg.Hunter, Token: key } } as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -107,7 +106,7 @@ const AuthSetting: React.FC = () => {
         ).catch(
             err => {
                 errorNotification("错误", err)
-                setKey(cfg.Hunter.token)
+                setKey(cfg.Hunter.Token)
             }
         )
     }
@@ -115,7 +114,7 @@ const AuthSetting: React.FC = () => {
     const cancel = () => {
         setEditable(false);
         setOpen(false)
-        setKey(cfg.Hunter.token)
+        setKey(cfg.Hunter.Token)
     }
 
     return <>
@@ -132,7 +131,6 @@ const AuthSetting: React.FC = () => {
             closeIcon={null}
             width={420}
             destroyOnClose
-            getContainer={false}
         >
             <Flex vertical gap={10}>
                 <Input.Password value={key} placeholder="token" onChange={
@@ -173,27 +171,25 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
     const dispatch = useDispatch()
     const [disable, setDisable] = useState<boolean>(false)
     const event = useSelector((state: RootState) => state.app.global.event)
+    const stat = useSelector((state: RootState) => state.app.global.status)
+    const exportID = useRef(0)
 
-    const exportData = (page: number) => {
-        setIsExporting(true)
-        setDisable(true)
-        Export(props.id, page, pageSize).then().catch(
-            err => {
-                errorNotification("错误", err)
-                setIsExporting(false)
-                setDisable(false)
-            }
-        )
-    }
     useEffect(() => {
-        EventsOn(String(event?.hasNewHunterDownloadItem), function () {
+        EventsOn(event.HunterExport,  (eventDetail:event.EventDetail)=> {
+            if (eventDetail.ID !== exportID.current){
+                return
+            }
             setIsExporting(false)
             setDisable(false)
-            GetRestToken().then(
-                result => {
-                    dispatch(userActions.setHunterUser({ restToken: result }))
-                }
-            )
+            if (eventDetail.Status === stat.Stopped){
+                GetRestToken().then(
+                    result => {
+                        dispatch(userActions.setHunterUser({ restToken: result }))
+                    }
+                )
+            }else if (eventDetail.Status === stat.Error){
+                errorNotification("错误",eventDetail.Error)
+            }
         })
     }, []);
     useEffect(() => {
@@ -206,6 +202,20 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
             setCost(page * pageSize)
         }
     }, [pageSize, props.total])
+
+    const exportData = (pageNum: number) => {
+        setIsExporting(true)
+        setDisable(true)
+        Export(props.id, pageNum, pageSize)
+            .then(r=>exportID.current = r)
+            .catch(
+            err => {
+                errorNotification("错误", err)
+                setIsExporting(false)
+                setDisable(false)
+            }
+        )
+    }
     return <>
         <Button
             disabled={disable}
@@ -310,9 +320,10 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const [hovered, setHovered] = useState(false);
     const [faviconUrl, setFaviconUrl] = useState("");
     const dispatch = useDispatch()
-    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.assets)
+    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.Assets)
     const event = useSelector((state: RootState) => state.app.global.event)
     const history = useSelector((state: RootState) => state.app.global.history)
+    const status = useSelector((state: RootState) => state.app.global.status)
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
@@ -382,7 +393,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             return formattedValueForCopy(params.column?.getColId(), params.node?.data)
         }, []);
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): any => {
-        if(!pageData || pageData.length === 0)return []
+        if(!pageData || pageData.length === 0 || !params.node)return []
         const cellValue = formattedValueForCopy(params.column?.getColId(), params.node?.data)
         return [
             {
@@ -455,7 +466,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     }, [pageData, queryOption]);
 
     useEffect(() => {
-        EventsOn(String(event?.hasNewHunterDownloadItem), function () {
+        EventsOn(event.HunterQuery, function (eventDetail:event.EventDetail) {
+            if (eventDetail.Status === status.Stopped)
             GetRestToken().then(
                 result => {
                     dispatch(userActions.setHunterUser({ restToken: result }))
@@ -509,7 +521,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 }))
                 setTotal(result.total)
                 setLoading(false)
-                pageIDMap.current[1] = result.taskID
+                pageIDMap.current[1] = result.pageID
                 dispatch(userActions.setHunterUser({
                     restToken: result.restQuota
                 }))
@@ -539,7 +551,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     }))
                     setCurrentPage(newPage)
                     setTotal(result.total)
-                    pageIDMap.current[newPage] = result.taskID
+                    pageIDMap.current[newPage] = result.pageID
                     dispatch(userActions.setHunterUser({
                         restToken: result.restQuota
                     }))
@@ -699,7 +711,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                             fetch: async (v) => {
                                 try {
                                     // @ts-ignore
-                                    const response = await FindByPartialKey(history.hunter, !v ? "" : v.toString());
+                                    const response = await FindByPartialKey(history.Hunter, !v ? "" : v.toString());
                                     const a: ItemType<string>[] = response?.map(item => {
                                         const t: ItemType<string> = {
                                             value: item,

@@ -24,8 +24,8 @@ type dwmRepositoryImpl struct{ db *gorm.DB }
 type aimRepositoryImpl struct{ db *gorm.DB }
 
 type baseZoneRepository[T1 any, T2 any] interface {
-	CreateBulk(taskID int64, items []T1) error
-	GetBulkByTaskID(taskID int64) ([]*T2, error)
+	CreateBulk(pageID int64, items []T1) error
+	GetBulkByTaskID(pageID int64) ([]*T2, error)
 }
 
 type zoneSiteRepository interface {
@@ -64,8 +64,8 @@ type zoneAimRepository interface {
 }
 
 type ZoneRepository interface {
-	CreateQueryField(item *models.ZoneQueryLog, taskID int64) error
-	GetQueryFieldByTaskID(taskID int64) (*models.ZoneQueryLog, error)
+	CreateQueryField(item *models.ZoneQueryLog, pageID int64) error
+	GetQueryFieldByTaskID(pageID int64) (*models.ZoneQueryLog, error)
 }
 
 type ZoneRepositoryImpl struct {
@@ -94,13 +94,13 @@ func NewZoneRepository(db *gorm.DB) ZoneRepositoryImpl {
 	}
 }
 
-func (r *siteRepositoryImpl) CreateBulk(taskID int64, items []zone.SiteItem) error {
+func (r *siteRepositoryImpl) CreateBulk(pageID int64, items []zone.SiteItem) error {
 	dbItems := make([]*models.ZoneSite, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneSite{
 			SiteItem: &tmp,
-			TaskID:   taskID,
+			PageID:   pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -109,21 +109,21 @@ func (r *siteRepositoryImpl) CreateBulk(taskID int64, items []zone.SiteItem) err
 	return nil
 }
 
-func (r *siteRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneSite, error) {
+func (r *siteRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneSite, error) {
 	items := make([]*models.ZoneSite, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *domainRepositoryImpl) CreateBulk(taskID int64, items []zone.DomainItem) error {
+func (r *domainRepositoryImpl) CreateBulk(pageID int64, items []zone.DomainItem) error {
 	dbItems := make([]*models.ZoneDomain, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneDomain{
 			DomainItem: &tmp,
-			TaskID:     taskID,
+			PageID:     pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -132,21 +132,21 @@ func (r *domainRepositoryImpl) CreateBulk(taskID int64, items []zone.DomainItem)
 	return nil
 }
 
-func (r *domainRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneDomain, error) {
+func (r *domainRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneDomain, error) {
 	items := make([]*models.ZoneDomain, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *apkRepositoryImpl) CreateBulk(taskID int64, items []zone.ApkItem) error {
+func (r *apkRepositoryImpl) CreateBulk(pageID int64, items []zone.ApkItem) error {
 	dbItems := make([]*models.ZoneApk, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneApk{
 			ApkItem: &tmp,
-			TaskID:  taskID,
+			PageID:  pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -155,21 +155,21 @@ func (r *apkRepositoryImpl) CreateBulk(taskID int64, items []zone.ApkItem) error
 	return nil
 }
 
-func (r *apkRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneApk, error) {
+func (r *apkRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneApk, error) {
 	items := make([]*models.ZoneApk, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *memberRepositoryImpl) CreateBulk(taskID int64, items []zone.MemberItem) error {
+func (r *memberRepositoryImpl) CreateBulk(pageID int64, items []zone.MemberItem) error {
 	dbItems := make([]*models.ZoneMember, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneMember{
 			MemberItem: &tmp,
-			TaskID:     taskID,
+			PageID:     pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -178,21 +178,21 @@ func (r *memberRepositoryImpl) CreateBulk(taskID int64, items []zone.MemberItem)
 	return nil
 }
 
-func (r *memberRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneMember, error) {
+func (r *memberRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneMember, error) {
 	items := make([]*models.ZoneMember, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *emailRepositoryImpl) CreateBulk(taskID int64, items []zone.EmailItem) error {
+func (r *emailRepositoryImpl) CreateBulk(pageID int64, items []zone.EmailItem) error {
 	dbItems := make([]*models.ZoneEmail, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneEmail{
 			EmailItem: &tmp,
-			TaskID:    taskID,
+			PageID:    pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -201,21 +201,21 @@ func (r *emailRepositoryImpl) CreateBulk(taskID int64, items []zone.EmailItem) e
 	return nil
 }
 
-func (r *emailRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneEmail, error) {
+func (r *emailRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneEmail, error) {
 	items := make([]*models.ZoneEmail, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *codeRepositoryImpl) CreateBulk(taskID int64, items []zone.CodeItem) error {
+func (r *codeRepositoryImpl) CreateBulk(pageID int64, items []zone.CodeItem) error {
 	dbItems := make([]*models.ZoneCode, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneCode{
 			CodeItem: &tmp,
-			TaskID:   taskID,
+			PageID:   pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -224,21 +224,21 @@ func (r *codeRepositoryImpl) CreateBulk(taskID int64, items []zone.CodeItem) err
 	return nil
 }
 
-func (r *codeRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneCode, error) {
+func (r *codeRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneCode, error) {
 	items := make([]*models.ZoneCode, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *dwmRepositoryImpl) CreateBulk(taskID int64, items []zone.DarknetItem) error {
+func (r *dwmRepositoryImpl) CreateBulk(pageID int64, items []zone.DarknetItem) error {
 	dbItems := make([]*models.ZoneDwm, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneDwm{
 			DarknetItem: &tmp,
-			TaskID:      taskID,
+			PageID:      pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -247,21 +247,21 @@ func (r *dwmRepositoryImpl) CreateBulk(taskID int64, items []zone.DarknetItem) e
 	return nil
 }
 
-func (r *dwmRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneDwm, error) {
+func (r *dwmRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneDwm, error) {
 	items := make([]*models.ZoneDwm, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *aimRepositoryImpl) CreateBulk(taskID int64, items []zone.AimItem) error {
+func (r *aimRepositoryImpl) CreateBulk(pageID int64, items []zone.AimItem) error {
 	dbItems := make([]*models.ZoneAim, 0)
 	for _, item := range items {
 		tmp := item
 		dbItems = append(dbItems, &models.ZoneAim{
 			AimItem: &tmp,
-			TaskID:  taskID,
+			PageID:  pageID,
 		})
 	}
 	if err := r.db.Preload(clause.Associations).Create(&dbItems).Error; err != nil {
@@ -270,25 +270,25 @@ func (r *aimRepositoryImpl) CreateBulk(taskID int64, items []zone.AimItem) error
 	return nil
 }
 
-func (r *aimRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.ZoneAim, error) {
+func (r *aimRepositoryImpl) GetBulkByTaskID(pageID int64) ([]*models.ZoneAim, error) {
 	items := make([]*models.ZoneAim, 0)
-	if err := r.db.Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *ZoneRepositoryImpl) CreateQueryField(item *models.ZoneQueryLog, taskID int64) error {
-	item.TaskID = taskID
+func (r *ZoneRepositoryImpl) CreateQueryField(item *models.ZoneQueryLog, pageID int64) error {
+	item.PageID = pageID
 	if err := r.db.Create(item).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *ZoneRepositoryImpl) GetQueryFieldByTaskID(taskID int64) (*models.ZoneQueryLog, error) {
+func (r *ZoneRepositoryImpl) GetQueryFieldByTaskID(pageID int64) (*models.ZoneQueryLog, error) {
 	item := &models.ZoneQueryLog{}
-	if err := r.db.Where("task_id = ?", taskID).Find(item).Error; err != nil {
+	if err := r.db.Where("task_id = ?", pageID).Find(item).Error; err != nil {
 		return nil, err
 	}
 	return item, nil

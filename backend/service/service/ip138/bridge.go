@@ -1,34 +1,32 @@
 package ip138
 
 import (
-	"fine/backend/app"
-	"fine/backend/config"
+	"fine/backend/application"
+	"fine/backend/database"
 	"fine/backend/database/repository"
-	"fine/backend/logger"
 )
 
 type Bridge struct {
-	app         *app.App
-	ip138       *IP138
-	queryLog    *repository.ICPQueryLog
-	downloadLog *repository.DownloadLogService
+	app           *application.Application
+	ip138         *IP138
+	exportLogRepo repository.ExportLogRepository
 }
 
-func NewIP138Bridge(app *app.App) *Bridge {
+func NewIP138Bridge(app *application.Application) *Bridge {
 	tt := NewClient()
-	tt.UseProxyManager(config.ProxyManager)
+	tt.UseProxyManager(app.ProxyManager)
+	db := database.GetConnection()
 	return &Bridge{
-		ip138:       tt,
-		queryLog:    repository.NewICPQueryLog(),
-		downloadLog: repository.NewDownloadLogService(),
-		app:         app,
+		ip138:         tt,
+		exportLogRepo: repository.NewExportLogRepository(db),
+		app:           app,
 	}
 }
 
-func (b *Bridge) GetCurrentIP(domain string) (map[string]any, error) {
-	items, msg, err := b.ip138.Domain.GetCurrentIP(domain)
+func (r *Bridge) GetCurrentIP(domain string) (map[string]any, error) {
+	items, msg, err := r.ip138.Domain.GetCurrentIP(domain)
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil, err
 	}
 
@@ -38,19 +36,19 @@ func (b *Bridge) GetCurrentIP(domain string) (map[string]any, error) {
 	}, nil
 }
 
-func (b *Bridge) GetHistoryIP(domain string) ([]*IPItem, error) {
-	items, err := b.ip138.Domain.GetHistoryIP(domain)
+func (r *Bridge) GetHistoryIP(domain string) ([]*IPItem, error) {
+	items, err := r.ip138.Domain.GetHistoryIP(domain)
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil, err
 	}
 	return items, nil
 }
 
-func (b *Bridge) GetCurrentDomain(ip string) ([]*DomainItem, error) {
-	items, err := b.ip138.IP.GetCurrentDomain(ip)
+func (r *Bridge) GetCurrentDomain(ip string) ([]*DomainItem, error) {
+	items, err := r.ip138.IP.GetCurrentDomain(ip)
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil, err
 	}
 	return items, nil

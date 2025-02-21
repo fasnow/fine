@@ -4,7 +4,7 @@ import "fine/backend/service/model/hunter"
 
 type Hunter struct {
 	BaseModel
-	TaskID int64
+	PageID int64
 	*hunter.Item
 }
 
@@ -15,11 +15,11 @@ type HunterRestToken struct {
 
 type HunterQueryLog struct {
 	BaseModel
-	TaskID     int64 `gorm:"unique"`
+	PageID     int64 `gorm:"unique"`
 	Query      string
 	StartTime  string
 	EndTime    string
-	Page       int
+	PageNum    int
 	PageSize   int
 	IsWeb      int
 	StatusCode string

@@ -1,31 +1,32 @@
 package tianyancha
 
 import (
-	"fine/backend/config"
-	"fine/backend/constant"
+	"fine/backend/application"
+	"fine/backend/constant/history"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/logger"
 )
 
 type Bridge struct {
 	t           *TianYanCha
+	app         *application.Application
 	historyRepo repository.HistoryRepository
 }
 
-func NewTianYanChaBridge() *Bridge {
-	tt := NewClient(config.GlobalConfig.TianYanCha.Token)
-	tt.UseProxyManager(config.ProxyManager)
+func NewTianYanChaBridge(app *application.Application) *Bridge {
+	tt := NewClient(app.Config.TianYanCha.Token)
+	tt.UseProxyManager(app.ProxyManager)
 	return &Bridge{
 		t:           tt,
+		app:         app,
 		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
 	}
 }
 
 func (r *Bridge) SetAuth(token string) error {
-	config.GlobalConfig.TianYanCha.Token = token
-	if err := config.Save(); err != nil {
+	r.app.Config.TianYanCha.Token = token
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
 		return err
 	}
 	r.t.SetToken(token)
@@ -33,9 +34,9 @@ func (r *Bridge) SetAuth(token string) error {
 }
 
 func (r *Bridge) Suggest(key string) ([]SuggestItem, error) {
-	err := r.historyRepo.CreateHistory(&models.History{Key: key, Type: constant.Histories.TYC})
+	err := r.historyRepo.CreateHistory(&models.History{Key: key, Type: history.TYC})
 	if err != nil {
-		logger.Info(err)
+		r.app.Logger.Error(err)
 	}
 	return r.t.Suggest(key)
 }

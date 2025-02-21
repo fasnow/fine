@@ -125,11 +125,14 @@ jobs:
         with:
           files: |
             artifacts/**
-          token: ${{ secrets.FINE_ACCESS_TOKEN }}
-#          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+#          token: ${{ secrets.FINE_ACCESS_TOKEN }}
+          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |
-            1. enhance: 替换表格为更好用的AgGrid；
-            2. new: 搜索历史记录；
-            3. new: FOFA统计聚合。
+            1. feature: ICP批量查询；
+            2. feature: 爱企查；
+            3. enhance: @xiaoliusec #16；
+            4. enhance: @allinu #18;
+            5. enhance: @K1p2y3 #20；
+            6. enhance: 小程序敏感信息提取正则。
 
 

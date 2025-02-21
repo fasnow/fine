@@ -86,7 +86,7 @@ const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
     };
 
     return (
-        <>
+        <div onMouseLeave={()=>setSelectedKey(null)}>
             {
                 props.title &&
                 <Tag bordered={false} color="cyan">{props.title}</Tag>
@@ -139,7 +139,7 @@ const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
                     </ConfigProvider>
                 )
             }
-        </>
+        </div>
     );
 })
 
@@ -267,7 +267,7 @@ const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
     }, [value])
 
     return (
-        <div ref={rootDivRef} style={{ position: "relative" }}>
+        <div ref={rootDivRef} style={{ position: "relative"}}>
             <Flex justify={'center'} align={'center'}>
                 {
                     onSearch ? <Space.Compact>
@@ -275,7 +275,6 @@ const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
                             ref={inputDivRef}
                             {...SharedProps}
                         /><Button icon={<SearchOutlined />} size={SharedProps.size} onClick={(e) => {
-                            console.log(value)
                             if (onSearch) {
                                 onSearch(value.toString())
                             }
@@ -295,7 +294,9 @@ const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
                 borderRadius: '3px',
                 padding: '5px',
                 overflowY: 'auto',
-                display: open ? 'block' : 'none'
+                overflowX: 'hidden',
+                display: open ? 'block' : 'none',
+                boxSizing:'border-box'
             }}>
                 {panels}
             </div>

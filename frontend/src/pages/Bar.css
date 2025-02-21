@@ -13,6 +13,7 @@
     --wails-draggable: drag;
     user-select: none;
     -webkit-user-select: none;
+    cursor: default;
 }
 
 .left {

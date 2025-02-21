@@ -1,31 +1,32 @@
 package aiqicha
 
 import (
-	"fine/backend/config"
-	"fine/backend/constant"
+	"fine/backend/application"
+	"fine/backend/constant/history"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/logger"
 )
 
 type Bridge struct {
+	app         *application.Application
 	aiQiCha     *AiQiCha
 	historyRepo repository.HistoryRepository
 }
 
-func NewAiQiChaBridge() *Bridge {
-	tt := NewClient(config.GlobalConfig.AiQiCha.Cookie)
-	tt.UseProxyManager(config.ProxyManager)
+func NewAiQiChaBridge(app *application.Application) *Bridge {
+	tt := NewClient(app.Config.AiQiCha.Cookie)
+	tt.UseProxyManager(app.ProxyManager)
 	return &Bridge{
+		app:         app,
 		aiQiCha:     tt,
 		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
 	}
 }
 
 func (r *Bridge) SetAuth(cookie string) error {
-	config.GlobalConfig.AiQiCha.Cookie = cookie
-	if err := config.Save(); err != nil {
+	r.app.Config.AiQiCha.Cookie = cookie
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
 		return err
 	}
 	r.aiQiCha.SetToken(cookie)
@@ -33,9 +34,9 @@ func (r *Bridge) SetAuth(cookie string) error {
 }
 
 func (r *Bridge) Suggest(key string) ([]SuggestItem, error) {
-	err := r.historyRepo.CreateHistory(&models.History{Key: key, Type: constant.Histories.TYC})
+	err := r.historyRepo.CreateHistory(&models.History{Key: key, Type: history.AQC})
 	if err != nil {
-		logger.Info(err)
+		r.app.Logger.Error(err)
 	}
 	return r.aiQiCha.Suggest(key)
 }

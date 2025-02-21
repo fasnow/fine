@@ -1,78 +1,25 @@
 package wechat
 
 import (
-	"fine/backend/app"
-	"fine/backend/database"
-	"fine/backend/logger"
-	"fine/backend/utils"
-	"fmt"
-	"os"
-	"path/filepath"
-	"regexp"
+	"encoding/json"
+	"fine/backend/application"
 	"testing"
 )
 
-func TestDecrypt(t *testing.T) {
-	bytes, err := os.ReadFile("D:\\AppAutoDownloadFiles\\WeChat\\WeChat Files\\Applet\\wx7605335e224edc7b\\161\\__APP__.wxapkg")
+func TestBridge_GetAllMiniProgram(t *testing.T) {
+	app := application.DefaultApp
+	c := NewWechatBridge(app)
+	miniPrograms, err := c.GetAllMiniProgram()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	decrypt, err := decrypt(bytes, "wx7605335e224edc7b", "saltiest", "the iv: 16 bytes")
-	if err != nil {
-		return
-	}
-	if err := utils.WriteFile("1.wxapkg", decrypt, 0766); err != nil {
-		t.Error(err)
-		return
-	}
+	bytes, _ := json.Marshal(miniPrograms)
+	t.Log(string(bytes))
 }
 
-func TestBridge_extract(t *testing.T) {
-	//version := strconv.Itoa(int(versionID))
-	//targetDir := filepath.Join(config.GlobalConfig.WechatDataPath, appid, version)
-	targetDir := "C:\\Users\\fasnow\\Desktop\\Fine-amd64\\data\\wechatMiniProgram\\wx25f982a55e60a540\\365"
-
-	regexPattern := "http.*?\\s+"
-	regex, err := regexp.Compile(regexPattern)
-	if err != nil {
-		logger.Info(err)
-		return
-	}
-
-	var matched []string
-	err = filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			logger.Info(err)
-			return nil
-		}
-		if !info.IsDir() {
-			// 读取文件内容
-			content, err := os.ReadFile(path)
-			if err != nil {
-				logger.Info(err)
-				return nil
-			}
-			matches := regex.FindAllStringSubmatch(string(content), -1)
-			for _, match := range matches {
-				matched = append(matched, match[0])
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		logger.Info(err)
-	}
-	fmt.Println(matched)
-}
-
-func TestBridge_QueryAppID(t *testing.T) {
-	database.Init("data.db")
-	b := NewWechatBridge(app.NewApp())
-	err, info := b.QueryAppID("wxa8da525af05281f3")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Log(info)
+func TestBridge_extractInfo(t *testing.T) {
+	app := application.DefaultApp
+	c := NewWechatBridge(app)
+	c.extractInfo("wxc76247c1ed91383e", "17")
 }

@@ -5,7 +5,7 @@ import TabsV2 from "@/component/TabsV2";
 import {errorNotification} from '@/component/Notification';
 import {appActions, RootState} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
-import {aiqicha, config, constant} from '../../wailsjs/go/models';
+import {aiqicha, config} from '../../wailsjs/go/models';
 import {buttonProps} from './Setting';
 import {UserOutlined} from "@ant-design/icons";
 import {TYC} from "@/pages/Constants";
@@ -14,7 +14,6 @@ import type {CascaderProps} from 'antd/es/cascader'
 import Candidate, {ItemType} from "@/component/Candidate";
 import './Aiqicha.css'
 import {GetInvestRecord, GetShareholder, GetStockChart, SetAuth, Suggest} from "../../wailsjs/go/aiqicha/Bridge";
-import History = constant.History;
 import InvestRecord = aiqicha.InvestRecord;
 import Shareholder = aiqicha.Shareholder;
 import {copy} from "@/util/util";
@@ -995,18 +994,18 @@ const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
     const dispatch = useDispatch()
-    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
+    const cfg = useSelector((state: RootState) => state.app.global.config)
     const [key, setKey] = useState("")
 
     useEffect(() => {
-        setKey(cfg.AiQiCha.cookie)
+        setKey(cfg.AiQiCha.Cookie)
     }, [cfg.AiQiCha])
 
 
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, AiQiCha: { ...cfg.AiQiCha, cookie: key } } as config.Config;
+                const t = { ...cfg, AiQiCha: { ...cfg.AiQiCha, Cookie: key } } as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -1014,7 +1013,7 @@ const AuthSetting: React.FC = () => {
         ).catch(
             err => {
                 errorNotification("错误", err)
-                setKey(cfg.AiQiCha.cookie)
+                setKey(cfg.AiQiCha.Cookie)
             }
         )
     }
@@ -1022,7 +1021,7 @@ const AuthSetting: React.FC = () => {
     const cancel = () => {
         setEditable(false);
         setOpen(false)
-        setKey(cfg.AiQiCha.cookie)
+        setKey(cfg.AiQiCha.Cookie)
     }
 
     return <>

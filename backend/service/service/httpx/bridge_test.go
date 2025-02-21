@@ -1,43 +1,26 @@
 package httpx
 
 import (
-	"bufio"
-	"fine/backend/app"
-	"fmt"
-	"os/exec"
+	"fine/backend/application"
 	"reflect"
-	runtime2 "runtime"
-	"syscall"
 	"testing"
 )
 
-func TestPing(t *testing.T) {
-	cmd := exec.Command("D:\\Tools\\vulnScan\\httpx\\httpx.exe", "-sc", "-cl", "-title", "-u", "http://185.39.51.142/")
-	if runtime2.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	}
-
-	stdout, _ := cmd.StdoutPipe()
-	//stderr, _ := cmd.StderrPipe()
-
-	if err := cmd.Start(); err != nil {
-		t.Log(err)
+func TestBridge_Run(t *testing.T) {
+	app := application.DefaultApp
+	c := NewHttpxBridge(app)
+	id, err := c.Run("/Users/fasnow/Tools/bin/httpx/httpx", "-sc -cl -title", "baidu.com")
+	if err != nil {
+		t.Error(err)
 		return
 	}
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		//decodeBytes, _ := simplifiedchinese.GB18030.NewDecoder().Bytes(scanner.Bytes())
-		fmt.Println(string(scanner.Bytes()))
-	}
-}
-
-func TestBridge_Run(t *testing.T) {
+	t.Log(id)
 
 }
 
 func TestNewHttpxBridge(t *testing.T) {
 	type args struct {
-		app *app.App
+		app *application.Application
 	}
 	tests := []struct {
 		name string

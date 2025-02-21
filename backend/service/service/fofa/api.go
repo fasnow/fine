@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fine/backend/logger"
 	service2 "fine/backend/service/service"
 	"github.com/tidwall/gjson"
 	"io"
@@ -55,7 +54,7 @@ func (r *Fofa) Get(req *GetDataReq) (*Result, error) {
 		return nil, err
 	}
 	if response.StatusCode != 200 {
-		return nil, service2.NonStatusOK
+		return nil, errors.New(response.Status)
 	}
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -100,12 +99,7 @@ func (r *Fofa) Get(req *GetDataReq) (*Result, error) {
 	return &resp, nil
 }
 
-// Export 数据为空则不会保存任何文件
 func (r *Fofa) Export(items []*fofa.Item, outputFilepath string, exportFields ...string) error {
-	if len(items) == 0 {
-		return nil
-	}
-
 	//根据link去重
 	seenLinks := make(map[string]struct{})
 	var uniqueItems []*fofa.Item
@@ -594,16 +588,13 @@ func (r *StatisticalAggs) Query(query string) (*StatisticalAggsResult, error) {
 	request, err := http.NewRequest("GET", u, nil)
 	response, err := r.fofa.http.Do(request)
 	if err != nil {
-		logger.Info(err)
 		return nil, err
 	}
 	if response.StatusCode != 200 {
-		logger.Info(response.Status)
 		return nil, errors.New(response.Status)
 	}
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
-		logger.Info(err)
 		return nil, err
 	}
 	bodyStr := string(bytes)
@@ -615,7 +606,6 @@ func (r *StatisticalAggs) Query(query string) (*StatisticalAggsResult, error) {
 	var aggs StatisticalAggsResult
 	err = json.Unmarshal(bytes, &aggs)
 	if err != nil {
-		logger.Info(err)
 		return nil, err
 	}
 	return &aggs, nil
@@ -639,16 +629,13 @@ func (r *HostAggs) Host(host string) (*HostAggsResult, error) {
 	request, err := http.NewRequest("GET", u, nil)
 	response, err := r.fofa.http.Do(request)
 	if err != nil {
-		logger.Info(err)
 		return nil, err
 	}
 	if response.StatusCode != 200 {
-		logger.Info(response.Status)
 		return nil, errors.New(response.Status)
 	}
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
-		logger.Info(err)
 		return nil, err
 	}
 	bodyStr := string(bytes)
@@ -660,7 +647,6 @@ func (r *HostAggs) Host(host string) (*HostAggsResult, error) {
 	var aggs HostAggsResult
 	err = json.Unmarshal(bytes, &aggs)
 	if err != nil {
-		logger.Info(err)
 		return nil, err
 	}
 	return &aggs, nil

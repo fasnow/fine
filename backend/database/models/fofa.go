@@ -4,13 +4,13 @@ import "fine/backend/service/model/fofa"
 
 type Fofa struct {
 	BaseModel
-	TaskID int64
+	PageID int64
 	*fofa.Item
 }
 
 type FOFAQueryLog struct {
 	BaseModel
-	TaskID  int64 `gorm:"unique"`
+	PageID  int64 `gorm:"unique"`
 	Query   string
 	Fields  string
 	Full    bool

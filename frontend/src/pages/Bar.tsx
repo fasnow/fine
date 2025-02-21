@@ -3,23 +3,23 @@ import {
     CloseOutlined,
     CompressOutlined,
     DeleteOutlined,
-    DownloadOutlined,
+    DownloadOutlined, ExclamationCircleOutlined,
     ExpandOutlined,
     FolderOpenOutlined,
     GithubOutlined,
-    LineOutlined,
+    LineOutlined, LoadingOutlined,
     SendOutlined,
     SyncOutlined,
 } from "@ant-design/icons";
 import { Badge, Button, ConfigProvider, Divider, Flex, List, Modal, Popover, Space, Spin, Tag, Tooltip, } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import "./Bar.css";
-import { useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { GITHUB_URL, ISSUE_URL } from "@/component/type";
 import wailsJson from '../../../wails.json';
 import favicon from "../assets/images/paimon.svg"
 import { genshinLaunch } from "./op";
-import { RootState } from "@/store/store";
+import {appActions, RootState} from "@/store/store";
 import { Proxy as ProxyComp } from "./Setting"
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
@@ -31,14 +31,14 @@ import {
     WindowToggleMaximise,
     WindowUnmaximise
 } from "../../wailsjs/runtime";
-import { CheckUpdate, GetPlatform, OpenFile, OpenFolder, ShowItemInFolder } from "../../wailsjs/go/runtime/Runtime";
 import { errorNotification, infoNotification } from "@/component/Notification";
-import { Clear, GetByOffset, MarkAsDeleted } from "../../wailsjs/go/repository/DownloadLogService";
-import { config, constant, models } from "../../wailsjs/go/models";
 import semver from "semver/preload";
-import DownloadLog = models.DownloadLog;
 import { Title } from "@/component/Title";
-import Event = constant.Event;
+import {GetPlatform, OpenFile, OpenFolder, ShowItemInFolder} from "../../wailsjs/go/osoperation/Runtime";
+import {CheckUpdate, SaveProxy} from "../../wailsjs/go/application/Application";
+import {config, exportlog} from "../../wailsjs/go/models";
+import Item = exportlog.Item;
+import {GetByOffset, MarkAllAsDeleted, MarkAsDeleted} from "../../wailsjs/go/exportlog/Bridge";
 
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
@@ -124,19 +124,20 @@ class TitleBarOverlay extends React.Component {
 }
 
 const DownloadViewContent: React.FC = () => {
-    const [data, setData] = useState<DownloadLog[]>([])
+    const [data, setData] = useState<Item[]>([])
     const [total, setTotal] = useState<number>(0)
-    const event = useSelector((state: RootState) => state.app.global.event || new Event())
-    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
+    const event = useSelector((state: RootState) => state.app.global.event)
+    const cfg = useSelector((state: RootState) => state.app.global.config)
+    const status = useSelector((state: RootState) => state.app.global.status)
 
     useEffect(() => {
         loadMoreData()
-        EventsOn(String(event.hasNewDownloadItem), function () {
+        EventsOn(String(event.NewDownloadItem), function () {
             loadMoreData()
         })
     }, []);
     const openDataFolder = async () => {
-        OpenFolder(cfg.DataDir).catch(
+        OpenFolder(cfg.ExportDataDir).catch(
             err => errorNotification("错误", err)
         )
     }
@@ -166,27 +167,26 @@ const DownloadViewContent: React.FC = () => {
         )
     }
 
-    const deleteFile = (fileID: number) => {
+    const deleteFile = (exportID: number) => {
         setData(data.map(item => {
-            if (item.fileId === fileID) {
-                item.deleted = true
+            if (item.exportID === exportID) {
+                item.status = status.Deleted
             }
             return item
         }))
-        MarkAsDeleted(fileID).catch(
+        MarkAsDeleted(exportID).catch(
             err => errorNotification("错误", err)
         )
     }
 
     const clearDownloadLog = async () => {
-        const error = await Clear()
-        Clear().then(
+        MarkAllAsDeleted().then(
             () => {
                 setData([])
                 setTotal(0)
             }
         ).catch(
-            err => errorNotification("删除导出记录", error)
+            err => errorNotification("删除导出记录", err)
         )
     }
     return (
@@ -232,7 +232,7 @@ const DownloadViewContent: React.FC = () => {
                             dataSource={data}
                             split={false}
                             size="small"
-                            renderItem={(item: DownloadLog) => (
+                            renderItem={(item: Item) => (
                                 <List.Item
                                     key={item.filename}
                                 >
@@ -249,7 +249,7 @@ const DownloadViewContent: React.FC = () => {
                                         <Title text={item.filename}>
                                             <span
                                                 style={{
-                                                    textDecoration: item.deleted ? "line-through" : "",
+                                                    textDecoration: item.status === status.Deleted ? "line-through" : "",
                                                     overflow: "hidden",
                                                     whiteSpace: "nowrap",
                                                     textOverflow: 'ellipsis',
@@ -260,40 +260,52 @@ const DownloadViewContent: React.FC = () => {
                                             </span>
                                         </Title>
                                         <span>
-                                            {item.deleted ?
+                                            {item.status === status.Deleted &&
                                                 <label style={{
                                                     paddingLeft: "0px",
                                                     paddingTop: "0px",
                                                     height: "22px",
                                                     fontSize: "12px"
-                                                }}>已删除</label>
-                                                :
-                                                <Button style={{
+                                                }}>已删除</label>}
+                                            {item.status === status.Error &&
+                                                <Flex><label style={{
+                                                    paddingLeft: "0px",
+                                                    paddingTop: "0px",
+                                                    height: "22px",
+                                                    fontSize: "12px",
+                                                }}>导出失败<Title text={item.error}><ExclamationCircleOutlined /></Title></label></Flex>}
+                                            {item.status === status.Running &&
+                                                <label style={{
+                                                    paddingLeft: "0px",
+                                                    paddingTop: "0px",
+                                                    height: "22px",
+                                                    fontSize: "12px",
+                                                    color: "#1677ff"
+                                                }}>正在导出<LoadingOutlined /></label>}
+                                            {item.status === status.Stopped && <Button style={{
                                                     paddingLeft: "0px",
                                                     paddingTop: "0px",
                                                     height: "22px",
                                                     fontSize: "12px"
                                                 }} type="link"
-                                                    onClick={() => openFile(item.dir, item.filename)}
+                                                        onClick={() => openFile(item.dir, item.filename)}
                                                 >打开文件</Button>}
 
                                         </span>
-                                        {item.deleted ?
-                                            ""
-                                            : <span
-                                                className="file"
-                                                style={{
-                                                    justifyItems: "center",
-                                                    alignItems: "center"
-                                                }}
-                                            >
+                                        {item.status === status.Stopped && <span
+                                            className="file"
+                                            style={{
+                                                justifyItems: "center",
+                                                alignItems: "center"
+                                            }}
+                                        >
                                                 <Title text="打开文件夹">
                                                     <Button size="large" type="text" icon={<FolderOpenOutlined />}
-                                                        onClick={() => showFileInFolder(item.dir, item.filename)} />
+                                                            onClick={() => showFileInFolder(item.dir, item.filename)} />
                                                 </Title>
                                                 <Title text="删除文件">
                                                     <Button title={"删除文件"} size="large" type="text" icon={<DeleteOutlined />}
-                                                        onClick={() => deleteFile(item.fileId)} />
+                                                            onClick={() => deleteFile(item.exportID)} />
                                                 </Title>
                                             </span>}
 
@@ -414,40 +426,54 @@ const Update: React.FC = () => {
         </Modal></>
 }
 
-const Proxy: React.FC = () => {
-    const proxy = useSelector((state: RootState) => state.app.global.config?.Proxy)
+export const Proxy: React.FC = () => {
+    const dispatch = useDispatch()
+    const cfg = useSelector((state:RootState) => state.app.global.config)
+    const proxy = useSelector((state:RootState) => state.app.global.config.Proxy)
     const [url, setUrl] = useState<string>("")
     const [open, setOpen] = useState<boolean>(false)
+
     useEffect(() => {
-        setUrl(`${proxy?.type}://${proxy?.host}:${proxy?.port}`)
+        setUrl(`${proxy?.Type}://${proxy?.Host}:${proxy?.Port}`)
     }, [proxy])
+
+    const updateProxy = (p:config.Proxy) =>{
+        SaveProxy(p).then(() => {
+            const tt = { ...cfg, Proxy: p } as config.Config;
+            dispatch(appActions.setConfig(tt))
+        }).catch(
+            err => {
+                errorNotification("错误", err, 3)
+            }
+        )
+    }
 
     return <>
         <Popover
-            content={<ProxyComp />}
+            content={<ProxyComp proxy={proxy} update={updateProxy}/>}
             trigger={"click"}
             open={open}
             onOpenChange={(value) => setOpen(value)}
         >
             <Tooltip
                 // placement={platform === "win32" ? "bottom" : "bottomLeft"}
-                title={proxy?.enable ? "当前代理" : "代理已禁用"}
+                title={proxy?.Enable ? "当前代理" : "代理已禁用"}
             >
                 <Button
                     type="text"
                     style={{
                         borderRadius: "0",
                         height: "30px",
-                        width: !proxy?.enable ? "30px" : "auto",
+                        width: !proxy?.Enable ? "30px" : "auto",
                         transition: "0s",
                     }}
                     icon={
-                        <Space direction="horizontal" size={1}>
+                        <Flex gap={1}>
                             {
-                                proxy?.enable ?
+                                proxy?.Enable ?
                                     <>
                                         <span style={{ display: "flex", marginBottom: "5px" }}>
-                                            <SendOutlined rotate={315} style={{ color: proxy?.enable ? "red" : "" }} />
+                                            <SendOutlined rotate={315} style={{ color: proxy?.Enable ? "red" : "" }} />
                                         </span>
                                         {/* <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
                                             {url}
@@ -456,16 +482,16 @@ const Proxy: React.FC = () => {
                                     </>
                                     :
                                     <span style={{ display: "flex", marginBottom: "5px" }}>
-                                        <SendOutlined rotate={315} style={{ color: proxy?.enable ? "red" : "" }} />
+                                        <SendOutlined rotate={315} style={{ color: proxy?.Enable ? "red" : "" }} />
                                     </span>
                             }
-                        </Space>
+                        </Flex>
                     }
                     size="small"
                 >
 
                     {
-                        proxy?.enable &&
+                        proxy?.Enable &&
                         <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
                             {url}
                         </Tag>
@@ -483,7 +509,7 @@ const DownloadHistory: React.FC = () => {
     const event = useSelector((state: RootState) => state.app.global.event)
 
     useEffect(() => {
-        EventsOn(String(event?.hasNewDownloadItem), function () {
+        EventsOn(event.NewDownloadItem, function () {
             setOpen(true)
         })
     }, [])
@@ -539,7 +565,7 @@ const Bar: React.FC = () => {
                 setPlatform(result)
             }
         )
-        EventsOn(String(event?.windowSizeChange), (r) => {
+        EventsOn(event.WindowSizeChange, (r) => {
             if (r === 0 && f.current) {
                 setIsFullScreen(false)
                 f.current = false

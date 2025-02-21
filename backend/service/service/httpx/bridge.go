@@ -2,11 +2,10 @@ package httpx
 
 import (
 	"bufio"
-	"fine/backend/app"
-	"fine/backend/config"
-	"fine/backend/constant"
-	"fine/backend/logger"
-	"fine/backend/runtime"
+	"fine/backend/application"
+	"fine/backend/constant/event"
+	"fine/backend/constant/status"
+	"fine/backend/osoperation"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
@@ -19,10 +18,10 @@ import (
 )
 
 type Bridge struct {
-	app *app.App
+	app *application.Application
 }
 
-func NewHttpxBridge(app *app.App) *Bridge {
+func NewHttpxBridge(app *application.Application) *Bridge {
 	return &Bridge{
 		app: app,
 	}
@@ -38,19 +37,18 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 	}
 	file, err := os.CreateTemp("", "temp*.txt")
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return 0, err
 	}
-	_, err = file.WriteString(targets)
-	if err != nil {
-		logger.Info(err.Error())
+	if _, err = file.WriteString(targets); err != nil {
+		r.app.Logger.Error(err)
 		return 0, err
 	}
 	tmpFilename = file.Name()
 	file.Close()
 	args = strings.Fields(fmt.Sprintf("%s %s %s %s", path, flags, "-l", tmpFilename))
 	cmd := exec.Command(args[0], args[1:]...)
-	runtime.HideCmdWindow(cmd)
+	osoperation.HideCmdWindow(cmd)
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
 
@@ -60,55 +58,57 @@ func (r *Bridge) Run(path, flags, targets string) (int64, error) {
 	cache.Set(taskIDStr, cmd, 9999*time.Hour)
 
 	if err := cmd.Start(); err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return 0, err
 	}
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			constant.Emit(constant.Events.HttpxOutput, map[string]any{
-				"taskID": taskID,
-				"data":   string(scanner.Bytes()),
+			data := string(scanner.Bytes())
+			event.EmitV2(event.Httpx, event.EventDetail{
+				ID:     taskID,
+				Status: status.Running,
+				Data:   data,
 			})
 		}
 	}()
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			constant.Emit(constant.Events.HttpxOutput, map[string]any{
-				"taskID": taskID,
-				"data":   string(scanner.Bytes()),
+			data := string(scanner.Bytes())
+			event.Emit(event.Httpx, event.EventDetail{
+				ID:     taskID,
+				Status: status.Running, //此处不能用Error返回，httpx报版本过时也是stderr
+				Data:   data,
 			})
 		}
-
 	}()
 	go func() {
 		defer cache.Delete(taskIDStr)
-		err := cmd.Wait()
-		if err != nil {
-			logger.Info(err.Error())
+		if err := cmd.Wait(); err != nil {
+			r.app.Logger.Error(err)
 		}
-		constant.Emit(constant.Events.HttpxOutputDone, map[string]any{
-			"taskID": taskID,
-			"data":   "",
+		event.Emit(event.Httpx, event.EventDetail{
+			Status: status.Stopped,
+			ID:     taskID,
 		})
 		os.Remove(tmpFilename)
 	}()
 	return taskID, nil
 }
 
-func (r *Bridge) Stop(taskID int64) error {
-	taskIDStr := strconv.Itoa(int(taskID))
+func (r *Bridge) Stop(pageID int64) error {
+	taskIDStr := strconv.Itoa(int(pageID))
 	value, ok1 := cache.Get(taskIDStr)
 	if !ok1 {
-		logger.Info("无效taskID")
-		return errors.New("无效taskID")
+		msg := "无效taskID"
+		r.app.Logger.Error(msg)
+		return errors.New(msg)
 	}
 	if cmd, ok2 := value.(*exec.Cmd); ok2 {
 		if cmd != nil && cmd.Process != nil && (cmd.ProcessState == nil || !cmd.ProcessState.Exited()) {
-			err := runtime.KillProcess(cmd)
-			if err != nil {
-				logger.Info(err.Error())
+			if err := osoperation.KillProcess(cmd); err != nil {
+				r.app.Logger.Error(err)
 				return err
 			}
 		}
@@ -117,11 +117,10 @@ func (r *Bridge) Stop(taskID int64) error {
 }
 
 func (r *Bridge) SetConfig(path, flags string) error {
-	config.GlobalConfig.Httpx.Flags = flags
-	config.GlobalConfig.Httpx.Path = path
-	err := config.Save()
-	if err != nil {
-		logger.Info(err)
+	r.app.Config.Httpx.Flags = flags
+	r.app.Config.Httpx.Path = path
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		r.app.Logger.Error(err)
 		return err
 	}
 	return nil

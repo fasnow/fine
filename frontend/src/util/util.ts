@@ -2,6 +2,31 @@ import copyToClipboard from "copy-to-clipboard";
 import dayjs, {Dayjs} from "dayjs";
 import {message} from "antd";
 import {ColDef, GridApi} from "ag-grid-community";
+import duration from 'dayjs/plugin/duration';
+
+// 扩展 dayjs 以支持 duration 功能
+dayjs.extend(duration);
+
+export const formatTimeSpent = (seconds:number)=>{
+    const dur = dayjs.duration(seconds, 'seconds');
+    const hours = dur.hours();
+    const minutes = dur.minutes();
+    const remainingSeconds = dur.seconds();
+
+    let formattedTime = '';
+
+    if (hours > 0) {
+        formattedTime += `${hours}h`;
+    }
+    if (minutes > 0) {
+        formattedTime += `${minutes}m`;
+    }
+    if (remainingSeconds > 0 || (hours === 0 && minutes === 0)) {
+        formattedTime += `${remainingSeconds}s`;
+    }
+
+    return formattedTime;
+}
 
 export const getSortedData = <T>(api:GridApi | undefined): T[]=>{
     if(!api)return []

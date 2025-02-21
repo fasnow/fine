@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"embed"
-	_ "fine/backend" // 用于初始化，不可更改import先后顺序
-	"fine/backend/app"
-	"fine/backend/config"
-	"fine/backend/constant"
-	"fine/backend/database/repository"
-	"fine/backend/logger"
-	"fine/backend/runtime"
+	"fine/backend/task"
+
+	//_ "fine/backend" // 用于初始化，不可更改import先后顺序
+	"fine/backend/application"
+	"fine/backend/constant/event"
+	history2 "fine/backend/constant/history"
+	"fine/backend/constant/status"
+	"fine/backend/osoperation"
 	"fine/backend/service/service/aiqicha"
-	"fine/backend/service/service/domain2ip"
+	"fine/backend/service/service/exportlog"
 	"fine/backend/service/service/fofa"
 	"fine/backend/service/service/history"
 	"fine/backend/service/service/httpx"
@@ -21,49 +22,34 @@ import (
 	"fine/backend/service/service/quake"
 	"fine/backend/service/service/tianyancha"
 	"fine/backend/service/service/wechat"
-	"fine/backend/service/service/zone"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
-	runtime2 "runtime"
+	"runtime"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
+var mainApp *application.Application
+
 func main() {
 	defaultWidth := 1200
 	defaultHeight := 800
-	mainApp := app.NewApp()
+	mainApp = application.DefaultApp
+	taskManager := task.Manager{ICP: icp.NewICPBridge(mainApp)}
 	opts := &options.App{
 		Title:  "Fine",
 		Width:  defaultWidth,
 		Height: defaultHeight,
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {
-			if runtime2.GOOS == "windows" {
-				r, _ := wailsRuntime.MessageDialog(ctx, wailsRuntime.MessageDialogOptions{
-					Type:          wailsRuntime.QuestionDialog,
-					Title:         "退出",
-					Message:       "确认退出吗？",
-					Buttons:       []string{"确认", "取消"},
-					DefaultButton: "确认",
-					CancelButton:  "取消",
-				})
-				return r != "Yes"
-			}
-			r, _ := wailsRuntime.MessageDialog(ctx, wailsRuntime.MessageDialogOptions{
-				Type:          wailsRuntime.WarningDialog,
-				Title:         "确定退出吗？",
-				Buttons:       []string{"确认", "取消"},
-				DefaultButton: "确认",
-				CancelButton:  "取消",
-			})
-			return r == "取消"
+			event.EmitV2(event.AppExit, event.EventDetail{})
+			return true
 		},
-		Frameless: runtime2.GOOS != "darwin",
+		Frameless: runtime.GOOS != "darwin",
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
@@ -80,7 +66,7 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			mainApp.SetContext(ctx)
-			constant.SetContext(ctx)
+			event.SetContext(ctx)
 
 			//适配小屏
 			screens, _ := wailsRuntime.ScreenGetAll(ctx)
@@ -99,32 +85,30 @@ func main() {
 			}
 		},
 		Bind: []interface{}{
+			&status.StatusEnum{},
+			&history2.HistoryEnum{},
+			&status.StatusEnum{},
 			mainApp,
-			config.GlobalConfig,
-			constant.Events,
-			runtime.NewRuntime(mainApp),
-			runtime.NewPath(),
+			osoperation.NewRuntime(mainApp),
+			osoperation.NewPath(),
 			httpx.NewHttpxBridge(mainApp),
-			icp.NewICPBridge(mainApp),
+			taskManager.ICP,
 			ip138.NewIP138Bridge(mainApp),
 			fofa.NewFofaBridge(mainApp),
 			hunter.NewHunterBridge(mainApp),
 			quake.NewQuakeBridge(mainApp),
-			zone.NewZoneBridge(mainApp),
 			history.NewHistoryBridge(mainApp),
 			wechat.NewWechatBridge(mainApp),
-			repository.NewDownloadLogService(),
-			domain2ip.NewDomain2IPBridge(mainApp),
-			tianyancha.NewTianYanChaBridge(),
-			aiqicha.NewAiQiChaBridge(),
+			exportlog.NewExportLogBridge(mainApp),
+			tianyancha.NewTianYanChaBridge(mainApp),
+			aiqicha.NewAiQiChaBridge(mainApp),
+			&event.EventDetail{},
 		},
 		Debug: options.Debug{
 			OpenInspectorOnStartup: true,
 		},
 	}
 	if err := wails.Run(opts); err != nil {
-		logger.Info(err.Error())
-		println("Error:", err.Error())
+		mainApp.Logger.Info(err)
 	}
-
 }

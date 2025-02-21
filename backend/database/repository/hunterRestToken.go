@@ -14,7 +14,7 @@ func NewHunterResidualTokenDBService() *HunterRestTokenDBService {
 	return &HunterRestTokenDBService{dbConn: database.GetConnection()}
 }
 
-func (h *HunterRestTokenDBService) Add(total int) {
+func (h *HunterRestTokenDBService) Create(total int) {
 	h.dbConn.Create(&models.HunterRestToken{Total: total})
 }
 

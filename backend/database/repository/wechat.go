@@ -1,103 +1,96 @@
 package repository
 
 import (
-	"fine/backend/database"
+	"fine/backend/constant/status"
 	"fine/backend/database/models"
-	"fine/backend/service/model/wechat"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
-	"strings"
 )
 
-type WechatDBService struct {
-	dbConn *gorm.DB
+type WechatRepository interface {
+	CreateTask(task *models.MiniProgramDecompileTask) error
+	FindInfoByAppID(appid string) (*models.Info, error)
+	DeleteAllInfo() error
+	CreateInfo(info *models.Info) error
+	UpdateInfo(info *models.Info) error
+	AppendVersionByAppID(appid string, versions []*models.VersionDecompileTask) error
+	FindByAppId(appid string) (*models.MiniProgramDecompileTask, error)
+	DeleteAllVersionDecompileTask() error
+	FindVersionByAppIDAndVersionNum(appid, versionNum string) (*models.VersionDecompileTask, error)
+	UpdateVersion(version *models.VersionDecompileTask) error
+	RestVersionStatus() error
 }
 
-func NewWechatDBService() *WechatDBService {
-	return &WechatDBService{dbConn: database.GetConnection()}
+type WechatRepositoryImpl struct {
+	db *gorm.DB
 }
 
-func (r *WechatDBService) Insert(miniProgram wechat.MiniProgram) error {
-	item := &models.MiniProgram{
-		MiniProgram: wechat.MiniProgram{
-			AppID:    miniProgram.AppID,
-			Versions: miniProgram.Versions,
-		},
+func (r *WechatRepositoryImpl) FindVersionByAppIDAndVersionNum(appid, versionNum string) (*models.VersionDecompileTask, error) {
+	result := &models.VersionDecompileTask{}
+	if err := r.db.Model(&models.VersionDecompileTask{}).Where("app_id = ? AND number = ?", appid, versionNum).First(result).Error; err != nil {
+		return nil, err
 	}
-	return r.dbConn.Create(item).Error
+	return result, nil
 }
 
-func (r *WechatDBService) AppendVersionByAppID(appid string, version ...wechat.Version) error {
-	item := r.FindByAppId(appid)
-	if item.AppID != "" {
-		item.Versions = append(item.Versions, version...)
-	}
-	return r.dbConn.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&item).Error
-}
-
-func (r *WechatDBService) FindByAppId(appid string) models.MiniProgram {
-	result := models.MiniProgram{}
-	r.dbConn.Model(&models.MiniProgram{}).Where("app_id = ?", appid).Preload("Versions").Limit(1).Find(&result)
-	return result
-}
-
-func (r *WechatDBService) UpdateUnpackedStatus(appid, version string, unpacked bool) error {
-	item := r.FindByAppId(appid)
-	for i := 0; i < len(item.Versions); i++ {
-		if item.Versions[i].Number == version {
-			item.Versions[i].Unpacked = unpacked
-		}
-	}
-	if item.AppID != "" {
-		return r.dbConn.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&item).Error
+func (r *WechatRepositoryImpl) CreateTask(task *models.MiniProgramDecompileTask) error {
+	if err := r.db.Model(&models.MiniProgramDecompileTask{}).Create(task).Error; err != nil {
+		return err
 	}
 	return nil
 }
 
-func (r *WechatDBService) DeleteAll() error {
-	return r.dbConn.Select(clause.Associations).Where("1 = 1").Delete(&models.MiniProgram{}).Error
+func (r *WechatRepositoryImpl) UpdateVersion(version *models.VersionDecompileTask) error {
+	return r.db.Model(&models.VersionDecompileTask{}).Where("app_id = ? AND number = ?", version.AppID, version.Number).Updates(version).Error
 }
 
-func (r *WechatDBService) InsertMatchStringTask(item models.MatchedString) (uint, error) {
-	result := r.dbConn.Create(&item)
-	if result.Error != nil {
-		return 0, result.Error
+func (r *WechatRepositoryImpl) RestVersionStatus() error {
+	return r.db.Model(&models.VersionDecompileTask{}).Where(" decompile_status  = ? OR match_status  = ?", status.Running, status.Running).Update("decompile_status", status.Waiting).Update("match_status", status.Waiting).Error
+}
+
+func (r *WechatRepositoryImpl) AppendVersionByAppID(appid string, versions []*models.VersionDecompileTask) error {
+	return r.db.Create(versions).Error
+}
+
+func (r *WechatRepositoryImpl) FindByAppId(appid string) (*models.MiniProgramDecompileTask, error) {
+	result := &models.MiniProgramDecompileTask{}
+	if err := r.db.Model(&models.MiniProgramDecompileTask{}).Where("app_id = ?", appid).Preload("Versions").First(result).Error; err != nil {
+		return nil, err
 	}
-	return item.ID, nil
+	return result, nil
 }
 
-func (r *WechatDBService) FindMatchedString(appid, version string) models.MatchedString {
-	result := models.MatchedString{}
-	r.dbConn.Model(&models.MatchedString{}).Where("app_id = ? AND version = ?", appid, version).Limit(1).Order("id desc").Find(&result)
-	return result
-}
-
-func (r *WechatDBService) UpdateMatchStringTask(id uint, taskDown bool, matched []string) error {
-	result := models.MatchedString{}
-	result.TaskDown = taskDown
-	result.Matched = strings.Join(matched, "\n")
-	return r.dbConn.Model(&result).Where("id = ?", id).Updates(&result).Error
-}
-
-func (r *WechatDBService) InsertInfo(info models.Info) error {
-	result := &models.Info{}
-	r.dbConn.Model(&models.Info{}).Where("app_id = ?", info.AppID).Limit(1).Find(result)
-	if result.ID != 0 {
-		result.Info = info.Info
-		r.dbConn.Updates(result)
+func (r *WechatRepositoryImpl) DeleteAllVersionDecompileTask() error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		//if err := tx.Where("1 = 1").Delete(&models.MiniProgramDecompileTask{}).Error; err != nil {
+		//	return err
+		//}
+		if err := tx.Where("1 = 1").Delete(&models.VersionDecompileTask{}).Error; err != nil {
+			return err
+		}
 		return nil
-	}
-	return r.dbConn.Create(&info).Error
+	})
 }
 
-func (r *WechatDBService) FindInfoByAppID(appid string) (models.Info, error) {
-	result := models.Info{}
-	if err := r.dbConn.Model(&models.Info{}).Where("app_id = ?", appid).Limit(1).Find(&result).Error; err != nil {
+func (r *WechatRepositoryImpl) CreateInfo(info *models.Info) error {
+	return r.db.Create(info).Error
+}
+
+func (r *WechatRepositoryImpl) UpdateInfo(info *models.Info) error {
+	return r.db.Model(&models.Info{}).Where("app_id = ?", info.AppID).Updates(info).Error
+}
+
+func (r *WechatRepositoryImpl) FindInfoByAppID(appid string) (*models.Info, error) {
+	result := &models.Info{}
+	if err := r.db.Model(&models.Info{}).Where("app_id = ?", appid).First(result).Error; err != nil {
 		return result, err
 	}
 	return result, nil
 }
 
-func (r *WechatDBService) DeleteAllInfo() error {
-	return r.dbConn.Where("1 = 1").Delete(&models.Info{}).Error
+func (r *WechatRepositoryImpl) DeleteAllInfo() error {
+	return r.db.Where("1 = 1").Delete(&models.Info{}).Error
+}
+
+func NewWechatRepository(db *gorm.DB) WechatRepository {
+	return &WechatRepositoryImpl{db: db}
 }

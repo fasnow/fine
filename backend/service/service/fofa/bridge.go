@@ -1,129 +1,157 @@
 package fofa
 
 import (
-	"fine/backend/app"
-	"fine/backend/config"
-	"fine/backend/constant"
+	"fine/backend/application"
+	"fine/backend/constant/event"
+	"fine/backend/constant/history"
+	"fine/backend/constant/status"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/logger"
+	"fine/backend/service/model/exportlog"
 	"fine/backend/service/model/fofa"
 	service2 "fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/cenkalti/backoff/v4"
-	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
 	"time"
 )
 
 type Bridge struct {
-	app         *app.App
-	fofa        *Fofa
-	fofaRepo    repository.FofaRepository
-	downloadLog *repository.DownloadLogService
-	cacheTotal  *repository.CacheTotal
-	historyRepo repository.HistoryRepository
+	app           *application.Application
+	fofa          *Fofa
+	fofaRepo      repository.FofaRepository
+	exportLogRepo repository.ExportLogRepository
+	historyRepo   repository.HistoryRepository
+	cacheTotal    repository.CacheTotal
 }
 
-func NewFofaBridge(app *app.App) *Bridge {
-	tt := NewClient(config.GlobalConfig.Fofa.Token)
-	tt.UseProxyManager(config.ProxyManager)
+func NewFofaBridge(app *application.Application) *Bridge {
+	tt := NewClient(app.Config.Fofa.Token)
+	tt.UseProxyManager(app.ProxyManager)
+	db := database.GetConnection()
 	return &Bridge{
-		fofa:        tt,
-		fofaRepo:    repository.NewFofaRepository(database.GetConnection()),
-		downloadLog: repository.NewDownloadLogService(),
-		cacheTotal:  repository.NewCacheTotal(),
-		app:         app,
-		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
+		app:           app,
+		fofa:          tt,
+		fofaRepo:      repository.NewFofaRepository(db),
+		exportLogRepo: repository.NewExportLogRepository(db),
+		cacheTotal:    repository.NewCacheTotal(db),
+		historyRepo:   repository.NewHistoryRepository(db),
 	}
 }
 
 type QueryResult struct {
 	*Result
 	MaxPage int   `json:"maxPage"`
-	TaskID  int64 `json:"taskID"`
+	PageID  int64 `json:"pageID"`
 }
 
-func (r *Bridge) Query(taskID int64, query string, page, pageSize int64, fields string, full bool) (*QueryResult, error) {
+func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int64, fields string, full bool) (*QueryResult, error) {
+	r.app.Logger.WithFields(map[string]interface{}{
+		"pageID":   pageID,
+		"query":    query,
+		"pageNum":  pageNum,
+		"pageSize": pageSize,
+		"fields":   fields,
+		"full":     full,
+	}).Debug("传入参数")
+
 	queryResult := &QueryResult{
 		Result: &Result{},
 	}
 
 	//获取缓存
-	total, q := r.cacheTotal.GetByTaskID(taskID)
+	total, q := r.cacheTotal.GetByPageID(pageID)
 	if total != 0 {
-		cacheItems := r.fofaRepo.GetByTaskID(taskID)
+		cacheItems, err := r.fofaRepo.GetBulkByPageID(pageID)
+		if err != nil {
+			r.app.Logger.Error(err)
+			return nil, err
+		}
 		queryResult.Query = q
 		queryResult.Total = total
-		queryResult.PageNum = int(page)
+		queryResult.PageNum = int(pageNum)
 		queryResult.PageSize = int(pageSize)
-		queryResult.TaskID = taskID
+		queryResult.PageID = pageID
 		for _, cacheItem := range cacheItems {
 			queryResult.Items = append(queryResult.Items, cacheItem.Item)
 		}
 		return queryResult, nil
 	}
 
-	err := r.historyRepo.CreateHistory(&models.History{
+	if err := r.historyRepo.CreateHistory(&models.History{
 		Key:  query,
-		Type: constant.Histories.FOFA,
-	})
-	if err != nil {
-		logger.Info(err)
+		Type: history.FOFA,
+	}); err != nil {
+		r.app.Logger.Warn(err)
 	}
 
 	//获取新数据
 	req := NewGetDataReqBuilder().
 		Query(query).
-		Page(page).
+		Page(pageNum).
 		Size(pageSize).Fields(fields).Full(full).Build()
 	result, err := r.fofa.Get(req)
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil, err
 	}
+	tmpPageID := idgen.NextId()
 	if result.Total > 0 {
-		id := idgen.NextId()
-		if page == 1 {
+		if pageNum == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = r.fofaRepo.CreateQueryField(&models.FOFAQueryLog{
+			if err := r.fofaRepo.CreateQueryField(&models.FOFAQueryLog{
+				PageID: tmpPageID,
 				Query:  query,
 				Fields: fields,
 				Full:   full,
 				Total:  result.Total,
-			}, id)
+			}); err != nil {
+				r.app.Logger.Warn(err)
+			}
 		}
-		r.cacheTotal.Add(id, result.Total, query)
-		_ = r.fofaRepo.BatchInsert(id, result.Items)
-		queryResult.TaskID = id
+		r.cacheTotal.Add(tmpPageID, result.Total, query)
+		if err := r.fofaRepo.CreateBulk(tmpPageID, result.Items); err != nil {
+			r.app.Logger.Warn(err)
+		}
 	}
+	queryResult.PageID = tmpPageID
 	queryResult.Result = result
 	return queryResult, nil
 }
 
-func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
-	queryLog, err := r.fofaRepo.GetQueryFieldByTaskID(taskID)
+func (r *Bridge) Export(pageID int64, pageNum, pageSize int64) (int64, error) {
+	r.app.Logger.WithFields(map[string]interface{}{
+		"pageID":   pageID,
+		"pageNum":  pageNum,
+		"pageSize": pageSize,
+	}).Debug("传入参数")
+	queryLog, err := r.fofaRepo.GetQueryFieldByPageID(pageID)
 	if err != nil {
-		return errors.New("查询后再导出")
+		r.app.Logger.Error(err)
+		return 0, err
 	}
-	fileID := idgen.NextId()
-	dataDir := config.GlobalConfig.DataDir
+	r.app.Logger.Debug(queryLog)
 	filename := fmt.Sprintf("Fofa_%s.xlsx", utils.GenFilenameTimestamp())
-	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = r.downloadLog.Insert(models.DownloadLog{
-		Dir:      dataDir,
-		Filename: filename,
-		Deleted:  false,
-		Status:   0,
-	}, fileID)
-	exportDataTaskID := idgen.NextId()
-
+	dir := r.app.Config.ExportDataDir
+	exportID := idgen.NextId()
+	outputAbsFilepath := filepath.Join(dir, filename)
+	if err := r.exportLogRepo.Create(&models.ExportLog{
+		Item: exportlog.Item{
+			Dir:      dir,
+			Filename: filename,
+			Status:   status.Running,
+			ExportID: exportID,
+		},
+	}); err != nil {
+		r.app.Logger.Error(err)
+		return 0, err
+	}
 	go func() {
-		for index := int64(1); index <= page; index++ {
-			result, err := backoff.RetryWithData(func() (*Result, error) {
+		for index := int64(1); index <= pageNum; index++ {
+			result, err1 := backoff.RetryWithData(func() (*Result, error) {
 				req := NewGetDataReqBuilder().
 					Query(queryLog.Query).
 					Page(index).
@@ -131,45 +159,59 @@ func (r *Bridge) Export(taskID int64, page, pageSize int64) error {
 					Fields(queryLog.Fields).
 					Full(queryLog.Full).
 					Build()
-				result, err := r.fofa.Get(req)
-				if err != nil {
-					logger.Info(err.Error())
-					return nil, err // 触发重试
+				result, err2 := r.fofa.Get(req)
+				if err2 != nil {
+					r.app.Logger.Debug(err2)
+					return nil, err2 // 触发重试
 				}
 				return result, nil
-			}, service2.GetBackOffWithMaxRetries(10, config.GlobalConfig.Fofa.Interval, 1))
-			if err != nil {
-				logger.Info(err.Error())
+			}, service2.GetBackOffWithMaxRetries(10, r.app.Config.Fofa.Interval, 1))
+			if err1 != nil {
+				r.app.Logger.Error(err1)
 				break
+			} else {
+				if err2 := r.fofaRepo.CreateBulk(exportID, result.Items); err2 != nil {
+					r.app.Logger.Error(err2)
+				}
 			}
-			_ = r.fofaRepo.BatchInsert(exportDataTaskID, result.Items)
-			time.Sleep(config.GlobalConfig.Fofa.Interval)
+			time.Sleep(r.app.Config.Fofa.Interval)
 		}
-		cacheItems := r.fofaRepo.GetByTaskID(exportDataTaskID)
+		cacheItems, err2 := r.fofaRepo.GetBulkByPageID(exportID)
+		if err2 != nil {
+			r.app.Logger.Error(err2)
+			data := event.EventDetail{
+				ID:     exportID,
+				Status: status.Error,
+				Error:  err.Error(),
+			}
+			r.app.Logger.Error(err, data)
+			event.EmitNewExportItemEvent(event.FOFAExport, data)
+			return
+		}
 		exportItems := make([]*fofa.Item, 0)
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)
 		}
-		if err := r.fofa.Export(exportItems, outputAbsFilepath, queryLog.Fields); err != nil {
-			logger.Info(err.Error())
-			return
-		}
-		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNewFofaDownloadItem)
+		service2.SaveToExcel(nil, r.exportLogRepo, exportID, event.FOFAExport, r.app.Logger, func() error {
+			return r.fofa.Export(exportItems, outputAbsFilepath, queryLog.Fields)
+		})
 	}()
-	return nil
+	return exportID, nil
 }
 
 func (r *Bridge) GetUserInfo() (*User, error) {
 	user, err := r.fofa.User()
 	if err != nil {
+		r.app.Logger.Error(err)
 		return nil, err
 	}
 	return user, nil
 }
 
 func (r *Bridge) SetAuth(key string) error {
-	config.GlobalConfig.Fofa.Token = key
-	if err := config.Save(); err != nil {
+	r.app.Config.Fofa.Token = key
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		r.app.Logger.Error(err)
 		return err
 	}
 	r.fofa.SetAuth(key)
@@ -177,23 +219,21 @@ func (r *Bridge) SetAuth(key string) error {
 }
 
 func (r *Bridge) StatisticalAggs(fields, query string) (*StatisticalAggsResult, error) {
-	err := r.historyRepo.CreateHistory(&models.History{
+	if err := r.historyRepo.CreateHistory(&models.History{
 		Key:  query,
-		Type: constant.Histories.FOFA,
-	})
-	if err != nil {
-		logger.Info(err)
+		Type: history.FOFA,
+	}); err != nil {
+		r.app.Logger.Info(fields, query, err)
 	}
 	return r.fofa.StatisticalAggs.Fields(fields).Query(query)
 }
 
 func (r *Bridge) HostAggs(host string) (*HostAggsResult, error) {
-	err := r.historyRepo.CreateHistory(&models.History{
+	if err := r.historyRepo.CreateHistory(&models.History{
 		Key:  host,
-		Type: constant.Histories.FOFA,
-	})
-	if err != nil {
-		logger.Info(err)
+		Type: history.FOFA,
+	}); err != nil {
+		r.app.Logger.Info(host, err)
 	}
 	return r.fofa.HostAggs.Detail(true).Host(host)
 }

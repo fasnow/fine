@@ -2,17 +2,15 @@ package fofa
 
 import (
 	"encoding/json"
-	_ "fine/backend" // 用于初始化，不可更改import先后顺序
-	"fine/backend/app"
-	"fine/backend/config"
+	"fine/backend/application"
 	"fine/backend/proxy/v2"
 	"fmt"
 	"testing"
 )
 
 func TestFofa_Get(t *testing.T) {
-	b := NewFofaBridge(app.NewApp())
-	err := config.ProxyManager.SetProxy("http://127.0.0.1:8080")
+	b := NewFofaBridge(application.DefaultApp)
+	err := application.DefaultApp.ProxyManager.SetProxy("http://127.0.0.1:8080")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -24,7 +22,7 @@ func TestFofa_Get(t *testing.T) {
 	}
 	fmt.Println(userInfo)
 
-	err = config.ProxyManager.SetProxy("")
+	err = application.DefaultApp.ProxyManager.SetProxy("")
 	if err != nil {
 		fmt.Println(err)
 		return

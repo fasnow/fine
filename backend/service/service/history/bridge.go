@@ -1,30 +1,27 @@
 package history
 
 import (
-	"fine/backend/app"
-	"fine/backend/constant"
+	"fine/backend/application"
 	"fine/backend/database"
 	"fine/backend/database/repository"
-	"fine/backend/logger"
 )
 
 type Bridge struct {
-	app         *app.App
+	app         *application.Application
 	historyRepo repository.HistoryRepository
 }
 
-func NewHistoryBridge(app *app.App) *Bridge {
+func NewHistoryBridge(app *application.Application) *Bridge {
 	return &Bridge{
 		app:         app,
 		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
 	}
 }
 
-func (r *Bridge) FindByPartialKey(ht constant.HistoryType, key string) []string {
-	logger.Info(key)
+func (r *Bridge) FindByPartialKey(ht int, key string) []string {
 	items, err := r.historyRepo.FindByPartialKey(ht, key, 100)
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil
 	}
 	t := make([]string, 0)

@@ -30,6 +30,7 @@ import {GetRunningTaskNum} from "../wailsjs/go/icp/Bridge";
 import {css, cx} from "antd-style";
 import type { DraggableData, DraggableEvent } from 'react-draggable';
 import Draggable from "react-draggable";
+import AppIcon from "@/assets/images/appicon.png"
 
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
@@ -245,7 +246,7 @@ const App: React.FC = () => {
                       }
                       style={{padding:10}}
                 >
-                    <img style={{height:'70px'}} draggable={false} src={"/src/assets/images/appicon.png"} alt={""}/>
+                    <img style={{height:'70px'}} draggable={false} src={AppIcon} alt={""}/>
                     <span style={{fontWeight: 'bold', fontSize: '12px'}}>确定退出吗？</span>
                     <Flex justify={"space-between"} style={{width: '100%'}} gap={10}>
                         <Button size={"small"} style={{width: "100%"}} onClick={()=>setOpen(false)}>取消</Button>

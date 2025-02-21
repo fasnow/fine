@@ -203,57 +203,70 @@ const App: React.FC = () => {
             height: '100%',
             width: '100%',
         }}>
-            <Modal
-                footer={null}
-                closeIcon={false}
-                mask={false}
-                open={open}
-                styles={{
-                    content:{
-                        backgroundColor: 'rgba(255, 255, 255, 0)', /* 设置背景颜色和透明度 */
-                        padding: 0
-                    },
+            <ConfigProvider
+                theme={{
+                    components:{
+                        Modal:{
+                            motionDurationMid: '0',
+                            motionDurationSlow: '0',
+                            motionEaseInOutCirc: '',
+                            motionEaseOutCirc: ''
+                        }
+                    }
                 }}
-                style={{cursor: "default"}}
-                width={260}
-                modalRender={(modal) => (
-                    <Draggable
-                        disabled={disabled}
-                        bounds={bounds}
-                        nodeRef={draggleRef}
-                        onStart={(event, uiData) => onStart(event, uiData)}
-                    >
-                        <div
-                            style={{
-                                userSelect: 'none',
-                                width: '100%',
-                                height: '100%',
-                                borderRadius: '10px',
-                                boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
-                                backgroundColor: 'rgba(241, 241, 241,0.3)', /* 设置背景颜色和透明度 */
-                            }}
-                            className={cx(css`
+            >
+                <Modal
+                    footer={null}
+                    closeIcon={false}
+                    mask={false}
+                    open={open}
+                    styles={{
+                        content:{
+                            backgroundColor: 'rgba(255, 255, 255, 0)', /* 设置背景颜色和透明度 */
+                            padding: 0
+                        },
+                    }}
+                    style={{cursor: "default"}}
+                    width={260}
+                    modalRender={(modal) => (
+                        <Draggable
+                            disabled={disabled}
+                            bounds={bounds}
+                            nodeRef={draggleRef}
+                            onStart={(event, uiData) => onStart(event, uiData)}
+                        >
+                            <div
+                                style={{
+                                    userSelect: 'none',
+                                    width: '100%',
+                                    height: '100%',
+                                    borderRadius: '10px',
+                                    boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
+                                    backgroundColor: 'rgba(241, 241, 241,0.3)', /* 设置背景颜色和透明度 */
+                                }}
+                                className={cx(css`
                                 backdrop-filter: blur(20px); /*毛玻璃效果*/
                             `)}
-                            ref={draggleRef}>{modal}</div>
-                    </Draggable>
-                )}
-            >
-                <Flex align={"center"} justify={"center"} vertical gap={20}
-                      onMouseOver={() => {
-                          if (disabled) {
-                              setDisabled(false);}}
-                      }
-                      style={{padding:10}}
+                                ref={draggleRef}>{modal}</div>
+                        </Draggable>
+                    )}
                 >
-                    <img style={{height:'70px'}} draggable={false} src={AppIcon} alt={""}/>
-                    <span style={{fontWeight: 'bold', fontSize: '12px'}}>确定退出吗？</span>
-                    <Flex justify={"space-between"} style={{width: '100%'}} gap={10}>
-                        <Button size={"small"} style={{width: "100%"}} onClick={()=>setOpen(false)}>取消</Button>
-                        <Button size={"small"} style={{width: "100%"}} type={"primary"} onClick={()=>Exit()}>确认</Button>
+                    <Flex align={"center"} justify={"center"} vertical gap={20}
+                          onMouseOver={() => {
+                              if (disabled) {
+                                  setDisabled(false);}}
+                          }
+                          style={{padding:10}}
+                    >
+                        <img style={{height:'70px'}} draggable={false} src={AppIcon} alt={""}/>
+                        <span style={{fontWeight: 'bold', fontSize: '12px'}}>确定退出吗？</span>
+                        <Flex justify={"space-between"} style={{width: '100%'}} gap={10}>
+                            <Button size={"small"} style={{width: "100%"}} onClick={()=>setOpen(false)}>取消</Button>
+                            <Button size={"small"} style={{width: "100%"}} type={"primary"} onClick={()=>Exit()}>确认</Button>
+                        </Flex>
                     </Flex>
-                </Flex>
-            </Modal>
+                </Modal>
+            </ConfigProvider>
 
             {
                 loading ? <div style={{

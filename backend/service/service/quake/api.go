@@ -2,9 +2,7 @@ package quake
 
 import (
 	"errors"
-	"fine/backend/logger"
 	"fine/backend/service/model/quake"
-	"fine/backend/service/service"
 	"fine/backend/utils"
 	"github.com/buger/jsonparser"
 	"github.com/goccy/go-json"
@@ -15,10 +13,10 @@ import (
 )
 
 type RealtimeServiceDataResult struct {
-	Items    []quake.RealtimeServiceItem `json:"items"` //用指针wails会无法生成正确的映射
-	PageNum  int                         `json:"pageNum"`
-	PageSize int                         `json:"pageSize"`
-	Total    int64                       `json:"total"`
+	Items    []*quake.RealtimeServiceItem `json:"items"`
+	PageNum  int                          `json:"pageNum"`
+	PageSize int                          `json:"pageSize"`
+	Total    int64                        `json:"total"`
 }
 
 //type Component struct {
@@ -92,18 +90,15 @@ func (r *realtimeService) Service(req *GetRealtimeDataReq) (*RealtimeServiceData
 	postData := strings.NewReader(string(postOptions))
 	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApi, postData)
 	if err != nil {
-		logger.Info(err.Error())
 		return nil, err
 	}
 	byteData, page, size, total, err := r.client.parser(request)
 	if err != nil {
-		logger.Info(err.Error())
 		return nil, err
 	}
-	var resultItems []quake.RealtimeServiceItem
+	var resultItems []*quake.RealtimeServiceItem
 	err = json.Unmarshal(byteData, &resultItems)
 	if err != nil {
-		logger.Info(err.Error())
 		return nil, err
 	}
 	result := &RealtimeServiceDataResult{
@@ -113,7 +108,7 @@ func (r *realtimeService) Service(req *GetRealtimeDataReq) (*RealtimeServiceData
 		Total:    total,
 	}
 	if result.Items == nil {
-		result.Items = make([]quake.RealtimeServiceItem, 0)
+		result.Items = make([]*quake.RealtimeServiceItem, 0)
 	}
 	return result, nil
 }
@@ -237,12 +232,12 @@ func (r *Quake) parser(request *http.Request) ([]byte, int, int, int64, error) {
 	}
 	tmpCode, valueType, _, err := jsonparser.Get(body, "code")
 	if err != nil {
-		return nil, 0, 0, 0, service.UnexpectedStructureError
+		return nil, 0, 0, 0, UnexpectedStructureError
 	}
 	if valueType == jsonparser.String {
 		message, err := jsonparser.GetString(body, "message")
 		if err != nil {
-			return nil, 0, 0, 0, service.UnexpectedStructureError
+			return nil, 0, 0, 0, UnexpectedStructureError
 		}
 		return nil, 0, 0, 0, errors.New(message)
 	}
@@ -250,13 +245,13 @@ func (r *Quake) parser(request *http.Request) ([]byte, int, int, int64, error) {
 	if code != 0 {
 		message, err := jsonparser.GetString(body, "message")
 		if err != nil {
-			return nil, 0, 0, 0, service.UnexpectedStructureError
+			return nil, 0, 0, 0, UnexpectedStructureError
 		}
 		return nil, 0, 0, 0, errors.New(message)
 	}
 	tmpData, _, _, err := jsonparser.Get(body, "data")
 	if err != nil {
-		return nil, 0, 0, 0, service.UnexpectedStructureError
+		return nil, 0, 0, 0, UnexpectedStructureError
 	}
 	total, _ := jsonparser.GetInt(body, "meta", "pagination", "total")
 	page, _ := jsonparser.GetInt(body, "meta", "pagination", "page_index")
@@ -309,7 +304,7 @@ func (f *faviconSimilarityData) Get(faviconHash string, similar float64, size in
 	}
 	code, err := jsonparser.GetInt(body, "Code")
 	if err != nil && err.Error() == "Key path not found" {
-		return nil, errors.New("quake query failed:" + service.UnexpectedResponse)
+		return nil, errors.New("quake query failed:" + UnexpectedResponse)
 	}
 	message, _ := jsonparser.GetString(body, "message")
 	if err != nil || code != 0 {
@@ -395,7 +390,7 @@ func (f *filterField) parser(fieldType QueryType) ([]*string, error) {
 		req, _ = http.NewRequest("GET", QuakeAggregationHostDataApiUrl, nil)
 		break
 	default:
-		return nil, service.UnexpectedFieldTypeError
+		return nil, UnexpectedFieldTypeError
 	}
 	body, _, _, _, err := f.client.parser(req)
 	if err != nil {
@@ -483,15 +478,15 @@ func (r *Quake) User() (*User, error) {
 		} `json:"meta"`
 	}
 	err = json.Unmarshal(body, &tmpResponse)
-	if err != nil && err.Error() == service.WrongJsonFormat {
-		return nil, errors.New(service.QuakeUnexpectedJsonResponse)
+	if err != nil && err.Error() == WrongJsonFormat {
+		return nil, errors.New(QuakeUnexpectedJsonResponse)
 	} else if err != nil {
-		return nil, errors.New(service.QuakeUnexpectedJsonResponseOfUser)
+		return nil, errors.New(QuakeUnexpectedJsonResponseOfUser)
 	}
 	return &tmpResponse.User, nil
 }
 
-func (r *Quake) Export(items []quake.RealtimeServiceItem, filename string) error {
+func (r *Quake) Export(items []*quake.RealtimeServiceItem, filename string) error {
 	var headers = []any{"ID", "IP", "域名", "主机", "端口", "协议", "响应码", "网页标题", "组件", "网站路径", "中间件", "证书", "操作系统", "运营商", "地理位置", "场景", "自治域", "自治域编号", "更新时间"}
 	var data = [][]any{headers}
 	for i, item := range items {
@@ -576,8 +571,8 @@ func (r *Quake) send(request *http.Request) ([]byte, error) {
 	if response.StatusCode != 200 {
 		return nil, errors.New(strconv.Itoa(response.StatusCode))
 	}
-	if string(body) == service.QuakeUnauthorized {
-		return nil, errors.New(service.QuakeInvalidKey)
+	if string(body) == QuakeUnauthorized {
+		return nil, errors.New(QuakeInvalidKey)
 	}
 	return body, nil
 }

@@ -34,13 +34,12 @@ import PointBuy from "@/assets/images/point-buy.svg"
 import PointFree from "@/assets/images/point-free.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
-import { config, fofa } from "../../wailsjs/go/models";
+import {config, event, fofa} from "../../wailsjs/go/models";
 import { Export, GetUserInfo, Query, SetAuth } from "../../wailsjs/go/fofa/Bridge";
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import { Dots } from "@/component/Icon";
 import MurmurHash3 from "murmurhash3js"
 import { Buffer } from "buffer"
-import { Fetch } from "../../wailsjs/go/app/App";
 import { toUint8Array } from "js-base64";
 import {copy, getAllDisplayedColumnKeys, getAllDisplayedColumnKeysNoIndex, getSortedData} from "@/util/util";
 import { WithIndex } from "@/component/Interface";
@@ -61,6 +60,7 @@ import {
 } from "ag-grid-community";
 import FofaStatisticalAggregation, {FofaStatisticalAggsRef} from "@/pages/FofaStatisticalAggregation";
 import FofaHostAggs, {FofaHostAggsRef} from "@/pages/FofaHostAggregation";
+import {Fetch} from "../../wailsjs/go/application/Application";
 
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
@@ -70,14 +70,14 @@ const AuthSetting: React.FC = () => {
     const [key, setKey] = useState("")
 
     useEffect(() => {
-        setKey(cfg.Fofa.token)
+        setKey(cfg.Fofa.Token)
     }, [cfg.Fofa])
 
 
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, Fofa: { ...cfg.Fofa, token: key } } as config.Config;
+                const t = { ...cfg, Fofa: { ...cfg.Fofa, Token: key } } as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -85,7 +85,7 @@ const AuthSetting: React.FC = () => {
         ).catch(
             err => {
                 errorNotification("错误", err)
-                setKey(cfg.Fofa.token)
+                setKey(cfg.Fofa.Token)
             }
         )
     }
@@ -93,7 +93,7 @@ const AuthSetting: React.FC = () => {
     const cancel = () => {
         setEditable(false);
         setOpen(false)
-        setKey(cfg.Fofa.token)
+        setKey(cfg.Fofa.Token)
     }
 
     return <>
@@ -110,7 +110,6 @@ const AuthSetting: React.FC = () => {
             closeIcon={null}
             width={420}
             destroyOnClose
-            getContainer={false}
         >
             <Flex vertical gap={10}>
                 <Input.Password value={key} placeholder="token" onChange={
@@ -203,7 +202,7 @@ const UserPanel = () => {
 
 const ExportDataPanel = (props: { id: number; total: number; currentPageSize: number, }) => {
     const user = useSelector((state: RootState) => state.user.fofa)
-    const [page, setPage] = useState<number>(0)
+    const [pageNum, setPageNum] = useState<number>(0)
     const [pageSize, setPageSize] = useState<number>(props.currentPageSize)
     const [status, setStatus] = useState<"" | "error" | "warning">("")
     const [isExporting, setIsExporting] = useState<boolean>(false)
@@ -212,28 +211,37 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
     const [disable, setDisable] = useState<boolean>(false)
     const dispatch = useDispatch()
     const event = useSelector((state: RootState) => state.app.global.event)
+    const stat = useSelector((state: RootState) => state.app.global.status)
+    const exportID = useRef(0)
 
     useEffect(() => {
-        EventsOn(String(event?.hasNewFofaDownloadItem), () => {
-            updateRestToken()
-            setIsExporting(false)
-            setDisable(false)
+        EventsOn(event.FOFAExport, (eventDetail:any) => {
+            if (eventDetail.ID !== exportID.current){
+                return
+            }
+            if (eventDetail.Status === stat.Stopped){
+                setIsExporting(false)
+                setDisable(false)
+                updateRestToken()
+            } else if (eventDetail.Status === stat.Error){
+                errorNotification("错误",eventDetail.Error)
+            }
         })
     }, []);
 
     useEffect(() => {
         const maxPage = Math.ceil(props.total / pageSize)
         setMaxPage(maxPage)
-        if (page > maxPage) {
-            setPage(maxPage)
+        if (pageNum > maxPage) {
+            setPageNum(maxPage)
         }
     }, [pageSize, props.total])
 
     useEffect(() => {
-        if (page > maxPage) {
-            setPage(maxPage)
+        if (pageNum > maxPage) {
+            setPageNum(maxPage)
         }
-    }, [page])
+    }, [pageNum])
 
     const updateRestToken = () => {
         GetUserInfo().then(
@@ -253,13 +261,14 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
             return
         }
         setDisable(true)
-        Export(Number(props.id), page, pageSize).catch(
-            err => {
-                errorNotification("导出结果", err)
-                setIsExporting(false)
-                setDisable(false)
-            }
-        )
+        Export(props.id, page, pageSize)
+            .then(r=>exportID.current = r)
+            .catch(
+                err => {
+                    errorNotification("导出结果", err)
+                    setIsExporting(false)
+                    setDisable(false)
+                })
     }
 
     return <>
@@ -276,14 +285,14 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
             title="导出结果"
             open={exportable}
             onOk={async () => {
-                if ((maxPage === 0) || (maxPage > 0 && (maxPage < page || page <= 0))) {
+                if ((maxPage === 0) || (maxPage > 0 && (maxPage < pageNum || pageNum <= 0))) {
                     setStatus("error")
                     return
                 } else {
                     setStatus("")
                 }
                 setExportable(false)
-                exportData(page)
+                exportData(pageNum)
             }}
             onCancel={() => {
                 setExportable(false);
@@ -314,13 +323,13 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
                         <InputNumber
                             status={status}
                             min={0}
-                            value={page}
+                            value={pageNum}
                             onChange={(value: number | null) => {
                                 if (value != null) {
                                     if (value > maxPage) {
-                                        setPage(maxPage)
+                                        setPageNum(maxPage)
                                     } else {
-                                        setPage(value)
+                                        setPageNum(value)
                                     }
                                 }
                             }}
@@ -359,7 +368,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const [faviconUrl, setFaviconUrl] = useState("");
     const [searchType, setSearchType] = useState<"普通搜索"|"统计聚合"|"Host聚合">("普通搜索")
     const dispatch = useDispatch()
-    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.assets)
+    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.Assets)
     const history = useSelector((state: RootState) => state.app.global.history)
     const [pageData, setPageData] = useState<PageDataType[]>([]);
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
@@ -440,7 +449,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const gridRef = useRef<AgGridReact>(null)
     const ipCache = useRef(null)
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams):any => {
-        if(!pageData || pageData.length === 0)return []
+        if(!pageData || pageData.length === 0 || !params.node)return []
         return [
             {
                 name: "浏览器打开URL",
@@ -572,7 +581,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 setPageData(result.items.map(item => ({ index: ++index, ...item })))
                 setTotal(result.total)
                 setLoading(false)
-                pageIDMap.current[1] = result.taskID
+                pageIDMap.current[1] = result.pageID
             }
         ).catch(
             err => {
@@ -603,7 +612,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     setPageData(result.items.map(item => ({ index: ++index, ...item })))
                     setCurrentPage(newPage)
                     setLoading(false)
-                    pageIDMap.current[newPage] = result.taskID
+                    pageIDMap.current[newPage] = result.pageID
                 }
             ).catch(
                 err => {
@@ -787,7 +796,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                         fetch: async (v) => {
                             try {
                                 // @ts-ignore
-                                const response = await FindByPartialKey(history.fofa, !v ? "" : v.toString());
+                                const response = await FindByPartialKey(history.FOFA, !v ? "" : v.toString());
                                 const a: ItemType<string>[] = response?.map(item => {
                                     const t: ItemType<string> = {
                                         value: item,
@@ -816,8 +825,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         </Flex>
         <div style={{display: searchType === "统计聚合" ? 'block' : 'none', width: "100%", height: "100%"}}><FofaStatisticalAggregation ref={statisticalAggsRef}/></div>
         <div style={{display: searchType === "Host聚合" ? 'block' : 'none', width: "100%", height: "100%"}}><FofaHostAggs ref={hostAggsRef}/></div>
-        <div style={{display: searchType === "普通搜索"?'block':"none", width: "100%", height: "100%"}}><>
-            <div style={{ width: "100%", height: "100%"}}>
+        <div style={{display: searchType === "普通搜索"?'block':"none", width: "100%", height: "100%"}}>
+            <Flex vertical style={{width: "100%", height: "100%"}}>
                 <AgGridReact
                     ref={gridRef}
                     loading={loading}
@@ -833,9 +842,10 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     loadingOverlayComponent={() => <Loading />}
                     cellSelection={true}
                 />
-            </div>
-            {footer}
-        </></div>
+                {footer}
+            </Flex>
+        </div>
+
     </Flex>
 }
 

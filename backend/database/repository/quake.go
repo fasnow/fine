@@ -8,10 +8,10 @@ import (
 )
 
 type QuakeRepository interface {
-	CreateBulk(taskID int64, items []quakeModel.RealtimeServiceItem) error
-	GetBulkByTaskID(taskID int64) ([]*models.Quake, error)
-	CreateQueryField(item *models.QuakeRealtimeQueryLog, taskID int64) error
-	GetQueryFieldByTaskID(taskID int64) (*models.QuakeRealtimeQueryLog, error)
+	CreateBulk(pageID int64, items []*quakeModel.RealtimeServiceItem) error
+	GetBulkByPageID(pageID int64) ([]*models.Quake, error)
+	CreateQueryField(item *models.QuakeRealtimeQueryLog, pageID int64) error
+	GetQueryFieldByTaskID(pageID int64) (*models.QuakeRealtimeQueryLog, error)
 }
 
 type QuakeRepositoryImpl struct {
@@ -24,12 +24,13 @@ func NewQuakeRepository(db *gorm.DB) QuakeRepository {
 	}
 }
 
-func (r *QuakeRepositoryImpl) CreateBulk(taskID int64, items []quakeModel.RealtimeServiceItem) error {
+func (r *QuakeRepositoryImpl) CreateBulk(pageID int64, items []*quakeModel.RealtimeServiceItem) error {
 	dbItems := make([]*models.Quake, 0)
 	for _, item := range items {
+		tmp := item
 		dbItems = append(dbItems, &models.Quake{
-			RealtimeServiceItem: &item,
-			TaskID:              taskID,
+			RealtimeServiceItem: tmp,
+			PageID:              pageID,
 		})
 	}
 
@@ -40,25 +41,25 @@ func (r *QuakeRepositoryImpl) CreateBulk(taskID int64, items []quakeModel.Realti
 	return nil
 }
 
-func (r *QuakeRepositoryImpl) GetBulkByTaskID(taskID int64) ([]*models.Quake, error) {
+func (r *QuakeRepositoryImpl) GetBulkByPageID(pageID int64) ([]*models.Quake, error) {
 	items := make([]*models.Quake, 0)
-	if err := r.db.Preload("Service").Preload(clause.Associations).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+	if err := r.db.Preload("Service").Preload(clause.Associations).Where("page_id = ?", pageID).Find(&items).Error; err != nil {
 		return items, err
 	}
 	return items, nil
 }
 
-func (r *QuakeRepositoryImpl) CreateQueryField(item *models.QuakeRealtimeQueryLog, taskID int64) error {
-	item.TaskID = taskID
+func (r *QuakeRepositoryImpl) CreateQueryField(item *models.QuakeRealtimeQueryLog, pageID int64) error {
+	item.PageID = pageID
 	if err := r.db.Create(item).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *QuakeRepositoryImpl) GetQueryFieldByTaskID(taskID int64) (*models.QuakeRealtimeQueryLog, error) {
+func (r *QuakeRepositoryImpl) GetQueryFieldByTaskID(pageID int64) (*models.QuakeRealtimeQueryLog, error) {
 	item := &models.QuakeRealtimeQueryLog{}
-	if err := r.db.Where("task_id = ?", taskID).Find(item).Error; err != nil {
+	if err := r.db.Where("page_id = ?", pageID).Find(item).Error; err != nil {
 		return nil, err
 	}
 	return item, nil

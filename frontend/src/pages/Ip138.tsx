@@ -31,7 +31,7 @@ const TabContent: React.FC = () => {
     const [wornning, setWarnnig] = useState<string>("")
     const running = useRef<boolean>(false)
     const interval = useRef<number>(1000)
-    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.ip138)
+    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.IP138)
 
     function isIPAddress(input: string): boolean {
         // IPv4 正则表达式

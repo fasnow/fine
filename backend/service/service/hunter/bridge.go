@@ -1,19 +1,19 @@
 package hunter
 
 import (
-	"fine/backend/app"
-	"fine/backend/config"
-	"fine/backend/constant"
+	"fine/backend/application"
+	"fine/backend/constant/event"
+	"fine/backend/constant/history"
+	"fine/backend/constant/status"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/logger"
+	"fine/backend/service/model/exportlog"
 	"fine/backend/service/model/hunter"
 	service2 "fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/cenkalti/backoff/v4"
-	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
 	"strings"
@@ -21,33 +21,34 @@ import (
 )
 
 type Bridge struct {
-	app         *app.App
-	hunter      *Hunter
-	hunterRepo  repository.HunterRepository
-	downloadLog *repository.DownloadLogService
-	token       *repository.HunterRestTokenDBService
-	cacheTotal  *repository.CacheTotal
-	historyRepo repository.HistoryRepository
+	app           *application.Application
+	hunter        *Hunter
+	token         *repository.HunterRestTokenDBService
+	cacheTotal    repository.CacheTotal
+	hunterRepo    repository.HunterRepository
+	exportLogRepo repository.ExportLogRepository
+	historyRepo   repository.HistoryRepository
 }
 
-func NewHunterBridge(app *app.App) *Bridge {
-	tt := NewClient(config.GlobalConfig.Hunter.Token)
-	tt.UseProxyManager(config.ProxyManager)
+func NewHunterBridge(app *application.Application) *Bridge {
+	tt := NewClient(app.Config.Hunter.Token)
+	tt.UseProxyManager(app.ProxyManager)
+	db := database.GetConnection()
 	return &Bridge{
-		hunter:      tt,
-		hunterRepo:  repository.NewHunterRepository(database.GetConnection()),
-		downloadLog: repository.NewDownloadLogService(),
-		token:       repository.NewHunterResidualTokenDBService(),
-		cacheTotal:  repository.NewCacheTotal(),
-		app:         app,
-		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
+		app:           app,
+		hunter:        tt,
+		token:         repository.NewHunterResidualTokenDBService(),
+		cacheTotal:    repository.NewCacheTotal(db),
+		hunterRepo:    repository.NewHunterRepository(db),
+		exportLogRepo: repository.NewExportLogRepository(db),
+		historyRepo:   repository.NewHistoryRepository(db),
 	}
 }
 
 type QueryResult struct {
 	*Result
 	MaxPage int   `json:"maxPage"`
-	TaskID  int64 `json:"taskID"`
+	PageID  int64 `json:"pageID"`
 }
 
 type QueryOptions struct {
@@ -61,22 +62,34 @@ type QueryOptions struct {
 	PortFilter bool   `json:"portFilter"`
 }
 
-func (r *Bridge) Query(taskID int64, query string, page, pageSize int, startTime, endTime string, isWeb int, statusCode string, portFilter bool) (*QueryResult, error) {
+func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int, startTime, endTime string, isWeb int, statusCode string, portFilter bool) (*QueryResult, error) {
+	r.app.Logger.WithFields(map[string]interface{}{
+		"pageID":     pageID,
+		"query":      query,
+		"pageNum":    pageNum,
+		"pageSize":   pageSize,
+		"startTime":  startTime,
+		"endTime":    endTime,
+		"isWeb":      isWeb,
+		"statusCode": statusCode,
+		"portFilter": portFilter,
+	}).Debug("传入参数")
+
 	queryResult := &QueryResult{
 		Result: &Result{},
 	}
 
 	//获取缓存
-	total, _ := r.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByPageID(pageID)
 	if total != 0 {
-		cacheItems, err := r.hunterRepo.GetBulkByTaskID(taskID)
+		cacheItems, err := r.hunterRepo.GetBulkByPageID(pageID)
 		if err != nil {
-			logger.Info(err.Error())
+			r.app.Logger.Error(err)
 			return nil, err
 		}
 		queryResult.Total = total
-		queryResult.PageNum = page
-		queryResult.TaskID = taskID
+		queryResult.PageNum = pageNum
+		queryResult.PageID = pageID
 		queryResult.RestQuota = r.token.GetLast() //从数据库获取剩余积分
 		for _, cacheItem := range cacheItems {
 			queryResult.Items = append(queryResult.Items, cacheItem.Item)
@@ -84,18 +97,17 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		return queryResult, nil
 	}
 
-	err := r.historyRepo.CreateHistory(&models.History{
+	if err := r.historyRepo.CreateHistory(&models.History{
 		Key:  query,
-		Type: constant.Histories.Hunter,
-	})
-	if err != nil {
-		logger.Info(err)
+		Type: history.Hunter,
+	}); err != nil {
+		r.app.Logger.Warn(err)
 	}
 
 	//获取新数据
 	req := NewGetDataReqBuilder().
 		Query(query).
-		Page(page).
+		Page(pageNum).
 		Size(pageSize).
 		StartTime(startTime).
 		EndTime(endTime).
@@ -104,30 +116,31 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		PortFilter(portFilter).Build()
 	result, err := r.hunter.Get(req)
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil, err
 	}
-	r.token.Add(result.RestQuota) //剩余积分添加到数据库记录
+	r.token.Create(result.RestQuota) //剩余积分添加到数据库记录
+	tmpPageID := idgen.NextId()
 	if result.Total > 0 {
 		// 缓存查询成功的条件，用于导出
-		id := idgen.NextId()
-		if page == 1 {
+		if pageNum == 1 {
 			_ = r.hunterRepo.CreateQueryField(&models.HunterQueryLog{
-				BaseModel:  models.BaseModel{},
+				PageID:     tmpPageID,
 				Query:      query,
 				StartTime:  startTime,
 				EndTime:    endTime,
-				Page:       page,
+				PageNum:    pageNum,
 				PageSize:   pageSize,
 				IsWeb:      isWeb,
 				StatusCode: statusCode,
 				PortFilter: portFilter,
 				Total:      result.Total,
-			}, id)
+			})
 		}
-		r.cacheTotal.Add(id, result.Total, query)
-		_ = r.hunterRepo.CreateBulk(id, result.Items)
-		queryResult.TaskID = id
+		r.cacheTotal.Add(tmpPageID, result.Total, query)
+		if err := r.hunterRepo.CreateBulk(tmpPageID, result.Items); err != nil {
+			r.app.Logger.Warn(err)
+		}
 	}
 	for i := 0; i < len(result.Items); i++ {
 		var location []string
@@ -143,30 +156,41 @@ func (r *Bridge) Query(taskID int64, query string, page, pageSize int, startTime
 		}
 		(*item).City = strings.Join(location, " ")
 	}
+	queryResult.PageID = tmpPageID
 	queryResult.Result = result
 	return queryResult, nil
 }
 
-func (r *Bridge) Export(taskID, page, pageSize int64) error {
-	queryLog, err := r.hunterRepo.GetQueryFieldByTaskID(taskID)
+func (r *Bridge) Export(pageID, pageNum, pageSize int64) (int64, error) {
+	r.app.Logger.WithFields(map[string]interface{}{
+		"pageID":   pageID,
+		"pageNum":  pageNum,
+		"pageSize": pageSize,
+	}).Debug("传入参数")
+	queryLog, err := r.hunterRepo.GetQueryFieldByTaskID(pageID)
 	if err != nil {
-		logger.Info(err.Error())
-		return errors.New("查询后再导出")
+		r.app.Logger.Error(err)
+		return 0, err
 	}
-	fileID := idgen.NextId()
-	dataDir := config.GlobalConfig.DataDir
+	r.app.Logger.Debug(queryLog)
 	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenFilenameTimestamp())
-	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = r.downloadLog.Insert(models.DownloadLog{
-		Dir:      dataDir,
-		Filename: filename,
-		Deleted:  false,
-		Status:   0,
-	}, fileID)
+	dir := r.app.Config.ExportDataDir
+	exportID := idgen.NextId()
+	outputAbsFilepath := filepath.Join(dir, filename)
+	if err := r.exportLogRepo.Create(&models.ExportLog{
+		Item: exportlog.Item{
+			Dir:      dir,
+			Filename: filename,
+			Status:   status.Running,
+			ExportID: exportID,
+		},
+	}); err != nil {
+		r.app.Logger.Error(err)
+		return 0, err
+	}
 	go func() {
-		exportDataTaskID := idgen.NextId()
-		for index := int64(1); index <= page; index++ {
-			result, err := backoff.RetryWithData(func() (*Result, error) {
+		for index := int64(1); index <= pageNum; index++ {
+			result, err1 := backoff.RetryWithData(func() (*Result, error) {
 				req := NewGetDataReqBuilder().
 					Query(queryLog.Query).
 					Page(int(index)).
@@ -176,40 +200,49 @@ func (r *Bridge) Export(taskID, page, pageSize int64) error {
 					StatusCode(queryLog.StatusCode).
 					IsWeb(queryLog.IsWeb).
 					PortFilter(queryLog.PortFilter).Build()
-				result, err := r.hunter.Get(req)
-				if err != nil {
-					logger.Info(err.Error())
-					return nil, err
+				result, err2 := r.hunter.Get(req)
+				if err2 != nil {
+					r.app.Logger.Error(err2)
+					return nil, err2
 				}
 				return result, nil
-			}, service2.GetBackOffWithMaxRetries(10, config.GlobalConfig.Hunter.Interval, 1))
-			if err != nil {
-				logger.Info(err.Error())
-				break
+			}, service2.GetBackOffWithMaxRetries(10, r.app.Config.Hunter.Interval, 1))
+			if err1 != nil {
+				r.app.Logger.Error(err1)
+			} else {
+				if err2 := r.hunterRepo.CreateBulk(exportID, result.Items); err2 != nil {
+					r.app.Logger.Error(err2)
+				}
+				r.token.Create(result.RestQuota) //剩余积分添加到数据库记录
 			}
-			_ = r.hunterRepo.CreateBulk(exportDataTaskID, result.Items)
-			r.token.Add(result.RestQuota) //剩余积分添加到数据库记录
-			time.Sleep(config.GlobalConfig.Hunter.Interval)
+			time.Sleep(r.app.Config.Hunter.Interval)
 		}
-		cacheItems, err := r.hunterRepo.GetBulkByTaskID(exportDataTaskID)
-		if err != nil {
+		cacheItems, err2 := r.hunterRepo.GetBulkByPageID(exportID)
+		if err2 != nil {
+			r.app.Logger.Error(err2)
+			data := event.EventDetail{
+				ID:     exportID,
+				Status: status.Error,
+				Error:  err.Error(),
+			}
+			r.app.Logger.Info(err, data)
+			event.EmitNewExportItemEvent(event.HunterExport, data)
 			return
 		}
 		exportItems := make([]*hunter.Item, 0)
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)
 		}
-		if err := r.hunter.Export(exportItems, outputAbsFilepath); err != nil {
-			return
-		}
-		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNewHunterDownloadItem)
+		service2.SaveToExcel(nil, r.exportLogRepo, exportID, event.HunterExport, r.app.Logger, func() error {
+			return r.hunter.Export(exportItems, outputAbsFilepath)
+		})
 	}()
-	return nil
+	return exportID, nil
 }
 
 func (r *Bridge) SetAuth(key string) error {
-	config.GlobalConfig.Hunter.Token = key
-	if err := config.Save(); err != nil {
+	r.app.Config.Hunter.Token = key
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
 		return err
 
 	}

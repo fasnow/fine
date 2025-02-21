@@ -2,6 +2,7 @@ package domain2ip
 
 import (
 	"encoding/json"
+	"fine/backend/application"
 	"fine/backend/proxy/v2"
 	"github.com/miekg/dns"
 	"github.com/pkg/errors"
@@ -13,10 +14,12 @@ import (
 
 type IP2Domain struct {
 	http *http.Client
+	app  *application.Application
 }
 
-func NewClient() *IP2Domain {
+func NewClient(app *application.Application) *IP2Domain {
 	return &IP2Domain{
+		app:  app,
 		http: &http.Client{},
 	}
 }

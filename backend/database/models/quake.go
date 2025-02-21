@@ -1,28 +1,28 @@
 package models
 
 import (
-	"fine/backend/service/model"
+	"fine/backend/constant"
 	quakeModel "fine/backend/service/model/quake"
 )
 
 type Quake struct {
 	BaseModel
-	TaskID int64
+	PageID int64
 	*quakeModel.RealtimeServiceItem
 }
 
 type QuakeRealtimeQueryLog struct {
 	BaseModel
-	TaskID      int64 `gorm:"unique"`
+	PageID      int64 `gorm:"unique"`
 	Query       string
 	Rule        string
-	IpList      model.StringArray
+	IpList      constant.StringArray
 	Page        int
 	PageSize    int
 	IgnoreCache bool
 	StartTime   string
 	EndTime     string
-	Include     model.StringArray
-	Exclude     model.StringArray
+	Include     constant.StringArray
+	Exclude     constant.StringArray
 	Latest      bool //仅用于实时服务数据查询
 }

@@ -151,7 +151,7 @@ const FofaHostAggs = React.forwardRef<FofaHostAggsRef, FofaHostAggsProps>((props
     }
 
     return <Flex vertical gap={10} align={"center"} style={{height: '100%', width: '100%'}}>
-        <Flex vertical gap={5} justify={"center"} >
+        <Flex vertical gap={5} justify={"center"} style={{padding:'0 6px'}}>
             <span style={SpanCssProperties}><label style={LabelCssProperties}>Host:</label><Tag bordered={false} color="cyan">
                     {host || ''}
                 </Tag></span>

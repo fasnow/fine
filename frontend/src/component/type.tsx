@@ -46,7 +46,7 @@ export interface ZoneMemberItemType {
 
 
 
-export const QUERY_FIRST = "查询后再导出"
+export const QUERY_FIRST = "数据为空或查询后再导出"
 export const ISSUE_URL = "https://github.com/fasnow/fine/issues"
 export const GITHUB_URL = "https://github.com/fasnow/fine/"
 

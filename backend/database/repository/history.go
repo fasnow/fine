@@ -1,10 +1,7 @@
 package repository
 
 import (
-	"encoding/json"
-	"fine/backend/constant"
 	"fine/backend/database/models"
-	"fine/backend/logger"
 	"fmt"
 	"gorm.io/gorm"
 	"strconv"
@@ -12,7 +9,7 @@ import (
 
 type HistoryRepository interface {
 	CreateHistory(history *models.History) error
-	FindByPartialKey(ht constant.HistoryType, key string, limit int) ([]*models.History, error)
+	FindByPartialKey(ht int, key string, limit int) ([]*models.History, error)
 }
 
 type HistoryRepositoryImpl struct {
@@ -30,7 +27,7 @@ func (r *HistoryRepositoryImpl) CreateHistory(history *models.History) error {
 }
 
 // FindByPartialKey 通过部分 key 模糊查询历史记录
-func (r *HistoryRepositoryImpl) FindByPartialKey(ht constant.HistoryType, key string, limit int) ([]*models.History, error) {
+func (r *HistoryRepositoryImpl) FindByPartialKey(ht int, key string, limit int) ([]*models.History, error) {
 	var items []*models.History
 	subQuery := `
         SELECT key, max(created_at) as max_created_at
@@ -49,10 +46,5 @@ func (r *HistoryRepositoryImpl) FindByPartialKey(ht constant.HistoryType, key st
 	if err != nil {
 		return nil, err
 	}
-	bytes, err := json.Marshal(items)
-	if err != nil {
-		return nil, err
-	}
-	logger.Info(string(bytes))
 	return items, nil
 }

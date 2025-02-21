@@ -124,6 +124,7 @@ const FofaStatisticalAggs = forwardRef<FofaStatisticalAggsRef, FofaStatisticalAg
                         全选
                     </Checkbox>
                     <Checkbox.Group
+                        style={{display: "inline-block"}}
                         options={fieldOptions}
                         value={fields}
                         onChange={onChange}

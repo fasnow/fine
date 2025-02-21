@@ -34,9 +34,8 @@ import { buttonProps } from './Setting';
 import {copy, getAllDisplayedColumnKeys, getSortedData, RangePresets} from '@/util/util';
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import { GetUserInfo, RealtimeServiceDataExport, RealtimeServiceDataQuery, SetAuth } from "../../wailsjs/go/quake/Bridge";
-import {config, quake} from "../../wailsjs/go/models";
-import { MenuItemType } from "antd/es/menu/interface";
-import { MenuItems, WithIndex } from "@/component/Interface";
+import {config, event, quake} from "../../wailsjs/go/models";
+import { WithIndex } from "@/component/Interface";
 import TabLabel from "@/component/TabLabel";
 import type { Tab } from "rc-tabs/lib/interface"
 import { TargetKey } from "@/pages/Constants";
@@ -170,14 +169,14 @@ const AuthSetting: React.FC = () => {
     const [key, setKey] = useState("")
 
     useEffect(() => {
-        setKey(cfg.Quake.token)
+        setKey(cfg.Quake.Token)
     }, [cfg.Quake])
 
 
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, Quake: { ...cfg.Quake, token: key } } as config.Config;
+                const t = { ...cfg, Quake: { ...cfg.Quake, Token: key } } as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -185,7 +184,7 @@ const AuthSetting: React.FC = () => {
         ).catch(
             err => {
                 errorNotification("错误", err)
-                setKey(cfg.Quake.token)
+                setKey(cfg.Quake.Token)
             }
         )
     }
@@ -193,7 +192,7 @@ const AuthSetting: React.FC = () => {
     const cancel = () => {
         setEditable(false);
         setOpen(false)
-        setKey(cfg.Quake.token)
+        setKey(cfg.Quake.Token)
     }
 
     return <>
@@ -250,6 +249,8 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
     const [maxPage, setMaxPage] = useState<number>(0)
     const [disable, setDisable] = useState<boolean>(false)
     const event = useSelector((state: RootState) => state.app.global.event)
+    const stat = useSelector((state: RootState) => state.app.global.status)
+    const exportID = useRef(0)
 
     useEffect(() => {
         const maxPage = Math.ceil(props.total / pageSize)
@@ -263,10 +264,17 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
     }, [pageSize, props.total])
 
     useEffect(() => {
-        EventsOn(String(event?.hasNewQuakeDownloadItem), function () {
-            updateRestToken()
-            setIsExporting(false)
-            setDisable(false)
+        EventsOn(event.QuakeExport, (eventDetail:event.EventDetail)=> {
+            if (eventDetail.ID !== exportID.current){
+                return
+            }
+            if (eventDetail.Status === stat.Stopped){
+                updateRestToken()
+                setIsExporting(false)
+                setDisable(false)
+            } else if (eventDetail.Status === stat.Error){
+                errorNotification("错误",eventDetail.Error)
+            }
         })
     }, []);
 
@@ -288,7 +296,9 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
         }
         setIsExporting(true)
         setDisable(true)
-        RealtimeServiceDataExport(id, page, pageSize).catch(
+        RealtimeServiceDataExport(id, page, pageSize)
+            .then(r=>exportID.current = r)
+            .catch(
             err => {
                 errorNotification("导出结果", err)
                 setIsExporting(false)
@@ -323,7 +333,6 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
                 setExportable(false);
                 setStatus("")
             }}
-            getContainer={false}
         >
 
             <span style={{ display: 'grid', gap: "3px" }}>
@@ -396,7 +405,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
     const dispatch = useDispatch()
     const history = useSelector((state: RootState) => state.app.global.history)
-    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.assets)
+    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.Assets)
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
@@ -476,7 +485,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         }
     }, [])
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): any => {
-            if(!pageData || pageData.length === 0)return []
+            if(!pageData || pageData.length === 0 || !params.node)return []
             const url = formattedUrl(params.node?.data)
             const cellValue = formattedValueForCopy(params.column?.getColId(), params.node?.data)
             return [
@@ -669,7 +678,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     return { index: ++index, ...item, convertValues, ...rest }
                 }))
                 setTotal(result.result.total)
-                pageIDMap.current[1] = result.taskID
+                pageIDMap.current[1] = result.pageID
             }
         ).catch(
             err => {
@@ -710,7 +719,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                             return { index: ++index, ...item, convertValues, ...rest }
                         }))
                         setCurrentPage(newPage)
-                        pageIDMap.current[newPage] = result.taskID
+                        pageIDMap.current[newPage] = result.pageID
                         updateRestToken()
                     }
                 )
@@ -730,23 +739,21 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         }
     }
 
-    const footer = (
-        <Flex justify={"space-between"} align={'center'} style={{ padding: '5px' }}>
-            <Pagination
-                showQuickJumper
-                showSizeChanger
-                total={total}
-                pageSizeOptions={pageSizeOptions}
-                defaultPageSize={pageSizeOptions[0]}
-                defaultCurrent={1}
-                current={currentPage}
-                showTotal={(total) => `${total} items`}
-                size="small"
-                onChange={(page, size) => handlePaginationChange(page, size)}
-            />
-            <ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />
-        </Flex>
-    )
+    const footer = <Flex justify={"space-between"} align={'center'} style={{ padding: '5px' }}>
+        <Pagination
+            showQuickJumper
+            showSizeChanger
+            total={total}
+            pageSizeOptions={pageSizeOptions}
+            defaultPageSize={pageSizeOptions[0]}
+            defaultCurrent={1}
+            current={currentPage}
+            showTotal={(total) => `${total} items`}
+            size="small"
+            onChange={(page, size) => handlePaginationChange(page, size)}
+        />
+        <ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />
+    </Flex>
 
     return <Flex vertical gap={5} style={{ height: '100%' }}>
         <Flex vertical gap={5}>
@@ -770,7 +777,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                             fetch: async (v) => {
                                 try {
                                     // @ts-ignore
-                                    const response = await FindByPartialKey(history.quake, !v ? "" : v.toString());
+                                    const response = await FindByPartialKey(history.Quake, !v ? "" : v.toString());
                                     const a: ItemType<string>[] = response?.map(item => {
                                         const t: ItemType<string> = {
                                             value: item,

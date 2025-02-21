@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TextArea from "antd/es/input/TextArea";
 import { Button, Flex, Input, InputNumber, Space, Splitter, Tooltip } from "antd";
 import "@/pages/Httpx.css"
-import { OpenFileDialog } from "../../wailsjs/go/runtime/Runtime";
 import { errorNotification } from "@/component/Notification";
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import { SyncOutlined } from "@ant-design/icons";
@@ -11,13 +10,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState, appActions } from "@/store/store";
 import { Chrome } from "@/component/Icon";
 import { copy, strSplit } from "@/util/util";
-import { config, constant } from "../../wailsjs/go/models";
 import TabsV2 from "@/component/TabsV2";
-import Event = constant.Event;
 import { AgGridReact } from "ag-grid-react";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
 import { ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, SideBarDef } from "ag-grid-community";
+import {config, event} from "../../wailsjs/go/models";
+import EventDetail = event.EventDetail;
+import {OpenFileDialog} from "../../wailsjs/go/osoperation/Runtime";
 
 interface PageDataType { "index": number, "url": string, "detail": string }
 
@@ -31,9 +31,10 @@ const TabContent = () => {
     const [limit, setLimit] = useState<number>(15)
     const taskID = useRef<number>(0)
     const dispatch = useDispatch()
-    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
+    const cfg = useSelector((state: RootState) => state.app.global.config)
+    const status = useSelector((state: RootState) => state.app.global.status)
     const [pageData, setPageData] = useState<PageDataType[]>([])
-    const event = useSelector((state: RootState) => state.app.global.event || new Event())
+    const event = useSelector((state: RootState) => state.app.global.event)
     const [columnDefs] = useState<ColDef[]>([
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
         {
@@ -84,7 +85,7 @@ const TabContent = () => {
         }
     }, [])
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams, ): (MenuItemDef)[] => {
-            if(!pageData || pageData.length === 0)return []
+            if(!pageData || pageData.length === 0 || !params.node)return []
             return [
                 {
                     name: "浏览器打开URL",
@@ -132,44 +133,45 @@ const TabContent = () => {
 
     useEffect(() => {
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
-        EventsOn(String(event?.httpxOutput), (value) => {
-            if (!value.taskID || value.taskID !== taskID.current) {
-                return
-            }
-            let data = value.data
-            data = data.replaceAll(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
-            if (!data.startsWith("http")) {
+        EventsOn(event.Httpx, (eventDetail:EventDetail) => {
+            if (eventDetail.ID !== taskID.current){
                 return;
             }
-            let t = strSplit(data, ' ', 2)
-            setPageData((prevState) => {
-                return [...prevState, { index: ++prevState.length, url: t[0], detail: t[1] }]
-            })
-        })
-        EventsOn(String(event.httpxOutputDone), (value) => {
-            if (!value.taskID || value.taskID !== taskID.current) {
-                return
+            if (eventDetail.Status === status.Running){
+                const data = eventDetail.Data.replaceAll(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
+                if (!data.startsWith("http")) {
+                    return;
+                }
+                let t = strSplit(data, ' ', 2)
+                setPageData((prevState) => {
+                    return [...prevState, { index: ++prevState.length, url: t[0], detail: t[1] }]
+                })
+            }else if (eventDetail.Status === status.Stopped){
+                taskID.current = 0
+                setRunning(false)
+            }else if (eventDetail.Status === status.Error){
+                taskID.current = 0
+                setRunning(false)
+                errorNotification("错误", eventDetail.Error)
             }
-            taskID.current = 0
-            setRunning(false)
         })
     }, []);
 
     useEffect(() => {
-        setPath(cfg.Httpx.path)
-        setFlags(cfg.Httpx.flags)
+        setPath(cfg.Httpx.Path)
+        setFlags(cfg.Httpx.Flags)
     }, [cfg.Httpx])
 
     const saveHttpx = () => {
         SetConfig(path, flags).then(
             () => {
-                const t = { ...cfg, Httpx: { ...cfg.Httpx, flags: flags, path: path } } as config.Config;
+                const t = { ...cfg, Httpx: { ...cfg.Httpx, Flags: flags, Path: path } } as config.Config;
                 dispatch(appActions.setConfig(t))
             }
         ).catch(e => {
             errorNotification("错误", e)
-            setPath(cfg.Httpx.path)
-            setFlags(cfg.Httpx.flags)
+            setPath(cfg.Httpx.Path)
+            setFlags(cfg.Httpx.Flags)
         })
     }
 
@@ -191,7 +193,7 @@ const TabContent = () => {
     const run = () => {
         setPageData([])
         setOffset(1)
-        setLimit(limit)
+        setLimit(15)
         Run(path, flags, targets).then(r => {
             taskID.current = r
             setRunning(true)

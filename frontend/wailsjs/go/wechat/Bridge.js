@@ -10,20 +10,24 @@ export function ClearDecompiled() {
   return window['go']['wechat']['Bridge']['ClearDecompiled']();
 }
 
-export function Decompile(arg1, arg2) {
-  return window['go']['wechat']['Bridge']['Decompile'](arg1, arg2);
+export function Decompile(arg1) {
+  return window['go']['wechat']['Bridge']['Decompile'](arg1);
+}
+
+export function DecompileBulk(arg1) {
+  return window['go']['wechat']['Bridge']['DecompileBulk'](arg1);
 }
 
 export function GetAllMiniProgram() {
   return window['go']['wechat']['Bridge']['GetAllMiniProgram']();
 }
 
-export function GetMatchedString(arg1, arg2) {
-  return window['go']['wechat']['Bridge']['GetMatchedString'](arg1, arg2);
+export function GetInfo(arg1) {
+  return window['go']['wechat']['Bridge']['GetInfo'](arg1);
 }
 
-export function QueryAppID(arg1) {
-  return window['go']['wechat']['Bridge']['QueryAppID'](arg1);
+export function GetMatchedString(arg1, arg2) {
+  return window['go']['wechat']['Bridge']['GetMatchedString'](arg1, arg2);
 }
 
 export function SetAppletPath(arg1) {

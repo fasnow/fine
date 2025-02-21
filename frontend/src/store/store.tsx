@@ -1,8 +1,5 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
-import {app, constant, fofa, quake} from "../../wailsjs/go/models";
-import Status = constant.Status;
-import Event = constant.Event;
-import History = constant.History;
+import {application, fofa, quake} from "../../wailsjs/go/models";
 
 export type HunterUserType = {
     restToken: number
@@ -99,7 +96,7 @@ const initialQuakeUserState: QuakeUserType = {
     role: [],
 }
 
-const t = new app.Constant()
+const t = new application.Constant()
 
 const {convertValues, ...rest} = t // 把不能序列化的去除掉
 
@@ -108,7 +105,7 @@ const appSlice = createSlice({
     name: "app",
     //初始值
     initialState: {
-        global: rest as app.Constant,
+        global: rest as application.Constant,
     } ,
     //方法
     reducers: {

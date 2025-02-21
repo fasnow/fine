@@ -13,26 +13,25 @@ import {
     Tooltip
 } from 'antd';
 import { FileTextOutlined, FileZipOutlined, FolderOpenOutlined } from "@ant-design/icons";
-import { Join } from "../../wailsjs/go/runtime/Path";
 import TextArea from "antd/es/input/TextArea";
 import "@/pages/Wechat.css"
-import { Environment, EventsOn } from "../../wailsjs/runtime";
-import { OpenDirectoryDialog, OpenFolder } from "../../wailsjs/go/runtime/Runtime";
-import { config, wechat } from "../../wailsjs/go/models";
+import { EventsOn } from "../../wailsjs/runtime";
+import {config, event, wechat} from "../../wailsjs/go/models";
 import { errorNotification } from "@/component/Notification";
 import {
     ClearApplet,
     ClearDecompiled,
-    Decompile,
+    Decompile, DecompileBulk,
     GetAllMiniProgram,
     GetMatchedString,
 } from "../../wailsjs/go/wechat/Bridge";
 import { DecompileIcon } from "@/component/Icon";
 import InfoToFront = wechat.InfoToFront;
-import { CssConfig } from "@/pages/Constants";
 import { useDispatch, useSelector } from "react-redux";
 import { appActions, RootState } from "@/store/store";
-import { SaveWechat } from "../../wailsjs/go/app/App";
+import {Join} from "../../wailsjs/go/osoperation/Path";
+import {OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/osoperation/Runtime";
+import {GetWechatRules, SaveWechat, SaveWechatRules} from "../../wailsjs/go/application/Application";
 
 export const MiniProgram: React.FC = () => {
     const [data, setData] = useState<InfoToFront[]>([])
@@ -43,7 +42,6 @@ export const MiniProgram: React.FC = () => {
     const versionRef = useRef<string>("")
     const [appletPath, setAppletPath] = useState<string>("")
     const dataCachePath = useRef<string>("")
-    const [platform, setPlatform] = useState<string>("")
     const timer = useRef<any>()
     const [autoDecompile, setAutoDecompile] = useState<boolean>(false)
     const autoRef = useRef<boolean>(false) //直接在定时任务当中无法调用auto更新后的值，只能用ref
@@ -53,42 +51,24 @@ export const MiniProgram: React.FC = () => {
     const dispatch = useDispatch()
     const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
     const event = useSelector((state: RootState) => state.app.global.event)
+    const status = useSelector((state: RootState) => state.app.global.status)
 
     useEffect(() => {
-        Environment().then(
-            r => {
-                setPlatform(r.platform)
-            }
-        )
-        //获取反编译输出
-        EventsOn(String(event?.decompileWxMiniProgram), (data) => {
-            _setDecompileResult(data)
-        })
-
-        //获取提取内容输出
-        EventsOn(String(event?.extractWxMiniProgramInfoOutput), (data) => {
-            _setDecompileResult(data)
-        })
-
-        //提取内容结束就展示
-        EventsOn(String(event?.extractWxMiniProgramInfoDone), (data) => {
-            _setDecompileResult(`[${data.appid} ${data.version}] 信息提取完成\n`)
-            if (data.appid !== appIdRef.current || data.version != versionRef.current) {
-                return
-            }
-            GetMatchedString(data.appid, data.version).then(
-                r => {
-                    if (!r.taskDown) {
-                        setMatchedResult(`[${data.appid} ${data.version}]正在提取关键字内容`)
-                    }
-                    setMatchedResult(pre => pre + r.matched + "\n")
+        EventsOn(event.DecompileWxMiniProgram, (eventDetail:event.EventDetail) => {
+            if (eventDetail.Status === status.Running){
+                _setDecompileResult(eventDetail.Message)
+            } else if (eventDetail.Status === status.Stopped){
+                _setDecompileResult(eventDetail.Message)
+                if (eventDetail.Data.appid !== appIdRef.current || eventDetail.Data.version !== versionRef.current) {
+                    return
                 }
-            )
-        })
-
-        //反编译完成后重绘列表
-        EventsOn(String(event?.decompileWxMiniProgramDone), (data) => {
-            _setDecompileResult(data)
+                GetMatchedString(eventDetail.Data.appid, eventDetail.Data.version)
+                    .then(r => {
+                            setMatchedResult(r?.join("\n"))
+                        })
+            } else if (eventDetail.Status === status.Error){
+                errorNotification("错误", eventDetail.Error)
+            }
         })
 
         //自动获取新的
@@ -111,10 +91,10 @@ export const MiniProgram: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        setAppletPath(cfg.Wechat.applet)
-        setRules(cfg.Wechat.rules.join("\n"))
-        dataCachePath.current = cfg.WechatDataPath
-    }, [cfg.Wechat, cfg.WechatDataPath])
+        setAppletPath(cfg.Wechat.Applet)
+        setRules(cfg.Wechat.Rules.join("\n"))
+        dataCachePath.current = cfg.WechatDataDir
+    }, [cfg.Wechat, cfg.WechatDataDir])
 
     const _setDecompileResult = (value: any) => {
         setDecompileResult(pre => {
@@ -132,13 +112,13 @@ export const MiniProgram: React.FC = () => {
         if (!autoRef.current) {
             return
         }
-        const unpackedItems: wechat.MiniProgram[] = []
+        const unpackedItems: wechat.InfoToFront[] = []
         for (let i = 0; i < items.length; i++) {
             let item = items[i]
-            const versions: wechat.Version[] = []
-            for (let j = 0; j < item.versions.length; j++) {
-                let version = item.versions[j]
-                if (!version.unpacked) {
+            const versions: wechat.VersionStatus[] = []
+            for (let j = 0; j < item.Versions.length; j++) {
+                let version = item.Versions[j]
+                if (version.DecompileStatus !== status.Stopped && version.DecompileStatus !== status.Running) {
                     versions.push(version)
                 }
             }
@@ -149,32 +129,29 @@ export const MiniProgram: React.FC = () => {
             }
         }
         if (unpackedItems.length > 0) {
-            decompile(unpackedItems, false)
+            decompileBulk(unpackedItems)
         }
     }
 
-    const decompile = (items: wechat.MiniProgram[], reDecompile: boolean) => {
-        Decompile(items, reDecompile).catch(
+    const decompileBulk = (items: wechat.InfoToFront[]) => {
+        DecompileBulk(items).catch(
+            e => _setDecompileResult(e)
+        )
+    }
+    const decompile = (items: wechat.InfoToFront) => {
+        Decompile(items).catch(
             e => _setDecompileResult(e)
         )
     }
 
     const saveRules = (rules: string[]) => {
-        const t = { ...cfg.Wechat, rules: rules }
-        SaveWechat(t).then(
+        SaveWechatRules(rules).then(
             () => {
-                const tt = { ...cfg, Wechat: { ...t } } as config.Config
-                dispatch(appActions.setConfig(tt))
-                GetAllMiniProgram().then(
-                    result => {
-                        scheduledTask(result)
-                    }
-                )
+                setOpen(false)
             }
         ).catch(
             e => {
                 errorNotification("错误", e)
-                setRules(cfg.Wechat.rules.join("\n"))
             }
         )
     }
@@ -183,7 +160,7 @@ export const MiniProgram: React.FC = () => {
         OpenDirectoryDialog().then(
             result => {
                 if (result) {
-                    const t = { ...cfg.Wechat, applet: result }
+                    const t = { ...cfg.Wechat, Applet: result }
                     SaveWechat(t).then(
                         () => {
                             const tt = { ...cfg, Wechat: { ...t } } as config.Config
@@ -197,7 +174,7 @@ export const MiniProgram: React.FC = () => {
                     ).catch(
                         e => {
                             errorNotification("错误", e)
-                            setAppletPath(cfg.Wechat.applet)
+                            setAppletPath(cfg.Wechat.Applet)
                         }
                     )
                 }
@@ -218,7 +195,7 @@ export const MiniProgram: React.FC = () => {
             <Flex vertical gap={10} align={"center"} justify={"center"}>
                 <Space.Compact style={{ justifyContent: "center" }}>
                     <Input style={{ width: "600px", }} size={'small'} prefix={<>微信Applet路径</>} value={appletPath} />
-                    <Button size={"small"} onClick={configAppletPath} disabled={platform !== "windows"}>选择</Button>
+                    <Button size={"small"} onClick={configAppletPath} >选择</Button>
                     {
                         autoDecompile ?
                             < Button size={"small"} onClick={() => {
@@ -226,10 +203,10 @@ export const MiniProgram: React.FC = () => {
                                 autoRef.current = false
                             }} style={{ backgroundColor: "red", color: "white" }}>停用自动反编译</Button>
                             :
-                            < Button size={"small"} onClick={() => {
+                            < Button size={"small"} type={'primary'} onClick={() => {
                                 setAutoDecompile(true)
                                 autoRef.current = true
-                            }} style={{ backgroundColor: "green", color: "white" }}>启用自动反编译</Button>
+                            }} >启用自动反编译</Button>
                     }
                     <Popconfirm
                         placement="bottom"
@@ -276,17 +253,20 @@ export const MiniProgram: React.FC = () => {
                         content={<Flex vertical={true} gap={5}>
                             <Flex gap={5}>
                                 <Button size={"small"} type={"primary"} onClick={() => {
-                                    setOpen(false)
                                     saveRules(rules.split("\n"))
                                 }}>保存</Button>
                                 <Button size={"small"} type={"primary"} onClick={() => {
                                     setOpen(false)
                                 }}>取消</Button>
+                                <Tag bordered={false} color="cyan">
+                                    正则测试地址: https://regex101.com/
+                                </Tag>
                             </Flex>
                             <TextArea
                                 value={rules}
+                                wrap={"off"}
                                 placeholder={"每行一条"}
-                                style={{ width: "300px" }}
+                                style={{ width: "600px" }}
                                 autoSize={{ minRows: 10, maxRows: 10 }}
                                 onChange={e => setRules(e.target.value)}
                                 allowClear
@@ -297,7 +277,10 @@ export const MiniProgram: React.FC = () => {
                         open={open}
                         onOpenChange={(v) => {
                             if (v) {
-                                setRules(cfg.Wechat.rules.join("\n"))
+                                GetWechatRules()
+                                    .then(
+                                        r=>setRules(r.join("\n"))
+                                    )
                             } else {
                                 setRules("")
                             }
@@ -326,80 +309,87 @@ export const MiniProgram: React.FC = () => {
                             // style={{overflowY: "auto", height: "calc(100vh -400px)", width: "100%"}}
                             itemLayout="vertical"
                             dataSource={data}
-                            renderItem={(item) => (
-                                <List.Item key={item.appid}
+                            renderItem={(item) => {
+                                return <List.Item key={item.AppID}
                                 >
                                     <Flex vertical gap={5}>
                                         <Flex gap={5}>
                                             <Tag color={"cyan"} bordered={false}>
                                                 <span style={{ fontWeight: "bold" }}>
-                                                    {item.appid}
+                                                    {item.AppID}
                                                 </span>
                                             </Tag>
                                             <Tag color={"orange"} bordered={false}>
                                                 <span style={{ fontWeight: "bold" }}>
-                                                    {item.update_date}
+                                                    {item.UpdateDate}
                                                 </span>
                                             </Tag>
-                                            {
-                                                item?.username && <>
-                                                    <Tag bordered={false} color="cyan">{item.username}</Tag>
-                                                </>
-                                            }
 
                                         </Flex>
                                         <Flex vertical gap={5}>
+                                            <Flex>
+                                                {
+                                                    item.Info.Nickname && <> <Flex><Tag
+                                                        title={item.Info.Nickname}
+                                                        bordered={false}
+                                                        color="red"
+                                                        style={{
+                                                            whiteSpace: "nowrap",
+                                                            textOverflow: "ellipsis",
+                                                            overflow: "hidden"
+                                                        }}>{item.Info.Nickname}</Tag></Flex></>
+                                                }
+                                                {
+                                                    item.Info.Username && <>
+                                                        <Tag bordered={false} color="cyan">{item.Info.Username}</Tag>
+                                                    </>
+                                                }
+                                            </Flex>
                                             {
-                                                item?.nickname && <> <Flex><Tag
-                                                    title={item.nickname}
-                                                    bordered={false}
-                                                    color="red"
-                                                    style={{
-                                                        whiteSpace: "nowrap",
-                                                        textOverflow: "ellipsis",
-                                                        overflow: "hidden"
-                                                    }}>{item.nickname}</Tag></Flex></>
-                                            }
-                                            {
-                                                item.versions.map((i) => {
-                                                    return <Flex gap={5} key={`${item.appid}-${i.number}`}>
+                                                item.Versions?.map((i) => {
+                                                    return <Flex gap={5} key={`${item.AppID}-${i.Number}`}>
                                                         <Tag bordered={false} color="cyan"><span
-                                                            title={i.unpacked ? "已反编译" : "未反编译"}><FileZipOutlined
-                                                            style={{ color: i.unpacked ? "green" : "black" }} />{i.number}</span></Tag>
+                                                            title={i.DecompileStatus === status.Stopped ? "已反编译" : "未反编译"}><FileZipOutlined
+                                                            style={{ color: i.DecompileStatus === status.Stopped ? "green" : "black" }} />{i.Number}</span></Tag>
                                                         <Space.Compact size={"small"}>
                                                             <Tooltip title={"反编译"}>
-                                                                <Button icon={<DecompileIcon
+                                                                <Button
+                                                                    disabled={i.DecompileStatus === status.Running}
+                                                                    icon={<DecompileIcon spin={i.DecompileStatus === status.Running}
                                                                     style={{ fontSize: "12px" }} />}
-                                                                        onClick={() => {
-                                                                            decompile([new wechat.MiniProgram({
-                                                                                appid: item.appid,
-                                                                                versions: item.versions
-                                                                            })], true)
+                                                                    onClick={() => {
+                                                                        decompile(new wechat.InfoToFront({
+                                                                            AppID: item.AppID,
+                                                                            Versions: item.Versions
+                                                                        }))
 
-                                                                        }} />
+                                                                    }}
+                                                                />
                                                             </Tooltip>
                                                             <Tooltip title={"打开数据文件夹"}>
                                                                 <Button
+                                                                    disabled={i.DecompileStatus !== status.Stopped}
                                                                     icon={<FolderOpenOutlined />}
                                                                     onClick={
                                                                         async () => {
-                                                                            OpenFolder(await Join([dataCachePath.current, item.appid, i.number]))
+                                                                            OpenFolder(await Join([dataCachePath.current, item.AppID, i.Number]))
                                                                         }
                                                                     } />
                                                             </Tooltip>
                                                             <Tooltip title={"敏感信息"}>
                                                                 <Button
+                                                                    disabled={i.MatchStatus !==status.Stopped }
                                                                     icon={<FileTextOutlined />}
                                                                     onClick={
                                                                         async () => {
                                                                             setSelect({
-                                                                                appid: item.appid,
-                                                                                version: i.number,
-                                                                                nickname: item.nickname
+                                                                                appid: item.AppID,
+                                                                                version: i.Number,
+                                                                                nickname: item.Info.Nickname
                                                                             })
-                                                                            GetMatchedString(item.appid, i.number).then(
+                                                                            GetMatchedString(item.AppID, i.Number).then(
                                                                                 r => {
-                                                                                    setMatchedResult(r.matched)
+                                                                                    setMatchedResult(r?.join("\n"))
                                                                                 }
                                                                             )
                                                                         }
@@ -410,12 +400,12 @@ export const MiniProgram: React.FC = () => {
                                                 })
                                             }
                                             <span style={{ color: "gray", fontSize: "12px" }}>
-                                                {item.description}
+                                                {item.Info.Description}
                                             </span>
                                         </Flex>
                                     </Flex>
                                 </List.Item>
-                            )}
+                            }}
                         />
                     </ConfigProvider>
                 </Splitter.Panel>

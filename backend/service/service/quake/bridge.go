@@ -1,53 +1,53 @@
 package quake
 
 import (
-	"fine/backend/app"
-	"fine/backend/config"
-	"fine/backend/constant"
+	"fine/backend/application"
+	"fine/backend/constant/event"
+	"fine/backend/constant/history"
+	"fine/backend/constant/status"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/logger"
+	"fine/backend/service/model/exportlog"
 	quakeModel "fine/backend/service/model/quake"
 	service2 "fine/backend/service/service"
 	"fine/backend/utils"
 	"github.com/cenkalti/backoff/v4"
 
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
 	"path/filepath"
 	"time"
 )
 
 type Bridge struct {
-	app         *app.App
-	quake       *Quake
-	quakeRepo   repository.QuakeRepository
-	downloadLog *repository.DownloadLogService
-	token       *repository.HunterRestTokenDBService
-	cacheTotal  *repository.CacheTotal
-	historyRepo repository.HistoryRepository
+	app           *application.Application
+	quake         *Quake
+	cacheTotal    repository.CacheTotal
+	quakeRepo     repository.QuakeRepository
+	exportLogRepo repository.ExportLogRepository
+	historyRepo   repository.HistoryRepository
 }
 
-func NewQuakeBridge(app *app.App) *Bridge {
-	t := config.GlobalConfig.Quake
+func NewQuakeBridge(app *application.Application) *Bridge {
+	t := app.Config.Quake
 	tt := NewClient(t.Token)
-	tt.UseProxyManager(config.ProxyManager)
+	tt.UseProxyManager(app.ProxyManager)
+	db := database.GetConnection()
 	return &Bridge{
-		quake:       tt,
-		quakeRepo:   repository.NewQuakeRepository(database.GetConnection()),
-		downloadLog: repository.NewDownloadLogService(),
-		cacheTotal:  repository.NewCacheTotal(),
-		app:         app,
-		historyRepo: repository.NewHistoryRepository(database.GetConnection()),
+		app:           app,
+		quake:         tt,
+		quakeRepo:     repository.NewQuakeRepository(db),
+		exportLogRepo: repository.NewExportLogRepository(db),
+		cacheTotal:    repository.NewCacheTotal(db),
+		historyRepo:   repository.NewHistoryRepository(db),
 	}
 }
 
 func (r *Bridge) SetAuth(key string) error {
-	config.GlobalConfig.Quake.Token = key
-	if err := config.Save(); err != nil {
-		logger.Info(err.Error())
+	r.app.Config.Quake.Token = key
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		r.app.Logger.Error(err)
 		return err
 
 	}
@@ -57,7 +57,7 @@ func (r *Bridge) SetAuth(key string) error {
 
 type RealtimeServiceQueryResult struct {
 	Result  RealtimeServiceDataResult `json:"result"`
-	TaskID  int64                     `json:"taskID"`
+	PageID  int64                     `json:"pageID"`
 	MaxPage int                       `json:"maxPage"`
 }
 
@@ -75,46 +75,55 @@ type RealtimeDataQueryOptions struct {
 	Latest      bool     `json:"latest,omitempty"` //仅用于实时服务数据查询
 }
 
+func (r *Bridge) GetRealtimeServiceItem() *quakeModel.RealtimeServiceItem {
+	return nil
+}
+
 func (r *Bridge) GetUserInfo() (*User, error) {
 	user, err := r.quake.User()
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil, err
 	}
 	return user, nil
 }
 
-func (r *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQueryOptions) (*RealtimeServiceQueryResult, error) {
+func (r *Bridge) RealtimeServiceDataQuery(pageID int64, options RealtimeDataQueryOptions) (*RealtimeServiceQueryResult, error) {
+	r.app.Logger.WithFields(map[string]interface{}{
+		"pageID":  pageID,
+		"options": options,
+	}).Debug("传入参数")
+
 	queryResult := &RealtimeServiceQueryResult{
 		Result: RealtimeServiceDataResult{},
 	}
 
 	//获取缓存
-	total, _ := r.cacheTotal.GetByTaskID(taskID)
+	total, _ := r.cacheTotal.GetByPageID(pageID)
 	if total != 0 {
-		cacheItems, err := r.quakeRepo.GetBulkByTaskID(taskID)
+		cacheItems, err := r.quakeRepo.GetBulkByPageID(pageID)
 		if err != nil {
-			logger.Info(err.Error())
+			r.app.Logger.Error(err)
 			return nil, err
 		}
 		queryResult.Result.Total = total
 		queryResult.Result.PageNum = options.PageNum
 		queryResult.Result.PageSize = options.PageSize
-		queryResult.TaskID = taskID
+		queryResult.PageID = pageID
 		for _, cacheItem := range cacheItems {
-			queryResult.Result.Items = append(queryResult.Result.Items, *cacheItem.RealtimeServiceItem)
+			queryResult.Result.Items = append(queryResult.Result.Items, cacheItem.RealtimeServiceItem)
 		}
 		return queryResult, nil
 	}
 
-	err := r.historyRepo.CreateHistory(&models.History{
+	if err := r.historyRepo.CreateHistory(&models.History{
 		Key:  options.Query,
-		Type: constant.Histories.Quake,
-	})
-	if err != nil {
-		logger.Info(err)
+		Type: history.Quake,
+	}); err != nil {
+		r.app.Logger.Warn(err)
 	}
 
+	//获取新数据
 	req := NewGetRealtimeDataBuilder().
 		Query(options.Query).
 		Page(options.PageNum).
@@ -130,14 +139,14 @@ func (r *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 		Build()
 	result, err := r.quake.RealtimeServer.Service(req)
 	if err != nil {
-		logger.Info(err.Error())
+		r.app.Logger.Error(err)
 		return nil, err
 	}
+	tmpPageID := idgen.NextId()
 	if result.Total > 0 {
-		id := idgen.NextId()
 		if options.PageNum == 1 {
 			// 缓存查询成功的条件，用于导出
-			_ = r.quakeRepo.CreateQueryField(&models.QuakeRealtimeQueryLog{
+			if err := r.quakeRepo.CreateQueryField(&models.QuakeRealtimeQueryLog{
 				Query:       options.Query,
 				Rule:        options.Rule,
 				IpList:      options.IpList,
@@ -149,11 +158,14 @@ func (r *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 				Include:     options.Include,
 				Exclude:     options.Exclude,
 				Latest:      options.Latest,
-			}, id)
+			}, tmpPageID); err != nil {
+				r.app.Logger.Warn(err)
+			}
 		}
-		r.cacheTotal.Add(id, result.Total, options.Query)
-		_ = r.quakeRepo.CreateBulk(id, result.Items)
-		queryResult.TaskID = id
+		r.cacheTotal.Add(tmpPageID, result.Total, options.Query)
+		if err := r.quakeRepo.CreateBulk(tmpPageID, result.Items); err != nil {
+			r.app.Logger.Warn(err)
+		}
 	}
 	for i := 0; i < len(result.Items); i++ {
 		var item = &result.Items[i]
@@ -186,31 +198,41 @@ func (r *Bridge) RealtimeServiceDataQuery(taskID int64, options RealtimeDataQuer
 			}
 		}
 	}
+	queryResult.PageID = tmpPageID
 	queryResult.Result = *result
 	return queryResult, nil
 }
 
-func (r *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) error {
-	queryLog, err := r.quakeRepo.GetQueryFieldByTaskID(taskID)
+func (r *Bridge) RealtimeServiceDataExport(pageID int64, pageNum, pageSize int) (int64, error) {
+	r.app.Logger.WithFields(map[string]interface{}{
+		"pageID":   pageID,
+		"pageNum":  pageNum,
+		"pageSize": pageSize,
+	}).Debug("传入参数")
+	queryLog, err := r.quakeRepo.GetQueryFieldByTaskID(pageID)
 	if err != nil {
-		logger.Info(err.Error())
-		return errors.New("查询后再导出")
+		r.app.Logger.Error(err)
+		return 0, err
 	}
-	fileID := idgen.NextId()
-	dataDir := config.GlobalConfig.DataDir
+	r.app.Logger.Info(queryLog)
 	filename := fmt.Sprintf("Quake_%s.xlsx", utils.GenFilenameTimestamp())
-	outputAbsFilepath := filepath.Join(dataDir, filename)
-	_ = r.downloadLog.Insert(models.DownloadLog{
-		Dir:      dataDir,
-		Filename: filename,
-		Deleted:  false,
-		Status:   0,
-	}, fileID)
-
+	dir := r.app.Config.ExportDataDir
+	exportID := idgen.NextId()
+	outputAbsFilepath := filepath.Join(r.app.Config.ExportDataDir, filename)
+	if err := r.exportLogRepo.Create(&models.ExportLog{
+		Item: exportlog.Item{
+			Dir:      dir,
+			Filename: filename,
+			Status:   status.Running,
+			ExportID: exportID,
+		},
+	}); err != nil {
+		r.app.Logger.Error(err)
+		return 0, err
+	}
 	go func() {
-		exportDataTaskID := idgen.NextId()
-		for index := 1; index <= page; index++ {
-			result, err := backoff.RetryWithData(func() (*RealtimeServiceDataResult, error) {
+		for index := 1; index <= pageNum; index++ {
+			result, err1 := backoff.RetryWithData(func() (*RealtimeServiceDataResult, error) {
 				req := NewGetRealtimeDataBuilder().
 					Query(queryLog.Query).
 					Page(index).
@@ -224,37 +246,43 @@ func (r *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 					IgnoreCache(queryLog.IgnoreCache).
 					Rule(queryLog.Rule).
 					Build()
-				result, err := r.quake.RealtimeServer.Service(req)
-				if err != nil {
-					logger.Info(err.Error())
-					return nil, err
+				result, err2 := r.quake.RealtimeServer.Service(req)
+				if err2 != nil {
+					r.app.Logger.Error(err2)
+					return nil, err2
 				}
 				return result, nil
-			}, service2.GetBackOffWithMaxRetries(10, config.GlobalConfig.Quake.Interval, 1))
-
-			if err != nil {
-				logger.Info(err.Error())
+			}, service2.GetBackOffWithMaxRetries(10, r.app.Config.Quake.Interval, 1))
+			if err1 != nil {
+				r.app.Logger.Error(err1)
 				break
 			}
-			_ = r.quakeRepo.CreateBulk(exportDataTaskID, result.Items)
-			time.Sleep(config.GlobalConfig.Quake.Interval)
+			if err2 := r.quakeRepo.CreateBulk(exportID, result.Items); err2 != nil {
+				r.app.Logger.Error(err2)
+			}
+			time.Sleep(r.app.Config.Quake.Interval)
 		}
-		cacheItems, err := r.quakeRepo.GetBulkByTaskID(exportDataTaskID)
-		if err != nil {
-			logger.Info(err.Error())
+		cacheItems, err2 := r.quakeRepo.GetBulkByPageID(exportID)
+		if err2 != nil {
+			r.app.Logger.Error(err2)
+			data := event.EventDetail{
+				ID:     exportID,
+				Status: status.Error,
+				Error:  err.Error(),
+			}
+			r.app.Logger.Error(err, data)
+			event.EmitNewExportItemEvent(event.QuakeExport, data)
 			return
 		}
-		exportItems := make([]quakeModel.RealtimeServiceItem, 0)
+		exportItems := make([]*quakeModel.RealtimeServiceItem, 0)
 		for _, cacheItem := range cacheItems {
-			exportItems = append(exportItems, *cacheItem.RealtimeServiceItem)
+			exportItems = append(exportItems, cacheItem.RealtimeServiceItem)
 		}
-		if err := r.quake.Export(exportItems, outputAbsFilepath); err != nil {
-			logger.Info(err.Error())
-			return
-		}
-		constant.HasNewDownloadLogItemEventEmit(constant.Events.HasNewQuakeDownloadItem)
+		service2.SaveToExcel(nil, r.exportLogRepo, exportID, event.QuakeExport, r.app.Logger, func() error {
+			return r.quake.Export(exportItems, outputAbsFilepath)
+		})
 	}()
-	return nil
+	return exportID, nil
 }
 
 //
@@ -273,12 +301,12 @@ func (r *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 //	if options.Size <= 0 {
 //		httpoutput.HttpErrOutput(c, statuscode.CodeOtherError, utils.FormatError(client.ErrorQuerySize))
 //	}
-//	if options.Page <= 0 {
+//	if options.PageNum <= 0 {
 //		httpoutput.HttpErrOutput(c, statuscode.CodeOtherError, utils.FormatError(client.ErrorQueryPage))
 //	}
 //	req := quakeCient.NewGetRealtimeDataBuilder().
 //		Query(options.Query).
-//		Page(options.Page).
+//		PageNum(options.PageNum).
 //		Size(options.Size).
 //		EndTime(options.EndTime).
 //		StartTime(options.StartTime).
@@ -299,10 +327,10 @@ func (r *Bridge) RealtimeServiceDataExport(taskID int64, page, pageSize int) err
 //		uuid := initialize.QueryCache.GenerateUUID()
 //		cacheItem.Options = options
 //		cacheItem.Total = result.Total
-//		cacheItem.Page = int(math.Ceil(float64(result.Total) / float64(options.Size)))
+//		cacheItem.PageNum = int(math.Ceil(float64(result.Total) / float64(options.Size)))
 //		initialize.QueryCache.Set(uuid, cacheItem, initialize.DefaultCacheTimeout)
 //		responseWithUUID.UUID = uuid
-//		responseWithUUID.MaxPage = cacheItem.Page
+//		responseWithUUID.MaxPage = cacheItem.PageNum
 //	}
 //	responseWithUUID.RHDQueryResult = result
 //	httpoutput.HttpStdOutput(c, responseWithUUID)

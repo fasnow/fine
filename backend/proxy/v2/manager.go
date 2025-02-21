@@ -2,7 +2,7 @@ package proxy
 
 import (
 	"context"
-	"fine/backend/logger"
+	"github.com/pkg/errors"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -10,18 +10,7 @@ import (
 	"time"
 )
 
-var (
-	defaultClient = &http.Client{
-		Transport: &CustomTransport{
-			Header: http.Header{"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"}},
-		},
-		Timeout: 20 * time.Second,
-		// 禁止重定向
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-)
+const defaultUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 
 type Manager struct {
 	client   *http.Client
@@ -39,7 +28,7 @@ type CustomTransport struct {
 func (c *CustomTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// 设置默认 UA
 	if _, ok := req.Header["User-Agent"]; !ok {
-		req.Header.Set("User-Agent", defaultClient.Transport.(*CustomTransport).Header.Get("User-Agent"))
+		req.Header.Set("User-Agent", defaultUA)
 	}
 
 	// 添加其他请求头
@@ -57,7 +46,16 @@ func (c *CustomTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 func NewManager() *Manager {
 	return &Manager{
-		client: defaultClient,
+		client: &http.Client{
+			Transport: &CustomTransport{
+				Header: http.Header{"User-Agent": []string{defaultUA}},
+			},
+			Timeout: 20 * time.Second,
+			// 禁止重定向
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
 	}
 }
 
@@ -70,7 +68,6 @@ func (r *Manager) SetProxy(s string) error {
 	}
 	proxyURL, err := url.Parse(s)
 	if err != nil {
-		logger.Info(err.Error())
 		return err
 	}
 	switch proxyURL.Scheme {
@@ -99,19 +96,16 @@ func (r *Manager) SetProxy(s string) error {
 		}
 		dialer, err := proxy.SOCKS5("tcp", proxyURL.Host, auth, proxy.Direct)
 		if err != nil {
-			logger.Info("Failed to create SOCKS5 dialer: " + err.Error())
-			return err
+			return errors.New("Failed to create SOCKS5 dialer: " + err.Error())
 		}
 
-		// 使用 DialContext 替代 Dial
 		transport.Transport = http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				return dialer.Dial(network, addr)
 			},
 		}
 	default:
-		logger.Info("Unsupported proxy scheme: " + proxyURL.Scheme)
-		return err
+		return errors.New("Unsupported proxy scheme: " + proxyURL.Scheme)
 	}
 	r.client.Transport = transport
 	r.proxyUrl = s

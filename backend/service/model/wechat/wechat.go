@@ -1,37 +1,33 @@
 package wechat
 
-import "gorm.io/gorm"
-
 type Version struct {
-	gorm.Model
-	VersionID  int64
-	Number     string `json:"number"`
-	Unpacked   bool   `json:"unpacked"`
-	UpdateDate string `json:"update_date"`
+	Number     string
+	UpdateDate string
 }
 
 type MiniProgram struct {
-	AppID      string    `json:"appid"`
-	UpdateDate string    `json:"update_date"`
-	Versions   []Version `gorm:"foreignKey:VersionID" json:"versions"`
+	AppID      string
+	UpdateDate string
 }
 
 type Info struct {
-	Nickname      string `json:"nickname"`
-	Username      string `json:"username"`
-	Description   string `json:"description"`
-	Avatar        string `json:"avatar"`
-	UsesCount     string `json:"uses_count"`
-	PrincipalName string `json:"principal_name"`
-	AppID         string `json:"appid"`
+	Nickname      string
+	Username      string
+	Description   string
+	Avatar        string
+	UsesCount     string
+	PrincipalName string
+	AppID         string
 }
 
 type InfoToFront struct {
-	MiniProgram
-	Nickname      string `json:"nickname"`
-	Username      string `json:"username"`
-	Description   string `json:"description"`
-	Avatar        string `json:"avatar"`
-	UsesCount     string `json:"uses_count"`
-	PrincipalName string `json:"principal_name"`
+	*MiniProgram
+	Info     Info
+	Status   int
+	Versions []*VersionStatus
+}
+type VersionStatus struct {
+	Number          string
+	DecompileStatus int
+	MatchStatus     int
 }

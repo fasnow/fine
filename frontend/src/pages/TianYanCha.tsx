@@ -5,7 +5,7 @@ import TabsV2 from "@/component/TabsV2";
 import {errorNotification} from '@/component/Notification';
 import {appActions, RootState} from '@/store/store';
 import {useDispatch, useSelector} from 'react-redux';
-import {config, constant, tianyancha} from '../../wailsjs/go/models';
+import {config, tianyancha} from '../../wailsjs/go/models';
 import {buttonProps} from './Setting';
 import {UserOutlined} from "@ant-design/icons";
 import {GetHolder, GetInvestee, SetAuth, Suggest} from "../../wailsjs/go/tianyancha/Bridge";
@@ -17,7 +17,6 @@ import {WithIndex} from "@/component/Interface";
 import Candidate, {ItemType} from "@/component/Candidate";
 import './TianYanCha.css'
 import PenetrationItem = tianyancha.PenetrationItem;
-import History = constant.History;
 
 interface BaseNodeType {
     nodeName: string
@@ -956,10 +955,10 @@ class StockTreeVertical<T1,T2=T1> {
         // 使用translateTo省去繁琐的计算，直接将svg元素的中心坐标移至点击的节点坐标。
         // this.zoomHandler.translateTo(this.svg, source.x, source.y)
         this.svg
-            .call(
-                this.zoomHandler.scaleTo, // 设置缩放比例
-                0.8
-            )
+            // .call(
+            //     this.zoomHandler.scaleTo, // 设置缩放比例
+            //     0.8
+            // )
             .call(() => {
                 this.zoomHandler.translateTo(this.svg, source.x, source.y); // 移动到指定坐标
             });
@@ -1057,13 +1056,13 @@ const AuthSetting: React.FC = () => {
     const [key, setKey] = useState("")
 
     useEffect(() => {
-        setKey(cfg.TianYanCha.token)
+        setKey(cfg.TianYanCha.Token)
     }, [cfg.TianYanCha])
 
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, TianYanCha: { ...cfg.TianYanCha, token: key } } as config.Config;
+                const t = { ...cfg, TianYanCha: { ...cfg.TianYanCha, Token: key } } as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -1071,7 +1070,7 @@ const AuthSetting: React.FC = () => {
         ).catch(
             err => {
                 errorNotification("错误", err)
-                setKey(cfg.TianYanCha.token)
+                setKey(cfg.TianYanCha.Token)
             }
         )
     }
@@ -1079,7 +1078,7 @@ const AuthSetting: React.FC = () => {
     const cancel = () => {
         setEditable(false);
         setOpen(false)
-        setKey(cfg.TianYanCha.token)
+        setKey(cfg.TianYanCha.Token)
     }
 
     return <>
@@ -1159,7 +1158,6 @@ const TabContent: React.FC = () => {
     const [ratioMax, setRatioMax] = useState(100)
     const ratioMinRef = useRef(ratioMin)
     const ratioMaxRef = useRef(ratioMax)
-    const history = useSelector((state: RootState) => state.app.global.history || new History())
 
     useEffect(() => {
         if (filterRef.current) {

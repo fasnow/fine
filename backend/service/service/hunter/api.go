@@ -2,9 +2,7 @@ package hunter
 
 import (
 	"errors"
-	"fine/backend/logger"
 	"fine/backend/service/model/hunter"
-	"fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/goccy/go-json"
@@ -60,20 +58,17 @@ func (r *Hunter) Get(req *GetDataReq) (*Result, error) {
 	url := fmt.Sprintf("%v?%s", HunterApiUrl, req.req.QueryParams.Encode())
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		logger.Info(err.Error())
 		return nil, err
 	}
 	response, err := r.http.Do(request)
 	if err != nil {
-		logger.Info(err.Error())
 		return nil, err
 	}
 	if response.StatusCode != 200 {
-		return nil, service.NonStatusOK
+		return nil, errors.New(response.Status)
 	}
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		logger.Info(err.Error())
 		return nil, err
 	}
 	var tmpResponse struct {
@@ -91,7 +86,6 @@ func (r *Hunter) Get(req *GetDataReq) (*Result, error) {
 	}
 	err = json.Unmarshal(body, &tmpResponse)
 	if err != nil {
-		logger.Info(err.Error())
 		return nil, err
 	}
 	if tmpResponse.Code == 429 {
@@ -102,12 +96,10 @@ func (r *Hunter) Get(req *GetDataReq) (*Result, error) {
 	}
 	page, err := strconv.Atoi(req.req.QueryParams.Get("page"))
 	if err != nil {
-		logger.Info("无法解析字段: " + err.Error())
 		return nil, err
 	}
 	size, err := strconv.Atoi(req.req.QueryParams.Get("page_size"))
 	if err != nil {
-		logger.Info("无法解析字段: " + err.Error())
 		return nil, err
 	}
 	var result Result
@@ -128,9 +120,6 @@ func (r *Hunter) Get(req *GetDataReq) (*Result, error) {
 }
 
 func (r *Hunter) Export(items []*hunter.Item, filename string) error {
-	if len(items) == 0 {
-		return nil
-	}
 	var headers = []any{"ID", "DOMAIN", "Port", "IP", "URL", "Protocol", "Title", "Status_Code", "Company", "Component",
 		"Icp", "os", "Banner", "Is_Risk", "Is_Web", "Location", "As_Org", "Isp", "Updated_At"}
 	var data = [][]any{headers}
@@ -173,7 +162,6 @@ func (r *Hunter) Export(items []*hunter.Item, filename string) error {
 		data = append(data, tmpItem)
 	}
 	if err := utils.SaveToExcel(data, filename); err != nil {
-		logger.Info("保存文件至本地失败: " + err.Error())
 		return err
 	}
 	return nil

@@ -3,7 +3,6 @@ package aiqicha
 import (
 	"encoding/json"
 	"errors"
-	"fine/backend/logger"
 	"github.com/tidwall/gjson"
 	"io"
 	"net/http"
@@ -159,7 +158,6 @@ func (r *AiQiCha) Suggest(key string) ([]SuggestItem, error) {
 		var item SuggestItem
 		err := json.Unmarshal([]byte(company.Raw), &item)
 		if err != nil {
-			logger.Info(err.Error() + ": " + company.Raw)
 			continue
 		}
 		item.Name = strings.ReplaceAll(item.ResultStr, "<em>", "")
@@ -227,7 +225,6 @@ func (r *AiQiCha) GetStockChart(pid, drill string) (*Penetration, error) {
 		var item Shareholder
 		err := json.Unmarshal([]byte(shareholder.Raw), &item)
 		if err != nil {
-			logger.Info(err.Error() + ": " + shareholder.Raw)
 			continue
 		}
 		shareholders = append(shareholders, item)
@@ -237,7 +234,6 @@ func (r *AiQiCha) GetStockChart(pid, drill string) (*Penetration, error) {
 		var item InvestRecord
 		err := json.Unmarshal([]byte(investRecord.Raw), &item)
 		if err != nil {
-			logger.Info(err.Error() + ": " + investRecord.Raw)
 			continue
 		}
 		investRecords = append(investRecords, item)

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fine/backend/logger"
 	"github.com/tidwall/gjson"
 	"io"
 	"net/http"
@@ -890,7 +889,6 @@ func (r *TianYanCha) Suggest(key string) ([]SuggestItem, error) {
 		var item SuggestItem
 		err := json.Unmarshal([]byte(company.Raw), &item)
 		if err != nil {
-			logger.Info(err.Error() + ": " + company.Raw)
 			continue
 		}
 		suggestItem = append(suggestItem, item)
@@ -991,7 +989,6 @@ func (r *TianYanCha) getPenetration(id, direct string) ([]PenetrationItem, error
 		var item PenetrationItem
 		err := json.Unmarshal([]byte(company.Raw), &item)
 		if err != nil {
-			logger.Info(err.Error() + ": " + company.Raw)
 			continue
 		}
 		if item.ID != id {

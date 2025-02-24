@@ -117,7 +117,7 @@ func TestTime(t *testing.T) {
 func TestBridge_CreateTask(t *testing.T) {
 	app := application.DefaultApp
 	c := NewICPBridge(app)
-	if err := c.CreateTask("test", []string{"1"}, []string{"1"}); err != nil {
+	if err := c.TaskCreate("test", []string{"1"}, []string{"1"}); err != nil {
 		t.Error(err)
 		return
 	}
@@ -141,7 +141,8 @@ func TestBridge_GetByTaskID(t *testing.T) {
 func TestBridge_executeTask(t *testing.T) {
 	app := application.DefaultApp
 	c := NewICPBridge(app)
-	c.executeTask(643309493575749)
+	c.TaskRun(647116238929989)
+	select {}
 }
 
 // CancelableSleep 封装支持取消的 Sleep 操作

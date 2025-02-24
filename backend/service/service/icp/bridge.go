@@ -1,12 +1,13 @@
 package icp
 
 import (
-	"context"
+	ctx "context"
 	"fine/backend/application"
 	"fine/backend/config"
 	"fine/backend/constant/event"
 	"fine/backend/constant/history"
 	"fine/backend/constant/status"
+	"fine/backend/context"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
@@ -25,6 +26,16 @@ import (
 	"time"
 )
 
+type TaskState struct {
+	task          *models.ICPTask
+	ctx           *context.StatusContext
+	mutex         sync.Mutex
+	baseTimeSpent float64
+	startTime     time.Time
+	ticker        *time.Ticker
+	resultChan    chan *models.ICPTaskSlice
+}
+
 type Bridge struct {
 	app           *application.Application
 	icp           *ICP
@@ -33,13 +44,8 @@ type Bridge struct {
 	icpTaskRepo   repository.IcpTaskRepository
 	historyRepo   repository.HistoryRepository
 	cacheTotal    repository.CacheTotal
-
-	taskControlCh map[int64]int // 任务控制通道，用于暂停、继续和终止任务
-	taskMutex     sync.Mutex    // 任务操作锁
-
-	limiter chan struct{}
-	wg      sync.WaitGroup
-	wg2     sync.WaitGroup
+	mutex         sync.Mutex
+	taskState     map[int64]*TaskState
 }
 
 func NewICPBridge(app *application.Application) *Bridge {
@@ -51,9 +57,7 @@ func NewICPBridge(app *application.Application) *Bridge {
 		icpTaskRepo:   repository.NewIcpTaskRepository(db),
 		historyRepo:   repository.NewHistoryRepository(db),
 		cacheTotal:    repository.NewCacheTotal(db),
-
-		taskControlCh: make(map[int64]int),
-		limiter:       make(chan struct{}, app.Config.ICP.Concurrency),
+		taskState:     map[int64]*TaskState{},
 	}
 	icpClient := NewClient()
 	bridgeClient.icp = icpClient
@@ -151,7 +155,7 @@ func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int, servic
 }
 
 func (r *Bridge) query(pageNum, pageSize int, serviceType string, query string, authErrorRetryNum, forbiddenErrorRetryNum uint64) (*Result, error) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := ctx.WithCancel(ctx.Background())
 	var err1 error
 	result, _ := backoff.RetryWithData(func() (*Result, error) {
 		if result, err3 := r.icp.PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).Query(query); err3 != nil {
@@ -242,7 +246,7 @@ func (r *Bridge) Export(pageID int64) (int64, error) {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := ctx.WithCancel(ctx.Background())
 	var err1 error
 	go func() {
 		result, _ := backoff.RetryWithData(func() (*Result, error) {
@@ -352,134 +356,190 @@ type GetTaskListResult struct {
 	Items []*icp.Task
 }
 
-func (r *Bridge) executeTask(taskID int64) {
-	task, err := r.icpTaskRepo.GetByTaskID(taskID, true)
+func (r *Bridge) taskExecute(ts *TaskState) {
+	go r.taskMonitor(ts)
+	go r.taskProcessSlices(ts)
+}
+
+func (r *Bridge) taskInitState(taskID int64, resetTask bool) (*TaskState, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	task, err := r.icpTaskRepo.GetByTaskID(taskID, false)
 	if err != nil {
 		r.app.Logger.Error(err)
-		return
+		return nil, err
 	}
-	r.taskMutex.Lock()
-	r.taskControlCh[taskID] = status.Running
-	r.taskMutex.Unlock()
-	task.Task.CreatedAt = task.BaseModel.CreatedAt
-	task.Status = status.Running
-	task.Message = ""
-	if err := r.icpTaskRepo.UpdateFullSaveAssociations(task); err != nil {
+	if ts, exists := r.taskState[taskID]; exists {
+		select {
+		case <-ts.ctx.Running():
+			return nil, errors.New("任务已在运行中")
+		case <-ts.ctx.Pausing():
+			return nil, errors.New("任务正在暂停中，稍后重试")
+		default:
+
+		}
+	}
+	if resetTask {
+		if err := r.icpTaskRepo.ResetTask(taskID); err != nil {
+			return nil, err
+		}
+	}
+	task, err = r.icpTaskRepo.GetByTaskID(taskID, false)
+	if err != nil {
 		r.app.Logger.Error(err)
-		return
+		return nil, err
 	}
+	sCtx := context.NewStatusContext()
+	t := &TaskState{
+		task:          task,
+		ctx:           sCtx,
+		baseTimeSpent: task.TimeSpent,
+		ticker:        time.NewTicker(5 * time.Second),
+		startTime:     time.Now(),
+		resultChan:    make(chan *models.ICPTaskSlice, 1),
+	}
+	r.taskState[taskID] = t
+	return t, nil
+}
+
+func (r *Bridge) taskUpdateProgress(ts *TaskState, stat int, delta int64) error {
+	ts.mutex.Lock()
+	defer ts.mutex.Unlock()
+	var errMsg string
+	if stat == status.Error {
+		if ts.ctx.Err != nil {
+			errMsg = ts.ctx.Err.Error()
+		} else {
+			errMsg = ""
+		}
+	}
+	ts.task.Status = stat
+	ts.task.Message = errMsg
+	ts.task.TimeSpent = time.Since(ts.startTime).Seconds() + ts.baseTimeSpent
+	ts.task.Current += delta
 	event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-		ID:     taskID,
-		Status: status.Running,
-		Data:   task.Task,
+		ID:     ts.task.TaskID,
+		Status: stat,
+		Data:   ts.task.Task,
+		Error:  errMsg,
 	})
-	baseTimeSpent := task.TimeSpent
-	start := time.Now()
-	var wg2 sync.WaitGroup
-	for _, slice := range task.TaskSlices {
+	return r.icpTaskRepo.Update(ts.task)
+}
+
+func (r *Bridge) taskTicker(ts *TaskState) error {
+	ts.mutex.Lock()
+	defer ts.mutex.Unlock()
+	ts.task.Task.TimeSpent = time.Since(ts.startTime).Seconds() + ts.baseTimeSpent
+	event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
+		ID:     ts.task.TaskID,
+		Status: status.Running,
+		Data:   ts.task.Task,
+	})
+	return r.icpTaskRepo.Update(ts.task)
+}
+
+func (r *Bridge) taskProcessSlices(ts *TaskState) {
+	ts.ctx.SendRunning()
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, r.app.Config.ICP.Concurrency) // 控制并发数
+	// TODO 不一次性取出
+	slices, _ := r.icpTaskRepo.GetSliceByTaskID(ts.task.TaskID)
+	for _, slice := range slices {
 		if slice.Status == status.Stopped {
 			continue
 		}
-		r.taskMutex.Lock()
-		if r.taskControlCh[taskID] == status.Pausing {
-			r.taskMutex.Unlock()
-			task.Status = status.Paused
-			task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
-			_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
-			event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-				ID:     taskID,
-				Status: status.Paused,
-				Data:   task.Task,
-			})
-			return
+		select {
+		case sem <- struct{}{}:
+			wg.Add(1)
+			select {
+			case <-ts.ctx.Running():
+				go func(s *models.ICPTaskSlice) {
+					defer func() {
+						<-sem
+						wg.Done()
+					}()
+					result, err := r.queryAll(s.ServiceType, s.UnitToQuery)
+					if err != nil {
+						ts.ctx.SendError(err)
+						return
+					}
+					select {
+					case <-ts.ctx.Running():
+						for _, item := range result.Items {
+							s.Items = append(s.Items, &models.ItemWithID{TaskID: ts.task.TaskID, Item: item})
+						}
+						s.Status = status.Stopped
+						ts.resultChan <- s
+					default:
+					}
+				}(slice)
+			case <-ts.ctx.Pausing():
+				ts.ctx.SendPause()
+			default:
+			}
 		}
-		if r.taskControlCh[taskID] == status.Error {
-			r.taskMutex.Unlock()
-			task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
-			_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
-			event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-				ID:     taskID,
-				Status: status.Error,
-				Data:   task.Task,
-			})
-			return
-		}
-		r.taskMutex.Unlock()
-		r.limiter <- struct{}{}
-		r.wg.Add(1)
-		wg2.Add(1)
-		go func(slice *models.ICPTaskSlice) {
-			defer func() {
-				r.wg.Done()
-				wg2.Done()
-				<-r.limiter
-			}() // 释放并发令牌
-			r.taskMutex.Lock()
-			if r.taskControlCh[taskID] != status.Waiting && r.taskControlCh[taskID] != status.Running {
-				r.taskMutex.Unlock()
-				return
-			}
-			r.taskMutex.Unlock()
-			// 查询操作
-			result, err := r.queryAll(slice.ServiceType, slice.UnitToQuery)
-			r.taskMutex.Lock()
-			if r.taskControlCh[taskID] != status.Running {
-				r.taskMutex.Unlock()
-				return
-			}
-			if err != nil {
-				r.taskControlCh[taskID] = status.Error
-				r.taskMutex.Unlock()
-				r.app.Logger.Error(err)
-				task.Status = status.Error
-				task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
-				task.Message = err.Error()
-				_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
-				event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-					ID:     taskID,
-					Status: status.Error,
-					Data:   task.Task,
-				})
-				return
-			}
-			r.taskMutex.Unlock()
-			for _, item := range result.Items {
-				slice.Items = append(slice.Items, &models.ItemWithID{Item: item, TaskID: taskID})
-			}
-			slice.Status = status.Stopped
-			r.taskMutex.Lock()
-			task.Current++
-			if r.taskControlCh[taskID] == status.Running {
-				task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
-				_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
-				event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-					ID:     taskID,
-					Status: status.Running,
-					Data:   task.Task,
-				})
-			}
-			r.taskMutex.Unlock()
-		}(slice)
 	}
-	wg2.Wait()
-	r.taskMutex.Lock()
-	if r.taskControlCh[taskID] == status.Error {
-		task.Task.Status = status.Error
+	wg.Wait()
+	select {
+	case <-ts.ctx.Running():
+		ts.ctx.SendStop()
+	case <-ts.ctx.Pausing():
+		ts.ctx.SendPause()
+	default:
 	}
-	if r.taskControlCh[taskID] == status.Running || r.taskControlCh[taskID] == status.Pausing || r.taskControlCh[taskID] == status.Paused {
-		task.Task.Status = status.Stopped
-	}
-	task.Task.TimeSpent = time.Since(start).Seconds() + baseTimeSpent
-	_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
-	event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-		ID:     taskID,
-		Status: task.Task.Status,
-		Data:   task.Task,
-	})
-	r.taskMutex.Unlock()
+	ts.ticker.Stop()
 }
 
-func (r *Bridge) GetTaskList(taskName string, pageNum, pageSize int) (*GetTaskListResult, error) {
+func (r *Bridge) taskMonitor(ts *TaskState) {
+	for {
+		select {
+		case <-ts.ctx.Done():
+			return
+		case <-ts.ctx.Error():
+			if err := r.taskUpdateProgress(ts, status.Error, 0); err != nil {
+				r.app.Logger.Error(err)
+			}
+			return
+		case <-ts.ctx.Stop():
+			if err := r.taskUpdateProgress(ts, status.Stopped, 0); err != nil {
+				r.app.Logger.Error(err)
+			}
+			return
+		case <-ts.ctx.Paused():
+			if err := r.taskUpdateProgress(ts, status.Paused, 0); err != nil {
+				r.app.Logger.Error(err)
+			}
+			return
+		case <-ts.ctx.Pausing():
+			if err := r.taskUpdateProgress(ts, status.Pausing, 0); err != nil {
+				r.app.Logger.Error(err)
+			}
+		case <-ts.ctx.Running():
+			select {
+			case slice, ok := <-ts.resultChan:
+				if ok {
+					ts.mutex.Lock()
+					if err := r.icpTaskRepo.UpdateTaskSlice(slice); err != nil {
+						r.app.Logger.Error(err)
+					}
+					ts.mutex.Unlock()
+					if err := r.taskUpdateProgress(ts, status.Running, 1); err != nil {
+						r.app.Logger.Error(err)
+					}
+				}
+			case <-ts.ticker.C:
+				if err := r.taskTicker(ts); err != nil {
+					r.app.Logger.Error(err)
+				}
+			default:
+			}
+		default:
+
+		}
+	}
+}
+
+func (r *Bridge) TaskGetList(taskName string, pageNum, pageSize int) (*GetTaskListResult, error) {
 	if taskName != "" {
 		if err := r.historyRepo.CreateHistory(&models.History{Key: taskName, Type: history.ICP}); err != nil {
 			r.app.Logger.Warn(err.Error())
@@ -502,7 +562,7 @@ func (r *Bridge) GetTaskList(taskName string, pageNum, pageSize int) (*GetTaskLi
 	}, nil
 }
 
-func (r *Bridge) GetTaskByID(taskID int64) (*icp.Task, error) {
+func (r *Bridge) TaskGetByID(taskID int64) (*icp.Task, error) {
 	task, err := r.icpTaskRepo.GetByTaskID(taskID, false)
 	if err != nil {
 		r.app.Logger.Error(err)
@@ -511,7 +571,7 @@ func (r *Bridge) GetTaskByID(taskID int64) (*icp.Task, error) {
 	return task.Task, nil
 }
 
-func (r *Bridge) CreateTask(taskName string, targets []string, serviceTypes []string) error {
+func (r *Bridge) TaskCreate(taskName string, targets []string, serviceTypes []string) error {
 	serviceTypes = utils.RemoveEmptyAndDuplicateString(serviceTypes)
 	if len(serviceTypes) == 0 {
 		msg := "查询类型不能为空"
@@ -547,7 +607,7 @@ func (r *Bridge) CreateTask(taskName string, targets []string, serviceTypes []st
 		Task: &icp.Task{
 			Name:         taskName,
 			TaskID:       taskID,
-			Total:        len(targets) * len(serviceTypes),
+			Total:        int64(len(targets) * len(serviceTypes)),
 			Status:       status.Waiting,
 			ServiceTypes: strings.Join(serviceTypes, "\n"),
 			Targets:      strings.Join(targets, "\n"),
@@ -560,71 +620,39 @@ func (r *Bridge) CreateTask(taskName string, targets []string, serviceTypes []st
 	return nil
 }
 
-func (r *Bridge) RunTask(taskID int64) error {
-	task, err := r.icpTaskRepo.GetByTaskID(taskID, true)
+func (r *Bridge) TaskRun(taskID int64) error {
+	ts, err := r.taskInitState(taskID, true)
 	if err != nil {
-		r.app.Logger.Error(err)
 		return err
 	}
-	if task.Status == status.Pausing {
-		return errors.New("任务正在暂停中，稍后重试")
+	if err := r.taskUpdateProgress(ts, status.Running, 0); err != nil {
+		return err
 	}
-	if task.Status == status.Stopped || task.Status == status.Error || task.Status == status.Paused {
-		if err := r.icpTaskRepo.ResetTask(taskID); err != nil {
-			r.app.Logger.Error(err)
-			return err
-		}
-	}
-	r.app.Logger.Debug(taskID)
-	r.taskMutex.Lock()
-	if _, ok := r.taskControlCh[taskID]; !ok {
-		r.app.Logger.Debug("make new chan")
-		r.taskControlCh[taskID] = status.Waiting
-	}
-	r.taskMutex.Unlock()
-	var wg sync.WaitGroup
-	wg.Add(1)
 	go func() {
-		r.app.Logger.Debug("executeTask")
-		defer wg.Done()
-		r.executeTask(taskID)
-		r.app.Logger.Debug("executeTask down")
+		r.taskExecute(ts)
 	}()
-	wg.Wait()
 	return nil
 }
 
-func (r *Bridge) PauseTask(taskID int64) error {
-	r.taskMutex.Lock()
-	defer r.taskMutex.Unlock()
-	task, _ := r.icpTaskRepo.GetByTaskID(taskID, false)
-	if task.Status == status.Pausing {
-		return nil
-	}
-	task.Status = status.Pausing
-	_ = r.icpTaskRepo.UpdateFullSaveAssociations(task)
-	if _, ok := r.taskControlCh[taskID]; ok {
-		r.taskControlCh[taskID] = status.Pausing
-		event.EmitV2(event.ICPBatchQueryStatusUpdate, event.EventDetail{
-			ID:     taskID,
-			Status: status.Pausing,
-			Data:   task,
-		})
+func (r *Bridge) TaskPause(taskID int64) error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	if ts, ok := r.taskState[taskID]; ok {
+		ts.ctx.SendPausing()
 		return nil
 	}
 	return errors.New("任务不存在或已结束")
 }
 
-func (r *Bridge) PauseAllTask() {
-	r.taskMutex.Lock()
-	defer r.taskMutex.Unlock()
-	for taskID := range r.taskControlCh {
-		r.taskControlCh[taskID] = status.Paused
+func (r *Bridge) TaskPauseAll() {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	for taskID := range r.taskState {
+		r.taskState[taskID].ctx.SendPausing()
 	}
-	r.wg.Wait()
 }
 
-func (r *Bridge) ResumeTask(taskID int64) error {
+func (r *Bridge) TaskResume(taskID int64) error {
 	task, err := r.icpTaskRepo.GetByTaskID(taskID, true)
 	if err != nil {
 		r.app.Logger.Error(err)
@@ -633,17 +661,20 @@ func (r *Bridge) ResumeTask(taskID int64) error {
 	if task.Status != status.Paused && task.Status != status.Error {
 		return errors.New("非已暂停任务")
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
+	ts, err := r.taskInitState(taskID, false)
+	if err != nil {
+		return err
+	}
+	if err := r.taskUpdateProgress(ts, status.Running, 0); err != nil {
+		return err
+	}
 	go func() {
-		defer wg.Done()
-		r.executeTask(taskID)
+		r.taskExecute(ts)
 	}()
-	wg.Wait()
 	return nil
 }
 
-func (r *Bridge) DeleteTask(taskID int64) error {
+func (r *Bridge) TaskDelete(taskID int64) error {
 	if err := r.icpTaskRepo.Delete(taskID); err != nil {
 		r.app.Logger.Error(err)
 		return err
@@ -656,7 +687,7 @@ func (r *Bridge) GetRunningTaskNum() int {
 	return len(tasks)
 }
 
-func (r *Bridge) UpdateTaskName(taskID int64, taskName string) error {
+func (r *Bridge) TaskUpdateName(taskID int64, taskName string) error {
 	if err := r.icpTaskRepo.UpdateName(taskID, taskName); err != nil {
 		r.app.Logger.Error(err)
 		return err
@@ -673,7 +704,7 @@ func (r *Bridge) GetModel() *models.ItemWithID {
 	return nil
 }
 
-func (r *Bridge) GetTaskData(unitName string, pageNum, pageSize int, taskID int64) (*GetTaskDataResult, error) {
+func (r *Bridge) TaskGetData(unitName string, pageNum, pageSize int, taskID int64) (*GetTaskDataResult, error) {
 	if unitName != "" {
 		if err := r.historyRepo.CreateHistory(&models.History{Key: unitName, Type: history.ICP}); err != nil {
 			r.app.Logger.Warn(err.Error())
@@ -690,7 +721,7 @@ func (r *Bridge) GetTaskData(unitName string, pageNum, pageSize int, taskID int6
 	}, nil
 }
 
-func (r *Bridge) ExportTaskData(key string, taskID int64) (int64, error) {
+func (r *Bridge) TaskExportData(key string, taskID int64) (int64, error) {
 	itemWithIDs, err := r.icpTaskRepo.FindResultByPartialKey(key, taskID)
 	if err != nil {
 		return 0, err

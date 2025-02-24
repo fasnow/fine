@@ -14,10 +14,12 @@ type IcpTaskRepository interface {
 	Delete(taskID int64) error
 	UpdateAllTaskToPaused() error
 	UpdateName(taskID int64, name string) error
-	UpdateFullSaveAssociations(task *models.ICPTask) error
+	Update(task *models.ICPTask) error
+	UpdateTaskSlice(slices *models.ICPTaskSlice) error
 	FindByPartialKey(key string, pageNum, pageSize int) ([]*models.ICPTask, int, error)
 	FindResultByPartialKey(key string, taskID int64) ([]*models.ItemWithID, error)
 	GetRunningTasks() ([]*models.ICPTask, error)
+	GetSliceByTaskID(taskID int64) ([]*models.ICPTaskSlice, error)
 	ResetTask(taskID int64) error
 }
 
@@ -135,6 +137,14 @@ func (r *IcpTaskRepositoryImpl) GetByTaskID(taskID int64, associationDetails boo
 	return task, nil
 }
 
+func (r *IcpTaskRepositoryImpl) GetSliceByTaskID(taskID int64) ([]*models.ICPTaskSlice, error) {
+	var items []*models.ICPTaskSlice
+	if err := r.db.Model(&models.ICPTaskSlice{}).Where("task_id = ?", taskID).Find(&items).Error; err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 func (r *IcpTaskRepositoryImpl) UpdateName(taskID int64, name string) error {
 	if err := r.db.Model(&models.ICPTask{}).Where("task_id = ?", taskID).Update("name", name).Error; err != nil {
 		return err
@@ -142,11 +152,12 @@ func (r *IcpTaskRepositoryImpl) UpdateName(taskID int64, name string) error {
 	return nil
 }
 
-func (r *IcpTaskRepositoryImpl) UpdateFullSaveAssociations(task *models.ICPTask) error {
-	if err := r.db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(task).Error; err != nil {
-		return err
-	}
-	return nil
+func (r *IcpTaskRepositoryImpl) Update(task *models.ICPTask) error {
+	return r.db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(task).Error
+}
+
+func (r *IcpTaskRepositoryImpl) UpdateTaskSlice(slice *models.ICPTaskSlice) error {
+	return r.db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(slice).Error
 }
 
 func (r *IcpTaskRepositoryImpl) UpdateAllTaskToPaused() error {

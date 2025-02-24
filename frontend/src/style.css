@@ -46,3 +46,7 @@ body {
 /*!*    top: 30px !important;*!*/
 /*!*}*!*/
 
+.ant-tabs-tab{
+    -webkit-user-select: none;
+    cursor: default;
+}

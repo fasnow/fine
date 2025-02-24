@@ -19,11 +19,11 @@ import {formatTimeSpent} from '@/util/util';
 import {EventsOn} from "../../wailsjs/runtime";
 
 import {
-    CreateTask,
-    ExportTaskData, GetTaskByID, GetTaskData,
-    GetTaskList, PauseTask,
-    ResumeTask, RunTask,
-    UpdateTaskName
+    TaskCreate,
+    TaskExportData, TaskGetByID, TaskGetData,
+    TaskGetList, TaskPause,
+    TaskResume, TaskRun,
+    TaskUpdateName
 } from "../../wailsjs/go/icp/Bridge";
 import { WithIndex } from "@/component/Interface";
 import {event, icp, models} from "../../wailsjs/go/models";
@@ -83,20 +83,20 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
                     type="primary"
                     disabled={params.data.status === status.Running || params.data.status === status.Pausing}
                     onClick={()=>{
-                        RunTask(params.data.taskID)
+                        TaskRun(params.data.taskID)
                     }
                     }>开始</Button>
                 <Button
                     size={"small"}
                     type="primary"
                     disabled={!(params.data.status === status.Running)}
-                    onClick={() => PauseTask(params.data.taskID)
+                    onClick={() => TaskPause(params.data.taskID)
                     }>{params.data.status === status.Running? "暂停" : params.data.status === status.Pausing? "暂停中" : "暂停"}</Button>
                 <Button
                     size={"small"}
                     type="primary"
                     disabled={!(params.data.status === status.Paused || params.data.status === status.Error)}
-                    onClick={()=>ResumeTask(params.data.taskID)}
+                    onClick={()=>TaskResume(params.data.taskID)}
                 >继续</Button>
                 <Button
                     size={"small"}
@@ -104,7 +104,7 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
                     onClick={()=>{
                         taskID.current = params.data.taskID
                         setOpen(true)
-                        GetTaskByID(taskID.current)
+                        TaskGetByID(taskID.current)
                             .then(r=>{
                                 setTaskName(r.name)
                                 setServiceTypes(r.serviceTypes.split("\n"))
@@ -145,7 +145,6 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
         },
 
         { headerName: '进度', field: "current", width: 100, cellRenderer:(params: ICellRendererParams)=>{
-            console.log(params)
                 return `${params.data.current}/${params.data.total}`
             }},
         { headerName: '用时', field: "timeSpent", width: 100,cellRenderer:(params: ICellRendererParams)=>{
@@ -191,6 +190,7 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
     useEffect(() => {
         getTaskList("",currentPageNum ,currentPageSize)
         EventsOn(event.ICPBatchQueryStatusUpdate,(data:EventDetail) => {
+            console.log(data.Data)
             updateCell(data.Data)
         })
     }, []);
@@ -215,7 +215,7 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
         if (newPage !== currentPageNum && newSize === currentPageSize) {
             setCurrentPageNum(newPage)
             setLoading(true)
-            GetTaskList(taskName, newPage, currentPageSize)
+            TaskGetList(taskName, newPage, currentPageSize)
                 .then(r=>{
                     const offset = (newPage-1) * currentPageSize
                     setTotal(r.Total)
@@ -253,7 +253,7 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
             taskID.current = 0
             return
         }
-        CreateTask(taskName,targets.split("\n"),serviceTypes)
+        TaskCreate(taskName,targets.split("\n"),serviceTypes)
             .then(()=>{
                 getTaskList("", currentPageNum, currentPageSize)
             })
@@ -267,7 +267,7 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
 
     const getTaskList = (taskName:string, pageNum:number, pageSize:number)=>{
         setLoading(true)
-        GetTaskList(taskName, pageNum, pageSize)
+        TaskGetList(taskName, pageNum, pageSize)
             .then(r=>{
                 const offset = (pageNum-1) * pageSize
                 setTotal(r.Total)
@@ -289,7 +289,7 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
     }
 
     const onCellValueChanged = (event:CellValueChangedEvent)=>{
-        UpdateTaskName(event.data.taskID, event.newValue || "")
+        TaskUpdateName(event.data.taskID, event.newValue || "")
             .catch(
                 e=>errorNotification("错误",e)
             )
@@ -477,7 +477,7 @@ const IcpTaskResult:React.FC<IcpTaskResultProps> = (props)=>{
         setCurrentPageNum(1)
         setTotal(0)
         setLoading(true)
-        GetTaskData(unitName, 1, pageSize,props.taskID || 0)
+        TaskGetData(unitName, 1, pageSize,props.taskID || 0)
             .then(r=>{
                 let index=0
                 setTotal(r.Total)
@@ -493,7 +493,7 @@ const IcpTaskResult:React.FC<IcpTaskResultProps> = (props)=>{
         if (newPage !== currentPageNum && newSize === currentPageSize) {
             setCurrentPageNum(newPage)
             setLoading(true)
-            GetTaskData(inputCache, newPage, currentPageSize,props.taskID || 0)
+            TaskGetData(inputCache, newPage, currentPageSize,props.taskID || 0)
                 .then(r=>{
                     let index= (newPage - 1) * currentPageSize
                     setTotal(r.Total)
@@ -518,7 +518,7 @@ const IcpTaskResult:React.FC<IcpTaskResultProps> = (props)=>{
         setIsExporting(true)
         setDisable(true)
         try {
-            exportID.current = await ExportTaskData(inputCache,props.taskID || 0)
+            exportID.current = await TaskExportData(inputCache,props.taskID || 0)
         } catch (e) {
             errorNotification("导出结果", e)
             setDisable(false)

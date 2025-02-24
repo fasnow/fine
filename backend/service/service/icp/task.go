@@ -63,7 +63,7 @@ func (r *TaskManager) CreateTask(taskName string, targets []string, serviceTypes
 		Task: &icp.Task{
 			Name:         taskName,
 			TaskID:       taskID,
-			Total:        len(targets) * len(serviceTypes),
+			Total:        int64(len(targets) * len(serviceTypes)),
 			Status:       status.Waiting,
 			ServiceTypes: strings.Join(serviceTypes, "\n"),
 			Targets:      strings.Join(targets, "\n"),

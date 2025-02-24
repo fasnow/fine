@@ -11,7 +11,6 @@
     align-items: center;
     /* // 设置可拖动 */
     --wails-draggable: drag;
-    user-select: none;
     -webkit-user-select: none;
     cursor: default;
 }

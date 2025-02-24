@@ -125,8 +125,8 @@ jobs:
         with:
           files: |
             artifacts/**
-#          token: ${{ secrets.FINE_ACCESS_TOKEN }}
-          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+          token: ${{ secrets.FINE_ACCESS_TOKEN }}
+#          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |
             1. feature: ICP批量查询；
             2. feature: 爱企查；

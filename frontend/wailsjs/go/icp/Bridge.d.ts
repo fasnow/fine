@@ -5,15 +5,9 @@ import {models} from '../models';
 import {config} from '../models';
 import {time} from '../models';
 
-export function CreateTask(arg1:string,arg2:Array<string>,arg3:Array<string>):Promise<void>;
-
-export function DeleteTask(arg1:number):Promise<void>;
-
 export function Export(arg1:number):Promise<number>;
 
 export function ExportCache(arg1:string,arg2:number):Promise<number>;
-
-export function ExportTaskData(arg1:string,arg2:number):Promise<number>;
 
 export function GetItem():Promise<icp.Item>;
 
@@ -21,24 +15,30 @@ export function GetModel():Promise<models.ItemWithID>;
 
 export function GetRunningTaskNum():Promise<number>;
 
-export function GetTaskByID(arg1:number):Promise<icp.Task>;
-
-export function GetTaskData(arg1:string,arg2:number,arg3:number,arg4:number):Promise<icp.GetTaskDataResult>;
-
-export function GetTaskList(arg1:string,arg2:number,arg3:number):Promise<icp.GetTaskListResult>;
-
-export function PauseAllTask():Promise<void>;
-
-export function PauseTask(arg1:number):Promise<void>;
-
 export function Query(arg1:number,arg2:string,arg3:number,arg4:number,arg5:string):Promise<icp.Data>;
-
-export function ResumeTask(arg1:number):Promise<void>;
-
-export function RunTask(arg1:number):Promise<void>;
 
 export function SetProxy(arg1:config.Proxy):Promise<void>;
 
 export function SetProxyTimeout(arg1:time.Duration):Promise<void>;
 
-export function UpdateTaskName(arg1:number,arg2:string):Promise<void>;
+export function TaskCreate(arg1:string,arg2:Array<string>,arg3:Array<string>):Promise<void>;
+
+export function TaskDelete(arg1:number):Promise<void>;
+
+export function TaskExportData(arg1:string,arg2:number):Promise<number>;
+
+export function TaskGetByID(arg1:number):Promise<icp.Task>;
+
+export function TaskGetData(arg1:string,arg2:number,arg3:number,arg4:number):Promise<icp.GetTaskDataResult>;
+
+export function TaskGetList(arg1:string,arg2:number,arg3:number):Promise<icp.GetTaskListResult>;
+
+export function TaskPause(arg1:number):Promise<void>;
+
+export function TaskPauseAll():Promise<void>;
+
+export function TaskResume(arg1:number):Promise<void>;
+
+export function TaskRun(arg1:number):Promise<void>;
+
+export function TaskUpdateName(arg1:number,arg2:string):Promise<void>;

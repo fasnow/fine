@@ -9,9 +9,9 @@ type Manager struct {
 }
 
 func (r *Manager) CheckRunningTask() {
-	r.ICP.PauseAllTask()
+	r.ICP.TaskPauseAll()
 }
 
 func (r *Manager) PauseAllTask() {
-	r.ICP.PauseAllTask()
+	r.ICP.TaskPauseAll()
 }

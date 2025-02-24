@@ -3,6 +3,7 @@ package aiqicha
 import (
 	"encoding/json"
 	"errors"
+	"fine/backend/proxy/v2"
 	"github.com/tidwall/gjson"
 	"io"
 	"net/http"
@@ -203,6 +204,7 @@ func (r *AiQiCha) GetStockChart(pid, drill string) (*Penetration, error) {
 	request, _ := http.NewRequest("GET", "https://aiqicha.baidu.com/stockchart/stockchartAjax?"+params.Encode(), nil)
 	request.Header.Add("Cookie", r.cookie)
 	request.Header.Add("Referer", "https://aiqicha.baidu.com/")
+	request.Header.Add("User-Agent", proxy.DefaultUA)
 	response, err := r.http.Do(request)
 	if err != nil {
 		return nil, err
@@ -258,4 +260,70 @@ func (r *AiQiCha) GetInvestRecord(pid string) ([]InvestRecord, error) {
 		return nil, err
 	}
 	return stockChart.InvestRecords, nil
+}
+
+type Copyright struct {
+	SoftwareName string          `json:"softwareName"`
+	ShortName    string          `json:"shortName"`
+	BatchNum     string          `json:"batchNum"`
+	SoftwareType string          `json:"softwareType"`
+	TypeCode     string          `json:"typeCode"`
+	RegDate      string          `json:"regDate"`
+	SoftwareWork string          `json:"softwareWork"`
+	RegNo        string          `json:"regNo"`
+	FirstDate    string          `json:"firstDate"`
+	Nationality  string          `json:"nationality"`
+	SoftID       string          `json:"softId"`
+	Detail       CopyrightDetail `json:"detail"`
+	DetailURL    string          `json:"detailUrl"`
+}
+
+type CopyrightDetail struct {
+	SoftwareName string `json:"softwareName"`
+	ShortName    string `json:"shortName"`
+	BatchNum     string `json:"batchNum"`
+	SoftwareType string `json:"softwareType"`
+	TypeCode     string `json:"typeCode"`
+	RegNo        string `json:"regNo"`
+	RegDate      string `json:"regDate"`
+	SoftwareWork string `json:"softwareWork"`
+	FirstDate    string `json:"firstDate"`
+	Nationality  string `json:"nationality"`
+}
+
+func (r *AiQiCha) GetCopyrightList(pid string, pageNum int) (total int64, list []*Copyright, err error) {
+	params := url.Values{}
+	params.Set("pid", pid)
+	params.Set("p", strconv.Itoa(pageNum))
+	request, _ := http.NewRequest("GET", "https://aiqicha.baidu.com/cs/copyrightAjax?"+params.Encode(), nil)
+	request.Header.Add("Cookie", r.cookie)
+	request.Header.Add("Referer", "https://aiqicha.baidu.com/")
+	request.Header.Add("User-Agent", proxy.DefaultUA)
+	response, err := r.http.Do(request)
+	if err != nil {
+		return 0, nil, err
+	}
+	if response.StatusCode != 200 {
+		return 0, nil, errors.New(response.Status)
+	}
+	t, err := io.ReadAll(response.Body)
+	if err != nil {
+		return 0, nil, err
+	}
+	tt := string(t)
+	var status = gjson.Get(tt, "status").Num
+	if status != 0 {
+		var message = gjson.Get(tt, "msg").String()
+		return 0, nil, errors.New(message)
+	}
+	total = gjson.Get(tt, "data.total").Int()
+	list = make([]*Copyright, 0)
+	for _, copyrights := range gjson.Get(tt, "data.list").Array() {
+		var copyright = &Copyright{}
+		if err := json.Unmarshal([]byte(copyrights.Raw), &copyright); err != nil {
+			continue
+		}
+		list = append(list, copyright)
+	}
+	return total, list, nil
 }

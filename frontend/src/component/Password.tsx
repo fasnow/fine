@@ -7,6 +7,7 @@ interface PasswordProps {
     value: string
     width?: string | number
     onSubmit: (path:string)=>Promise<boolean>
+    placeholder?: string,
 }
 
 const Password:React.FC<PasswordProps>=(props)=>{
@@ -36,7 +37,7 @@ const Password:React.FC<PasswordProps>=(props)=>{
             props.label &&
             <span style={{display: "inline-block", textAlign: "left", paddingRight: "5px", height: "24px", width: props.labelWidth || 'fit-content'}}>{props.label}</span>
         }
-        <Input.Password style={{width: "400px", marginRight: "10px"}} value={key} onChange={(e) => { if (editable) setKey(e.target.value) }} size={"small"} />
+        <Input.Password placeholder={props.placeholder} style={{width: "400px", marginRight: "10px"}} value={key} onChange={(e) => { if (editable) setKey(e.target.value) }} size={"small"} />
         <Flex gap={10}>
             {
                 !editable ?

@@ -648,6 +648,9 @@ func (r *Bridge) TaskPause(taskID int64) error {
 	defer r.mutex.Unlock()
 	if ts, ok := r.taskState[taskID]; ok {
 		ts.ctx.SendPausing()
+		if err := r.taskUpdateProgress(ts, status.Pausing, 0); err != nil {
+			r.app.Logger.Error(err)
+		}
 		return nil
 	}
 	return errors.New("任务不存在或已结束")

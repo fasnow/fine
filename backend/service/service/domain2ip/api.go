@@ -59,6 +59,7 @@ type IPDetail struct {
 
 func (r *IP2Domain) GetIPDetail(ip string) (*IPDetail, error) {
 	request, err := http.NewRequest("GET", "https://ip-moe.zerodream.net/?ip="+ip, nil)
+	request.Header.Add("User-Agent", proxy.DefaultUA)
 	if err != nil {
 		return nil, err
 	}

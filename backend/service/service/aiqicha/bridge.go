@@ -52,3 +52,7 @@ func (r *Bridge) GetShareholder(pid string) ([]Shareholder, error) {
 func (r *Bridge) GetInvestRecord(pid string) ([]InvestRecord, error) {
 	return r.aiQiCha.GetInvestRecord(pid)
 }
+
+func (r *Bridge) GetCopyrightList(pid string, pageNum int) (int64, []*Copyright, error) {
+	return r.aiQiCha.GetCopyrightList(pid, pageNum)
+}

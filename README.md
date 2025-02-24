@@ -8,7 +8,7 @@
 
 网络空间资产测绘、ICP备案、天眼查股权结构图、IP138域名解析与IP反查、外部HTTP调用与小程序反编译。
 
-设置认证信息，天眼查为auth_token，爱企查为cookie。ICP批量查询务必使用代理池(如：https://github.com/thinkoaa/Deadpool)。
+设置认证信息，天眼查为auth_token，爱企查为cookie。ICP批量查询务必使用代理池(如：https://github.com/thinkoaa/Deadpool )。
 
 ![1](README_images/img_4.png)
 ![2](README_images/img.png)

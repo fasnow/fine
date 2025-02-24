@@ -360,24 +360,22 @@ const SettingPanel = () => {
 
     return <>
         <Flex gap={5} align={"center"} justify={"center"} style={{backgroundColor: '#f2f2f2'}}>
-            <Tooltip title={"设置"} placement={"right"}>
-                <Button onClick={onOpen}
-                        size={"small"}
-                        type={"link"}
-                        icon={<SettingOutlined />}
-                        style={{minWidth:'100px'}}
-                >{
-                    proxy.Enable &&
-                    <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
-                        <Flex>
+            <Button onClick={onOpen}
+                    size={"small"}
+                    type={"link"}
+                    icon={<SettingOutlined />}
+                    style={{minWidth:'100px'}}
+            >{
+                proxy.Enable &&
+                <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
+                    <Flex>
                             <span style={{ display: "flex", marginBottom: "5px" }}>
                                 <SendOutlined rotate={315} style={{ color: proxy?.Enable ? "red" : "" }} />
                             </span>
-                            {url}
-                        </Flex>
-                    </Tag>
-                }</Button>
-            </Tooltip>
+                        {url}
+                    </Flex>
+                </Tag>
+            }代理</Button>
         </Flex>
         <Modal
             footer={null}

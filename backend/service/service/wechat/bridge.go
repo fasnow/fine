@@ -76,10 +76,15 @@ func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
 	for _, entry := range entries {
 		if entry.IsDir() {
 			appid := entry.Name()
-			if appid == "__plugin__" {
+			if strings.HasPrefix(appid, "wx") {
 				continue
 			}
 			versionsPath := filepath.Join(r.app.Config.Wechat.Applet, appid)
+			if isDir, err := utils.IsDir(versionsPath); err != nil {
+				r.app.Logger.Error(err)
+			} else if !isDir {
+				continue
+			}
 			versionEntries, err2 := os.ReadDir(versionsPath)
 			if err2 != nil {
 				r.app.Logger.Error(err2)
@@ -92,7 +97,7 @@ func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
 				var file = filepath.Join(versionsPath, versionEntry.Name(), "__APP__.wxapkg")
 				fileInfo, err3 := os.Stat(file)
 				if err3 != nil {
-					//r.app.Logger.Info(err2.Error()) //不写入日志避免文件过大
+					//不写入日志避免文件过大
 					continue
 				}
 				versions = append(versions, &models.VersionDecompileTask{

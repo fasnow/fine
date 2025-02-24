@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const defaultUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+const DefaultUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 
 type Manager struct {
 	client   *http.Client
@@ -28,7 +28,7 @@ type CustomTransport struct {
 func (c *CustomTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// 设置默认 UA
 	if _, ok := req.Header["User-Agent"]; !ok {
-		req.Header.Set("User-Agent", defaultUA)
+		req.Header.Set("User-Agent", DefaultUA)
 	}
 
 	// 添加其他请求头
@@ -48,7 +48,7 @@ func NewManager() *Manager {
 	return &Manager{
 		client: &http.Client{
 			Transport: &CustomTransport{
-				Header: http.Header{"User-Agent": []string{defaultUA}},
+				Header: http.Header{"User-Agent": []string{DefaultUA}},
 			},
 			Timeout: 20 * time.Second,
 			// 禁止重定向

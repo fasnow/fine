@@ -397,7 +397,7 @@ export const Setting: React.FC = () => {
                       }
                   }}
             />
-            <Password label={'天眼查'} labelWidth={80} width={400} value={cfg.TianYanCha.Token}
+            <Password label={'天眼查'} placeholder={"auth_token"} labelWidth={80} width={400} value={cfg.TianYanCha.Token}
                   onSubmit={async (value) => {
                       try {
                           await SetTianYanChaAuth(value)
@@ -410,7 +410,7 @@ export const Setting: React.FC = () => {
                       }
                   }}
             />
-            <Password label={'爱企查'} labelWidth={80} width={400} value={cfg.AiQiCha.Cookie}
+            <Password label={'爱企查'} placeholder={"cookie"} labelWidth={80} width={400} value={cfg.AiQiCha.Cookie}
                   onSubmit={async (value) => {
                       try {
                           await SetAiQiChaAuth(value)

@@ -2,7 +2,9 @@ package aiqicha
 
 import (
 	"encoding/json"
+	"fine/backend/application"
 	"fine/backend/proxy/v2"
+	"fmt"
 	"testing"
 )
 
@@ -24,7 +26,7 @@ func TestTianYanCha_Suggest(t *testing.T) {
 }
 
 func TestAiqicha_GetStockChart(t *testing.T) {
-	c := NewClient("1")
+	c := NewClient(application.DefaultApp.Config.AiQiCha.Cookie)
 	m := proxy.NewManager()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
@@ -38,4 +40,20 @@ func TestAiqicha_GetStockChart(t *testing.T) {
 		return
 	}
 	t.Log(string(marshal))
+}
+
+func TestAiQiCha_GetCopyrightList(t *testing.T) {
+	c := NewClient(application.DefaultApp.Config.AiQiCha.Cookie)
+	m := proxy.NewManager()
+	m.SetProxy("http://127.0.0.1:8081")
+	c.UseProxyManager(m)
+	total, list, err := c.GetCopyrightList("28783255028393", 1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println(total)
+	for _, i := range list {
+		fmt.Println(i)
+	}
 }

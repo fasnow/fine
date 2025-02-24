@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"errors"
+	"fine/backend/proxy/v2"
 	"fine/backend/service/model/icp"
 	"fine/backend/utils"
 	"fmt"
@@ -28,6 +29,7 @@ func (r *ICP) SetTokenFromRemote() error {
 	req, _ = http.NewRequest("POST", getTokenUrl, strings.NewReader(postData.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Set("Referer", referer)
+	req.Header.Add("User-Agent", proxy.DefaultUA)
 	req.Header.Set("Cookie", "__jsluid_s = 6452684553c30942fcb8cff8d5aa5a5b")
 	response, err := r.http.Do(req)
 	if err != nil {

@@ -385,6 +385,7 @@ func (r *Bridge) taskInitState(taskID int64, resetTask bool) (*TaskState, error)
 		}
 	}
 	task, err = r.icpTaskRepo.GetByTaskID(taskID, false)
+	task.Task.CreatedAt = task.BaseModel.CreatedAt
 	if err != nil {
 		r.app.Logger.Error(err)
 		return nil, err
@@ -444,6 +445,7 @@ func (r *Bridge) taskProcessSlices(ts *TaskState) {
 	sem := make(chan struct{}, r.app.Config.ICP.Concurrency) // 控制并发数
 	// TODO 不一次性取出
 	slices, _ := r.icpTaskRepo.GetSliceByTaskID(ts.task.TaskID)
+shouldTerminal:
 	for _, slice := range slices {
 		if slice.Status == status.Stopped {
 			continue
@@ -473,8 +475,10 @@ func (r *Bridge) taskProcessSlices(ts *TaskState) {
 					default:
 					}
 				}(slice)
+			case <-ts.ctx.Paused():
+				break shouldTerminal
 			case <-ts.ctx.Pausing():
-				ts.ctx.SendPause()
+				break shouldTerminal
 			default:
 			}
 		}
@@ -487,32 +491,36 @@ func (r *Bridge) taskProcessSlices(ts *TaskState) {
 		ts.ctx.SendPause()
 	default:
 	}
-	ts.ticker.Stop()
 }
 
 func (r *Bridge) taskMonitor(ts *TaskState) {
+shouldTerminal:
 	for {
 		select {
 		case <-ts.ctx.Done():
-			return
+			break shouldTerminal
 		case <-ts.ctx.Error():
 			if err := r.taskUpdateProgress(ts, status.Error, 0); err != nil {
 				r.app.Logger.Error(err)
 			}
-			return
+			break shouldTerminal
 		case <-ts.ctx.Stop():
 			if err := r.taskUpdateProgress(ts, status.Stopped, 0); err != nil {
 				r.app.Logger.Error(err)
 			}
-			return
+			break shouldTerminal
 		case <-ts.ctx.Paused():
 			if err := r.taskUpdateProgress(ts, status.Paused, 0); err != nil {
 				r.app.Logger.Error(err)
 			}
-			return
+			break shouldTerminal
 		case <-ts.ctx.Pausing():
-			if err := r.taskUpdateProgress(ts, status.Pausing, 0); err != nil {
-				r.app.Logger.Error(err)
+			select {
+			case <-ts.ticker.C:
+				if err := r.taskTicker(ts); err != nil {
+					r.app.Logger.Error(err)
+				}
+			default:
 			}
 		case <-ts.ctx.Running():
 			select {
@@ -537,6 +545,7 @@ func (r *Bridge) taskMonitor(ts *TaskState) {
 
 		}
 	}
+	ts.ticker.Stop()
 }
 
 func (r *Bridge) TaskGetList(taskName string, pageNum, pageSize int) (*GetTaskListResult, error) {

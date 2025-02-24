@@ -130,11 +130,14 @@ export const Proxy:React.FC<ProxyPros> = (props) => {
                         >取消</Button>
                     </Flex>
             }
-            <Switch value={proxyConf.Enable} size="default" checkedChildren="开启"
-                unCheckedChildren="关闭"
-                onChange={v => {
-                    if (!editable) save(v)
-                }}
+            <Switch value={proxyConf.Enable}
+                    size="default"
+                    checkedChildren="开启"
+                    unCheckedChildren="关闭"
+                    style={{width:'max-content'}}
+                    onChange={v => {
+                        if (!editable) save(v)
+                    }}
             />
         </Flex>
     </Flex>
@@ -320,7 +323,7 @@ export const Setting: React.FC = () => {
             <Proxy labelWidth={40} proxy={cfg.ICP.Proxy} update={updateProxy}/>
             <Number labelWidth={200} label={"单查询时认证错误重试次数"} value={cfg.ICP.AuthErrorRetryNum1} onChange={value=>update({...cfg.ICP,AuthErrorRetryNum1: value as number} as config.ICP)}/>
             <Number labelWidth={200} label={"单查询时403错误误重试次数"} value={cfg.ICP.ForbiddenErrorRetryNum1} onChange={value=>update({...cfg.ICP,ForbiddenErrorRetryNum1: value as number} as config.ICP)}/>
-            <Number labelWidth={200} label={"批量查询时认证错误重试次数"} value={cfg.ICP.AuthErrorRetryNum2} onChange={value=>update({...cfg.ICP,AuthErrorRetryNum1: value as number} as config.ICP)}/>
+            <Number labelWidth={200} label={"批量查询时认证错误重试次数"} value={cfg.ICP.AuthErrorRetryNum2} onChange={value=>update({...cfg.ICP,AuthErrorRetryNum2: value as number} as config.ICP)}/>
             <Number labelWidth={200} label={"批量查询403错误误重试次数"} value={cfg.ICP.ForbiddenErrorRetryNum2} onChange={value=>update({...cfg.ICP,ForbiddenErrorRetryNum2: value as number} as config.ICP)}/>
             <Number labelWidth={200} label={"批量查询协程数"} value={cfg.ICP.Concurrency} onChange={value=>update({...cfg.ICP,Concurrency: value as number} as config.ICP)}/>
             <Number labelWidth={200} label={"批量查询代理超时（ns）"} width={200} value={cfg.ICP.Timeout} onChange={async value => {

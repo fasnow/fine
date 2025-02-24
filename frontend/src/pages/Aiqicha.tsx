@@ -986,10 +986,6 @@ class StockTreeVertical<T1,T2=T1> {
     }
 }
 
-const LabelCssProps: CSSProperties = {
-    textAlign: "left", paddingRight: "5px", minWidth: "70px", width: "70px", height: "24px"
-}
-
 const AuthSetting: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [editable, setEditable] = useState(false)
@@ -1215,7 +1211,7 @@ const TabContent: React.FC = () => {
                                         query(item.data.name, item.data.pid)
                                     },
                                     title: '相关企业',
-                                    filter: (v) => { return !!(v && v.toString().length >= 6) },
+                                    filter: (v) => { return !!(v && v.toString().length >= 4) },
                                     fetch: async (v) => {
                                         try {
                                             const response = await Suggest(v.toString());

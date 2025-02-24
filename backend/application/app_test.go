@@ -59,3 +59,11 @@ func TestContext(t *testing.T) {
 	}()
 	select {}
 }
+
+func TestUpdateCheck(t *testing.T) {
+	checkUpdate, err := DefaultApp.CheckUpdate()
+	if err != nil {
+		return
+	}
+	t.Log(checkUpdate)
+}

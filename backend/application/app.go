@@ -71,7 +71,7 @@ var defaultConfig = &config.Config{
 		Interval: 1000 * time.Millisecond,
 	},
 	ICP: config.ICP{
-		Timeout: 20 * time.Second,
+		Timeout: 10 * time.Second,
 		Proxy: config.Proxy{
 			Enable: false,
 			Type:   "http",

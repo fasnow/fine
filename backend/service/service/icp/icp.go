@@ -3,6 +3,7 @@ package icp
 import (
 	"encoding/base64"
 	"errors"
+	"fine/backend/application"
 	"fine/backend/proxy/v2"
 	"fine/backend/service/model/icp"
 	"net/http"
@@ -56,7 +57,9 @@ type Result struct {
 
 func NewClient() *ICP {
 	return &ICP{
-		http: &http.Client{},
+		http: &http.Client{
+			Timeout: application.DefaultApp.Config.Timeout, //  必须设置一个超时
+		},
 		sign: "eyJ0eXBlIjozLCJleHREYXRhIjp7InZhZnljb2RlX2ltYWdlX2tleSI6IjBlNzg0YzM4YmQ1ZTQwNWY4NzQyMTdiN2E5MjVjZjdhIn0sImUiOjE3MzA5NzkzNTgwMDB9.kyklc3fgv9Ex8NnlmkYuCyhe8vsLrXBcUUkEawZryGc",
 	}
 }

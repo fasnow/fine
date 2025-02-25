@@ -24,6 +24,7 @@ const (
 	DecompileWxMiniProgram    = "DecompileWxMiniProgram"
 	ICPBatchQuery             = "ICPBatchQuery"
 	ICPBatchQueryStatusUpdate = "ICPBatchQueryStatusUpdate"
+	AiQiCha                   = "AiQiCha"
 )
 
 type EventEnum struct {
@@ -43,6 +44,7 @@ type EventEnum struct {
 	DecompileWxMiniProgram    string
 	ICPBatchQuery             string
 	ICPBatchQueryStatusUpdate string
+	AiQiCha                   string
 }
 
 func init() {

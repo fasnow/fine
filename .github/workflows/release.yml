@@ -128,6 +128,8 @@ jobs:
           token: ${{ secrets.FINE_ACCESS_TOKEN }}
 #          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
           body: |
-            1. fix: 小程序获取Bug。
+            1. fix: 小程序获取Bug；
+            2. fix: ICP查询无法正确处理token过期情况；
+            3. fix: ICP批量任务无法暂停。
 
 

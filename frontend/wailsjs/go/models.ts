@@ -1,33 +1,45 @@
 export namespace aiqicha {
 	
-	export class CopyrightDetail {
-	    softwareName: string;
-	    shortName: string;
-	    batchNum: string;
-	    softwareType: string;
-	    typeCode: string;
-	    regNo: string;
-	    regDate: string;
-	    softwareWork: string;
-	    firstDate: string;
-	    nationality: string;
+	export class Branch {
+	    entName: string;
+	    logo: string;
+	    logoWord: string;
+	    entCoreName: string;
+	    legalPerson: string;
+	    personLink: string;
+	    personId: string;
+	    legalPersonLogo: string;
+	    legalPersonLogoWord: string;
+	    compNum: number;
+	    compNumLink: string;
+	    startDate: string;
+	    regCapital: string;
+	    openStatus: string;
+	    pid: string;
+	    entLink: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new CopyrightDetail(source);
+	        return new Branch(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.softwareName = source["softwareName"];
-	        this.shortName = source["shortName"];
-	        this.batchNum = source["batchNum"];
-	        this.softwareType = source["softwareType"];
-	        this.typeCode = source["typeCode"];
-	        this.regNo = source["regNo"];
-	        this.regDate = source["regDate"];
-	        this.softwareWork = source["softwareWork"];
-	        this.firstDate = source["firstDate"];
-	        this.nationality = source["nationality"];
+	        this.entName = source["entName"];
+	        this.logo = source["logo"];
+	        this.logoWord = source["logoWord"];
+	        this.entCoreName = source["entCoreName"];
+	        this.legalPerson = source["legalPerson"];
+	        this.personLink = source["personLink"];
+	        this.personId = source["personId"];
+	        this.legalPersonLogo = source["legalPersonLogo"];
+	        this.legalPersonLogoWord = source["legalPersonLogoWord"];
+	        this.compNum = source["compNum"];
+	        this.compNumLink = source["compNumLink"];
+	        this.startDate = source["startDate"];
+	        this.regCapital = source["regCapital"];
+	        this.openStatus = source["openStatus"];
+	        this.pid = source["pid"];
+	        this.entLink = source["entLink"];
 	    }
 	}
 	export class Copyright {
@@ -42,7 +54,6 @@ export namespace aiqicha {
 	    firstDate: string;
 	    nationality: string;
 	    softId: string;
-	    detail: CopyrightDetail;
 	    detailUrl: string;
 	
 	    static createFrom(source: any = {}) {
@@ -62,29 +73,9 @@ export namespace aiqicha {
 	        this.firstDate = source["firstDate"];
 	        this.nationality = source["nationality"];
 	        this.softId = source["softId"];
-	        this.detail = this.convertValues(source["detail"], CopyrightDetail);
 	        this.detailUrl = source["detailUrl"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
-	
 	export class InvestRecord {
 	    pid: string;
 	    entName: string;
@@ -539,6 +530,7 @@ export namespace event {
 	    DecompileWxMiniProgram: string;
 	    ICPBatchQuery: string;
 	    ICPBatchQueryStatusUpdate: string;
+	    AiQiCha: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new EventEnum(source);
@@ -562,6 +554,7 @@ export namespace event {
 	        this.DecompileWxMiniProgram = source["DecompileWxMiniProgram"];
 	        this.ICPBatchQuery = source["ICPBatchQuery"];
 	        this.ICPBatchQueryStatusUpdate = source["ICPBatchQueryStatusUpdate"];
+	        this.AiQiCha = source["AiQiCha"];
 	    }
 	}
 

@@ -8,25 +8,22 @@ import (
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/service/model/exportlog"
 	quakeModel "fine/backend/service/model/quake"
 	service2 "fine/backend/service/service"
-	"fine/backend/utils"
+	"fine/backend/service/service/exportlog"
 	"github.com/cenkalti/backoff/v4"
 
-	"fmt"
 	"github.com/yitter/idgenerator-go/idgen"
-	"path/filepath"
 	"time"
 )
 
 type Bridge struct {
-	app           *application.Application
-	quake         *Quake
-	cacheTotal    repository.CacheTotal
-	quakeRepo     repository.QuakeRepository
-	exportLogRepo repository.ExportLogRepository
-	historyRepo   repository.HistoryRepository
+	app             *application.Application
+	quake           *Quake
+	cacheTotal      repository.CacheTotal
+	quakeRepo       repository.QuakeRepository
+	historyRepo     repository.HistoryRepository
+	exportLogBridge *exportlog.Bridge
 }
 
 func NewQuakeBridge(app *application.Application) *Bridge {
@@ -35,12 +32,12 @@ func NewQuakeBridge(app *application.Application) *Bridge {
 	tt.UseProxyManager(app.ProxyManager)
 	db := database.GetConnection()
 	return &Bridge{
-		app:           app,
-		quake:         tt,
-		quakeRepo:     repository.NewQuakeRepository(db),
-		exportLogRepo: repository.NewExportLogRepository(db),
-		cacheTotal:    repository.NewCacheTotal(db),
-		historyRepo:   repository.NewHistoryRepository(db),
+		app:             app,
+		quake:           tt,
+		quakeRepo:       repository.NewQuakeRepository(db),
+		cacheTotal:      repository.NewCacheTotal(db),
+		historyRepo:     repository.NewHistoryRepository(db),
+		exportLogBridge: exportlog.NewBridge(app),
 	}
 }
 
@@ -215,18 +212,8 @@ func (r *Bridge) RealtimeServiceDataExport(pageID int64, pageNum, pageSize int) 
 		return 0, err
 	}
 	r.app.Logger.Info(queryLog)
-	filename := fmt.Sprintf("Quake_%s.xlsx", utils.GenFilenameTimestamp())
-	dir := r.app.Config.ExportDataDir
-	exportID := idgen.NextId()
-	outputAbsFilepath := filepath.Join(r.app.Config.ExportDataDir, filename)
-	if err := r.exportLogRepo.Create(&models.ExportLog{
-		Item: exportlog.Item{
-			Dir:      dir,
-			Filename: filename,
-			Status:   status.Running,
-			ExportID: exportID,
-		},
-	}); err != nil {
+	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("Quake")
+	if err != nil {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
@@ -278,7 +265,7 @@ func (r *Bridge) RealtimeServiceDataExport(pageID int64, pageNum, pageSize int) 
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.RealtimeServiceItem)
 		}
-		service2.SaveToExcel(nil, r.exportLogRepo, exportID, event.QuakeExport, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, exportID, event.QuakeExport, r.app.Logger, func() error {
 			return r.quake.Export(exportItems, outputAbsFilepath)
 		})
 	}()

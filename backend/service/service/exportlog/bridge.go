@@ -2,10 +2,15 @@ package exportlog
 
 import (
 	"fine/backend/application"
+	"fine/backend/constant/status"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
 	"fine/backend/service/model/exportlog"
+	"fine/backend/utils"
+	"fmt"
+	"github.com/yitter/idgenerator-go/idgen"
+	"path/filepath"
 )
 
 type Bridge struct {
@@ -13,7 +18,7 @@ type Bridge struct {
 	exportLogRepo repository.ExportLogRepository
 }
 
-func NewExportLogBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	b := &Bridge{
 		app:           app,
 		exportLogRepo: repository.NewExportLogRepository(database.GetConnection()),
@@ -56,4 +61,22 @@ func (r *Bridge) DeleteAll() error {
 
 func (r *Bridge) GetByOffset(offset, limit int) (map[string]any, error) {
 	return r.exportLogRepo.GetByOffset(offset, limit)
+}
+
+func (r *Bridge) Create(prefix string) (exportID int64, outputAbsFilepath string, err error) {
+	filename := fmt.Sprintf("%s_%s.xlsx", prefix, utils.GenFilenameTimestamp())
+	dir := r.app.Config.ExportDataDir
+	exportID = idgen.NextId()
+	outputAbsFilepath = filepath.Join(dir, filename)
+	if err := r.exportLogRepo.Create(&models.ExportLog{
+		Item: exportlog.Item{
+			Dir:      dir,
+			Filename: filename,
+			Status:   status.Running,
+			ExportID: exportID,
+		},
+	}); err != nil {
+		return 0, "", err
+	}
+	return exportID, outputAbsFilepath, nil
 }

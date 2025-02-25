@@ -12,15 +12,14 @@ import (
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
 	"fine/backend/proxy/v2"
-	"fine/backend/service/model/exportlog"
 	"fine/backend/service/model/icp"
 	service2 "fine/backend/service/service"
+	"fine/backend/service/service/exportlog"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -37,27 +36,27 @@ type TaskState struct {
 }
 
 type Bridge struct {
-	app           *application.Application
-	icp           *ICP
-	exportLogRepo repository.ExportLogRepository
-	icpRepo       repository.IcpRepository
-	icpTaskRepo   repository.IcpTaskRepository
-	historyRepo   repository.HistoryRepository
-	cacheTotal    repository.CacheTotal
-	mutex         sync.Mutex
-	taskState     map[int64]*TaskState
+	app             *application.Application
+	icp             *ICP
+	icpRepo         repository.IcpRepository
+	icpTaskRepo     repository.IcpTaskRepository
+	historyRepo     repository.HistoryRepository
+	cacheTotal      repository.CacheTotal
+	mutex           sync.Mutex
+	taskState       map[int64]*TaskState
+	exportLogBridge *exportlog.Bridge
 }
 
 func NewICPBridge(app *application.Application) *Bridge {
 	db := database.GetConnection()
 	bridgeClient := &Bridge{
-		app:           app,
-		exportLogRepo: repository.NewExportLogRepository(db),
-		icpRepo:       repository.NewIcpRepository(db),
-		icpTaskRepo:   repository.NewIcpTaskRepository(db),
-		historyRepo:   repository.NewHistoryRepository(db),
-		cacheTotal:    repository.NewCacheTotal(db),
-		taskState:     map[int64]*TaskState{},
+		app:             app,
+		icpRepo:         repository.NewIcpRepository(db),
+		icpTaskRepo:     repository.NewIcpTaskRepository(db),
+		historyRepo:     repository.NewHistoryRepository(db),
+		cacheTotal:      repository.NewCacheTotal(db),
+		taskState:       map[int64]*TaskState{},
+		exportLogBridge: exportlog.NewBridge(app),
 	}
 	icpClient := NewClient()
 	bridgeClient.icp = icpClient
@@ -155,7 +154,7 @@ func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int, servic
 }
 
 func (r *Bridge) query(pageNum, pageSize int, serviceType string, query string, authErrorRetryNum, forbiddenErrorRetryNum uint64) (*Result, error) {
-	ctx, cancel := ctx.WithCancel(ctx.Background())
+	ctx2, cancel := ctx.WithCancel(ctx.Background())
 	var err1 error
 	result, _ := backoff.RetryWithData(func() (*Result, error) {
 		if result, err3 := r.icp.PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).Query(query); err3 != nil {
@@ -189,7 +188,7 @@ func (r *Bridge) query(pageNum, pageSize int, serviceType string, query string, 
 			err1 = nil
 			return result, nil
 		}
-	}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), forbiddenErrorRetryNum), ctx))
+	}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), forbiddenErrorRetryNum), ctx2))
 	if err1 != nil {
 		return nil, err1
 	}
@@ -197,24 +196,14 @@ func (r *Bridge) query(pageNum, pageSize int, serviceType string, query string, 
 }
 
 func (r *Bridge) ExportCache(key string, total int) (int64, error) {
-	filename := fmt.Sprintf("ICP_%s.xlsx", utils.GenFilenameTimestamp())
-	dir := r.app.Config.ExportDataDir
-	exportID := idgen.NextId()
-	outputAbsFilepath := filepath.Join(dir, filename)
-	if err := r.exportLogRepo.Create(&models.ExportLog{
-		Item: exportlog.Item{
-			Dir:      dir,
-			Filename: filename,
-			Status:   status.Running,
-			ExportID: exportID,
-		},
-	}); err != nil {
+	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("ICP")
+	if err != nil {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
 	go func() {
 		items, _, err := r.icpRepo.FindByPartialKeyV2(key, 1, total)
-		service2.SaveToExcel(err, r.exportLogRepo, exportID, event.ICPExport, r.app.Logger, func() error {
+		service2.SaveToExcel(err, exportID, event.ICPExport, r.app.Logger, func() error {
 			return r.icp.Export(items, outputAbsFilepath)
 		})
 	}()
@@ -231,22 +220,12 @@ func (r *Bridge) Export(pageID int64) (int64, error) {
 		return 0, err
 	}
 	r.app.Logger.Info(queryLog)
-	filename := fmt.Sprintf("ICP_%s.xlsx", utils.GenFilenameTimestamp())
-	dir := r.app.Config.ExportDataDir
-	exportID := idgen.NextId()
-	outputAbsFilepath := filepath.Join(dir, filename)
-	if err := r.exportLogRepo.Create(&models.ExportLog{
-		Item: exportlog.Item{
-			Dir:      dir,
-			Filename: filename,
-			Status:   status.Running,
-			ExportID: exportID,
-		},
-	}); err != nil {
+	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("ICP")
+	if err != nil {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
-	ctx, cancel := ctx.WithCancel(ctx.Background())
+	ctx2, cancel := ctx.WithCancel(ctx.Background())
 	var err1 error
 	go func() {
 		result, _ := backoff.RetryWithData(func() (*Result, error) {
@@ -274,8 +253,8 @@ func (r *Bridge) Export(pageID int64) (int64, error) {
 			} else {
 				return result, nil
 			}
-		}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3), ctx))
-		service2.SaveToExcel(err1, r.exportLogRepo, exportID, event.ICPExport, r.app.Logger, func() error {
+		}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3), ctx2))
+		service2.SaveToExcel(err1, exportID, event.ICPExport, r.app.Logger, func() error {
 			return r.icp.Export(result.Items, outputAbsFilepath)
 		})
 	}()
@@ -738,18 +717,8 @@ func (r *Bridge) TaskExportData(key string, taskID int64) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	filename := fmt.Sprintf("ICP_%s.xlsx", utils.GenFilenameTimestamp())
-	dir := r.app.Config.ExportDataDir
-	exportID := idgen.NextId()
-	outputAbsFilepath := filepath.Join(dir, filename)
-	if err := r.exportLogRepo.Create(&models.ExportLog{
-		Item: exportlog.Item{
-			Dir:      dir,
-			Filename: filename,
-			Status:   status.Running,
-			ExportID: exportID,
-		},
-	}); err != nil {
+	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("ICP")
+	if err != nil {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
@@ -758,7 +727,7 @@ func (r *Bridge) TaskExportData(key string, taskID int64) (int64, error) {
 		for _, item := range itemWithIDs {
 			items = append(items, item.Item)
 		}
-		service2.SaveToExcel(nil, r.exportLogRepo, exportID, event.ICPExport, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, exportID, event.ICPExport, r.app.Logger, func() error {
 			return r.icp.Export(items, outputAbsFilepath)
 		})
 	}()

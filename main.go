@@ -99,7 +99,7 @@ func main() {
 			quake.NewQuakeBridge(mainApp),
 			history.NewHistoryBridge(mainApp),
 			wechat.NewWechatBridge(mainApp),
-			exportlog.NewExportLogBridge(mainApp),
+			exportlog.NewBridge(mainApp),
 			tianyancha.NewTianYanChaBridge(mainApp),
 			aiqicha.NewAiQiChaBridge(mainApp),
 			&event.EventDetail{},

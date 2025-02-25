@@ -8,24 +8,21 @@ import (
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/service/model/exportlog"
 	"fine/backend/service/model/fofa"
 	service2 "fine/backend/service/service"
-	"fine/backend/utils"
-	"fmt"
+	"fine/backend/service/service/exportlog"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/yitter/idgenerator-go/idgen"
-	"path/filepath"
 	"time"
 )
 
 type Bridge struct {
-	app           *application.Application
-	fofa          *Fofa
-	fofaRepo      repository.FofaRepository
-	exportLogRepo repository.ExportLogRepository
-	historyRepo   repository.HistoryRepository
-	cacheTotal    repository.CacheTotal
+	app             *application.Application
+	fofa            *Fofa
+	fofaRepo        repository.FofaRepository
+	historyRepo     repository.HistoryRepository
+	cacheTotal      repository.CacheTotal
+	exportLogBridge *exportlog.Bridge
 }
 
 func NewFofaBridge(app *application.Application) *Bridge {
@@ -33,12 +30,12 @@ func NewFofaBridge(app *application.Application) *Bridge {
 	tt.UseProxyManager(app.ProxyManager)
 	db := database.GetConnection()
 	return &Bridge{
-		app:           app,
-		fofa:          tt,
-		fofaRepo:      repository.NewFofaRepository(db),
-		exportLogRepo: repository.NewExportLogRepository(db),
-		cacheTotal:    repository.NewCacheTotal(db),
-		historyRepo:   repository.NewHistoryRepository(db),
+		app:             app,
+		fofa:            tt,
+		fofaRepo:        repository.NewFofaRepository(db),
+		cacheTotal:      repository.NewCacheTotal(db),
+		historyRepo:     repository.NewHistoryRepository(db),
+		exportLogBridge: exportlog.NewBridge(app),
 	}
 }
 
@@ -134,18 +131,8 @@ func (r *Bridge) Export(pageID int64, pageNum, pageSize int64) (int64, error) {
 		return 0, err
 	}
 	r.app.Logger.Debug(queryLog)
-	filename := fmt.Sprintf("Fofa_%s.xlsx", utils.GenFilenameTimestamp())
-	dir := r.app.Config.ExportDataDir
-	exportID := idgen.NextId()
-	outputAbsFilepath := filepath.Join(dir, filename)
-	if err := r.exportLogRepo.Create(&models.ExportLog{
-		Item: exportlog.Item{
-			Dir:      dir,
-			Filename: filename,
-			Status:   status.Running,
-			ExportID: exportID,
-		},
-	}); err != nil {
+	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("FOFA")
+	if err != nil {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
@@ -192,7 +179,7 @@ func (r *Bridge) Export(pageID int64, pageNum, pageSize int64) (int64, error) {
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)
 		}
-		service2.SaveToExcel(nil, r.exportLogRepo, exportID, event.FOFAExport, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, exportID, event.FOFAExport, r.app.Logger, func() error {
 			return r.fofa.Export(exportItems, outputAbsFilepath, queryLog.Fields)
 		})
 	}()

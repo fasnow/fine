@@ -8,26 +8,23 @@ import (
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/service/model/exportlog"
 	"fine/backend/service/model/hunter"
 	service2 "fine/backend/service/service"
-	"fine/backend/utils"
-	"fmt"
+	"fine/backend/service/service/exportlog"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/yitter/idgenerator-go/idgen"
-	"path/filepath"
 	"strings"
 	"time"
 )
 
 type Bridge struct {
-	app           *application.Application
-	hunter        *Hunter
-	token         *repository.HunterRestTokenDBService
-	cacheTotal    repository.CacheTotal
-	hunterRepo    repository.HunterRepository
-	exportLogRepo repository.ExportLogRepository
-	historyRepo   repository.HistoryRepository
+	app             *application.Application
+	hunter          *Hunter
+	token           *repository.HunterRestTokenDBService
+	cacheTotal      repository.CacheTotal
+	hunterRepo      repository.HunterRepository
+	historyRepo     repository.HistoryRepository
+	exportLogBridge *exportlog.Bridge
 }
 
 func NewHunterBridge(app *application.Application) *Bridge {
@@ -35,13 +32,13 @@ func NewHunterBridge(app *application.Application) *Bridge {
 	tt.UseProxyManager(app.ProxyManager)
 	db := database.GetConnection()
 	return &Bridge{
-		app:           app,
-		hunter:        tt,
-		token:         repository.NewHunterResidualTokenDBService(),
-		cacheTotal:    repository.NewCacheTotal(db),
-		hunterRepo:    repository.NewHunterRepository(db),
-		exportLogRepo: repository.NewExportLogRepository(db),
-		historyRepo:   repository.NewHistoryRepository(db),
+		app:             app,
+		hunter:          tt,
+		token:           repository.NewHunterResidualTokenDBService(),
+		cacheTotal:      repository.NewCacheTotal(db),
+		hunterRepo:      repository.NewHunterRepository(db),
+		historyRepo:     repository.NewHistoryRepository(db),
+		exportLogBridge: exportlog.NewBridge(app),
 	}
 }
 
@@ -173,18 +170,8 @@ func (r *Bridge) Export(pageID, pageNum, pageSize int64) (int64, error) {
 		return 0, err
 	}
 	r.app.Logger.Debug(queryLog)
-	filename := fmt.Sprintf("Hunter_%s.xlsx", utils.GenFilenameTimestamp())
-	dir := r.app.Config.ExportDataDir
-	exportID := idgen.NextId()
-	outputAbsFilepath := filepath.Join(dir, filename)
-	if err := r.exportLogRepo.Create(&models.ExportLog{
-		Item: exportlog.Item{
-			Dir:      dir,
-			Filename: filename,
-			Status:   status.Running,
-			ExportID: exportID,
-		},
-	}); err != nil {
+	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("Hunter")
+	if err != nil {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
@@ -233,7 +220,7 @@ func (r *Bridge) Export(pageID, pageNum, pageSize int64) (int64, error) {
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)
 		}
-		service2.SaveToExcel(nil, r.exportLogRepo, exportID, event.HunterExport, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, exportID, event.HunterExport, r.app.Logger, func() error {
 			return r.hunter.Export(exportItems, outputAbsFilepath)
 		})
 	}()

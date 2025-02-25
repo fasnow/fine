@@ -3,6 +3,7 @@ package service
 import (
 	"fine/backend/constant/event"
 	"fine/backend/constant/status"
+	"fine/backend/database"
 	"fine/backend/database/repository"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/sirupsen/logrus"
@@ -17,7 +18,8 @@ func GetBackOffWithMaxRetries(max uint64, interval time.Duration, multiplier flo
 	return backoff.WithMaxRetries(bf, max)
 }
 
-func SaveToExcel(getDataErr error, exportLogRepo repository.ExportLogRepository, exportID int64, eventName string, logger *logrus.Logger, exportFunc func() error) {
+func SaveToExcel(getDataErr error, exportID int64, eventName string, logger *logrus.Logger, exportFunc func() error) {
+	exportLogRepo := repository.NewExportLogRepository(database.GetConnection())
 	data := event.EventDetail{
 		ID: exportID,
 	}

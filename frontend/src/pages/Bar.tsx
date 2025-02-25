@@ -319,6 +319,12 @@ const DownloadViewContent: React.FC = () => {
     );
 };
 
+// 获取当前日期字符串
+const getTodayDate = () => {
+    const date = new Date();
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+};
+
 const Update: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const [open, setOpen] = useState<boolean>(false)
@@ -326,26 +332,37 @@ const Update: React.FC = () => {
     const [releaseUrl, setReleaseUrl] = useState<string>("")
     const [releaseVersion, setReleaseVersion] = useState<string>("")
     const [releaseDescription, setReleaseDescription] = useState<string>("")
-
+    const today = useRef<string>()
+    const showToday = useRef<boolean>(false)
     useEffect(() => {
-        CheckUpdate().then(
-            result => {
-                const newVersion = result["version"]
-                if (newVersion && semver.gt(newVersion, version.current)) {
-                    setReleaseUrl(result["url"])
-                    setReleaseDescription(result["description"])
-                    setReleaseVersion(newVersion)
-                    setOpen(true)
-                }
+        const intervalId = setInterval(() => {
+            const newDate = new Date().getDate().toString()
+            if (!showToday.current && today.current === newDate){
+                return
             }
-        )
-    }, [])
+            if (today.current !== newDate){
+                today.current = newDate
+                showToday.current = true
+            }
+            CheckUpdate().then(
+                result => {
+                    const newVersion = result["version"]
+                    console.log(newVersion)
+                    if (newVersion && semver.gt(newVersion, version.current)) {
+                        setReleaseUrl(result["url"])
+                        setReleaseDescription(result["description"])
+                        setReleaseVersion(newVersion)
+                        setOpen(true)
+                    }
+                }
+            )
+        }, 1000 * 60 * 60); // 每隔 1 小时检查一次
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, []);
 
     const checkUpdate = () => {
-        if (releaseUrl !== "") {
-            setOpen(true)
-            return
-        }
         setLoading(true)
         CheckUpdate()
             .then(result => {
@@ -378,8 +395,31 @@ const Update: React.FC = () => {
                 onClick={checkUpdate} />
         </Tooltip>
         <Modal
-            // maskStyle={{ marginTop: "30px" }}
+            maskClosable={false}
             title="检查更新"
+            footer={<>
+                <Flex justify={"right"} gap={10}>
+                    <Button size={"small"} type={"default"}
+                    onClick={
+                        () => {
+                            setOpen(false)
+                            showToday.current = false
+                        }
+                    }
+                    >今日不再提示</Button>
+                    <Button size={"small"} type={"default"}
+                    onClick={
+                        () => setOpen(false)
+                    }
+                    >取消</Button>
+                    <Button size={"small"} type={"primary"}
+                    onClick={()=>{
+                        setOpen(false)
+                        BrowserOpenURL(releaseUrl);
+                    }}
+                    >下载更新</Button>
+                </Flex>
+            </>}
             cancelButtonProps={{ size: "small" }}
             okButtonProps={{ size: "small" }}
             open={open}

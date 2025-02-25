@@ -24,7 +24,6 @@ import { SearchProps } from "antd/es/input";
 import { SearchOutlined } from "@ant-design/icons";
 import { SizeType } from "antd/es/config-provider/SizeContext";
 
-// 定义ItemType类型，更明确key的类型为string（可根据实际情况调整类型）
 export interface ItemType<T> {
     value: string | number;
     label: React.ReactNode;
@@ -41,7 +40,6 @@ interface BasePanelProps<T> {
 }
 
 const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
-    // 使用useState来管理当前选中项的key，初始值可以设为null，表示没有选中项
     const [selectedKey, setSelectedKey] = useState<string | number | null>(null);
     const [loading, setLoading] = useState(false);
     const [candidates, setCandidates] = useState<ItemType<T>[]>([]);
@@ -71,7 +69,6 @@ const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
         if (result instanceof Promise) {
             result.then((newItems) => {
                 setCandidates(newItems);
-                console.log(newItems)
             }).finally(() => {
                 setLoading(false);
             });

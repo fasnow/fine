@@ -7,6 +7,7 @@ import (
 	"fine/backend/proxy/v2"
 	"fine/backend/service/model/icp"
 	"net/http"
+	"sync"
 )
 
 var (
@@ -39,6 +40,7 @@ type ICP struct {
 	page         int
 	size         int
 	serviceType  string // 1,6,7,8 网站，app，小程序，快应用
+	mutex        sync.Mutex
 }
 
 var ServiceTypes = []string{

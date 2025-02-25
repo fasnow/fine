@@ -19,8 +19,13 @@ import (
 )
 
 func (r *ICP) SetTokenFromRemote() error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	var req *http.Request
 	timeStampInt := time.Now().UnixMilli()
+	if r.expireIn > timeStampInt {
+		return nil
+	}
 	timeStampStr := strconv.FormatInt(timeStampInt, 10)
 	authKey := fmt.Sprintf("%x", md5.Sum([]byte("testtest"+timeStampStr)))
 	postData := url.Values{}

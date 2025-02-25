@@ -431,9 +431,9 @@ shouldTerminal:
 		}
 		select {
 		case sem <- struct{}{}:
-			wg.Add(1)
 			select {
 			case <-ts.ctx.Running():
+				wg.Add(1)
 				go func(s *models.ICPTaskSlice) {
 					defer func() {
 						<-sem

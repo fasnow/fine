@@ -2,21 +2,8 @@ export namespace aiqicha {
 	
 	export class Branch {
 	    entName: string;
-	    logo: string;
-	    logoWord: string;
-	    entCoreName: string;
 	    legalPerson: string;
-	    personLink: string;
-	    personId: string;
-	    legalPersonLogo: string;
-	    legalPersonLogoWord: string;
-	    compNum: number;
-	    compNumLink: string;
 	    startDate: string;
-	    regCapital: string;
-	    openStatus: string;
-	    pid: string;
-	    entLink: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Branch(source);
@@ -25,21 +12,8 @@ export namespace aiqicha {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.entName = source["entName"];
-	        this.logo = source["logo"];
-	        this.logoWord = source["logoWord"];
-	        this.entCoreName = source["entCoreName"];
 	        this.legalPerson = source["legalPerson"];
-	        this.personLink = source["personLink"];
-	        this.personId = source["personId"];
-	        this.legalPersonLogo = source["legalPersonLogo"];
-	        this.legalPersonLogoWord = source["legalPersonLogoWord"];
-	        this.compNum = source["compNum"];
-	        this.compNumLink = source["compNumLink"];
 	        this.startDate = source["startDate"];
-	        this.regCapital = source["regCapital"];
-	        this.openStatus = source["openStatus"];
-	        this.pid = source["pid"];
-	        this.entLink = source["entLink"];
 	    }
 	}
 	export class Copyright {

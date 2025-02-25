@@ -196,3 +196,25 @@ func TestBridge_Query(t *testing.T) {
 	}
 	t.Log(data)
 }
+
+func TestTask(t *testing.T) {
+	c := NewICPBridge(application.DefaultApp)
+	c.SetProxy(config.Proxy{
+		Enable: true,
+		Type:   "http",
+		Host:   "127.0.0.1",
+		Port:   "8081",
+		User:   "",
+		Pass:   "",
+	})
+	if err := c.TaskRun(648556981796933); err != nil {
+		t.Error(err)
+		return
+	}
+	time.Sleep(500 * time.Millisecond)
+	if err := c.TaskPause(648556981796933); err != nil {
+		t.Error(err)
+		return
+	}
+	select {}
+}

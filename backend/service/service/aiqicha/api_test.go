@@ -47,7 +47,23 @@ func TestAiQiCha_GetCopyrightList(t *testing.T) {
 	m := proxy.NewManager()
 	m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
-	total, list, err := c.GetCopyrightList("28783255028393", 1)
+	total, list, err := c.GetCopyrightList("28783255028393", 1, 10)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println(total)
+	for _, i := range list {
+		fmt.Println(i)
+	}
+}
+
+func TestAiQiCha_GetBranchList(t *testing.T) {
+	c := NewClient(application.DefaultApp.Config.AiQiCha.Cookie)
+	m := proxy.NewManager()
+	m.SetProxy("http://127.0.0.1:8081")
+	c.UseProxyManager(m)
+	total, list, err := c.GetBranchList("28783255028393", 1, 1)
 	if err != nil {
 		t.Error(err)
 		return

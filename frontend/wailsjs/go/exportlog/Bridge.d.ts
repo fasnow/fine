@@ -3,6 +3,8 @@
 import {models} from '../models';
 import {exportlog} from '../models';
 
+export function Create(arg1:string):Promise<number>;
+
 export function DeleteAll():Promise<void>;
 
 export function FindByExportID(arg1:number):Promise<models.ExportLog>;

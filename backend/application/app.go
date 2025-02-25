@@ -169,9 +169,6 @@ func (r *Application) transformConfigFile() error {
 	if err := r.WriteConfig(r.Config); err != nil {
 		return err
 	}
-	if err := r.WriteConfig(r.Config); err != nil {
-		return err
-	}
 	r.Logger = logger.NewWithLogDir(r.Config.LogDataDir)
 
 	if err := os.Remove(filepath.Join(r.AppDir, "config.ini")); err != nil {
@@ -204,6 +201,22 @@ func (r *Application) loadConfigFile() error {
 	}
 	if r.Config.WechatDataDir == "" {
 		r.Config.WechatDataDir = filepath.Join(r.AppDir, "data", "wechat")
+		needUpdate = true
+	}
+	if r.Config.ICP.AuthErrorRetryNum1 <= 0 {
+		r.Config.ICP.AuthErrorRetryNum1 = 3
+		needUpdate = true
+	}
+	if r.Config.ICP.ForbiddenErrorRetryNum1 <= 0 {
+		r.Config.ICP.ForbiddenErrorRetryNum1 = 1
+		needUpdate = true
+	}
+	if r.Config.ICP.AuthErrorRetryNum2 <= 0 {
+		r.Config.ICP.AuthErrorRetryNum2 = 999
+		needUpdate = true
+	}
+	if r.Config.ICP.ForbiddenErrorRetryNum2 <= 0 {
+		r.Config.ICP.ForbiddenErrorRetryNum2 = 999
 		needUpdate = true
 	}
 	currentVersion, _ := version.NewVersion(Version)
@@ -542,6 +555,7 @@ func (r *Application) GetAllConstants() *Constant {
 		DecompileWxMiniProgram:    event.DecompileWxMiniProgram,
 		ICPBatchQuery:             event.ICPBatchQuery,
 		ICPBatchQueryStatusUpdate: event.ICPBatchQueryStatusUpdate,
+		AiQiCha:                   event.AiQiCha,
 	}
 
 	var histories = history.HistoryEnum{

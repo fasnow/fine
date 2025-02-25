@@ -331,22 +331,22 @@ func (r *AiQiCha) GetCopyrightList(pid string, pageNum, pageSize int) (total int
 }
 
 type Branch struct {
-	EntName             string `json:"entName"`
-	Logo                string `json:"logo"`
-	LogoWord            string `json:"logoWord"`
-	EntCoreName         string `json:"entCoreName"`
-	LegalPerson         string `json:"legalPerson"`
-	PersonLink          string `json:"personLink"`
-	PersonID            string `json:"personId"`
-	LegalPersonLogo     string `json:"legalPersonLogo"`
-	LegalPersonLogoWord string `json:"legalPersonLogoWord"`
-	CompNum             int    `json:"compNum"`
-	CompNumLink         string `json:"compNumLink"`
-	StartDate           string `json:"startDate"`
-	RegCapital          string `json:"regCapital"`
-	OpenStatus          string `json:"openStatus"`
-	Pid                 string `json:"pid"`
-	EntLink             string `json:"entLink"`
+	EntName string `json:"entName"`
+	//Logo                string `json:"logo"`
+	//LogoWord            string `json:"logoWord"`
+	//EntCoreName         string `json:"entCoreName"`
+	LegalPerson string `json:"legalPerson"`
+	//PersonLink          string `json:"personLink"`
+	//PersonID            string `json:"personId"`
+	//LegalPersonLogo     string `json:"legalPersonLogo"`
+	//LegalPersonLogoWord string `json:"legalPersonLogoWord"`
+	//CompNum             int    `json:"compNum"`
+	//CompNumLink         string `json:"compNumLink"`
+	StartDate string `json:"startDate"`
+	//RegCapital          string `json:"regCapital"`
+	//OpenStatus          string `json:"openStatus"`
+	//Pid                 string `json:"pid"`
+	//EntLink             string `json:"entLink"`
 }
 
 // GetBranchList 获取分公司
@@ -405,6 +405,21 @@ func (r *AiQiCha) ExportCopyrights(items []*Copyright, outputFilepath string) er
 			item.RegNo,
 			item.FirstDate,
 			item.Nationality,
+		}
+		data = append(data, tmpItem)
+	}
+	return utils.SaveToExcel(data, outputFilepath)
+}
+
+func (r *AiQiCha) ExportBranches(items []*Branch, outputFilepath string) error {
+	var headers = []any{"序号", "企业名称", "负责人", "成立日期"}
+	var data = [][]any{headers}
+	for i, item := range items {
+		var tmpItem = []any{
+			i + 1,
+			item.EntName,
+			item.LegalPerson,
+			item.StartDate,
 		}
 		data = append(data, tmpItem)
 	}

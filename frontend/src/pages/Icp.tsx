@@ -365,7 +365,8 @@ const SettingPanel = () => {
                     type={"link"}
                     icon={<SettingOutlined />}
                     style={{minWidth:'100px'}}
-            >{
+            >
+                代理{
                 proxy.Enable &&
                 <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
                     <Flex>
@@ -375,7 +376,7 @@ const SettingPanel = () => {
                         {url}
                     </Flex>
                 </Tag>
-            }代理</Button>
+            }</Button>
         </Flex>
         <Modal
             footer={null}

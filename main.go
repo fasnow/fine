@@ -7,7 +7,6 @@ import (
 	"fine/backend/constant/event"
 	history2 "fine/backend/constant/history"
 	"fine/backend/constant/status"
-	"fine/backend/logger"
 	"fine/backend/osoperation"
 	"fine/backend/service/service/aiqicha"
 	"fine/backend/service/service/exportlog"
@@ -36,8 +35,6 @@ var assets embed.FS
 var mainApp *application.Application
 
 func main() {
-	l := logger.NewWithLogDir(application.DefaultApp.Config.LogDataDir)
-	l.Info(0000000)
 	defaultWidth := 1200
 	defaultHeight := 800
 	mainApp = application.DefaultApp

@@ -113,6 +113,6 @@ typings/
 **/*.yaml
 !.github/workflows/*.yaml
 **/.idea
-backend/service/service/wechat/decompile
+backend/service/service/wechat/decompile_darwin
 **/log
 **/*.ini

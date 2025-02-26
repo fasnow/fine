@@ -33,7 +33,7 @@ import (
 	"time"
 )
 
-//go:embed decompile
+//go:embed decompile_darwin
 var decompile embed.FS
 
 var filteredFileExt = []string{".png", ".jpg", ".jpeg", ".wxapkg", ".br"}

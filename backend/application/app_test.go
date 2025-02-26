@@ -67,3 +67,7 @@ func TestUpdateCheck(t *testing.T) {
 	}
 	t.Log(checkUpdate)
 }
+
+func TestLog(t *testing.T) {
+	DefaultApp.Logger.Info(DefaultApp.Config.LogDataDir)
+}

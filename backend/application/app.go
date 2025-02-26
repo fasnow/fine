@@ -155,8 +155,7 @@ func (r *Application) init() {
 	f, _ := os.OpenFile(filepath.Join(r.Config.LogDataDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
 	bytes, _ := json.Marshal(r.Config)
 	f.Write(bytes)
-	bytes, _ = json.Marshal(r.Logger)
-	f.Write(bytes)
+	r.Logger.Info(r.Config)
 }
 
 func (r *Application) transformConfigFile() error {

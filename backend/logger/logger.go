@@ -74,6 +74,8 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 	var err error
 	logFile, err = os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
 	if err != nil {
+		f, _ := os.OpenFile(filepath.Join(logDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
+		f.Write([]byte("333333"))
 		logger.Warnf("Failed to log to file %s, using default stderr: %v", logFilePath, err)
 	}
 
@@ -96,12 +98,12 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 	logger.SetReportCaller(true)
 	logger.SetLevel(logrus.TraceLevel)
 
-	// 替换原有的 Hook
-	logger.AddHook(&DailyLogFileHook{
-		logDir:      logDir,
-		currentFile: logFile,
-		currentDate: currentDate,
-	})
+	//// 替换原有的 Hook
+	//logger.AddHook(&DailyLogFileHook{
+	//	logDir:      logDir,
+	//	currentFile: logFile,
+	//	currentDate: currentDate,
+	//})
 
 	return logger
 }

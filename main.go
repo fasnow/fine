@@ -3,9 +3,6 @@ package main
 import (
 	"context"
 	"embed"
-	"fine/backend/task"
-
-	//_ "fine/backend" // 用于初始化，不可更改import先后顺序
 	"fine/backend/application"
 	"fine/backend/constant/event"
 	history2 "fine/backend/constant/history"
@@ -22,6 +19,7 @@ import (
 	"fine/backend/service/service/quake"
 	"fine/backend/service/service/tianyancha"
 	"fine/backend/service/service/wechat"
+	"fine/backend/task"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -37,6 +35,7 @@ var assets embed.FS
 var mainApp *application.Application
 
 func main() {
+
 	defaultWidth := 1200
 	defaultHeight := 800
 	mainApp = application.DefaultApp

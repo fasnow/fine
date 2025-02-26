@@ -152,7 +152,6 @@ func (r *Application) init() {
 			}
 		}
 	}
-	r.Logger.Info(r.Config)
 	f, _ := os.OpenFile(filepath.Join(r.Config.LogDataDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
 	bytes, _ := json.Marshal(r.Config)
 	f.Write(bytes)
@@ -252,7 +251,6 @@ func (r *Application) loadConfigFile() error {
 	//超时
 	r.ProxyManager.SetTimeout(r.Config.Timeout)
 	r.Logger.Info(fmt.Sprintf("set timeout %fs", r.ProxyManager.GetClient().Timeout.Seconds()))
-
 	return nil
 }
 

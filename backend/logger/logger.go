@@ -2,7 +2,6 @@ package logger
 
 import (
 	"fine/backend/utils"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -74,13 +73,11 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 	var err error
 	logFile, err = os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
 	if err != nil {
-		f, _ := os.OpenFile(filepath.Join(logDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		f.Write([]byte("333333"))
 		logger.Warnf("Failed to log to file %s, using default stderr: %v", logFilePath, err)
 	}
 
 	// 同时输出到文件和控制台
-	logger.SetOutput(io.MultiWriter(logFile, os.Stdout))
+	logger.SetOutput(io.MultiWriter(logFile, os.Stdout)) // writer先后顺序不能变，不然在windows下会无法写入文件，不知道什么原因
 
 	// 设置自定义日志格式和启用调用者信息
 	logger.SetFormatter(&CustomTextFormatter{
@@ -88,60 +85,13 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 			FullTimestamp:  true,
 			DisableSorting: false,
 			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-				// 调用统一的获取调用者信息函数
 				fileName, line, funcName := getCallerInfo()
-				f, _ := os.OpenFile(filepath.Join(logDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
-				f.Write([]byte(funcName + "  " + fileName + ":" + strconv.Itoa(line)))
 				return funcName, fileName + ":" + strconv.Itoa(line)
 			},
 		},
 	})
+
 	logger.SetReportCaller(true)
 	logger.SetLevel(logrus.TraceLevel)
-
-	//// 替换原有的 Hook
-	//logger.AddHook(&DailyLogFileHook{
-	//	logDir:      logDir,
-	//	currentFile: logFile,
-	//	currentDate: currentDate,
-	//})
-
 	return logger
-}
-
-// DailyLogFileHook 自定义 Hook 用于按天切换日志文件
-type DailyLogFileHook struct {
-	logDir      string
-	currentFile *os.File
-	currentDate string
-}
-
-// Levels 返回该 Hook 支持的日志级别
-func (h *DailyLogFileHook) Levels() []logrus.Level {
-	return logrus.AllLevels
-}
-
-// Fire 在每次记录日志时触发
-func (h *DailyLogFileHook) Fire(entry *logrus.Entry) error {
-	f, _ := os.OpenFile(filepath.Join(h.logDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
-	f.Write([]byte("111111"))
-	now := time.Now()
-	date := now.Format("2006-01-02")
-	if date != h.currentDate {
-		// 日期改变，关闭当前文件并创建新文件
-		if h.currentFile != nil {
-			h.currentFile.Close()
-		}
-		newLogFilePath := filepath.Join(h.logDir, date+".txt")
-		var err error
-		h.currentFile, err = os.OpenFile(newLogFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
-		if err != nil {
-			f.Write([]byte("2222"))
-			return fmt.Errorf("Failed to open new log file %s: %v", newLogFilePath, err)
-		}
-		h.currentDate = date
-		// 更新输出目标
-		entry.Logger.SetOutput(io.MultiWriter(os.Stdout, h.currentFile))
-	}
-	return nil
 }

@@ -72,7 +72,7 @@ jobs:
           npm install pkg
           npm install --force
           npm run build
-          move /y decompile.exe ../backend/service/service/wechat/decompile
+          mv decompile.exe ../backend/service/service/wechat/decompile -Force
 
       - name: Build WxMiniProgramDecompile for Mac/Linux
         if: matrix.build.os != 'windows'

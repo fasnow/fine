@@ -125,8 +125,7 @@ jobs:
         with:
           files: |
             artifacts/**
-          token: ${{ secrets.FINE_ACCESS_TOKEN }}
-#          token: ${{ secrets.FINE_TEST_ACCESS_TOKEN }}
+          token: ${{ secrets.FINE }}
           body: |
             1. fix: 小程序获取Bug；
             2. fix: ICP批量任务无法暂停；

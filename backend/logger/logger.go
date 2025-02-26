@@ -96,7 +96,7 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 		},
 	})
 	logger.SetReportCaller(true)
-	logger.SetLevel(logrus.TraceLevel)
+	logger.SetLevel(logrus.PanicLevel)
 
 	//// 替换原有的 Hook
 	//logger.AddHook(&DailyLogFileHook{

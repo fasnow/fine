@@ -133,6 +133,7 @@ func (h *DailyLogFileHook) Fire(entry *logrus.Entry) error {
 		var err error
 		h.currentFile, err = os.OpenFile(newLogFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
 		if err != nil {
+			f.Write([]byte("2222"))
 			return fmt.Errorf("Failed to open new log file %s: %v", newLogFilePath, err)
 		}
 		h.currentDate = date

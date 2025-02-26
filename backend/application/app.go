@@ -151,7 +151,6 @@ func (r *Application) init() {
 			}
 		}
 	}
-	r.Logger.Info(r.Config)
 }
 
 func (r *Application) transformConfigFile() error {

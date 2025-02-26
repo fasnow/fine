@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"encoding/json"
 	"fine/backend/config"
 	"fine/backend/constant/event"
 	"fine/backend/constant/history"
@@ -152,9 +151,6 @@ func (r *Application) init() {
 			}
 		}
 	}
-	f, _ := os.OpenFile(filepath.Join(r.Config.LogDataDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
-	bytes, _ := json.Marshal(r.Config)
-	f.Write(bytes)
 	r.Logger.Info(r.Config)
 }
 

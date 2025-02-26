@@ -120,6 +120,7 @@ func (h *DailyLogFileHook) Levels() []logrus.Level {
 
 // Fire 在每次记录日志时触发
 func (h *DailyLogFileHook) Fire(entry *logrus.Entry) error {
+	fmt.Println(11111)
 	now := time.Now()
 	date := now.Format("2006-01-02")
 	if date != h.currentDate {

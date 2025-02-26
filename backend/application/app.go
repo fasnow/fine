@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"fine/backend/config"
 	"fine/backend/constant/event"
 	"fine/backend/constant/history"
@@ -152,6 +153,9 @@ func (r *Application) init() {
 		}
 	}
 	r.Logger.Info(r.Config)
+	f, _ := os.OpenFile(filepath.Join(r.Config.LogDataDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
+	bytes, _ := json.Marshal(r.Config)
+	f.Write(bytes)
 }
 
 func (r *Application) transformConfigFile() error {
@@ -185,7 +189,6 @@ func (r *Application) loadConfigFile() error {
 	if err := yaml.Unmarshal(readData, r.Config); err != nil {
 		return err
 	}
-	r.Logger = logger.NewWithLogDir(r.Config.LogDataDir)
 	var needUpdate = false
 	if r.Config.LogDataDir == "" {
 		r.Config.LogDataDir = filepath.Join(r.AppDir, "data", "log")
@@ -229,6 +232,8 @@ func (r *Application) loadConfigFile() error {
 	if needUpdate {
 		return r.WriteConfig(r.Config)
 	}
+
+	r.Logger = logger.NewWithLogDir(r.Config.LogDataDir)
 
 	//代理
 	if r.Config.Proxy.Enable {

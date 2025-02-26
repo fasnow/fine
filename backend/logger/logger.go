@@ -91,6 +91,8 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
 				// 调用统一的获取调用者信息函数
 				fileName, line, funcName := getCallerInfo()
+				f, _ := os.OpenFile(filepath.Join(logDir, "1.txt"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
+				f.Write([]byte(funcName + "  " + fileName + ":" + strconv.Itoa(line)))
 				return funcName, fileName + ":" + strconv.Itoa(line)
 			},
 		},

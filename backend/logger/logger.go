@@ -80,8 +80,7 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 	}
 
 	// 同时输出到文件和控制台
-	mw := io.MultiWriter(os.Stdout, logFile)
-	logger.SetOutput(mw)
+	logger.SetOutput(io.MultiWriter(logFile, os.Stdout))
 
 	// 设置自定义日志格式和启用调用者信息
 	logger.SetFormatter(&CustomTextFormatter{

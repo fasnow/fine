@@ -217,6 +217,10 @@ func (r *Application) loadConfigFile() error {
 		r.Config.ICP.ForbiddenErrorRetryNum2 = 999
 		needUpdate = true
 	}
+	if r.Config.ICP.Concurrency <= 0 {
+		r.Config.ICP.Concurrency = 5
+		needUpdate = true
+	}
 	currentVersion, _ := version.NewVersion(Version)
 	configFileVersion, err := version.NewVersion(r.Config.Version)
 	if err != nil || currentVersion.GreaterThan(configFileVersion) {

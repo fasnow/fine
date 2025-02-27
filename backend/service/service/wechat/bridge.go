@@ -626,7 +626,6 @@ func (r *Bridge) extractInfo(appid, version string) {
 						extractInfoWg.Done()
 						<-extractInfoSemaphore
 					}()
-					r.app.Logger.Debug(path, re.String())
 					matches := re.FindAllStringSubmatch(string(content), -1)
 					var localMatches []string
 					for _, match := range matches {

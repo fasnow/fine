@@ -76,7 +76,7 @@ func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
 	for _, entry := range entries {
 		if entry.IsDir() {
 			appid := entry.Name()
-			if strings.HasPrefix(appid, "wx") {
+			if !strings.HasPrefix(appid, "wx") {
 				continue
 			}
 			versionsPath := filepath.Join(r.app.Config.Wechat.Applet, appid)

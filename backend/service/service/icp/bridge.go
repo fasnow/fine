@@ -315,8 +315,8 @@ func (r *Bridge) SetProxy(p config.Proxy) error {
 		r.app.Logger.Info("icp proxy enabled on " + pm.ProxyString())
 		return nil
 	}
+	r.app.Logger.Info("icp proxy disabled using global proxy")
 	r.icp.UseProxyManager(r.app.ProxyManager)
-	r.app.Logger.Info("icp proxy disabled")
 	return nil
 }
 

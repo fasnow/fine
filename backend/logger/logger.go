@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fine/backend/utils"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -93,5 +94,40 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 
 	logger.SetReportCaller(true)
 	logger.SetLevel(logrus.TraceLevel)
+	logger.AddHook(&DailyLogFileHook{
+		logDir:      logDir,
+		currentFile: logFile,
+		currentDate: currentDate,
+	})
 	return logger
+}
+
+type DailyLogFileHook struct {
+	logDir      string
+	currentFile *os.File
+	currentDate string
+}
+
+func (h *DailyLogFileHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
+
+// Fire 在每次记录日志时触发
+func (h *DailyLogFileHook) Fire(entry *logrus.Entry) error {
+	now := time.Now()
+	date := now.Format("2006-01-02")
+	if date != h.currentDate {
+		if h.currentFile != nil {
+			h.currentFile.Close()
+		}
+		newLogFilePath := filepath.Join(h.logDir, date+".txt")
+		var err error
+		h.currentFile, err = os.OpenFile(newLogFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0664)
+		if err != nil {
+			return fmt.Errorf("failed to open new log file %s: %v", newLogFilePath, err)
+		}
+		h.currentDate = date
+		entry.Logger.SetOutput(io.MultiWriter(h.currentFile, os.Stdout))
+	}
+	return nil
 }

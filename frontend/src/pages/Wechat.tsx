@@ -32,6 +32,7 @@ import { appActions, RootState } from "@/store/store";
 import {Join} from "../../wailsjs/go/osoperation/Path";
 import {OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/osoperation/Runtime";
 import {GetWechatRules, SaveWechat, SaveWechatRules} from "../../wailsjs/go/application/Application";
+import {copy} from "@/util/util";
 
 export const MiniProgram: React.FC = () => {
     const [data, setData] = useState<InfoToFront[]>([])
@@ -180,6 +181,19 @@ export const MiniProgram: React.FC = () => {
                 }
             }
         )
+    }
+
+    const getApis=()=>{
+        const regex: RegExp = /\/(?:[\w-]+\/)*[\w-]+(.cgi|.php|.action|.jsp|.jspx|.asp|.aspx|.py|.rb|.html|.htm|.tpl|.do|.jsf)?\/*\??(?:[\w=&-]+)?\)*/gi
+        const matches = matchedResult.matchAll(regex);
+        const items:string[] = []
+        for (const match of matches) {
+            items.push(match[0])
+        }
+        if (items.length === 0 ){
+            return
+        }
+        copy(Array.from(new Set(items)).join("\n"))
     }
 
     return (
@@ -425,6 +439,7 @@ export const MiniProgram: React.FC = () => {
                                             <Tag bordered={false} color={"orange"}>{select.nickname}</Tag>
                                         </Flex>
                                     }
+                                    <Button size={"small"} type={"primary"} onClick={getApis}>提取API</Button>
                                 </Flex>
 
                                 <TextArea

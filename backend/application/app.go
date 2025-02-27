@@ -239,14 +239,16 @@ func (r *Application) loadConfigFile() error {
 			p = fmt.Sprintf("%s://%s:%s", r.Config.Proxy.Type, r.Config.Proxy.Host, r.Config.Proxy.Port)
 		}
 		if err := r.ProxyManager.SetProxy(p); err != nil {
-			r.Logger.Error("set proxy error: " + err.Error())
+			r.Logger.Error("set global proxy error: " + err.Error())
 		}
-		r.Logger.Info("enable proxy on" + r.ProxyManager.ProxyString())
+		r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
+	} else {
+		r.Logger.Info("global proxy disabled")
 	}
 
 	//超时
 	r.ProxyManager.SetTimeout(r.Config.Timeout)
-	r.Logger.Info(fmt.Sprintf("set timeout %fs", r.ProxyManager.GetClient().Timeout.Seconds()))
+	r.Logger.Info(fmt.Sprintf("set global timeout %fs", r.ProxyManager.GetClient().Timeout.Seconds()))
 	return nil
 }
 
@@ -385,7 +387,7 @@ func (r *Application) SaveProxy(proxy config.Proxy) error {
 	r.Config.Proxy.User = proxy.User
 	r.Config.Proxy.Pass = proxy.Pass
 	if err := r.WriteConfig(r.Config); err != nil {
-		msg := "can't store proxy to file"
+		msg := "can't store global proxy to file"
 		r.Logger.Info(msg)
 		return errors.New(msg)
 	}
@@ -395,16 +397,16 @@ func (r *Application) SaveProxy(proxy config.Proxy) error {
 			if proxy.Pass != "" {
 				auth += ":" + proxy.Pass + "@"
 				_ = r.ProxyManager.SetProxy(fmt.Sprintf("%s://%s%s:%s", proxy.Type, auth, proxy.Host, proxy.Port))
-				r.Logger.Info("proxy enabled on " + r.ProxyManager.ProxyString())
+				r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
 				return nil
 			}
 		}
 		_ = r.ProxyManager.SetProxy(fmt.Sprintf("%s://%s:%s", proxy.Type, proxy.Host, proxy.Port))
-		r.Logger.Info("proxy enabled on " + r.ProxyManager.ProxyString())
+		r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
 		return nil
 	}
 	_ = r.ProxyManager.SetProxy("")
-	r.Logger.Info("proxy disabled")
+	r.Logger.Info("global proxy disabled")
 	return nil
 }
 

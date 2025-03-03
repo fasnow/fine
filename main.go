@@ -20,6 +20,7 @@ import (
 	"fine/backend/service/service/tianyancha"
 	"fine/backend/service/service/wechat"
 	"fine/backend/task"
+	"github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -38,6 +39,7 @@ func main() {
 	defaultWidth := 1200
 	defaultHeight := 800
 	mainApp = application.DefaultApp
+	mainApp.Logger.SetLevel(logrus.InfoLevel) // 日志等级
 	taskManager := task.Manager{ICP: icp.NewICPBridge(mainApp)}
 	opts := &options.App{
 		Title:  "Fine",

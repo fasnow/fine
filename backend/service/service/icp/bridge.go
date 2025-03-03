@@ -567,7 +567,7 @@ func (r *Bridge) TaskCreate(taskName string, targets []string, serviceTypes []st
 		return errors.New(msg)
 	}
 	for _, serviceType := range serviceTypes {
-		if !utils.StringsContain(ServiceTypes, serviceType) {
+		if !utils.StringSliceContain(ServiceTypes, serviceType) {
 			msg := "查询类型错误: " + serviceType
 			r.app.Logger.Error(msg)
 			return errors.New(msg)

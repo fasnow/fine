@@ -123,8 +123,9 @@ type Wechat struct {
 	//AdafruitAPIKey bool   `ini:"Adafruit_API_Key"`
 	//AdafruitAPIKey bool   `ini:"Adafruit_API_Key"`
 	//AdafruitAPIKey bool   `ini:"Adafruit_API_Key"`
-
-	Rules []string `ini:"rule,,allowshadow"  comment:"清空则会生成默认值"`
+	DecompileConcurrency int
+	ExtractConcurrency   int
+	Rules                []string `ini:"rule,,allowshadow"  comment:"清空则会生成默认值"`
 }
 
 type Httpx struct {

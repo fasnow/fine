@@ -247,6 +247,8 @@ export namespace config {
 	}
 	export class Wechat {
 	    Applet: string;
+	    DecompileConcurrency: number;
+	    ExtractConcurrency: number;
 	    Rules: string[];
 	
 	    static createFrom(source: any = {}) {
@@ -256,6 +258,8 @@ export namespace config {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.Applet = source["Applet"];
+	        this.DecompileConcurrency = source["DecompileConcurrency"];
+	        this.ExtractConcurrency = source["ExtractConcurrency"];
 	        this.Rules = source["Rules"];
 	    }
 	}
@@ -502,6 +506,7 @@ export namespace event {
 	    ZoneEmailExport: string;
 	    Httpx: string;
 	    DecompileWxMiniProgram: string;
+	    DecompileWxMiniProgramTicker: string;
 	    ICPBatchQuery: string;
 	    ICPBatchQueryStatusUpdate: string;
 	    AiQiCha: string;
@@ -526,6 +531,7 @@ export namespace event {
 	        this.ZoneEmailExport = source["ZoneEmailExport"];
 	        this.Httpx = source["Httpx"];
 	        this.DecompileWxMiniProgram = source["DecompileWxMiniProgram"];
+	        this.DecompileWxMiniProgramTicker = source["DecompileWxMiniProgramTicker"];
 	        this.ICPBatchQuery = source["ICPBatchQuery"];
 	        this.ICPBatchQueryStatusUpdate = source["ICPBatchQueryStatusUpdate"];
 	        this.AiQiCha = source["AiQiCha"];
@@ -2558,13 +2564,14 @@ export namespace wechat {
 	        this.AppID = source["AppID"];
 	    }
 	}
-	export class VersionStatus {
+	export class VersionTaskStatus {
 	    Number: string;
 	    DecompileStatus: number;
 	    MatchStatus: number;
+	    Message: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new VersionStatus(source);
+	        return new VersionTaskStatus(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -2572,14 +2579,15 @@ export namespace wechat {
 	        this.Number = source["Number"];
 	        this.DecompileStatus = source["DecompileStatus"];
 	        this.MatchStatus = source["MatchStatus"];
+	        this.Message = source["Message"];
 	    }
 	}
 	export class InfoToFront {
 	    AppID: string;
 	    UpdateDate: string;
-	    Info: Info;
+	    Info?: Info;
 	    Status: number;
-	    Versions: VersionStatus[];
+	    Versions: VersionTaskStatus[];
 	
 	    static createFrom(source: any = {}) {
 	        return new InfoToFront(source);
@@ -2591,7 +2599,7 @@ export namespace wechat {
 	        this.UpdateDate = source["UpdateDate"];
 	        this.Info = this.convertValues(source["Info"], Info);
 	        this.Status = source["Status"];
-	        this.Versions = this.convertValues(source["Versions"], VersionStatus);
+	        this.Versions = this.convertValues(source["Versions"], VersionTaskStatus);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

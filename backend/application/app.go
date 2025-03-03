@@ -92,7 +92,11 @@ var defaultConfig = &config.Config{
 		Path:  "",
 		Flags: "-sc -cl -title",
 	},
-	Wechat: config.Wechat{Rules: DefaultRegex},
+	Wechat: config.Wechat{
+		Rules:                DefaultRegex,
+		DecompileConcurrency: 5,
+		ExtractConcurrency:   20,
+	},
 }
 
 var DefaultApp = NewApp()
@@ -219,6 +223,14 @@ func (r *Application) loadConfigFile() error {
 	}
 	if r.Config.ICP.Concurrency <= 0 {
 		r.Config.ICP.Concurrency = 5
+		needUpdate = true
+	}
+	if r.Config.Wechat.DecompileConcurrency <= 0 {
+		r.Config.Wechat.DecompileConcurrency = 5
+		needUpdate = true
+	}
+	if r.Config.Wechat.ExtractConcurrency <= 0 {
+		r.Config.Wechat.ExtractConcurrency = 20
 		needUpdate = true
 	}
 	currentVersion, _ := version.NewVersion(Version)
@@ -516,20 +528,6 @@ func (r *Application) GetWechatRules() []string {
 	return t
 }
 
-func (r *Application) SaveWechatRules(rules []string) error {
-	var t []string
-	for _, rule := range rules {
-		tt := fmt.Sprintf("\"%s\"", rule)
-		ttt, err := strconv.Unquote(tt)
-		if err != nil {
-			return errors.New("语法错误：" + tt)
-		}
-		t = append(t, ttt)
-	}
-	r.Config.Wechat.Rules = t
-	return r.WriteConfig(r.Config)
-}
-
 func (r *Application) GetAllConstants() *Constant {
 	var statuses = status.StatusEnum{
 		Pending: status.Pending,
@@ -544,23 +542,24 @@ func (r *Application) GetAllConstants() *Constant {
 		Pausing: status.Pausing,
 	}
 	var events = event.EventEnum{
-		AppExit:                   event.AppExit,
-		WindowSizeChange:          event.WindowSizeChange,
-		FOFAExport:                event.FOFAExport,
-		NewDownloadItem:           event.NewExportItem,
-		NewExportLog:              event.NewExportLog,
-		HunterExport:              event.HunterExport,
-		HunterQuery:               event.HunterQuery,
-		ICPExport:                 event.ICPExport,
-		QuakeExport:               event.QuakeExport,
-		ZoneSiteExport:            event.ZoneSiteExport,
-		ZoneMemberExport:          event.ZoneMemberExport,
-		ZoneEmailExport:           event.ZoneEmailExport,
-		Httpx:                     event.Httpx,
-		DecompileWxMiniProgram:    event.DecompileWxMiniProgram,
-		ICPBatchQuery:             event.ICPBatchQuery,
-		ICPBatchQueryStatusUpdate: event.ICPBatchQueryStatusUpdate,
-		AiQiCha:                   event.AiQiCha,
+		AppExit:                      event.AppExit,
+		WindowSizeChange:             event.WindowSizeChange,
+		FOFAExport:                   event.FOFAExport,
+		NewDownloadItem:              event.NewExportItem,
+		NewExportLog:                 event.NewExportLog,
+		HunterExport:                 event.HunterExport,
+		HunterQuery:                  event.HunterQuery,
+		ICPExport:                    event.ICPExport,
+		QuakeExport:                  event.QuakeExport,
+		ZoneSiteExport:               event.ZoneSiteExport,
+		ZoneMemberExport:             event.ZoneMemberExport,
+		ZoneEmailExport:              event.ZoneEmailExport,
+		Httpx:                        event.Httpx,
+		DecompileWxMiniProgram:       event.DecompileWxMiniProgram,
+		DecompileWxMiniProgramTicker: event.DecompileWxMiniProgramTicker,
+		ICPBatchQuery:                event.ICPBatchQuery,
+		ICPBatchQueryStatusUpdate:    event.ICPBatchQueryStatusUpdate,
+		AiQiCha:                      event.AiQiCha,
 	}
 
 	var histories = history.HistoryEnum{

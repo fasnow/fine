@@ -5,9 +5,14 @@ type Version struct {
 	UpdateDate string
 }
 
-type MiniProgram struct {
+type MiniAppBaseInfo struct {
 	AppID      string
 	UpdateDate string
+}
+
+type MiniProgram struct {
+	*MiniAppBaseInfo
+	Versions []*Version
 }
 
 type Info struct {
@@ -21,13 +26,14 @@ type Info struct {
 }
 
 type InfoToFront struct {
-	*MiniProgram
-	Info     Info
+	*MiniAppBaseInfo
+	Info     *Info
 	Status   int
-	Versions []*VersionStatus
+	Versions []*VersionTaskStatus
 }
-type VersionStatus struct {
+type VersionTaskStatus struct {
 	Number          string
 	DecompileStatus int
 	MatchStatus     int
+	Message         string
 }

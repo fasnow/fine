@@ -41,8 +41,6 @@ export function SaveWechat(arg1:config.Wechat):Promise<void>;
 
 export function SaveWechatDataDir(arg1:string):Promise<void>;
 
-export function SaveWechatRules(arg1:Array<string>):Promise<void>;
-
 export function SetContext(arg1:context.Context):Promise<void>;
 
 export function UseProxyManager(arg1:proxy.Manager):Promise<void>;

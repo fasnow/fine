@@ -16,13 +16,8 @@ import {
     SaveProxy,
     SaveQueryOnEnter,
     SaveTimeout,
-    SaveWechat
 } from "../../wailsjs/go/application/Application";
-import {update} from "cheerio/lib/parse";
 import {OpenDirectoryDialog} from "../../wailsjs/go/osoperation/Runtime";
-import {GetAllMiniProgram} from "../../wailsjs/go/wechat/Bridge";
-import {prop, val} from "cheerio/lib/api/attributes";
-import {ValueType} from 'rc-input-number'
 import {SetProxy, SetProxyTimeout} from "../../wailsjs/go/icp/Bridge";
 import Number from "@/component/Number";
 import Password from "@/component/Password";

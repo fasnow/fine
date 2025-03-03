@@ -1,9 +1,15 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/binary"
 	"os"
 	"path/filepath"
 )
+
+func ReadBinary(reader *bytes.Reader, data interface{}) error {
+	return binary.Read(reader, binary.BigEndian, data)
+}
 
 func IsDir(path string) (bool, error) {
 	info, err := os.Stat(path)
@@ -51,4 +57,9 @@ func CreateFile(filePath string) error {
 	}
 	defer file.Close()
 	return nil
+}
+
+func FileExist(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
 }

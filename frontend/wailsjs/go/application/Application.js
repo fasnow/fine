@@ -70,10 +70,6 @@ export function SaveWechatDataDir(arg1) {
   return window['go']['application']['Application']['SaveWechatDataDir'](arg1);
 }
 
-export function SaveWechatRules(arg1) {
-  return window['go']['application']['Application']['SaveWechatRules'](arg1);
-}
-
 export function SetContext(arg1) {
   return window['go']['application']['Application']['SetContext'](arg1);
 }

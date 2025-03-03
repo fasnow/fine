@@ -127,6 +127,6 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            1. fix: 小程序获取Bug。
+            1. new: 小程序反编译改为Go。
 
 

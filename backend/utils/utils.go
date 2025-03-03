@@ -14,7 +14,7 @@ func GetTableName(db *gorm.DB, model interface{}) string {
 	return stmt.Schema.Table
 }
 
-func StringsContain(slice []string, target string) bool {
+func StringSliceContain(slice []string, target string) bool {
 	for _, str := range slice {
 		if str == target {
 			return true
@@ -83,9 +83,4 @@ func SaveToTxt() {
 
 func GetFileContent(filename string) ([]byte, error) {
 	return os.ReadFile(filename)
-}
-
-func FileExist(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return !os.IsNotExist(err)
 }

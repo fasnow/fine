@@ -78,7 +78,7 @@ func GetConnection() *gorm.DB {
 			panic(err)
 		}
 		if err = db.AutoMigrate(
-			&models.MiniProgramDecompileTask{},
+			&models.MiniAppDecompileTask{},
 			&models.VersionDecompileTask{},
 			&models.Info{},
 		); err != nil {

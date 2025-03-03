@@ -4,10 +4,9 @@ import (
 	"fine/backend/service/model/wechat"
 )
 
-type MiniProgramDecompileTask struct {
+type MiniAppDecompileTask struct {
 	BaseModel
-	*wechat.MiniProgram
-	Status   int
+	*wechat.MiniAppBaseInfo
 	Versions []*VersionDecompileTask `gorm:"foreignKey:AppID;references:AppID"` // 一对多关系
 }
 type VersionDecompileTask struct {
@@ -17,6 +16,7 @@ type VersionDecompileTask struct {
 	DecompileStatus int
 	MatchStatus     int
 	Matched         string
+	Message         string
 }
 
 type Info struct {

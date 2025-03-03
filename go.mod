@@ -5,6 +5,7 @@ go 1.21.6
 require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/ditashi/jsbeautifier-go v0.0.0-20141206144643-2520a8026a9c
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-version v1.7.0
@@ -17,6 +18,7 @@ require (
 	github.com/wailsapp/wails/v2 v2.9.2
 	github.com/xuri/excelize/v2 v2.8.0
 	github.com/yitter/idgenerator-go v1.3.3
+	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	golang.org/x/crypto v0.23.0
 	golang.org/x/net v0.25.0
 	gopkg.in/ini.v1 v1.67.0

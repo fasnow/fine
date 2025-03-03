@@ -3,6 +3,7 @@ package constant
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"os"
 )
 
 type StringArray []string
@@ -33,4 +34,26 @@ func (r Float64Array) Value() (driver.Value, error) {
 		return nil, err
 	}
 	return marshal, nil
+}
+
+type FileInfoSlice []os.DirEntry
+
+func (f FileInfoSlice) Len() int {
+	return len(f)
+}
+
+func (f FileInfoSlice) Less(i, j int) bool {
+	info1, err := f[i].Info()
+	if err != nil {
+		return false
+	}
+	info2, err := f[j].Info()
+	if err != nil {
+		return false
+	}
+	return info1.ModTime().After(info2.ModTime())
+}
+
+func (f FileInfoSlice) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
 }

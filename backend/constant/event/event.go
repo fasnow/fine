@@ -8,43 +8,45 @@ import (
 )
 
 const (
-	AppExit                   = "AppExit"
-	WindowSizeChange          = "WindowSizeChange"
-	FOFAExport                = "FOFAExport"
-	NewExportItem             = "NewExportItem"
-	NewExportLog              = "NewExportItem"
-	HunterExport              = "HunterExport"
-	HunterQuery               = "HunterQuery"
-	ICPExport                 = "ICPExport"
-	QuakeExport               = "QuakeExport"
-	ZoneSiteExport            = "ZoneSiteExport"
-	ZoneMemberExport          = "ZoneMemberExport"
-	ZoneEmailExport           = "ZoneEmailExport"
-	Httpx                     = "Httpx"
-	DecompileWxMiniProgram    = "DecompileWxMiniProgram"
-	ICPBatchQuery             = "ICPBatchQuery"
-	ICPBatchQueryStatusUpdate = "ICPBatchQueryStatusUpdate"
-	AiQiCha                   = "AiQiCha"
+	AppExit                      = "AppExit"
+	WindowSizeChange             = "WindowSizeChange"
+	FOFAExport                   = "FOFAExport"
+	NewExportItem                = "NewExportItem"
+	NewExportLog                 = "NewExportItem"
+	HunterExport                 = "HunterExport"
+	HunterQuery                  = "HunterQuery"
+	ICPExport                    = "ICPExport"
+	QuakeExport                  = "QuakeExport"
+	ZoneSiteExport               = "ZoneSiteExport"
+	ZoneMemberExport             = "ZoneMemberExport"
+	ZoneEmailExport              = "ZoneEmailExport"
+	Httpx                        = "Httpx"
+	DecompileWxMiniProgram       = "DecompileWxMiniProgram"
+	DecompileWxMiniProgramTicker = "DecompileWxMiniProgramTicker"
+	ICPBatchQuery                = "ICPBatchQuery"
+	ICPBatchQueryStatusUpdate    = "ICPBatchQueryStatusUpdate"
+	AiQiCha                      = "AiQiCha"
 )
 
 type EventEnum struct {
-	AppExit                   string
-	WindowSizeChange          string
-	FOFAExport                string
-	NewDownloadItem           string
-	NewExportLog              string
-	HunterExport              string
-	HunterQuery               string
-	ICPExport                 string
-	QuakeExport               string
-	ZoneSiteExport            string
-	ZoneMemberExport          string
-	ZoneEmailExport           string
-	Httpx                     string
-	DecompileWxMiniProgram    string
-	ICPBatchQuery             string
-	ICPBatchQueryStatusUpdate string
-	AiQiCha                   string
+	AppExit                      string
+	WindowSizeChange             string
+	FOFAExport                   string
+	NewDownloadItem              string
+	NewExportLog                 string
+	HunterExport                 string
+	HunterQuery                  string
+	ICPExport                    string
+	QuakeExport                  string
+	ZoneSiteExport               string
+	ZoneMemberExport             string
+	ZoneEmailExport              string
+	Httpx                        string
+	DecompileWxMiniProgram       string
+	DecompileWxMiniProgramTicker string
+	ICPBatchQuery                string
+	ICPBatchQueryStatusUpdate    string
+	AiQiCha                      string
 }
 
 func init() {

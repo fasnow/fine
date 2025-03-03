@@ -1,48 +1,55 @@
 package wechat
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/sha1"
-	"embed"
 	"fine/backend/application"
 	"fine/backend/constant/event"
 	"fine/backend/constant/status"
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/osoperation"
 	"fine/backend/proxy/v2"
 	"fine/backend/service/model/wechat"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
-	"golang.org/x/crypto/pbkdf2"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	runtime2 "runtime"
-	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-//go:embed decompile
-var decompile embed.FS
-
 var filteredFileExt = []string{".png", ".jpg", ".jpeg", ".wxapkg", ".br"}
 
 type Bridge struct {
-	app      *application.Application
-	wxRepo   repository.WechatRepository
-	http     *http.Client
-	regexMap sync.Map
+	app                      *application.Application
+	wxRepo                   repository.WechatRepository
+	http                     *http.Client
+	regexMap                 sync.Map
+	wechat                   *WeChat
+	mutex                    sync.Mutex
+	decompileConcurrencyChan chan struct{}
+	extractConcurrencyChan   chan struct{}
+	decompileStatusChan      chan struct {
+		Task *models.VersionDecompileTask
+		Stat int
+		Err  error
+		Msg  string
+	}
+	extractStatusChan chan struct {
+		Task *models.VersionDecompileTask
+		Stat int
+		Err  error
+		Msg  string
+	}
+	autoDecompile bool
 }
 
 func (r *Bridge) UseProxyManager(manager *proxy.Manager) {
@@ -51,609 +58,323 @@ func (r *Bridge) UseProxyManager(manager *proxy.Manager) {
 
 func NewWechatBridge(app *application.Application) *Bridge {
 	c := &Bridge{
-		app:    app,
-		wxRepo: repository.NewWechatRepository(database.GetConnection()),
-		http:   &http.Client{},
+		app:                      app,
+		wxRepo:                   repository.NewWechatRepository(database.GetConnection()),
+		http:                     &http.Client{},
+		wechat:                   New(app.Config.Wechat.Applet),
+		decompileConcurrencyChan: make(chan struct{}, app.Config.Wechat.DecompileConcurrency),
+		extractConcurrencyChan:   make(chan struct{}, app.Config.Wechat.ExtractConcurrency),
+		decompileStatusChan: make(chan struct {
+			Task *models.VersionDecompileTask
+			Stat int
+			Err  error
+			Msg  string
+		}, 1),
+		extractStatusChan: make(chan struct {
+			Task *models.VersionDecompileTask
+			Stat int
+			Err  error
+			Msg  string
+		}, 1),
 	}
-	c.wxRepo.RestVersionStatus()
+	c.SetRegex(app.Config.Wechat.Rules)
+	c.wxRepo.RestVersionTaskStatus()
 	c.UseProxyManager(app.ProxyManager)
+	c.fileMonitor()
 	return c
 }
 
-func (r *Bridge) GetAllMiniProgram() ([]wechat.InfoToFront, error) {
-	items := make([]wechat.InfoToFront, 0)
-	if r.app.Config.Wechat.Applet == "" {
-		return items, nil
-	}
+func (r *Bridge) SetRegex(regexes []string) {
+	r.wechat.SetRegex(regexes)
+}
 
-	// 获取所有的小程序，按修改时间排序
-	entries, err := os.ReadDir(r.app.Config.Wechat.Applet)
-	if err != nil {
-		r.app.Logger.Error(err)
-		return nil, err
+// 创建版本任务
+func (r *Bridge) createVersionTasks(miniProgram *wechat.MiniProgram) []*models.VersionDecompileTask {
+	var versionsTask []*models.VersionDecompileTask
+	for _, version := range miniProgram.Versions {
+		versionsTask = append(versionsTask, &models.VersionDecompileTask{
+			AppID:           miniProgram.AppID,
+			DecompileStatus: status.Waiting,
+			MatchStatus:     status.Waiting,
+			Version: &wechat.Version{
+				Number:     version.Number,
+				UpdateDate: version.UpdateDate,
+			},
+		})
 	}
-	sort.Sort(FileInfoSlice(entries))
-	for _, entry := range entries {
-		if entry.IsDir() {
-			appid := entry.Name()
-			if !strings.HasPrefix(appid, "wx") {
-				continue
+	return versionsTask
+}
+
+// 创建版本任务状态
+func (r *Bridge) createVersionTaskStatuses(versions []*models.VersionDecompileTask) []*wechat.VersionTaskStatus {
+	var statuses []*wechat.VersionTaskStatus
+	for _, version := range versions {
+		statuses = append(statuses, &wechat.VersionTaskStatus{
+			Number:          version.Version.Number,
+			DecompileStatus: version.DecompileStatus,
+			MatchStatus:     version.MatchStatus,
+		})
+	}
+	return statuses
+}
+
+// 查找或创建信息
+func (r *Bridge) findOrCreateInfo(appID string) (*wechat.Info, error) {
+	appInfo, err := r.wxRepo.FindInfoByAppID(appID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			tmpInfo, e := r.queryAppID(appID)
+			if e != nil {
+				return nil, e
 			}
-			versionsPath := filepath.Join(r.app.Config.Wechat.Applet, appid)
-			if isDir, err := utils.IsDir(versionsPath); err != nil {
-				r.app.Logger.Error(err)
-			} else if !isDir {
-				continue
-			}
-			versionEntries, err2 := os.ReadDir(versionsPath)
-			if err2 != nil {
-				r.app.Logger.Error(err2)
+			if err2 := r.wxRepo.CreateInfo(&models.Info{
+				Info: &wechat.Info{
+					Nickname:      tmpInfo.Nickname,
+					Username:      tmpInfo.Username,
+					Description:   tmpInfo.Description,
+					Avatar:        tmpInfo.Avatar,
+					UsesCount:     tmpInfo.UsesCount,
+					PrincipalName: tmpInfo.PrincipalName,
+				},
+			}); err2 != nil {
 				return nil, err2
 			}
-			// 按修改时间排序
-			sort.Sort(FileInfoSlice(versionEntries))
-			var versions []*models.VersionDecompileTask
-			for _, versionEntry := range versionEntries {
-				var file = filepath.Join(versionsPath, versionEntry.Name(), "__APP__.wxapkg")
-				fileInfo, err3 := os.Stat(file)
-				if err3 != nil {
-					//不写入日志避免文件过大
-					continue
-				}
-				versions = append(versions, &models.VersionDecompileTask{
-					AppID:           appid,
-					DecompileStatus: status.Waiting,
-					MatchStatus:     status.Waiting,
-					Version: &wechat.Version{
-						Number:     versionEntry.Name(),
-						UpdateDate: fileInfo.ModTime().Format("2006/01/02 15:04"),
-					},
-				})
-			}
-
-			if info, err3 := entry.Info(); err3 != nil {
-				r.app.Logger.Error(err3)
-			} else {
-				miniProgram := &wechat.MiniProgram{
-					AppID:      appid,
-					UpdateDate: info.ModTime().Format("2006/01/02 15:04"),
-				}
-				task := &models.MiniProgramDecompileTask{
-					Status:      status.Waiting,
-					MiniProgram: miniProgram,
-					Versions:    versions,
-				}
-				item := wechat.InfoToFront{
-					MiniProgram: miniProgram,
-					Info:        wechat.Info{AppID: appid},
-				}
-				if decompileTask, err4 := r.wxRepo.FindByAppId(appid); errors.Is(err4, gorm.ErrRecordNotFound) {
-					//没有就插入新的
-					if err5 := r.wxRepo.CreateTask(task); err5 != nil {
-						r.app.Logger.Error(err5)
-					}
-					for _, version := range versions {
-						item.Versions = append(item.Versions, &wechat.VersionStatus{
-							Number:          version.Number,
-							DecompileStatus: status.Waiting,
-							MatchStatus:     status.Waiting,
-						})
-					}
-				} else {
-					//有则判断状态
-					var newVersions []*models.VersionDecompileTask
-					for j := 0; j < len(versions); j++ {
-						if len(decompileTask.Versions) == 0 {
-							//添加新的版本
-							newVersions = append(newVersions, versions[j])
-							item.Versions = append(item.Versions, &wechat.VersionStatus{
-								Number:          versions[j].Number,
-								DecompileStatus: status.Waiting,
-								MatchStatus:     status.Waiting,
-							})
-							continue
-						}
-						for _, version := range decompileTask.Versions {
-							if versions[j].Number == version.Number {
-								item.Versions = append(item.Versions, &wechat.VersionStatus{
-									Number:          version.Number,
-									DecompileStatus: version.DecompileStatus,
-									MatchStatus:     version.MatchStatus,
-								})
-								continue
-							}
-							//添加新的版本
-							newVersions = append(newVersions, versions[j])
-							item.Versions = append(item.Versions, &wechat.VersionStatus{
-								Number:          version.Number,
-								DecompileStatus: status.Waiting,
-								MatchStatus:     status.Waiting,
-							})
-						}
-					}
-					if len(newVersions) > 0 {
-						if err5 := r.wxRepo.AppendVersionByAppID(appid, newVersions); err5 != nil {
-							r.app.Logger.Error(err5)
-						}
-					}
-				}
-
-				if appInfo, err4 := r.wxRepo.FindInfoByAppID(appid); err4 != nil {
-					tmpInfo, e := r.queryAppID(appid)
-					if e != nil {
-						r.app.Logger.Error(e)
-					} else {
-						if err5 := r.wxRepo.CreateInfo(&models.Info{
-							Info: tmpInfo,
-						}); err5 != nil {
-							r.app.Logger.Error(e)
-						}
-						item.Info.Nickname = tmpInfo.Nickname
-						item.Info.Username = tmpInfo.Username
-						item.Info.Description = tmpInfo.Description
-						item.Info.Avatar = tmpInfo.Avatar
-						item.Info.UsesCount = tmpInfo.UsesCount
-						item.Info.PrincipalName = tmpInfo.PrincipalName
-					}
-				} else {
-					item.Info.Nickname = appInfo.Nickname
-					item.Info.Username = appInfo.Username
-					item.Info.Description = appInfo.Description
-					item.Info.Avatar = appInfo.Avatar
-					item.Info.UsesCount = appInfo.UsesCount
-					item.Info.PrincipalName = appInfo.PrincipalName
-				}
-				items = append(items, item)
-			}
+			return tmpInfo, nil
 		}
+		return nil, err
 	}
-	return items, nil
+	return &wechat.Info{
+		Nickname:      appInfo.Nickname,
+		Username:      appInfo.Username,
+		Description:   appInfo.Description,
+		Avatar:        appInfo.Avatar,
+		UsesCount:     appInfo.UsesCount,
+		PrincipalName: appInfo.PrincipalName,
+		AppID:         appID,
+	}, nil
 }
 
-func (r *Bridge) GetInfo(appid string) error {
-	info, err := r.wxRepo.FindInfoByAppID(appid)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		r.app.Logger.Error(err)
-		return err
-	}
-	tmpInfo, e := r.queryAppID(appid)
-	if e != nil {
-		r.app.Logger.Error(e)
-		return e
-	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if e = r.wxRepo.CreateInfo(&models.Info{Info: tmpInfo}); e != nil {
-			r.app.Logger.Error(err)
-			return e
-		}
-		return nil
-	}
-	info.Info = tmpInfo
-	if e = r.wxRepo.UpdateInfo(info); e != nil {
-		r.app.Logger.Error(err)
-		return e
-	}
-	return nil
-}
-
-func (r *Bridge) SetAppletPath(path string) error {
-	r.app.Config.Wechat.Applet = path
-	if err := r.app.WriteConfig(r.app.Config); err != nil {
-		r.app.Logger.Error(err)
-		return err
-
-	}
-	return nil
-}
-
-var decompileSemaphore = make(chan struct{}, 10)
-var extractInfoSemaphore = make(chan struct{}, 200)
-var mutex = sync.Mutex{}
-
-func (r *Bridge) DecompileBulk(items []wechat.InfoToFront) error {
-	exePath, err := generateDecompileExe()
+// 处理版本任务
+func (r *Bridge) handleVersionTasks(appID string, versionsTask []*models.VersionDecompileTask) ([]*wechat.VersionTaskStatus, error) {
+	task, err := r.wxRepo.FindTaskByAppId(appID)
 	if err != nil {
-		r.app.Logger.Error(err)
-		return err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if err2 := r.wxRepo.CreateVersionTask(&models.MiniAppDecompileTask{
+				MiniAppBaseInfo: &wechat.MiniAppBaseInfo{AppID: appID},
+				Versions:        versionsTask,
+			}); err2 != nil {
+				return nil, err2
+			}
+			return r.createVersionTaskStatuses(versionsTask), nil
+		}
+		return nil, err
 	}
+	versionMap := make(map[string]*models.VersionDecompileTask)
+	for _, version := range task.Versions {
+		versionMap[version.Version.Number] = version
+	}
+	var newVersionsTask []*models.VersionDecompileTask
+	var statuses []*wechat.VersionTaskStatus
+	for _, versionTask := range versionsTask {
+		if existingVersion, ok := versionMap[versionTask.Version.Number]; ok {
+			statuses = append(statuses, &wechat.VersionTaskStatus{
+				Number:          existingVersion.Version.Number,
+				DecompileStatus: existingVersion.DecompileStatus,
+				MatchStatus:     existingVersion.MatchStatus,
+				Message:         existingVersion.Message,
+			})
+		} else {
+			newVersionsTask = append(newVersionsTask, versionTask)
+			statuses = append(statuses, &wechat.VersionTaskStatus{
+				Number:          versionTask.Version.Number,
+				DecompileStatus: status.Waiting,
+				MatchStatus:     status.Waiting,
+			})
+		}
+	}
+	if len(newVersionsTask) > 0 {
+		if err2 := r.wxRepo.AppendVersionTaskByAppID(newVersionsTask); err2 != nil {
+			return nil, err2
+		}
+	}
+	return statuses, nil
+}
+
+func (r *Bridge) getDecryptedWxapkgs(appid, version string) (map[string][]byte, error) {
+	wxapkgs, err := r.wechat.GetMiniAppWxapkgs(appid, version)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string][]byte, 0)
+	for _, wxapkg := range wxapkgs {
+		bytes, err := os.ReadFile(wxapkg)
+		if err != nil {
+			return nil, err
+		}
+		if runtime2.GOOS == "windows" {
+			bytes, err = r.wechat.DecryptWxapkg(bytes, appid, DefaultSalt, DefaultIV)
+			if err != nil {
+				return nil, err
+			}
+		}
+		result[wxapkg] = bytes
+	}
+	return result, nil
+}
+
+func (r *Bridge) decompile(task *models.VersionDecompileTask) []string {
+	var wg sync.WaitGroup
+	var resultFiles []string
+	wg.Add(1)
 	go func() {
-		for _, item := range items {
-			for _, versions := range item.Versions {
-				decompileSemaphore <- struct{}{}
-				go func(appid, version string) {
-					defer func() {
-						<-decompileSemaphore
-					}()
-					var data = map[string]string{
-						"appID":   appid,
-						"version": version,
-					}
-					mutex.Lock()
-					task, err := r.wxRepo.FindVersionByAppIDAndVersionNum(appid, version)
-					if err != nil {
-						r.app.Logger.Error(err)
-						return
-					}
-					if task.DecompileStatus == status.Running || task.DecompileStatus == status.Stopped {
-						return
-					}
-					task.DecompileStatus = status.Running
-					if err := r.wxRepo.UpdateVersion(task); err != nil {
-						r.app.Logger.Error(err)
-					}
-					mutex.Unlock()
-					event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-						Status:  status.Running,
-						Message: fmt.Sprintf("[%s  %s] 开始反编译\n", appid, version),
-						Data:    data,
-					})
-
-					//读取加密的wxapkg包并解密到指定文件
-					files, _ := os.ReadDir(filepath.Join(r.app.Config.Wechat.Applet, appid, version))
-					var outputDir = filepath.Join(r.app.Config.WechatDataDir, appid, version)
-					var sourceFilesName []string
-					var targetFiles = make([]string, 0)
-					defer func(targetFiles *[]string) {
-						//反编译完成后删除解密的wxapkg文件
-						for _, file := range *targetFiles {
-							os.Remove(file)
-						}
-					}(&targetFiles)
-					for _, file := range files {
-						if !file.IsDir() && filepath.Ext(file.Name()) == ".wxapkg" {
-							sourceFilesName = append(sourceFilesName, file.Name())
-						}
-					}
-
-					for _, sourceFileName := range sourceFilesName {
-						bytes, err := os.ReadFile(filepath.Join(r.app.Config.Wechat.Applet, appid, version, sourceFileName))
-						if err != nil {
-							event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-								Status: status.Error,
-								Error:  fmt.Sprintf("[%s  %s] 读取wxapkg文件时出错：%s\n", appid, version, err.Error()),
-								Data:   data,
-							})
-							continue
-						}
-
-						// windows下需要先解密
-						if runtime2.GOOS == "windows" {
-							bytes, err = decrypt(bytes, appid, "saltiest", "the iv: 16 bytes")
-							if err != nil {
-								event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-									Status: status.Error,
-									Error:  fmt.Sprintf("[%s  %s] 解密wxapkg文件时出错：%s\n", appid, version, err.Error()),
-									Data:   data,
-								})
-								continue
-							}
-						}
-
-						var targetFile = filepath.Join(outputDir, sourceFileName)
-						if err := utils.WriteFile(targetFile, bytes, 0766); err != nil {
-							event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-								Status: status.Error,
-								Error:  fmt.Sprintf("[%s  %s] 无法写入解密后的文件到指定位置：%s\n", appid, version, err.Error()),
-								Data:   data})
-							continue
-						}
-						targetFiles = append(targetFiles, targetFile)
-					}
-					r.app.Logger.Info(targetFiles)
-					cmd := exec.Command(exePath, "-t", outputDir, "-o", outputDir)
-					r.app.Logger.Info(cmd)
-					osoperation.HideCmdWindow(cmd)
-
-					//反编译程序内部出错但是此时可能已经成功反编译,所以只能其他错误再返回
-					if err := cmd.Run(); err != nil && cmd.ProcessState.ExitCode() != 1 {
-						r.app.Logger.Error(err)
-						mutex.Lock()
-						task.DecompileStatus = status.Error
-						if err := r.wxRepo.UpdateVersion(task); err != nil {
-							r.app.Logger.Error(err)
-						}
-						mutex.Unlock()
-						event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-							Status: status.Error,
-							Error:  fmt.Sprintf("[%s  %s] 反编译时发生错误：%s\n", appid, version, err.Error()),
-							Data:   data})
-						return
-					}
-					mutex.Lock()
-					task.DecompileStatus = status.Stopped
-					task.MatchStatus = status.Running
-					if err := r.wxRepo.UpdateVersion(task); err != nil {
-						r.app.Logger.Error(err)
-					}
-					mutex.Unlock()
-					event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-						Status:  status.Stopped,
-						Message: fmt.Sprintf("[%s  %s] 反编译完成,信息提取开始\n", appid, version),
-						Data:    data,
-					})
-					r.extractInfo(appid, version)
-					mutex.Lock()
-					task.MatchStatus = status.Stopped
-					if err := r.wxRepo.UpdateVersion(task); err != nil {
-						r.app.Logger.Error(err)
-					}
-					mutex.Unlock()
-					event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-						Status:  status.Stopped,
-						Message: fmt.Sprintf("[%s  %s] 信息提取完成\n", appid, version),
-						Data:    data,
-					})
-				}(item.MiniProgram.AppID, versions.Number)
-			}
-		}
-	}()
-	return nil
-}
-
-func (r *Bridge) Decompile(item wechat.InfoToFront) error {
-	exePath, err := generateDecompileExe()
-	if err != nil {
-		r.app.Logger.Error(err)
-		return err
-	}
-	r.app.Logger.Debug(item)
-	go func() {
-		for _, versions := range item.Versions {
-			go func(appid, version string) {
-				var data = map[string]string{
-					"appID":   appid,
-					"version": version,
-				}
-				mutex.Lock()
-				task, err := r.wxRepo.FindVersionByAppIDAndVersionNum(appid, version)
-				if err != nil {
-					r.app.Logger.Error(err)
-					return
-				}
-				r.app.Logger.Debug(task)
-				if task.DecompileStatus == status.Running || task.MatchStatus == status.Running {
-					return
-				}
-				task.DecompileStatus = status.Running
-				if err := r.wxRepo.UpdateVersion(task); err != nil {
-					r.app.Logger.Error(err)
-				}
-				mutex.Unlock()
-				event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-					Status:  status.Running,
-					Message: fmt.Sprintf("[%s  %s] 开始反编译\n", appid, version),
-					Data:    data,
-				})
-
-				//读取加密的wxapkg包并解密到指定文件
-				files, _ := os.ReadDir(filepath.Join(r.app.Config.Wechat.Applet, appid, version))
-				var outputDir = filepath.Join(r.app.Config.WechatDataDir, appid, version)
-				var sourceFilesName []string
-				var targetFiles = make([]string, 0)
-				defer func(targetFiles *[]string) {
-					//反编译完成后删除解密的wxapkg文件
-					for _, file := range *targetFiles {
-						os.Remove(file)
-					}
-				}(&targetFiles)
-				for _, file := range files {
-					if !file.IsDir() && filepath.Ext(file.Name()) == ".wxapkg" {
-						sourceFilesName = append(sourceFilesName, file.Name())
-					}
-				}
-
-				for _, sourceFileName := range sourceFilesName {
-					bytes, err := os.ReadFile(filepath.Join(r.app.Config.Wechat.Applet, appid, version, sourceFileName))
-					if err != nil {
-						event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-							Status: status.Error,
-							Error:  fmt.Sprintf("[%s  %s] 读取wxapkg文件时出错：%s\n", appid, version, err.Error()),
-							Data:   data,
-						})
-						continue
-					}
-
-					// windows下需要先解密
-					if runtime2.GOOS == "windows" {
-						bytes, err = decrypt(bytes, appid, "saltiest", "the iv: 16 bytes")
-						if err != nil {
-							event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-								Status: status.Error,
-								Error:  fmt.Sprintf("[%s  %s] 解密wxapkg文件时出错：%s\n", appid, version, err.Error()),
-								Data:   data,
-							})
-							continue
-						}
-					}
-
-					var targetFile = filepath.Join(outputDir, sourceFileName)
-					if err := utils.WriteFile(targetFile, bytes, 0766); err != nil {
-						event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-							Status: status.Error,
-							Error:  fmt.Sprintf("[%s  %s] 无法写入解密后的文件到指定位置：%s\n", appid, version, err.Error()),
-							Data:   data})
-						continue
-					}
-					targetFiles = append(targetFiles, targetFile)
-				}
-				r.app.Logger.Info(targetFiles)
-				cmd := exec.Command(exePath, "-t", outputDir, "-o", outputDir)
-				r.app.Logger.Info(cmd)
-				osoperation.HideCmdWindow(cmd)
-
-				//反编译程序内部出错但是此时可能已经成功反编译,所以只能其他错误再返回
-				if err := cmd.Run(); err != nil && cmd.ProcessState.ExitCode() != 1 {
-					r.app.Logger.Error(err)
-					task.DecompileStatus = status.Error
-					if err := r.wxRepo.UpdateVersion(task); err != nil {
-						r.app.Logger.Error(err)
-					}
-					event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-						Status: status.Error,
-						Error:  fmt.Sprintf("[%s  %s] 反编译时发生错误：%s\n", appid, version, err.Error()),
-						Data:   data})
-					return
-				}
-				mutex.Lock()
-				task.DecompileStatus = status.Stopped
-				task.MatchStatus = status.Running
-				if err := r.wxRepo.UpdateVersion(task); err != nil {
-					r.app.Logger.Error(err)
-				}
-				mutex.Unlock()
-				event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-					Status:  status.Stopped,
-					Message: fmt.Sprintf("[%s  %s] 反编译完成,信息提取开始\n", appid, version),
-					Data:    data,
-				})
-				r.extractInfo(appid, version)
-				mutex.Lock()
-				task.MatchStatus = status.Stopped
-				if err := r.wxRepo.UpdateVersion(task); err != nil {
-					r.app.Logger.Error(err)
-				}
-				mutex.Unlock()
-				event.EmitV2(event.DecompileWxMiniProgram, event.EventDetail{
-					Status:  status.Stopped,
-					Message: fmt.Sprintf("[%s  %s] 信息提取完成\n", appid, version),
-					Data:    data,
-				})
-			}(item.MiniProgram.AppID, versions.Number)
-		}
-	}()
-	return nil
-}
-
-func (r *Bridge) ClearApplet() error {
-	err := os.RemoveAll(r.app.Config.Wechat.Applet)
-	if err != nil {
-		return err
-	}
-	return r.wxRepo.DeleteAllVersionDecompileTask()
-}
-
-func (r *Bridge) ClearDecompiled() error {
-	if err := r.wxRepo.DeleteAllVersionDecompileTask(); err != nil {
-		r.app.Logger.Error(err)
-		return err
-	}
-	return os.RemoveAll(r.app.Config.WechatDataDir)
-}
-
-func decrypt(dataByte []byte, wxid, salt, iv string) ([]byte, error) {
-	dk := pbkdf2.Key([]byte(wxid), []byte(salt), 1000, 32, sha1.New)
-	block, _ := aes.NewCipher(dk)
-	blockMode := cipher.NewCBCDecrypter(block, []byte(iv))
-	originData := make([]byte, 1024)
-	blockMode.CryptBlocks(originData, dataByte[6:1024+6])
-	afData := make([]byte, len(dataByte)-1024-6)
-	var xorKey = byte(0x66)
-	if len(wxid) >= 2 {
-		xorKey = wxid[len(wxid)-2]
-	}
-	for i, b := range dataByte[1024+6:] {
-		afData[i] = b ^ xorKey
-	}
-	return append(originData[:1023], afData...), nil
-}
-
-// WxapkgInfo 表示包含 _APP_.wxapkg 的目录信息
-type WxapkgInfo struct {
-	Path       string       `json:"path"` // 目录路径
-	UpdateDate string       `json:"updateDate"`
-	SubDirs    []WxapkgInfo `json:"subDirs"` // 子目录信息
-	Unpacked   bool         `json:"unpacked"`
-}
-
-type FileInfoSlice []os.DirEntry
-
-func (f FileInfoSlice) Len() int {
-	return len(f)
-}
-
-func (f FileInfoSlice) Less(i, j int) bool {
-	info1, err := f[i].Info()
-	if err != nil {
-		return false
-	}
-	info2, err := f[j].Info()
-	if err != nil {
-		return false
-	}
-	return info1.ModTime().After(info2.ModTime())
-}
-
-func (f FileInfoSlice) Swap(i, j int) {
-	f[i], f[j] = f[j], f[i]
-}
-
-func (r *Bridge) extractInfo(appid, version string) {
-	targetDir := filepath.Join(r.app.Config.WechatDataDir, appid, version)
-	task, err := r.wxRepo.FindVersionByAppIDAndVersionNum(appid, version)
-	if err != nil {
-		r.app.Logger.Error(err)
-	}
-	var matchedStrings []string
-	var extractInfoWg sync.WaitGroup
-	var matchResults sync.Map
-	err = filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
+		defer wg.Done()
+		r.decompileStatusChan <- struct {
+			Task *models.VersionDecompileTask
+			Stat int
+			Err  error
+			Msg  string
+		}{Task: task, Stat: status.Running, Err: nil, Msg: "反编译中"}
+		wxapkgMap, err := r.getDecryptedWxapkgs(task.AppID, task.Number)
 		if err != nil {
 			r.app.Logger.Error(err)
-			return nil
+			r.decompileStatusChan <- struct {
+				Task *models.VersionDecompileTask
+				Stat int
+				Err  error
+				Msg  string
+			}{Task: task, Stat: status.Error, Err: err, Msg: fmt.Sprintf("获取/解密wxapkg文件出错: %s", err.Error())}
+			return
 		}
-		if !info.IsDir() {
-			// 跳过非文本文件
-			if utils.StringsContain(filteredFileExt, filepath.Ext(path)) {
-				return nil
+		for filename, bytes := range wxapkgMap {
+			baseFilename := filepath.Base(filename)
+			dir := filepath.Join(r.app.Config.WechatDataDir, task.AppID, task.Number, baseFilename[0:len(baseFilename)-7])
+			files, err := r.wechat.UnpackWxapkg(bytes, dir, nil)
+			if err != nil {
+				r.app.Logger.Error(err)
+				r.decompileStatusChan <- struct {
+					Task *models.VersionDecompileTask
+					Stat int
+					Err  error
+					Msg  string
+				}{Task: task, Stat: status.Error, Err: err, Msg: fmt.Sprintf("反编译出错: %s", err.Error())}
+				continue
 			}
-			// 读取文件内容
-			content, err2 := os.ReadFile(path)
-			if err2 != nil {
-				r.app.Logger.Info(err2)
-				return nil
-			}
+			resultFiles = append(resultFiles, files...)
+		}
+		r.decompileStatusChan <- struct {
+			Task *models.VersionDecompileTask
+			Stat int
+			Err  error
+			Msg  string
+		}{Task: task, Stat: status.Stopped, Err: nil, Msg: "反编译结束"}
+	}()
+	wg.Wait()
+	return resultFiles
+}
 
-			for _, regex := range r.app.Config.Wechat.Rules {
-				re, err := r.getRegex(regex)
+func (r *Bridge) emitDecompileStatus(task *models.VersionDecompileTask, stat int, err error, msg string) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	data := map[string]string{
+		"AppID":   task.AppID,
+		"Version": task.Version.Number,
+	}
+	task.DecompileStatus = stat
+	task.Message = msg
+	if err := r.wxRepo.UpdateVersionTask(task); err != nil {
+		r.app.Logger.Error(err)
+	}
+	eventDetail := event.EventDetail{
+		Status:  stat,
+		Message: fmt.Sprintf("%s\n", msg),
+		Data:    data,
+	}
+	if err != nil {
+		eventDetail.Error = err.Error()
+	}
+	event.EmitV2(event.DecompileWxMiniProgram, eventDetail)
+}
+
+func (r *Bridge) emitExtractInfoStatus(task *models.VersionDecompileTask, stat int, err error, msg string) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	data := map[string]string{
+		"AppID":   task.AppID,
+		"Version": task.Version.Number,
+	}
+	task.MatchStatus = stat
+	task.Message = msg
+	if err := r.wxRepo.UpdateVersionTask(task); err != nil {
+		r.app.Logger.Error(err)
+	}
+	eventDetail := event.EventDetail{
+		Status:  stat,
+		Message: fmt.Sprintf("%s\n", msg),
+		Data:    data,
+	}
+	if err != nil {
+		eventDetail.Error = err.Error()
+	}
+	event.EmitV2(event.DecompileWxMiniProgram, eventDetail)
+}
+
+func (r *Bridge) fileMonitor() {
+	go func() {
+		ticker := time.NewTicker(3 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				miniApps, err := r.GetAllMiniApp()
 				if err != nil {
-					r.app.Logger.Error(err)
 					continue
 				}
-				extractInfoWg.Add(1)
-				extractInfoSemaphore <- struct{}{}
-				go func(re *regexp.Regexp) {
-					defer func() {
-						extractInfoWg.Done()
-						<-extractInfoSemaphore
-					}()
-					matches := re.FindAllStringSubmatch(string(content), -1)
-					var localMatches []string
-					for _, match := range matches {
-						localMatches = append(localMatches, match[0])
-					}
-					if len(localMatches) > 0 {
-						matchResults.Store(path+re.String(), localMatches)
-					}
-				}(re)
+				if r.autoDecompile {
+					r.decompileBulk(miniApps)
+				}
+				event.EmitV2(event.DecompileWxMiniProgramTicker, event.EventDetail{
+					Status: status.Running,
+					Data:   miniApps,
+				})
+			case data := <-r.decompileStatusChan:
+				r.emitDecompileStatus(data.Task, data.Stat, data.Err, data.Msg)
+			case data := <-r.extractStatusChan:
+				r.emitExtractInfoStatus(data.Task, data.Stat, data.Err, data.Msg)
 			}
 		}
-		return nil
-	})
-	extractInfoWg.Wait()
-	if err != nil {
-		r.app.Logger.Error(err)
-	}
-	matchResults.Range(func(key, value interface{}) bool {
-		matches := value.([]string)
-		matchedStrings = append(matchedStrings, matches...)
-		return true
-	})
-	matchedStrings = utils.RemoveEmptyAndDuplicateString(matchedStrings)
-	task.Matched = strings.Join(matchedStrings, "\n")
-	if err := r.wxRepo.UpdateVersion(task); err != nil {
-		r.app.Logger.Error(err)
-		return
-	}
+	}()
+}
+
+func (r *Bridge) extractInfo(task *models.VersionDecompileTask, files []string) {
+	go func() {
+		r.extractStatusChan <- struct {
+			Task *models.VersionDecompileTask
+			Stat int
+			Err  error
+			Msg  string
+		}{Task: task, Stat: status.Running, Err: nil, Msg: "敏感信息提取中"}
+		var results []string
+		for _, file := range files {
+			// 跳过指定后缀本文件
+			if utils.StringSliceContain(filteredFileExt, filepath.Ext(file)) {
+				continue
+			}
+
+			bytes, err := os.ReadFile(file)
+			if err != nil {
+				continue
+			}
+			t := r.wechat.ExtractInfo(string(bytes))
+			results = append(results, t...)
+		}
+		results = utils.RemoveEmptyAndDuplicateString(results)
+		task.Matched = strings.Join(results, "\n")
+		r.extractStatusChan <- struct {
+			Task *models.VersionDecompileTask
+			Stat int
+			Err  error
+			Msg  string
+		}{Task: task, Stat: status.Stopped, Err: nil, Msg: "敏感信息提取完成"}
+	}()
 }
 
 func (r *Bridge) getRegex(regex string) (*regexp.Regexp, error) {
@@ -669,15 +390,6 @@ func (r *Bridge) getRegex(regex string) (*regexp.Regexp, error) {
 	}
 	r.regexMap.Store(regex, compiled)
 	return compiled, nil
-}
-
-func (r *Bridge) GetMatchedString(appid, version string) []string {
-	task, err := r.wxRepo.FindVersionByAppIDAndVersionNum(appid, version)
-	if err != nil {
-		r.app.Logger.Error(err)
-		return nil
-	}
-	return strings.Split(task.Matched, "\n")
 }
 
 func (r *Bridge) queryAppID(appid string) (*wechat.Info, error) {
@@ -708,27 +420,196 @@ func (r *Bridge) queryAppID(appid string) (*wechat.Info, error) {
 	return result, nil
 }
 
-func generateDecompileExe() (string, error) {
-	filename := filepath.Join(application.DefaultApp.AppDir, "bin", "decompile.exe")
-	if runtime2.GOOS != "windows" {
-		filename = filepath.Join(application.DefaultApp.AppDir, "bin", "decompile")
+func (r *Bridge) checkVersionTaskStatus(task *models.VersionDecompileTask, allowedStoppedStatus bool) bool {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	if allowedStoppedStatus {
+		return !(task.DecompileStatus == status.Running || task.MatchStatus == status.Running)
 	}
-	if utils.FileExist(filename) {
-		currentDate := time.Now()
+	return !(task.DecompileStatus == status.Running || task.MatchStatus == status.Running || task.MatchStatus == status.Stopped)
+}
 
-		//2024/11/25
-		comparisonDate := time.Date(2024, 11, 25, 0, 0, 0, 0, time.Local)
-		if currentDate.After(comparisonDate) {
-			return filename, nil
+func (r *Bridge) GetAllMiniApp() ([]wechat.InfoToFront, error) {
+	itemsToFront := make([]wechat.InfoToFront, 0)
+	if r.app.Config.Wechat.Applet == "" {
+		return itemsToFront, nil
+	}
+	miniPrograms, err := r.wechat.GetAllMiniApp()
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "no such file or directory") {
+			r.app.Logger.Error(err)
 		}
+		return nil, err
 	}
-	data, err := decompile.ReadFile("decompile")
+	for _, miniProgram := range miniPrograms {
+		versionsTask := r.createVersionTasks(miniProgram)
+		versionStatuses, err := r.handleVersionTasks(miniProgram.AppID, versionsTask)
+		if err != nil {
+			r.app.Logger.Error(err)
+			continue
+		}
+		info, err := r.findOrCreateInfo(miniProgram.AppID)
+		if err != nil {
+			r.app.Logger.Error(err)
+			continue
+		}
+		itemToFront := wechat.InfoToFront{
+			MiniAppBaseInfo: miniProgram.MiniAppBaseInfo,
+			Info:            info,
+			Status:          status.Waiting,
+			Versions:        versionStatuses,
+		}
+		itemsToFront = append(itemsToFront, itemToFront)
+	}
+	return itemsToFront, nil
+}
+
+func (r *Bridge) GetInfo(appid string) error {
+	// 从数据库中查找信息
+	info, err := r.wxRepo.FindInfoByAppID(appid)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		r.app.Logger.Error(err)
+		return err
+	}
+
+	// 查询最新的信息
+	tmpInfo, e := r.queryAppID(appid)
+	if e != nil {
+		r.app.Logger.Error(e)
+		return e
+	}
+
+	// 如果数据库中未找到信息，则创建新信息
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		e = r.wxRepo.CreateInfo(&models.Info{Info: tmpInfo})
+		if e != nil {
+			r.app.Logger.Error(e)
+			return e
+		}
+		return nil
+	}
+
+	// 如果数据库中已存在信息，则更新信息
+	info.Info = tmpInfo
+	e = r.wxRepo.UpdateInfo(info)
+	if e != nil {
+		r.app.Logger.Error(err)
+		return e
+	}
+
+	return nil
+}
+
+func (r *Bridge) SetAppletPath(path string) error {
+	r.app.Config.Wechat.Applet = path
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		r.app.Logger.Error(err)
+		return err
+
+	}
+	r.wechat.SetApplet(path)
+	return nil
+}
+
+func (r *Bridge) SaveWechatRules(rules []string) error {
+	var t []string
+	for _, rule := range rules {
+		tt := fmt.Sprintf("\"%s\"", rule)
+		ttt, err := strconv.Unquote(tt)
+		if err != nil {
+			return errors.New("语法错误：" + tt)
+		}
+		t = append(t, ttt)
+	}
+	r.app.Config.Wechat.Rules = t
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		return err
+	}
+	r.wechat.SetRegex(t)
+	return nil
+}
+
+func (r *Bridge) Decompile(item wechat.InfoToFront) {
+	go func() {
+		for _, versionTaskStatus := range item.Versions {
+			go func(appid, version string) {
+				task, err := r.wxRepo.FindVersionTaskByAppIDAndVersionNum(appid, version)
+				if err != nil {
+					r.app.Logger.Error(err)
+					return
+				}
+
+				// 跳过正在反编译或者信息提取的任务
+				passed := r.checkVersionTaskStatus(task, true)
+				if !passed {
+					return
+				}
+
+				files := r.decompile(task)
+				r.extractInfo(task, files)
+			}(item.MiniAppBaseInfo.AppID, versionTaskStatus.Number)
+		}
+	}()
+}
+
+func (r *Bridge) decompileBulk(items []wechat.InfoToFront) {
+	go func() {
+		for _, item := range items {
+			for _, version := range item.Versions {
+				task, err := r.wxRepo.FindVersionTaskByAppIDAndVersionNum(item.AppID, version.Number)
+				if err != nil {
+					r.app.Logger.Error(err)
+					continue
+				}
+
+				r.decompileConcurrencyChan <- struct{}{}
+				go func(task *models.VersionDecompileTask) {
+					defer func() { <-r.decompileConcurrencyChan }()
+					// 跳过正在反编译或者信息提取的任务
+					passed := r.checkVersionTaskStatus(task, false)
+					if !passed {
+						return
+					}
+
+					files := r.decompile(task)
+					r.extractConcurrencyChan <- struct{}{}
+					go func() {
+						defer func() { <-r.extractConcurrencyChan }()
+						r.extractInfo(task, files)
+					}()
+				}(task)
+			}
+		}
+	}()
+}
+
+func (r *Bridge) ClearApplet() error {
+	err := os.RemoveAll(r.app.Config.Wechat.Applet)
 	if err != nil {
-		return "", err
+		return err
 	}
-	err = utils.WriteFile(filename, data, 0766)
+	return r.wxRepo.DeleteAllVersionDecompileTask()
+}
+
+func (r *Bridge) ClearDecompiled() error {
+	if err := r.wxRepo.DeleteAllVersionDecompileTask(); err != nil {
+		r.app.Logger.Error(err)
+		return err
+	}
+	return os.RemoveAll(r.app.Config.WechatDataDir)
+}
+
+func (r *Bridge) GetMatchedString(appid, version string) []string {
+	task, err := r.wxRepo.FindVersionTaskByAppIDAndVersionNum(appid, version)
 	if err != nil {
-		return "", err
+		r.app.Logger.Error(err)
+		return nil
 	}
-	return filename, nil
+	return strings.Split(task.Matched, "\n")
+}
+
+func (r *Bridge) AutoDecompile(enable bool) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	r.autoDecompile = enable
 }

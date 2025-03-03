@@ -93,7 +93,7 @@ func NewWithLogDir(DataDir string) *logrus.Logger {
 	})
 
 	logger.SetReportCaller(true)
-	logger.SetLevel(logrus.TraceLevel)
+	logger.SetLevel(logrus.DebugLevel)
 	logger.AddHook(&DailyLogFileHook{
 		logDir:      logDir,
 		currentFile: logFile,

@@ -18,6 +18,7 @@ import { ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, Si
 import {config, event} from "../../wailsjs/go/models";
 import EventDetail = event.EventDetail;
 import {OpenFileDialog} from "../../wailsjs/go/osoperation/Runtime";
+import {add} from "cheerio/lib/api/traversing";
 
 interface PageDataType { "index": number, "url": string, "detail": string }
 
@@ -34,6 +35,7 @@ const TabContent = () => {
     const cfg = useSelector((state: RootState) => state.app.global.config)
     const status = useSelector((state: RootState) => state.app.global.status)
     const [pageData, setPageData] = useState<PageDataType[]>([])
+    const totalRef = useRef(0)
     const event = useSelector((state: RootState) => state.app.global.event)
     const [columnDefs] = useState<ColDef[]>([
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
@@ -143,8 +145,8 @@ const TabContent = () => {
                     return;
                 }
                 let t = strSplit(data, ' ', 2)
-                setPageData((prevState) => {
-                    return [...prevState, { index: ++prevState.length, url: t[0], detail: t[1] }]
+                gridRef.current!.api.applyTransactionAsync({
+                    add:[{ index: ++totalRef.current, url: t[0], detail: t[1] }]
                 })
             }else if (eventDetail.Status === status.Stopped){
                 taskID.current = 0
@@ -194,6 +196,7 @@ const TabContent = () => {
         setPageData([])
         setOffset(1)
         setLimit(15)
+        totalRef.current = 0
         Run(path, flags, targets).then(r => {
             taskID.current = r
             setRunning(true)

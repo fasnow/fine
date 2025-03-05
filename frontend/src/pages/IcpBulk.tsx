@@ -190,7 +190,6 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
     useEffect(() => {
         getTaskList("",currentPageNum ,currentPageSize)
         EventsOn(event.ICPBatchQueryStatusUpdate,(data:EventDetail) => {
-            console.log(data.Data)
             updateCell(data.Data)
         })
     }, []);
@@ -482,7 +481,6 @@ const IcpTaskResult:React.FC<IcpTaskResultProps> = (props)=>{
                 let index=0
                 setTotal(r.Total)
                 setPageData(r.Items.map(item=>({index:++index,...item} as PageDataType2)))
-                console.log(r)
             })
             .catch(e=>errorNotification("错误",e))
         setLoading(false)

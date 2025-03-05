@@ -145,7 +145,7 @@ const TabContent = () => {
                     return;
                 }
                 let t = strSplit(data, ' ', 2)
-                gridRef.current!.api.applyTransactionAsync({
+                gridRef.current?.api?.applyTransactionAsync({
                     add:[{ index: ++totalRef.current, url: t[0], detail: t[1] }]
                 })
             }else if (eventDetail.Status === status.Stopped){

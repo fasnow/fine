@@ -195,6 +195,63 @@ func (r *Bridge) query(pageNum, pageSize int, serviceType string, query string, 
 	return result, nil
 }
 
+func (r *Bridge) queryWithStatusContext(pageNum, pageSize int, serviceType string, query string, authErrorRetryNum, forbiddenErrorRetryNum uint64, statCtx *context.StatusContext) (*Result, error) {
+	ctx2, cancel := ctx.WithCancel(ctx.Background())
+	var err1 error
+	var canceled bool
+	result, _ := backoff.RetryWithData(func() (*Result, error) {
+		if result, err3 := r.icp.PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).Query(query); err3 != nil {
+			err1 = err3
+
+			// 这里添加一个额外上下文判断是为了避免当暂停任务时如果正在retry且retry上限比较高则无法及时终止
+			select {
+			case <-statCtx.Running():
+				// 认证错误
+				if err3.Error() == IllegalRequestError.Error() || err3.Error() == CaptchaMismatchError.Error() || err3.Error() == TokenExpiredError.Error() {
+					if err4 := backoff.Retry(func() error {
+						if err5 := r.icp.SetTokenFromRemote(); err5 != nil {
+							return err5 // 触发重试
+						}
+						return nil
+					}, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), authErrorRetryNum)); err4 != nil {
+						// 无法更新token,不执行后续查询
+						cancel()
+						err1 = err4
+						return nil, err4 // 这里只需要返回一个错误即可,最终收到的都是ctxCancelError
+					}
+					// 更新token,后续流程继续
+					return nil, err3 // 触发重试
+				}
+
+				// 403 错误
+				if err3.Error() == "403 Forbidden" {
+					return nil, err3 // 触发重试
+				}
+
+				// 非预期错误,不重试查询
+				cancel()
+				return nil, err3
+			default:
+				// 任务非运行状态不再继续重试
+				cancel()
+				err1 = nil
+				canceled = true
+				return nil, err3
+			}
+		} else {
+			err1 = nil
+			return result, nil
+		}
+	}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), forbiddenErrorRetryNum), ctx2))
+	if err1 != nil {
+		return nil, err1
+	}
+	if canceled {
+		return &Result{}, nil
+	}
+	return result, nil
+}
+
 func (r *Bridge) ExportCache(key string, total int) (int64, error) {
 	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("ICP")
 	if err != nil {
@@ -262,15 +319,15 @@ func (r *Bridge) Export(pageID int64) (int64, error) {
 	return exportID, nil
 }
 
-func (r *Bridge) queryAll(serviceType, query string) (*Result, error) {
-	result, err := r.query(1, 1, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2)
+func (r *Bridge) queryAll(serviceType, query string, statCtx *context.StatusContext) (*Result, error) {
+	result, err := r.queryWithStatusContext(1, 1, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2, statCtx)
 	if err != nil {
 		return nil, err
 	}
-	if result.Total == 1 { // 只有一条就返回当前的就行
+	if result.Total == 0 || result.Total == 1 { // 没有数据或只有一条就返回当前结果就行
 		return result, nil
 	}
-	result2, err := r.query(1, result.Total, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2)
+	result2, err := r.queryWithStatusContext(1, result.Total, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2, statCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -439,7 +496,7 @@ shouldTerminal:
 						<-sem
 						wg.Done()
 					}()
-					result, err := r.queryAll(s.ServiceType, s.UnitToQuery)
+					result, err := r.queryAll(s.ServiceType, s.UnitToQuery, ts.ctx)
 					if err != nil {
 						ts.ctx.SendError(err)
 						return
@@ -458,7 +515,8 @@ shouldTerminal:
 				break shouldTerminal
 			case <-ts.ctx.Pausing():
 				break shouldTerminal
-			default:
+			case <-ts.ctx.Done():
+				break shouldTerminal
 			}
 		}
 	}
@@ -473,33 +531,32 @@ shouldTerminal:
 }
 
 func (r *Bridge) taskMonitor(ts *TaskState) {
-shouldTerminal:
+	defer ts.ticker.Stop()
 	for {
 		select {
 		case <-ts.ctx.Done():
-			break shouldTerminal
+			return
 		case <-ts.ctx.Error():
 			if err := r.taskUpdateProgress(ts, status.Error, 0); err != nil {
 				r.app.Logger.Error(err)
 			}
-			break shouldTerminal
+			return
 		case <-ts.ctx.Stop():
 			if err := r.taskUpdateProgress(ts, status.Stopped, 0); err != nil {
 				r.app.Logger.Error(err)
 			}
-			break shouldTerminal
+			return
 		case <-ts.ctx.Paused():
 			if err := r.taskUpdateProgress(ts, status.Paused, 0); err != nil {
 				r.app.Logger.Error(err)
 			}
-			break shouldTerminal
+			return
 		case <-ts.ctx.Pausing():
 			select {
 			case <-ts.ticker.C:
 				if err := r.taskTicker(ts); err != nil {
 					r.app.Logger.Error(err)
 				}
-			default:
 			}
 		case <-ts.ctx.Running():
 			select {
@@ -520,11 +577,8 @@ shouldTerminal:
 				}
 			default:
 			}
-		default:
-
 		}
 	}
-	ts.ticker.Stop()
 }
 
 func (r *Bridge) TaskGetList(taskName string, pageNum, pageSize int) (*GetTaskListResult, error) {
@@ -666,6 +720,11 @@ func (r *Bridge) TaskResume(taskID int64) error {
 }
 
 func (r *Bridge) TaskDelete(taskID int64) error {
+	// 先终止进行中的任务
+	if ts, ok := r.taskState[taskID]; ok {
+		ts.ctx.Cancel()
+	}
+
 	if err := r.icpTaskRepo.Delete(taskID); err != nil {
 		r.app.Logger.Error(err)
 		return err

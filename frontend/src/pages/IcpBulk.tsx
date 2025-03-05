@@ -10,7 +10,7 @@ import {
     Tag,
     Tooltip,
     Checkbox,
-    Splitter, Input, Space
+    Splitter, Input, Space, Popconfirm
 } from 'antd';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import { errorNotification } from '@/component/Notification';
@@ -19,7 +19,7 @@ import {formatTimeSpent} from '@/util/util';
 import {EventsOn} from "../../wailsjs/runtime";
 
 import {
-    TaskCreate,
+    TaskCreate, TaskDelete,
     TaskExportData, TaskGetByID, TaskGetData,
     TaskGetList, TaskPause,
     TaskResume, TaskRun,
@@ -76,7 +76,7 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
     const [columnDefs] = useState<ColDef[]>([
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
         // field必须是data的一个字段不然无法更新
-        { headerName: '操作', field: "status", pinned: 'right', width: 270, cellRenderer:(params: ICellRendererParams)=>{
+        { headerName: '操作', field: "status", pinned: 'right', width: 320, cellRenderer:(params: ICellRendererParams)=>{
             return <Space.Compact>
                 <Button
                     size={"small"}
@@ -122,6 +122,24 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
                         }
                     }
                     }>结果</Button>
+                <Popconfirm
+                    placement={"left"}
+                    title="删除任务"
+                    description="确定删除吗?"
+                    onConfirm={()=>{
+                        TaskDelete(params.data.taskID)
+                            .then(()=>refresh())
+                            .catch(e=>errorNotification("错误",e))
+                    }}
+
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <Button
+                        size={"small"}
+                        type="primary"
+                        >删除</Button>
+                </Popconfirm>
             </Space.Compact>
         }},
         { headerName: '名称', field: "name", pinned: 'left', width: 150, editable: true},
@@ -199,8 +217,8 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
     }, []);
 
     const updateCell = useCallback((data:icp.Task) => {
-        const rowNode = gridRef.current!.api.getRowNode(String(data.taskID))!;
-        rowNode.updateData({...rowNode.data,...data});
+        const rowNode = gridRef.current?.api?.getRowNode(String(data.taskID))!;
+        rowNode?.updateData({...rowNode.data,...data});
     }, []);
 
     const handleNewQuery = (taskName: string, pageSize: number) => {

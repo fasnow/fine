@@ -4,6 +4,7 @@ import (
 	"fine/backend/constant/status"
 	"fine/backend/database/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type IcpTaskRepository interface {
@@ -117,7 +118,7 @@ func (r *IcpTaskRepositoryImpl) Delete(taskID int64) error {
 	if err := r.db.Where("task_id = ?", taskID).First(task).Error; err != nil {
 		return err
 	}
-	if err := r.db.Where("task_id = ?", taskID).Delete(task).Error; err != nil {
+	if err := r.db.Select(clause.Associations).Delete(task).Error; err != nil {
 		return err
 	}
 	return nil

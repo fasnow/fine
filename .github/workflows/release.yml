@@ -8,7 +8,7 @@ on:
 env:
   # Necessary for most environments as build failure can occur due to OOM issues
 #  NODE_OPTIONS: "--max-old-space-size=4096"
-  go-version: '1.22.0'
+  go-version: '1.24.0'
   node-version: '18'
   wails-version: 'latest'
 
@@ -65,24 +65,6 @@ jobs:
         with:
           install-only: true
 
-      - name: Build WxMiniProgramDecompile for Windows
-        if: matrix.build.os == 'windows'
-        run: |
-          cd wechatMiniProgram
-          npm install pkg
-          npm install --force
-          npm run build
-          mv decompile.exe ../backend/service/service/wechat/decompile -Force
-
-      - name: Build WxMiniProgramDecompile for Mac/Linux
-        if: matrix.build.os != 'windows'
-        run: |
-          cd wechatMiniProgram
-          npm install pkg
-          npm install --force
-          npm run build
-          mv -f decompile ../backend/service/service/wechat/decompile
-
       - name: Build artifact
         run: |
           wails build --platform ${{ matrix.build.os }}/${{ matrix.build.arch }} -o ${{ steps.set_artifact_name.outputs.artifact_name }}
@@ -127,12 +109,16 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            fix: httpx结果抖动;
+            feature: Shodan @zhifana #2;
+            feature: macOS微信小程序自定义路径 @allinu #18;
+            feature: ICP任务删除 @littleheary #24, @xiaoliusec #25;
             enhance: 小程序反编译日志过多；
             enhance: 小程序反编译改为Go;
             enhance: 小程序敏感信息提取正则;
             enhance: ICP任务暂停;
-            feature: ICP任务删除@littleheary #24。
+            fix: httpx结果抖动;
+            fix: 清除Applet文件夹无法清除当前列表;
+            fix: 小程序重新设置路径后不会马上生效。
             
             
             

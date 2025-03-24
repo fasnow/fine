@@ -724,7 +724,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 size="small"
                 onChange={(page, size) => handlePaginationChange(page, size)}
             />
-            <ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />
+            {/*<ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />*/}
         </Flex>)
 
     return <Flex vertical gap={5} style={{ height: '100%' }}>

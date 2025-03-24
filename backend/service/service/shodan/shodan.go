@@ -64,6 +64,7 @@ func (r *Shodan) UseProxyManager(manager *proxy.Manager) {
 }
 
 func (r *Shodan) bypassCFJSChallenge(url string) (http.Header, []byte, error) {
+	// TODO 这里位置计算只在macos下正常，windows下还需考虑缩放比例
 	screenWidth, screenHeight := robotgo.GetScreenSize() // 获取屏幕分辨率
 	winWidth, winHeight := 800, 600                      // 设定窗口大小
 

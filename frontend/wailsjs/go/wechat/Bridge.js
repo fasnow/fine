@@ -30,6 +30,10 @@ export function GetMatchedString(arg1, arg2) {
   return window['go']['wechat']['Bridge']['GetMatchedString'](arg1, arg2);
 }
 
+export function GetWechatRules() {
+  return window['go']['wechat']['Bridge']['GetWechatRules']();
+}
+
 export function SaveWechatRules(arg1) {
   return window['go']['wechat']['Bridge']['SaveWechatRules'](arg1);
 }

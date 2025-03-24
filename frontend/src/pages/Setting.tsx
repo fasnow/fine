@@ -12,13 +12,12 @@ import { SetAuth as SetTianYanChaAuth } from "../../wailsjs/go/tianyancha/Bridge
 import { SetAuth as SetAiQiChaAuth } from "../../wailsjs/go/aiqicha/Bridge";
 import { config } from "../../wailsjs/go/models";
 import {
-    SaveICPConfig,
     SaveProxy,
     SaveQueryOnEnter,
     SaveTimeout,
 } from "../../wailsjs/go/application/Application";
 import {OpenDirectoryDialog} from "../../wailsjs/go/osoperation/Runtime";
-import {SetProxy, SetProxyTimeout} from "../../wailsjs/go/icp/Bridge";
+import {SaveICPConfig, SetProxy, SetProxyTimeout} from "../../wailsjs/go/icp/Bridge";
 import Number from "@/component/Number";
 import Password from "@/component/Password";
 

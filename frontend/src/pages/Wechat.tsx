@@ -23,7 +23,7 @@ import {
     ClearApplet,
     ClearDecompiled,
     Decompile,
-    GetMatchedString, SaveWechatRules, SetAppletPath,
+    GetMatchedString, GetWechatRules, SaveWechatRules, SetAppletPath,
 } from "../../wailsjs/go/wechat/Bridge";
 import { DecompileIcon } from "@/component/Icon";
 import InfoToFront = wechat.InfoToFront;
@@ -31,7 +31,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { appActions, RootState } from "@/store/store";
 import {Join} from "../../wailsjs/go/osoperation/Path";
 import {OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/osoperation/Runtime";
-import {GetWechatRules, SaveWechat} from "../../wailsjs/go/application/Application";
 import {copy} from "@/util/util";
 import VersionTaskStatus = wechat.VersionTaskStatus;
 

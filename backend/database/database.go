@@ -60,7 +60,7 @@ func GetConnection() *gorm.DB {
 		if err = db.AutoMigrate(&models.Quake{}, &models.QuakeRealtimeQueryLog{}, &quakeModel.Service{}, &quakeModel.Component{}); err != nil {
 			panic(err)
 		}
-		if err = db.AutoMigrate(&shodan2.QueryLog{}, &shodan2.HostSearchResult{}); err != nil {
+		if err = db.AutoMigrate(&shodan2.QueryLog{}, &shodan2.HostSearchResult{}, &shodan2.Facets{}, &shodan2.General{}); err != nil {
 			panic(err)
 		}
 		if err = db.AutoMigrate(

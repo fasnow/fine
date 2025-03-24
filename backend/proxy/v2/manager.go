@@ -70,6 +70,7 @@ func (r *Manager) SetProxy(s string) error {
 		r.client.Transport = &CustomTransport{
 			Header: http.Header{"User-Agent": []string{DefaultUA}},
 		}
+		r.proxyUrl = ""
 		return nil
 	}
 	if r.client.Transport == nil {

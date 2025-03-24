@@ -104,7 +104,7 @@ func (r *Bridge) HostSearch(pageID int64, query string, facets string, pageNum i
 		return nil, err
 	}
 	tmpPageID := idgen.NextId()
-	if result.Total > 0 {
+	if hostSearchResult.Total > 0 {
 		if pageNum == 1 {
 			// 缓存查询成功的条件，用于导出
 			if err := r.shodanRepo.CreateQueryField(&shodan2.QueryLog{
@@ -113,12 +113,12 @@ func (r *Bridge) HostSearch(pageID int64, query string, facets string, pageNum i
 				Facets: facets,
 				Minify: minify,
 			}); err != nil {
-				r.app.Logger.Warn(err)
+				r.app.Logger.Error(err)
 			}
 		}
-		r.cacheTotal.Add(tmpPageID, result.Total, query)
+		r.cacheTotal.Add(tmpPageID, hostSearchResult.Total, query)
 		if err := r.shodanRepo.CreateHostSearchPageData(tmpPageID, hostSearchResult); err != nil {
-			r.app.Logger.Warn(err)
+			r.app.Logger.Error(err)
 		}
 	}
 	result.PageID = tmpPageID

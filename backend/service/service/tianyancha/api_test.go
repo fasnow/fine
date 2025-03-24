@@ -2,12 +2,13 @@ package tianyancha
 
 import (
 	"encoding/json"
+	"fine/backend/application"
 	"fine/backend/proxy/v2"
 	"testing"
 )
 
 func TestTianYanCha_GetIndustryList(t *testing.T) {
-	c := NewClient()
+	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
 	c.UseProxyManager(proxy.NewManager())
 	list, err := c.GetIndustryList()
 	if err != nil {
@@ -22,7 +23,7 @@ func TestTianYanCha_GetIndustryList(t *testing.T) {
 }
 
 func TestTianYanCha_GetAreaList(t *testing.T) {
-	c := NewClient()
+	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
 	c.UseProxyManager(proxy.NewManager())
 	list, err := c.GetAreaList()
 	if err != nil {
@@ -37,7 +38,7 @@ func TestTianYanCha_GetAreaList(t *testing.T) {
 }
 
 func TestTianYanCha_Search(t *testing.T) {
-	c := NewClient()
+	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
 	m := proxy.NewManager()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
@@ -55,7 +56,7 @@ func TestTianYanCha_Search(t *testing.T) {
 }
 
 func TestTianYanCha_Suggest(t *testing.T) {
-	c := NewClient()
+	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
 	m := proxy.NewManager()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
@@ -73,7 +74,7 @@ func TestTianYanCha_Suggest(t *testing.T) {
 }
 
 func TestTianYanCha_GetInvestee(t *testing.T) {
-	c := NewClient()
+	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
 	m := proxy.NewManager()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
@@ -91,7 +92,7 @@ func TestTianYanCha_GetInvestee(t *testing.T) {
 }
 
 func TestTianYanCha_GetHolder(t *testing.T) {
-	c := NewClient()
+	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
 	m := proxy.NewManager()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)

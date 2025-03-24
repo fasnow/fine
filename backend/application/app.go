@@ -52,6 +52,7 @@ var iniOptions = ini.LoadOptions{
 }
 
 var defaultConfig = &config.Config{
+	Version: Version,
 	Timeout: 20 * time.Second,
 	Proxy: config.Proxy{
 		Enable: false,

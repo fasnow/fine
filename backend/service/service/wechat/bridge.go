@@ -440,8 +440,8 @@ func (r *Bridge) GetAllMiniApp() ([]wechat.InfoToFront, error) {
 	}
 	miniPrograms, err := r.wechat.GetAllMiniApp()
 	if err != nil {
-		if strings.HasSuffix(err.Error(), "no such file or directory") {
-			r.app.Logger.Error(err)
+		if strings.Contains(err.Error(), "no such file or directory") {
+			return itemsToFront, nil
 		}
 		return nil, err
 	}

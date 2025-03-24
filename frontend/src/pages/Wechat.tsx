@@ -23,7 +23,7 @@ import {
     ClearApplet,
     ClearDecompiled,
     Decompile,
-    GetMatchedString, SaveWechatRules,
+    GetMatchedString, SaveWechatRules, SetAppletPath,
 } from "../../wailsjs/go/wechat/Bridge";
 import { DecompileIcon } from "@/component/Icon";
 import InfoToFront = wechat.InfoToFront;
@@ -84,6 +84,7 @@ export const MiniProgram: React.FC = () => {
         })
 
         EventsOn(event.DecompileWxMiniProgramTicker, (eventDetail:event.EventDetail) => {
+            console.log(eventDetail.Data)
             setData(eventDetail.Data)
         })
     }, []);
@@ -110,10 +111,9 @@ export const MiniProgram: React.FC = () => {
         OpenDirectoryDialog().then(
             result => {
                 if (result) {
-                    const t = { ...cfg.Wechat, Applet: result }
-                    SaveWechat(t).then(
+                    SetAppletPath(result).then(
                         () => {
-                            const tt = { ...cfg, Wechat: { ...t } } as config.Config
+                            const tt = { ...cfg, Wechat: { ...cfg.Wechat,Applet:result } } as config.Config
                             dispatch(appActions.setConfig(tt))
                         }
                     ).catch(

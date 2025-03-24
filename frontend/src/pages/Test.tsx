@@ -513,7 +513,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: 'ASN', field: "asn", width: 110, tooltipField: 'asn',},
         { headerName: '运营商', field: "isp", width: 120, tooltipField: 'isp',},
         { headerName: '组织', field: "org", width: 120, tooltipField: 'org',},
-        { headerName: '更新时间', field: "timestamp", width: 200, pinned: "right", tooltipField: 'org',},
+        { headerName: '更新时间', field: "timestamp", width: 200, pinned: "right", tooltipField: 'timestamp',},
     ]);
     const defaultColDef = useMemo<ColDef>(() => {
         return {

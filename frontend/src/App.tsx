@@ -31,6 +31,7 @@ import {css, cx} from "antd-style";
 import type { DraggableData, DraggableEvent } from 'react-draggable';
 import Draggable from "react-draggable";
 import AppIcon from "@/assets/images/appicon.png"
+import Shodan from "@/pages/Shodan";
 
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
@@ -57,6 +58,7 @@ const App: React.FC = () => {
                     {key: 'Fofa',label: 'Fofa',children: <Fofa/>,},
                     {key: 'Hunter',label: 'Hunter',children: <Hunter/>,},
                     {key: 'Quake',label: 'Quake',children: <Quake/>,},
+                    {key: 'Shodan',label: 'Shodan',children: <Shodan/>,},
                     // {key: '0.zone',label: '0.zone',children: <Zone/>,}
                 ]}
                 tabBarStyle={{backgroundColor: '#F2F2F2FF', padding : "0 10px",}}

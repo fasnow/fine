@@ -1,6 +1,8 @@
 package models
 
-import "fine/backend/service/model/hunter"
+import (
+	"fine/backend/service/model/hunter"
+)
 
 type Hunter struct {
 	BaseModel
@@ -8,9 +10,9 @@ type Hunter struct {
 	*hunter.Item
 }
 
-type HunterRestToken struct {
+type HunterUser struct {
 	BaseModel
-	Total int
+	hunter.User
 }
 
 type HunterQueryLog struct {

@@ -4,6 +4,6 @@ import {ip138} from '../models';
 
 export function GetCurrentDomain(arg1:string):Promise<Array<ip138.DomainItem>>;
 
-export function GetCurrentIP(arg1:string):Promise<{[key: string]: any}>;
+export function GetCurrentIP(arg1:string):Promise<Record<string, any>>;
 
 export function GetHistoryIP(arg1:string):Promise<Array<ip138.IPItem>>;

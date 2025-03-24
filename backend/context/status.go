@@ -1,8 +1,6 @@
 package context
 
-import (
-	"sync"
-)
+import "sync"
 
 // 定义优先级
 type priority int

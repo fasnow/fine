@@ -7,26 +7,26 @@ import (
 )
 
 const (
-	// QuakeUserApiUrl 获取Quake用户详情
-	QuakeUserApiUrl = "https://quake.360.net/api/v3/user/info"
-	// QuakeServiceDataFilterFieldApiUrl 获取服务数据筛选字段
-	QuakeServiceDataFilterFieldApiUrl = "https://quake.360.net/api/v3/filterable/field/quake_service"
-	// QuakeRealTimeServiceDataApi 服务数据实时查询
-	QuakeRealTimeServiceDataApi = "https://quake.360.net/api/v3/search/quake_service"
-	// QuakeDeepServiceDataApiUrl 服务数据深度查询
-	QuakeDeepServiceDataApiUrl = "https://quake.360.net/api/v3/scroll/quake_service"
-	// QuakeAggregationServiceDataApiUrl 获取聚合数据筛选字段 聚合信息查询
-	QuakeAggregationServiceDataApiUrl = "https://quake.360.net/api/v3/aggregation/quake_service"
-	// QuakeHostDataFilterFieldApiUrl 获取主机数据筛选字段
-	QuakeHostDataFilterFieldApiUrl = "https://quake.360.net/api/v3/filterable/field/quake_host"
-	// QuakeRealTimeHostDataApiUrl 主机数据实时查询
-	QuakeRealTimeHostDataApiUrl = "https://quake.360.net/api/v3/search/quake_host"
-	// QuakeDeepHostDataApiUrl 主机数据深度查询
-	QuakeDeepHostDataApiUrl = "https://quake.360.net/api/v3/scroll/quake_host"
-	// QuakeAggregationHostDataApiUrl 获取聚合数据筛选字段 聚合数据查询
-	QuakeAggregationHostDataApiUrl = "https://quake.360.net/api/v3/aggregation/quake_host"
-	// QuakeFaviconSimilarityDataApiUrl favicon相似度查询接口
-	QuakeFaviconSimilarityDataApiUrl = "https://quake.360.net/api/v3/query/similar_icon/aggregation"
+	// UserAPIUrl  获取Quake用户详情
+	UserAPIUrl = "https://quake.360.net/api/v3/user/info"
+	// ServiceDataFilterFieldAPIUrl 获取服务数据筛选字段
+	ServiceDataFilterFieldAPIUrl = "https://quake.360.net/api/v3/filterable/field/quake_service"
+	// RealTimeServiceDataAPIUrl 服务数据实时查询
+	RealTimeServiceDataAPIUrl = "https://quake.360.net/api/v3/search/quake_service"
+	// DeepServiceDataAPIUrl 服务数据深度查询
+	DeepServiceDataAPIUrl = "https://quake.360.net/api/v3/scroll/quake_service"
+	// AggregationServiceDataAPIUrl 获取聚合数据筛选字段 聚合信息查询
+	AggregationServiceDataAPIUrl = "https://quake.360.net/api/v3/aggregation/quake_service"
+	// HostDataFilterFieldAPIUrl 获取主机数据筛选字段
+	HostDataFilterFieldAPIUrl = "https://quake.360.net/api/v3/filterable/field/quake_host"
+	// RealTimeHostDataAPIUrl 主机数据实时查询
+	RealTimeHostDataAPIUrl = "https://quake.360.net/api/v3/search/quake_host"
+	// DeepHostDataAPIUrl 主机数据深度查询
+	DeepHostDataAPIUrl = "https://quake.360.net/api/v3/scroll/quake_host"
+	// AggregationHostDataAPIUrl 获取聚合数据筛选字段 聚合数据查询
+	AggregationHostDataAPIUrl = "https://quake.360.net/api/v3/aggregation/quake_host"
+	// FaviconSimilarityDataAPIUrl favicon相似度查询接口
+	FaviconSimilarityDataAPIUrl = "https://quake.360.net/api/v3/query/similar_icon/aggregation"
 )
 
 type QueryType string
@@ -146,7 +146,7 @@ type Quake struct {
 	Field          *filterField
 }
 
-func NewClient(key string) *Quake {
+func New(key string) *Quake {
 	client := &Quake{
 		key:            key,
 		http:           &http.Client{},

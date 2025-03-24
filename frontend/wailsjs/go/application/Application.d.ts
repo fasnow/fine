@@ -9,7 +9,7 @@ import {proxy} from '../models';
 
 export function CheckRunningTask():Promise<void>;
 
-export function CheckUpdate():Promise<{[key: string]: string}>;
+export function CheckUpdate():Promise<Record<string, string>>;
 
 export function EvenDetail():Promise<event.EventDetail>;
 
@@ -20,6 +20,8 @@ export function Fetch(arg1:string):Promise<Array<number>>;
 export function GetAllConstants():Promise<application.Constant>;
 
 export function GetContext():Promise<context.Context>;
+
+export function GetProxyHistory():Promise<Array<config.Proxy>>;
 
 export function GetWechatRules():Promise<Array<string>>;
 

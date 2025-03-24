@@ -127,6 +127,14 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            1. new: 小程序反编译改为Go。
+            fix: httpx结果抖动;
+            enhance: 小程序反编译日志过多；
+            enhance: 小程序反编译改为Go;
+            enhance: 小程序敏感信息提取正则;
+            enhance: ICP任务暂停;
+            feature: ICP任务删除@littleheary #24。
+            
+            
+            
 
 

@@ -20,6 +20,10 @@ type Zone struct {
 	Token    string        `ini:"token" `
 	Interval time.Duration `ini:"interval"  comment:"接口请求间隔，默认:1s"`
 }
+type Shodan struct {
+	Token    string
+	Interval time.Duration
+}
 type Proxy struct {
 	Enable bool   `ini:"enable" `
 	Type   string `ini:"type"  comment:"http,socks5"`
@@ -173,6 +177,7 @@ type Config struct {
 	Hunter        Hunter
 	Quake         Quake
 	Zone          Zone `ini:"0.zone"`
+	Shodan        Shodan
 	ICP           ICP
 	TianYanCha    TianYanCha
 	AiQiCha       AiQiCha

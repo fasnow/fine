@@ -38,7 +38,7 @@ import {
     ColDef,
     GetRowIdParams,
     ICellRendererParams,
-    ValueFormatterParams
+    ValueFormatterParams, ValueGetterParams
 } from "ag-grid-community";
 import TextArea from "antd/es/input/TextArea";
 import EventDetail = event.EventDetail;
@@ -162,10 +162,10 @@ const IcpTask = React.forwardRef<IcpTaskProps,any>((props, ref) =>{
             }
         },
 
-        { headerName: '进度', field: "current", width: 100, cellRenderer:(params: ICellRendererParams)=>{
+        { headerName: '进度', field: "current", width: 100, valueGetter: (params: ValueGetterParams) =>{
                 return `${params.data.current}/${params.data.total}`
             }},
-        { headerName: '用时', field: "timeSpent", width: 100,cellRenderer:(params: ICellRendererParams)=>{
+        { headerName: '用时', field: "timeSpent", width: 100,valueGetter: (params: ValueGetterParams) =>{
             return formatTimeSpent(params.data.timeSpent)
             }},
         { headerName: '状态', field: "status", width: 100,

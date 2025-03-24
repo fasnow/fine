@@ -6,77 +6,63 @@ import (
 	"strconv"
 )
 
-type Req struct {
-	HttpMethod  string
-	ApiPath     string
-	Body        interface{}
-	QueryParams *service.QueryParams
-	//PathParams  *plugin.PathParams
+type QueryReqBuilder struct {
+	req *service.Request
 }
 
-type GetDataReqBuilder struct {
-	req *Req
-}
-
-type GetDataReq struct {
-	req *Req
-}
-
-func NewGetDataReqBuilder() *GetDataReqBuilder {
-	builder := &GetDataReqBuilder{}
-	builder.req = &Req{
-		QueryParams: &service.QueryParams{},
-	}
+func NewQueryReqBuilder() *QueryReqBuilder {
+	builder := &QueryReqBuilder{}
+	req := service.NewRequest()
+	req.Method = "GET"
+	builder.req = req
 	return builder
 }
 
-func (builder *GetDataReqBuilder) Query(query string) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("search", base64.URLEncoding.EncodeToString([]byte(query)))
-	return builder
+func (r *QueryReqBuilder) Query(query string) *QueryReqBuilder {
+	r.req.QueryParams.Set("search", base64.URLEncoding.EncodeToString([]byte(query)))
+	return r
 }
 
-func (builder *GetDataReqBuilder) Page(page int) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("page", strconv.Itoa(page))
-	return builder
+func (r *QueryReqBuilder) Page(page int) *QueryReqBuilder {
+	r.req.QueryParams.Set("page", strconv.Itoa(page))
+	return r
 }
 
-func (builder *GetDataReqBuilder) Size(size int) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("page_size", strconv.Itoa(size))
-	return builder
+func (r *QueryReqBuilder) Size(size int) *QueryReqBuilder {
+	r.req.QueryParams.Set("page_size", strconv.Itoa(size))
+	return r
 }
 
 // IsWeb 1:web 2:非web 3:全部
-func (builder *GetDataReqBuilder) IsWeb(isWeb int) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("is_web", strconv.Itoa(isWeb))
-	return builder
+func (r *QueryReqBuilder) IsWeb(isWeb int) *QueryReqBuilder {
+	r.req.QueryParams.Set("is_web", strconv.Itoa(isWeb))
+	return r
 }
 
-func (builder *GetDataReqBuilder) PortFilter(portFilter bool) *GetDataReqBuilder {
+func (r *QueryReqBuilder) PortFilter(portFilter bool) *QueryReqBuilder {
 	if portFilter {
-		builder.req.QueryParams.Set("port_filter", "true")
-		return builder
+		r.req.QueryParams.Set("port_filter", "true")
+		return r
 	}
-	builder.req.QueryParams.Set("port_filter", "false")
-	return builder
+	r.req.QueryParams.Set("port_filter", "false")
+	return r
 }
 
-func (builder *GetDataReqBuilder) StatusCode(statusCode string) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("status_code", statusCode)
-	return builder
+func (r *QueryReqBuilder) StatusCode(statusCode string) *QueryReqBuilder {
+	r.req.QueryParams.Set("status_code", statusCode)
+	return r
 }
 
-func (builder *GetDataReqBuilder) StartTime(startTime string) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("start_time", startTime)
-	return builder
+func (r *QueryReqBuilder) StartTime(startTime string) *QueryReqBuilder {
+	r.req.QueryParams.Set("start_time", startTime)
+	return r
 }
 
-func (builder *GetDataReqBuilder) EndTime(endTime string) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("end_time", endTime)
-	return builder
+func (r *QueryReqBuilder) EndTime(endTime string) *QueryReqBuilder {
+	r.req.QueryParams.Set("end_time", endTime)
+	return r
 }
 
-func (builder *GetDataReqBuilder) Build() *GetDataReq {
-	req := &GetDataReq{}
-	req.req = builder.req
-	return req
+func (r *QueryReqBuilder) Build() *service.Request {
+	return r.req
 }

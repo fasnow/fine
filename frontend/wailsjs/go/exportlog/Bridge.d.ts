@@ -9,7 +9,7 @@ export function DeleteAll():Promise<void>;
 
 export function FindByExportID(arg1:number):Promise<models.ExportLog>;
 
-export function GetByOffset(arg1:number,arg2:number):Promise<{[key: string]: any}>;
+export function GetByOffset(arg1:number,arg2:number):Promise<Record<string, any>>;
 
 export function MarkAllAsDeleted():Promise<void>;
 

@@ -17,11 +17,13 @@ import (
 	"fine/backend/service/service/icp"
 	"fine/backend/service/service/ip138"
 	"fine/backend/service/service/quake"
+	"fine/backend/service/service/shodan"
 	"fine/backend/service/service/tianyancha"
 	"fine/backend/service/service/wechat"
 	"fine/backend/task"
 	"github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
@@ -39,12 +41,12 @@ func main() {
 	defaultWidth := 1200
 	defaultHeight := 800
 	mainApp = application.DefaultApp
-	mainApp.Logger.SetLevel(logrus.InfoLevel) // 日志等级
 	taskManager := task.Manager{ICP: icp.NewICPBridge(mainApp)}
 	opts := &options.App{
-		Title:  "Fine",
-		Width:  defaultWidth,
-		Height: defaultHeight,
+		LogLevel: logger.DEBUG,
+		Title:    "Fine",
+		Width:    defaultWidth,
+		Height:   defaultHeight,
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {
 			event.EmitV2(event.AppExit, event.EventDetail{})
 			return true
@@ -65,6 +67,9 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
+			if wailsRuntime.Environment(ctx).BuildType == "dev" {
+				mainApp.Logger.SetLevel(logrus.DebugLevel) // 日志等级
+			}
 			mainApp.SetContext(ctx)
 			event.SetContext(ctx)
 
@@ -85,28 +90,29 @@ func main() {
 			}
 		},
 		Bind: []interface{}{
+			mainApp,
 			&status.StatusEnum{},
 			&history2.HistoryEnum{},
 			&status.StatusEnum{},
-			mainApp,
+			&event.EventDetail{},
 			osoperation.NewRuntime(mainApp),
 			osoperation.NewPath(),
-			httpx.NewHttpxBridge(mainApp),
+			httpx.NewBridge(mainApp),
 			taskManager.ICP,
-			ip138.NewIP138Bridge(mainApp),
-			fofa.NewFofaBridge(mainApp),
-			hunter.NewHunterBridge(mainApp),
-			quake.NewQuakeBridge(mainApp),
-			history.NewHistoryBridge(mainApp),
-			wechat.NewWechatBridge(mainApp),
+			ip138.NewBridge(mainApp),
+			fofa.NewBridge(mainApp),
+			hunter.NewBridge(mainApp),
+			quake.NewBridge(mainApp),
+			shodan.NewBridge(mainApp),
+			history.NewBridge(mainApp),
+			wechat.NewBridge(mainApp),
 			exportlog.NewBridge(mainApp),
-			tianyancha.NewTianYanChaBridge(mainApp),
-			aiqicha.NewAiQiChaBridge(mainApp),
-			&event.EventDetail{},
+			tianyancha.NewBridge(mainApp),
+			aiqicha.NewBridge(mainApp),
 		},
-		Debug: options.Debug{
-			OpenInspectorOnStartup: true,
-		},
+		//Debug: options.Debug{
+		//	OpenInspectorOnStartup: true,
+		//},
 	}
 	if err := wails.Run(opts); err != nil {
 		mainApp.Logger.Info(err)

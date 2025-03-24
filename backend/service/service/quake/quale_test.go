@@ -1,39 +1,43 @@
 package quake
 
 import (
-	"fine/backend/database"
-	"fine/backend/database/repository"
+	"encoding/json"
+	"fine/backend/application"
+	"fine/backend/proxy/v2"
 	"fmt"
-	"github.com/yitter/idgenerator-go/idgen"
 	"testing"
 )
 
-func TestQuakeDBService_GetByTaskID(t *testing.T) {
-	database.Init("data.db")
-	client := NewClient("76b63b88-83c5-49ed-bcf5-9c340a75ac39")
-	req := NewGetRealtimeDataBuilder().
+func TestRealtimeService_Service(t *testing.T) {
+	c := New(application.DefaultApp.Config.Quake.Token)
+	p := proxy.NewManager()
+	p.SetProxy("http://127.0.0.1:8081")
+	c.UseProxyManager(p)
+	req := NewRealtimeServiceReqBuilder().
 		Query("baidu.com").
 		Page(1).
-		Size(1).
-		Build()
-	result, err := client.RealtimeServer.Service(req)
+		Size(1)
+	result, err := c.RealtimeServer.Service(req)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	c := repository.NewQuakeDBService()
-	id := idgen.NextId()
-	err = c.BatchInsert(id, result.Items)
-	if err != nil {
-		t.Error(err)
-		return
+	t.Log(result.Total)
+}
+
+func TestName(t *testing.T) {
+	// 示例：键为小写字母的 map
+	m := map[string]interface{}{
+		"name":  "Alice",
+		"age":   25,
+		"email": "alice@example.com",
 	}
-	items, err := c.GetByTaskID(id)
+
+	// 使用 json.Marshal 序列化
+	data, err := json.Marshal(m)
 	if err != nil {
-		t.Error(err)
-		return
-	}
-	for i, item := range items {
-		fmt.Println(i, item.Service.HTTP)
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Serialized JSON:", string(data))
 	}
 }

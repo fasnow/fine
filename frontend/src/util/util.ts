@@ -197,3 +197,10 @@ export const RangePresets: Preset[] = [
     { label: '最近两年', value: [dayjs().add(-2, 'year'), dayjs()] },
     { label: '最近三年', value: [dayjs().add(-3, 'year'), dayjs()] },
 ];
+
+export const  truncateString = (str: string, maxLength: number): string => {
+    if (str.length > maxLength) {
+        return str.slice(0, maxLength) + '...';
+    }
+    return str;
+}

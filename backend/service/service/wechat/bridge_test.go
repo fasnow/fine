@@ -8,7 +8,7 @@ import (
 
 func TestBridge_GetAllMiniProgram(t *testing.T) {
 	app := application.DefaultApp
-	c := NewWechatBridge(app)
+	c := NewBridge(app)
 	miniPrograms, err := c.GetAllMiniApp()
 	if err != nil {
 		t.Error(err)
@@ -20,6 +20,6 @@ func TestBridge_GetAllMiniProgram(t *testing.T) {
 
 func TestBridge_extractInfo(t *testing.T) {
 	//app := application.DefaultApp
-	//c := NewWechatBridge(app)
+	//c := NewBridge(app)
 	//c.extractInfo("wxc76247c1ed91383e", "17")
 }

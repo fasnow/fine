@@ -56,7 +56,7 @@ func (r *Bridge) UseProxyManager(manager *proxy.Manager) {
 	r.http = manager.GetClient()
 }
 
-func NewWechatBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	c := &Bridge{
 		app:                      app,
 		wxRepo:                   repository.NewWechatRepository(database.GetConnection()),
@@ -122,8 +122,10 @@ func (r *Bridge) createVersionTaskStatuses(versions []*models.VersionDecompileTa
 func (r *Bridge) findOrCreateInfo(appID string) (*wechat.Info, error) {
 	appInfo, err := r.wxRepo.FindInfoByAppID(appID)
 	if err != nil {
+		fmt.Println(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			tmpInfo, e := r.queryAppID(appID)
+			fmt.Println(tmpInfo)
 			if e != nil {
 				return nil, e
 			}
@@ -135,6 +137,7 @@ func (r *Bridge) findOrCreateInfo(appID string) (*wechat.Info, error) {
 					Avatar:        tmpInfo.Avatar,
 					UsesCount:     tmpInfo.UsesCount,
 					PrincipalName: tmpInfo.PrincipalName,
+					AppID:         appID,
 				},
 			}); err2 != nil {
 				return nil, err2
@@ -423,10 +426,11 @@ func (r *Bridge) queryAppID(appid string) (*wechat.Info, error) {
 func (r *Bridge) checkVersionTaskStatus(task *models.VersionDecompileTask, allowedStoppedStatus bool) bool {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
+	t := task.DecompileStatus == status.Running || task.MatchStatus == status.Running
 	if allowedStoppedStatus {
-		return !(task.DecompileStatus == status.Running || task.MatchStatus == status.Running)
+		return !t
 	}
-	return !(task.DecompileStatus == status.Running || task.MatchStatus == status.Running || task.MatchStatus == status.Stopped)
+	return !(t || task.MatchStatus == status.Stopped)
 }
 
 func (r *Bridge) GetAllMiniApp() ([]wechat.InfoToFront, error) {
@@ -538,7 +542,7 @@ func (r *Bridge) Decompile(item wechat.InfoToFront) {
 					r.app.Logger.Error(err)
 					return
 				}
-
+				r.app.Logger.Debug(task)
 				// 跳过正在反编译或者信息提取的任务
 				passed := r.checkVersionTaskStatus(task, true)
 				if !passed {

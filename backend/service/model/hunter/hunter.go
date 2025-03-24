@@ -1,5 +1,10 @@
 package hunter
 
+type User struct {
+	AccountType string
+	RestQuota   int
+}
+
 type Component struct {
 	Name    string `json:"name"`    //组件名称
 	Version string `json:"version"` //组件版本

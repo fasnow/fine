@@ -8,39 +8,28 @@ import (
 	"testing"
 )
 
-func TestFofa_Get(t *testing.T) {
-	b := NewFofaBridge(application.DefaultApp)
-	err := application.DefaultApp.ProxyManager.SetProxy("http://127.0.0.1:8080")
+func TestFofa_User(t *testing.T) {
+	c := New(application.DefaultApp.Config.Fofa.Token)
+	err := application.DefaultApp.ProxyManager.SetProxy("http://127.0.0.1:8081")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	userInfo, err := b.GetUserInfo()
+	userInfo, err := c.User()
 	if err != nil {
-		fmt.Println(err)
-		//return
-	}
-	fmt.Println(userInfo)
-
-	err = application.DefaultApp.ProxyManager.SetProxy("")
-	if err != nil {
-		fmt.Println(err)
+		t.Error(err)
 		return
 	}
-	userInfo2, err := b.GetUserInfo()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(userInfo2)
+	t.Log(userInfo.Email)
 }
 
 func TestStatisticalAggs_Query(t *testing.T) {
-	c := NewClient("")
+	c := New(application.DefaultApp.Config.Fofa.Token)
 	proxy := proxy.NewManager()
 	proxy.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(proxy)
-	aggs, err := c.StatisticalAggs.Fields("country").Query("title=百度")
+	req := NewStatAggsReqBuilder().Fields("country").Query("title=百度").Build()
+	aggs, err := c.StatisticalAggs.Query(req)
 	if err != nil {
 		t.Error(err)
 		return
@@ -55,11 +44,12 @@ func TestStatisticalAggs_Query(t *testing.T) {
 }
 
 func TestHostAggs_Host(t *testing.T) {
-	c := NewClient("")
+	c := New(application.DefaultApp.Config.Fofa.Token)
 	proxy := proxy.NewManager()
 	proxy.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(proxy)
-	aggs, err := c.HostAggs.Detail(true).Host("78.48.50.249")
+	req := NewHostStatReqBuilder().Detail(true).Host("78.48.50.249").Build()
+	aggs, err := c.HostAggs.Query(req)
 	if err != nil {
 		t.Error(err)
 		return
@@ -71,4 +61,23 @@ func TestHostAggs_Host(t *testing.T) {
 	}
 	t.Log(string(bytes))
 
+}
+
+func TestFofa_Query(t *testing.T) {
+	c := New(application.DefaultApp.Config.Fofa.Token)
+	proxy := proxy.NewManager()
+	proxy.SetProxy("http://127.0.0.1:8081")
+	c.UseProxyManager(proxy)
+	req := NewSearchAllReqBuilder().Page(1).Size(10).Query("domain=baidu.com").Fields("link").Build()
+	result, err := c.Query(req)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	bytes, err := json.Marshal(result)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(string(bytes))
 }

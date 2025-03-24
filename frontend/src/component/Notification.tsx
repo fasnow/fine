@@ -42,3 +42,13 @@ export const errorNotification = (message: string, description: any, duration?: 
     })
 }
 
+export const errorNotification1 = (description: any, duration?: number) => {
+    const des = description.toString()
+    notification.error({
+        message:"",
+        description: des,
+        placement: "topRight",
+        duration,
+    })
+}
+

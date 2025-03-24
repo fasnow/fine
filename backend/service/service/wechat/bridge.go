@@ -533,6 +533,15 @@ func (r *Bridge) SaveWechatRules(rules []string) error {
 	return nil
 }
 
+func (r *Bridge) GetWechatRules() []string {
+	var t []string
+	for _, rule := range r.app.Config.Wechat.Rules {
+		tt := strconv.Quote(rule)
+		t = append(t, tt[1:len(tt)-1])
+	}
+	return t
+}
+
 func (r *Bridge) Decompile(item wechat.InfoToFront) {
 	go func() {
 		for _, versionTaskStatus := range item.Versions {

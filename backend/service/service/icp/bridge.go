@@ -339,6 +339,20 @@ func (r *Bridge) queryAll(serviceType, query string, statCtx *context.StatusCont
 	return result2, nil
 }
 
+func (r *Bridge) SaveICPConfig(cfg config.ICP) error {
+	r.app.Config.ICP.AuthErrorRetryNum1 = cfg.AuthErrorRetryNum1
+	r.app.Config.ICP.AuthErrorRetryNum2 = cfg.AuthErrorRetryNum2
+	r.app.Config.ICP.ForbiddenErrorRetryNum1 = cfg.ForbiddenErrorRetryNum1
+	r.app.Config.ICP.ForbiddenErrorRetryNum2 = cfg.ForbiddenErrorRetryNum2
+	r.app.Config.ICP.Concurrency = cfg.Concurrency
+	err := r.app.WriteConfig(r.app.Config)
+	if err != nil {
+		r.app.Logger.Info(err)
+		return err
+	}
+	return nil
+}
+
 func (r *Bridge) SetProxy(p config.Proxy) error {
 	if r.app.Config.ICP.Proxy != p {
 		r.app.Config.ICP.Proxy.Type = p.Type

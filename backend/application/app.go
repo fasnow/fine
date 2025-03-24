@@ -471,16 +471,6 @@ func (r *Application) SaveQueryOnEnter(queryOnEnter config.QueryOnEnter) error {
 	return nil
 }
 
-func (r *Application) SaveWechat(wechat config.Wechat) error {
-	r.Config.Wechat = wechat
-	err := r.WriteConfig(r.Config)
-	if err != nil {
-		r.Logger.Info(err)
-		return err
-	}
-	return nil
-}
-
 func (r *Application) SaveTimeout(timeout time.Duration) error {
 	r.Config.Timeout = timeout
 	err := r.WriteConfig(r.Config)
@@ -530,29 +520,6 @@ func (r *Application) SaveLogDataDir(dir string) error {
 		return err
 	}
 	return nil
-}
-
-func (r *Application) SaveICPConfig(cfg config.ICP) error {
-	r.Config.ICP.AuthErrorRetryNum1 = cfg.AuthErrorRetryNum1
-	r.Config.ICP.AuthErrorRetryNum2 = cfg.AuthErrorRetryNum2
-	r.Config.ICP.ForbiddenErrorRetryNum1 = cfg.ForbiddenErrorRetryNum1
-	r.Config.ICP.ForbiddenErrorRetryNum2 = cfg.ForbiddenErrorRetryNum2
-	r.Config.ICP.Concurrency = cfg.Concurrency
-	err := r.WriteConfig(r.Config)
-	if err != nil {
-		r.Logger.Info(err)
-		return err
-	}
-	return nil
-}
-
-func (r *Application) GetWechatRules() []string {
-	var t []string
-	for _, rule := range r.Config.Wechat.Rules {
-		tt := strconv.Quote(rule)
-		t = append(t, tt[1:len(tt)-1])
-	}
-	return t
 }
 
 func (r *Application) GetAllConstants() *Constant {

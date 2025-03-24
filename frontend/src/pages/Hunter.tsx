@@ -15,7 +15,7 @@ import {
     Space,
     Spin,
     Switch,
-    Tabs,
+    Tabs, Tag,
     Tooltip,
     Upload
 } from 'antd';
@@ -30,15 +30,14 @@ import {
 import { errorNotification } from '@/component/Notification';
 import { RootState, appActions, userActions } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import PointBuy from "@/assets/images/point-buy.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
 import {copy, getAllDisplayedColumnKeys, getSortedData, RangePresets} from '@/util/util';
 import {config, event, hunter} from "../../wailsjs/go/models";
-import { Export, GetRestToken, Query, SetAuth } from "../../wailsjs/go/hunter/Bridge";
+import {Export, GetUserInfo, Query, SetAuth} from "../../wailsjs/go/hunter/Bridge";
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
 import type { Tab } from 'rc-tabs/lib/interface';
-import { Dots } from "@/component/Icon";
+import {Coin1, Dots} from "@/component/Icon";
 import { md5 } from "js-md5"
 import { toUint8Array } from "js-base64";
 import { WithIndex } from "@/component/Interface";
@@ -54,10 +53,12 @@ import {
     GetContextMenuItemsParams,
     ICellRendererParams,
     ProcessCellForExportParams,
-    SideBarDef
+    SideBarDef, ValueGetterParams
 } from "ag-grid-community";
 import Help from "@/pages/HunterUsage";
 import {Fetch} from "../../wailsjs/go/application/Application";
+import Password from "@/component/Password";
+import Label from "@/component/Label";
 
 const pageSizeOptions = [10, 20, 50, 100]
 
@@ -84,81 +85,6 @@ interface QueryOptions {
     dateRange: string[]
 }
 
-const AuthSetting: React.FC = () => {
-    const [open, setOpen] = useState<boolean>(false)
-    const [editable, setEditable] = useState(false)
-    const dispatch = useDispatch()
-    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
-    const [key, setKey] = useState("")
-
-    useEffect(() => {
-        setKey(cfg.Hunter.Token)
-    }, [cfg.Hunter])
-
-    const save = () => {
-        SetAuth(key).then(
-            () => {
-                const t = { ...cfg, Hunter: { ...cfg.Hunter, Token: key } } as config.Config;
-                dispatch(appActions.setConfig(t))
-                setOpen(false)
-                setEditable(false)
-            }
-        ).catch(
-            err => {
-                errorNotification("错误", err)
-                setKey(cfg.Hunter.Token)
-            }
-        )
-    }
-
-    const cancel = () => {
-        setEditable(false);
-        setOpen(false)
-        setKey(cfg.Hunter.Token)
-    }
-
-    return <>
-        <Tooltip title="设置" placement={"right"}>
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
-        </Tooltip>
-        <Modal
-            open={open}
-            onCancel={() => setOpen(false)}
-            onOk={() => {
-                setOpen(false)
-            }}
-            footer={null}
-            closeIcon={null}
-            width={420}
-            destroyOnClose
-        >
-            <Flex vertical gap={10}>
-                <Input.Password value={key} placeholder="token" onChange={
-                    e => {
-                        if (!editable) return
-                        setKey(e.target.value)
-                    }
-                } />
-                <Flex gap={10} justify={"end"}>
-                    {
-                        !editable ?
-                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                            :
-                            <>
-                                <Button {...buttonProps} htmlType="submit"
-                                    onClick={save}
-                                >保存</Button>
-                                <Button {...buttonProps} htmlType="submit"
-                                    onClick={cancel}
-                                >取消</Button>
-                            </>
-                    }
-                </Flex>
-            </Flex>
-        </Modal>
-    </>
-}
-
 const ExportDataPanel = (props: { id: number, total: number, currentPageSize: number }) => {
     const user = useSelector((state: RootState) => state.user.hunter)
     const [page, setPage] = useState<number>(0)
@@ -182,7 +108,7 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
             setIsExporting(false)
             setDisable(false)
             if (eventDetail.Status === stat.Stopped){
-                GetRestToken().then(
+                GetUserInfo().then(
                     result => {
                         dispatch(userActions.setHunterUser({ restToken: result }))
                     }
@@ -252,7 +178,7 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
                         gap: "10px",
                         backgroundColor: '#f3f3f3',
                         width: "100%"
-                    }}>当前积分: <span style={{ color: "red" }}>{user.restToken}</span></span>
+                    }}>当前积分: <span style={{ color: "red" }}>{user.RestQuota || 0}</span></span>
                 </Row>
                 <Row>
                     <Col span={10}>
@@ -337,7 +263,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: '备案单位', field: "company", width: 100, },
         { headerName: '响应码', field: "status_code", width: 80, },
         {
-            headerName: '组件', field: "component", width: 100, cellRenderer: (params: ICellRendererParams) => {
+            headerName: '组件', field: "component", width: 100, valueGetter: (params: ValueGetterParams)  => {
                 if(!params.data) return <></>
                 const tmp = params.data.component?.map((component: hunter.Component) => {
                     return component.name + component.version
@@ -468,7 +394,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     useEffect(() => {
         EventsOn(event.HunterQuery, function (eventDetail:event.EventDetail) {
             if (eventDetail.Status === status.Stopped)
-            GetRestToken().then(
+            GetUserInfo().then(
                 result => {
                     dispatch(userActions.setHunterUser({ restToken: result }))
                 }
@@ -522,9 +448,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 setTotal(result.total)
                 setLoading(false)
                 pageIDMap.current[1] = result.pageID
-                dispatch(userActions.setHunterUser({
-                    restToken: result.restQuota
-                }))
+                dispatch(userActions.setHunterUser(result.User))
             }
         ).catch(
             err => {
@@ -552,9 +476,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     setCurrentPage(newPage)
                     setTotal(result.total)
                     pageIDMap.current[newPage] = result.pageID
-                    dispatch(userActions.setHunterUser({
-                        restToken: result.restQuota
-                    }))
+                    dispatch(userActions.setHunterUser(result.User))
                     setLoading(false)
                 }
             ).catch(
@@ -783,31 +705,67 @@ const TabContent: React.FC<TabContentProps> = (props) => {
 
 const UserPanel = () => {
     const user = useSelector((state: RootState) => state.user.hunter)
+    const [open, setOpen] = useState<boolean>(false)
+    const dispatch = useDispatch()
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
+
+    const save = async (key: string) => {
+        try {
+            await SetAuth(key)
+            const t = {...cfg, Hunter: {...cfg.Hunter, Token: key}} as config.Config;
+            dispatch(appActions.setConfig(t))
+            return true
+        } catch (e) {
+            errorNotification("错误", e)
+            return false
+        }
+    }
+
     return <div style={{
         width: "auto",
         height: "23px",
         display: "flex",
         alignItems: "center",
-        backgroundColor: "#f1f3f4"
+        backgroundColor: "#f1f3f4",
+        paddingRight: '10px'
     }}>
-        <AuthSetting />
-        <Divider type="vertical" />
-        <Space>
-            <Tooltip title="剩余总积分">
-                <div style={{
-                    height: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: "#f5222d"
-                }}>
-                    <img src={PointBuy} />
-                    {user.restToken}
-                </div>
+        <Flex align={"center"}>
+            <Tooltip title="设置" placement={"bottom"}>
+                <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
             </Tooltip>
-            <Tooltip title="查询后自动获取">
-                <Button size="small" shape="circle" type="text" icon={<ExclamationCircleOutlined />} />
-            </Tooltip>
-        </Space>
+            <Flex gap={10}>
+                <Tooltip title="剩余总积分,查询后自动获取" placement={"bottom"}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: "center",
+                        color: "#f5222d"
+                    }}>
+                        <Coin1 />
+                        {user.RestQuota || 0}
+                    </div>
+                </Tooltip>
+            </Flex>
+        </Flex>
+        <Modal
+            open={open}
+            onCancel={() => setOpen(false)}
+            onOk={() => {
+                setOpen(false)
+            }}
+            footer={null}
+            closeIcon={null}
+            width={600}
+            destroyOnClose
+        >
+            <Flex vertical gap={10}>
+                <Tag bordered={false} color="processing">
+                    API信息
+                </Tag>
+                <Password labelWidth={100} value={cfg.Hunter.Token} label={"API key"} onSubmit={save}/>
+                <Label labelWidth={100} value={user.AccountType} label={"账户类型"}/>
+                <Label labelWidth={100} value={user.RestQuota} label={"剩余积分"}/>
+            </Flex>
+        </Modal>
     </div>
 }
 

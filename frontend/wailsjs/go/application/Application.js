@@ -30,6 +30,10 @@ export function GetContext() {
   return window['go']['application']['Application']['GetContext']();
 }
 
+export function GetProxyHistory() {
+  return window['go']['application']['Application']['GetProxyHistory']();
+}
+
 export function GetWechatRules() {
   return window['go']['application']['Application']['GetWechatRules']();
 }

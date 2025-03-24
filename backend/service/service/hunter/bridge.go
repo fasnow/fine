@@ -20,21 +20,19 @@ import (
 type Bridge struct {
 	app             *application.Application
 	hunter          *Hunter
-	token           *repository.HunterRestTokenDBService
 	cacheTotal      repository.CacheTotal
 	hunterRepo      repository.HunterRepository
 	historyRepo     repository.HistoryRepository
 	exportLogBridge *exportlog.Bridge
 }
 
-func NewHunterBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	tt := NewClient(app.Config.Hunter.Token)
 	tt.UseProxyManager(app.ProxyManager)
 	db := database.GetConnection()
 	return &Bridge{
 		app:             app,
 		hunter:          tt,
-		token:           repository.NewHunterResidualTokenDBService(),
 		cacheTotal:      repository.NewCacheTotal(db),
 		hunterRepo:      repository.NewHunterRepository(db),
 		historyRepo:     repository.NewHistoryRepository(db),
@@ -87,7 +85,10 @@ func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int, startT
 		queryResult.Total = total
 		queryResult.PageNum = pageNum
 		queryResult.PageID = pageID
-		queryResult.RestQuota = r.token.GetLast() //从数据库获取剩余积分
+		u, err := r.hunterRepo.GetLastUserInfo()
+		if err != nil {
+			queryResult.User = u.User //从数据库获取剩余积分
+		}
 		for _, cacheItem := range cacheItems {
 			queryResult.Items = append(queryResult.Items, cacheItem.Item)
 		}
@@ -102,7 +103,7 @@ func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int, startT
 	}
 
 	//获取新数据
-	req := NewGetDataReqBuilder().
+	req := NewQueryReqBuilder().
 		Query(query).
 		Page(pageNum).
 		Size(pageSize).
@@ -111,12 +112,12 @@ func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int, startT
 		StatusCode(statusCode).
 		IsWeb(isWeb).
 		PortFilter(portFilter).Build()
-	result, err := r.hunter.Get(req)
+	result, err := r.hunter.Query(req)
 	if err != nil {
 		r.app.Logger.Error(err)
 		return nil, err
 	}
-	r.token.Create(result.RestQuota) //剩余积分添加到数据库记录
+	r.hunterRepo.CreateUserInfo(result.User) //剩余积分添加到数据库记录
 	tmpPageID := idgen.NextId()
 	if result.Total > 0 {
 		// 缓存查询成功的条件，用于导出
@@ -178,7 +179,7 @@ func (r *Bridge) Export(pageID, pageNum, pageSize int64) (int64, error) {
 	go func() {
 		for index := int64(1); index <= pageNum; index++ {
 			result, err1 := backoff.RetryWithData(func() (*Result, error) {
-				req := NewGetDataReqBuilder().
+				req := NewQueryReqBuilder().
 					Query(queryLog.Query).
 					Page(int(index)).
 					Size(int(pageSize)).
@@ -187,7 +188,7 @@ func (r *Bridge) Export(pageID, pageNum, pageSize int64) (int64, error) {
 					StatusCode(queryLog.StatusCode).
 					IsWeb(queryLog.IsWeb).
 					PortFilter(queryLog.PortFilter).Build()
-				result, err2 := r.hunter.Get(req)
+				result, err2 := r.hunter.Query(req)
 				if err2 != nil {
 					r.app.Logger.Error(err2)
 					return nil, err2
@@ -200,7 +201,7 @@ func (r *Bridge) Export(pageID, pageNum, pageSize int64) (int64, error) {
 				if err2 := r.hunterRepo.CreateBulk(exportID, result.Items); err2 != nil {
 					r.app.Logger.Error(err2)
 				}
-				r.token.Create(result.RestQuota) //剩余积分添加到数据库记录
+				r.hunterRepo.CreateUserInfo(result.User) //剩余积分添加到数据库记录
 			}
 			time.Sleep(r.app.Config.Hunter.Interval)
 		}
@@ -237,6 +238,11 @@ func (r *Bridge) SetAuth(key string) error {
 	return nil
 }
 
-func (r *Bridge) GetRestToken() int {
-	return r.token.GetLast()
+func (r *Bridge) GetUserInfo() (*hunter.User, error) {
+	u, err := r.hunterRepo.GetLastUserInfo()
+	if err != nil {
+		r.app.Logger.Error(err)
+		return nil, err
+	}
+	return &u.User, nil
 }

@@ -16,7 +16,7 @@ import {
     Tabs,
     Tooltip,
     Upload,
-    Radio
+    Radio, Tag
 } from 'antd';
 import {
     CloudDownloadOutlined,
@@ -30,14 +30,12 @@ import { errorNotification } from '@/component/Notification';
 import { QUERY_FIRST } from '@/component/type';
 import { RootState, appActions, userActions } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import PointBuy from "@/assets/images/point-buy.svg"
-import PointFree from "@/assets/images/point-free.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
 import {config, event, fofa} from "../../wailsjs/go/models";
 import { Export, GetUserInfo, Query, SetAuth } from "../../wailsjs/go/fofa/Bridge";
 import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
-import { Dots } from "@/component/Icon";
+import {Coin1, Coin2, Dots} from "@/component/Icon";
 import MurmurHash3 from "murmurhash3js"
 import { Buffer } from "buffer"
 import { toUint8Array } from "js-base64";
@@ -61,87 +59,15 @@ import {
 import FofaStatisticalAggregation, {FofaStatisticalAggsRef} from "@/pages/FofaStatisticalAggregation";
 import FofaHostAggs, {FofaHostAggsRef} from "@/pages/FofaHostAggregation";
 import {Fetch} from "../../wailsjs/go/application/Application";
-
-const AuthSetting: React.FC = () => {
-    const [open, setOpen] = useState<boolean>(false)
-    const [editable, setEditable] = useState(false)
-    const dispatch = useDispatch()
-    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
-    const [key, setKey] = useState("")
-
-    useEffect(() => {
-        setKey(cfg.Fofa.Token)
-    }, [cfg.Fofa])
-
-
-    const save = () => {
-        SetAuth(key).then(
-            () => {
-                const t = { ...cfg, Fofa: { ...cfg.Fofa, Token: key } } as config.Config;
-                dispatch(appActions.setConfig(t))
-                setOpen(false)
-                setEditable(false)
-            }
-        ).catch(
-            err => {
-                errorNotification("错误", err)
-                setKey(cfg.Fofa.Token)
-            }
-        )
-    }
-
-    const cancel = () => {
-        setEditable(false);
-        setOpen(false)
-        setKey(cfg.Fofa.Token)
-    }
-
-    return <>
-        <Tooltip title="设置" placement={"right"}>
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
-        </Tooltip>
-        <Modal
-            open={open}
-            onCancel={() => setOpen(false)}
-            onOk={() => {
-                setOpen(false)
-            }}
-            footer={null}
-            closeIcon={null}
-            width={420}
-            destroyOnClose
-        >
-            <Flex vertical gap={10}>
-                <Input.Password value={key} placeholder="token" onChange={
-                    e => {
-                        if (!editable) return
-                        setKey(e.target.value)
-                    }
-                } />
-                <Flex gap={10} justify={"end"}>
-                    {
-                        !editable ?
-                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                            :
-                            <>
-                                <Button {...buttonProps} htmlType="submit"
-                                    onClick={save}
-                                >保存</Button>
-                                <Button {...buttonProps} htmlType="submit"
-                                    onClick={cancel}
-                                >取消</Button>
-                            </>
-                    }
-                </Flex>
-            </Flex>
-        </Modal>
-    </>
-}
+import Password from "@/component/Password";
+import Label from "@/component/Label";
 
 const UserPanel = () => {
     const [spin, setSpin] = useState<boolean>(false)
-    const dispatch = useDispatch()
     const user = useSelector((store: RootState) => store.user.fofa)
+    const [open, setOpen] = useState<boolean>(false)
+    const dispatch = useDispatch()
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
     useEffect(() => {
         updateRestToken()
@@ -155,6 +81,18 @@ const UserPanel = () => {
         }
     }
 
+    const save = async (key: string) => {
+        try {
+            await SetAuth(key)
+            const t = {...cfg, Fofa: {...cfg.Fofa, Token: key}} as config.Config;
+            dispatch(appActions.setConfig(t))
+            return true
+        } catch (e) {
+            errorNotification("错误", e)
+            return false
+        }
+    }
+
     return <div style={{
         width: "auto",
         height: "23px",
@@ -162,41 +100,71 @@ const UserPanel = () => {
         alignItems: "center",
         backgroundColor: "#f1f3f4"
     }}>
-        <AuthSetting />
-        <Divider type="vertical" />
-        <Space>
-            <Tooltip title="F币">
-                <div style={{
-                    height: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: "#f5222d"
-                }}>
-                    <img src={PointFree} />
-                    {user.fcoin}
-                </div>
+        <Flex align={"center"}>
+            <Tooltip title="设置" placement={"bottom"}>
+                <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
             </Tooltip>
-            <Tooltip title="F点">
-                <div style={{
-                    height: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: "#f5222d"
-                }}>
-                    <img src={PointBuy} />
-                    {user.fofa_point}
-                </div>
-            </Tooltip>
-            <Tooltip title="刷新余额">
-                <Button size="small" shape="circle" type="text" icon={<SyncOutlined spin={spin}
-                    onClick={async () => {
-                        setSpin(true)
-                        await updateRestToken()
-                        setSpin(false)
-                    }}
-                />}></Button>
-            </Tooltip>
-        </Space>
+            <Flex gap={10}>
+                <Tooltip title="F币" placement={"bottom"}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: "center",
+                        color: "#f5222d"
+                    }}>
+                        <Coin1 />
+                        {user.fcoin || 0}
+                    </div>
+                </Tooltip>
+                <Tooltip title="F点" placement={"bottom"}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: "center",
+                        color: "#f5222d"
+                    }}>
+                        <Coin2/>
+                        {user.fofa_point || 0}
+                    </div>
+                </Tooltip>
+                <Tooltip title="刷新余额" placement={"bottom"}>
+                    <Button size="small"
+                            shape="circle"
+                            type="text"
+                            icon={<SyncOutlined
+                                spin={spin}
+                                onClick={async () => {
+                                        setSpin(true)
+                                        await updateRestToken()
+                                        setSpin(false)
+                                }}
+                    />}></Button>
+                </Tooltip>
+            </Flex>
+        </Flex>
+        <Modal
+            open={open}
+            onCancel={() => setOpen(false)}
+            onOk={() => {
+                setOpen(false)
+            }}
+            footer={null}
+            closeIcon={null}
+            width={600}
+            destroyOnClose
+        >
+            <Flex vertical gap={10}>
+                <Tag bordered={false} color="processing">
+                    API信息
+                </Tag>
+                <Password labelWidth={100} value={cfg.Fofa.Token} label={"API key"} onSubmit={save}/>
+                <Label labelWidth={100} label={"是否会员"} value={`${user.isvip ? "是" : "否"}`}/>
+                <Label labelWidth={100} label={"会员等级"} value={`${user.vip_level}`}/>
+                <Label labelWidth={100} label={"剩余F币"} value={`${user.fcoin || 0}`}/>
+                <Label labelWidth={100} label={"剩余F点"} value={`${user.fofa_point || 0}`}/>
+                <Label labelWidth={100} label={"剩余免费F点"} value={`${user.remain_free_point || 0}`}/>
+                <Label labelWidth={100} label={"剩余查询次数"} value={`${user.remain_api_query || 0}`}/>
+                <Label labelWidth={100} label={"剩余数据量"} value={`${user.remain_api_data || 0}`}/>
+            </Flex>
+        </Modal>
     </div>
 }
 

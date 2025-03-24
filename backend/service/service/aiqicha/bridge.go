@@ -21,8 +21,8 @@ type Bridge struct {
 	exportLogBridge *exportlog.Bridge
 }
 
-func NewAiQiChaBridge(app *application.Application) *Bridge {
-	tt := NewClient(app.Config.AiQiCha.Cookie)
+func NewBridge(app *application.Application) *Bridge {
+	tt := New(app.Config.AiQiCha.Cookie)
 	tt.UseProxyManager(app.ProxyManager)
 	return &Bridge{
 		app:             app,
@@ -37,7 +37,7 @@ func (r *Bridge) SetAuth(cookie string) error {
 	if err := r.app.WriteConfig(r.app.Config); err != nil {
 		return err
 	}
-	r.aiQiCha.SetToken(cookie)
+	r.aiQiCha.SetAuth(cookie)
 	return nil
 }
 

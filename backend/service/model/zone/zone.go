@@ -1,7 +1,7 @@
 package zone
 
 import (
-	"fine/backend/constant"
+	"gorm.io/datatypes"
 )
 
 type QueryType string
@@ -57,12 +57,12 @@ type ApkItem struct {
 }
 
 type MemberItem struct {
-	Name         string               `json:"name"`
-	Position     constant.StringArray `json:"position"`
-	Introduction string               `json:"introduction"`
-	Source       string               `json:"source"`    //来源
-	Timestamp    string               `json:"timestamp"` //入库时间
-	Company      string               `json:"company"`   //所属集团 实际是字符串或者字符串列表，这里只取第一个
+	Name         string                      `json:"name"`
+	Position     datatypes.JSONSlice[string] `json:"position"`
+	Introduction string                      `json:"introduction"`
+	Source       string                      `json:"source"`    //来源
+	Timestamp    string                      `json:"timestamp"` //入库时间
+	Company      string                      `json:"company"`   //所属集团 实际是字符串或者字符串列表，这里只取第一个
 }
 
 type DomainItem struct {
@@ -73,11 +73,11 @@ type DomainItem struct {
 }
 
 type EmailItem struct {
-	Email     string               `json:"email"`
-	EmailType string               `json:"email_type"`
-	Group     string               `json:"group"`     //所属集团
-	Source    constant.StringArray `json:"source"`    //来源 有可能是string类型,需要转为[]string类型
-	Timestamp string               `json:"timestamp"` //更新时间
+	Email     string                      `json:"email"`
+	EmailType string                      `json:"email_type"`
+	Group     string                      `json:"group"`     //所属集团
+	Source    datatypes.JSONSlice[string] `json:"source"`    //来源 有可能是string类型,需要转为[]string类型
+	Timestamp string                      `json:"timestamp"` //更新时间
 	//Company   []string `json:"company"`   //所属集团
 }
 

@@ -14,7 +14,7 @@ type Bridge struct {
 	historyRepo repository.HistoryRepository
 }
 
-func NewTianYanChaBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	tt := NewClient(app.Config.TianYanCha.Token)
 	tt.UseProxyManager(app.ProxyManager)
 	return &Bridge{
@@ -29,7 +29,7 @@ func (r *Bridge) SetAuth(token string) error {
 	if err := r.app.WriteConfig(r.app.Config); err != nil {
 		return err
 	}
-	r.t.SetToken(token)
+	r.t.SetAuth(token)
 	return nil
 }
 

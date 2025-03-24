@@ -50,8 +50,6 @@ export const Proxy:React.FC<ProxyPros> = (props) => {
         setProxyConf(props.proxy)
     }, [props.proxy])
 
-
-
     const cancel = () => {
         setProxyConf(props.proxy)
         setEditable(false)

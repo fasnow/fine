@@ -7,7 +7,6 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fine/backend/beauty"
-	"fine/backend/constant"
 	"fine/backend/matcher"
 	"fine/backend/proxy/v2"
 	"fine/backend/service/model/wechat"
@@ -139,7 +138,7 @@ func (r *WeChat) GetAllMiniApp() ([]*wechat.MiniProgram, error) {
 	if err != nil {
 		return nil, err
 	}
-	sort.Sort(constant.FileInfoSlice(entries))
+	sort.Sort(utils.FileInfoSlice(entries))
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
@@ -167,7 +166,7 @@ func (r *WeChat) GetAllMiniApp() ([]*wechat.MiniProgram, error) {
 			UpdateDate: info.ModTime().Format("2006/01/02 15:04"),
 		}
 		// 按修改时间排序
-		sort.Sort(constant.FileInfoSlice(versionEntries))
+		sort.Sort(utils.FileInfoSlice(versionEntries))
 		var versions []*wechat.Version
 		for _, versionEntry := range versionEntries {
 			var file = filepath.Join(versionsDir, versionEntry.Name(), "__APP__.wxapkg")

@@ -3,7 +3,7 @@ package quake
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fine/backend/constant"
+	"gorm.io/datatypes"
 	"time"
 )
 
@@ -88,14 +88,14 @@ type RealtimeHostItem struct {
 type Component struct {
 	SID            int64 `gorm:"primarykey"`
 	ItemID         int64
-	ProductLevel   string               `json:"product_level"`
-	ProductType    constant.StringArray `json:"product_type"`
-	ProductVendor  string               `json:"product_vendor"`
-	ProductNameCn  string               `json:"product_name_cn"`
-	ProductNameEn  string               `json:"product_name_en"`
-	ID             string               `json:"id"`
-	Version        string               `json:"version"`
-	ProductCatalog constant.StringArray `json:"product_catalog"`
+	ProductLevel   string                      `json:"product_level"`
+	ProductType    datatypes.JSONSlice[string] `json:"product_type"`
+	ProductVendor  string                      `json:"product_vendor"`
+	ProductNameCn  string                      `json:"product_name_cn"`
+	ProductNameEn  string                      `json:"product_name_en"`
+	ID             string                      `json:"id"`
+	Version        string                      `json:"version"`
+	ProductCatalog datatypes.JSONSlice[string] `json:"product_catalog"`
 }
 
 func (Component) TableName() string {
@@ -155,24 +155,24 @@ func (r HTTP) Value() (driver.Value, error) {
 
 type Location struct {
 	LocationID  int64
-	Owner       string                `json:"owner"`
-	ProvinceCn  string                `json:"province_cn"`
-	ProvinceEn  string                `json:"province_en"`
-	Isp         string                `json:"isp"` //运营商
-	CountryEn   string                `json:"country_en"`
-	DistrictCn  string                `json:"district_cn"`
-	Gps         constant.Float64Array `json:"gps"`
-	StreetCn    string                `json:"street_cn"`
-	CityEn      string                `json:"city_en"`
-	DistrictEn  string                `json:"district_en"`
-	CountryCn   string                `json:"country_cn"`
-	StreetEn    string                `json:"street_en"`
-	CityCn      string                `json:"city_cn"`
-	CountryCode string                `json:"country_code"`
-	Asname      string                `json:"asname"`
-	SceneCn     string                `json:"scene_cn"`
-	SceneEn     string                `json:"scene_en"`
-	Radius      float64               `json:"radius"`
+	Owner       string                       `json:"owner"`
+	ProvinceCn  string                       `json:"province_cn"`
+	ProvinceEn  string                       `json:"province_en"`
+	Isp         string                       `json:"isp"` //运营商
+	CountryEn   string                       `json:"country_en"`
+	DistrictCn  string                       `json:"district_cn"`
+	Gps         datatypes.JSONSlice[float64] `json:"gps"`
+	StreetCn    string                       `json:"street_cn"`
+	CityEn      string                       `json:"city_en"`
+	DistrictEn  string                       `json:"district_en"`
+	CountryCn   string                       `json:"country_cn"`
+	StreetEn    string                       `json:"street_en"`
+	CityCn      string                       `json:"city_cn"`
+	CountryCode string                       `json:"country_code"`
+	Asname      string                       `json:"asname"`
+	SceneCn     string                       `json:"scene_cn"`
+	SceneEn     string                       `json:"scene_en"`
+	Radius      float64                      `json:"radius"`
 }
 
 func (r *Location) Scan(value interface{}) error {

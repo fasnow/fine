@@ -6,6 +6,9 @@ import (
 	"fine/backend/constant/event"
 	"fine/backend/constant/history"
 	"fine/backend/constant/status"
+	"fine/backend/database"
+	"fine/backend/database/models"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/proxy/v2"
 	"fine/backend/utils"
@@ -65,10 +68,10 @@ var defaultConfig = &config.Config{
 		Interval: 1500 * time.Millisecond,
 	},
 	Quake: config.Quake{
-		Interval: 1000 * time.Millisecond,
+		Interval: 1 * time.Second,
 	},
 	Zone: config.Zone{
-		Interval: 1000 * time.Millisecond,
+		Interval: 1 * time.Second,
 	},
 	ICP: config.ICP{
 		Timeout: 10 * time.Second,
@@ -85,6 +88,9 @@ var defaultConfig = &config.Config{
 		AuthErrorRetryNum2:      999,
 		ForbiddenErrorRetryNum2: 999,
 		Concurrency:             5,
+	},
+	Shodan: config.Shodan{
+		Interval: 1 * time.Second,
 	},
 	TianYanCha: config.TianYanCha{Token: ""},
 	AiQiCha:    config.AiQiCha{Cookie: ""},
@@ -110,6 +116,8 @@ type Application struct {
 	ProxyManager *proxy.Manager
 	Logger       *logrus.Logger
 	UserHome     string
+
+	proxyHistoryRepo repository.ProxyHistoryRepository
 }
 
 func NewApp() *Application {
@@ -119,6 +127,8 @@ func NewApp() *Application {
 	}
 	app.init()
 	app.UseProxyManager(app.ProxyManager)
+	database.SetDatabaseFile(app.Config.DatabaseFile)
+	app.proxyHistoryRepo = repository.NewProxyHistoryRepository(database.GetConnection())
 	return app
 }
 
@@ -309,6 +319,18 @@ func (r *Application) Exit() {
 	os.Exit(0)
 }
 
+func (r *Application) GetProxyHistory() ([]config.Proxy, error) {
+	histories, _, err := r.proxyHistoryRepo.GetByPagination(1, 20)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]config.Proxy, 0)
+	for _, proxyHistory := range histories {
+		items = append(items, proxyHistory.Proxy)
+	}
+	return items, nil
+}
+
 func ShowErrorMessage(message string) {
 	switch runtime.GOOS {
 	case "darwin":
@@ -419,6 +441,11 @@ func (r *Application) SaveProxy(proxy config.Proxy) error {
 		}
 		_ = r.ProxyManager.SetProxy(fmt.Sprintf("%s://%s:%s", proxy.Type, proxy.Host, proxy.Port))
 		r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
+		if err := r.proxyHistoryRepo.Create(models.ProxyHistory{
+			Proxy: proxy,
+		}); err != nil {
+			r.Logger.Info(err)
+		}
 		return nil
 	}
 	_ = r.ProxyManager.SetProxy("")
@@ -570,6 +597,7 @@ func (r *Application) GetAllConstants() *Constant {
 		ICP:    history.ICP,
 		TYC:    history.TYC,
 		AQC:    history.AQC,
+		Shodan: history.Shodan,
 	}
 	return &Constant{
 		Event:   events,

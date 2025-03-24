@@ -8,7 +8,7 @@ import (
 
 func TestBridge_Run(t *testing.T) {
 	app := application.DefaultApp
-	c := NewHttpxBridge(app)
+	c := NewBridge(app)
 	id, err := c.Run("/Users/fasnow/Tools/bin/httpx/httpx", "-sc -cl -title", "baidu.com")
 	if err != nil {
 		t.Error(err)
@@ -31,8 +31,8 @@ func TestNewHttpxBridge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewHttpxBridge(tt.args.app); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewHttpxBridge() = %v, want %v", got, tt.want)
+			if got := NewBridge(tt.args.app); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewBridge() = %v, want %v", got, tt.want)
 			}
 		})
 	}

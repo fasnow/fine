@@ -1,8 +1,8 @@
 package database
 
 import (
-	"fine/backend/application"
 	"fine/backend/database/models"
+	shodan2 "fine/backend/database/models/shodan"
 	"fine/backend/service/model/hunter"
 	quakeModel "fine/backend/service/model/quake"
 	"fine/backend/utils"
@@ -16,51 +16,51 @@ var (
 	once sync.Once
 )
 
+var databaseFile = ""
+
+func SetDatabaseFile(filepath string) {
+	databaseFile = filepath
+}
+
 // GetConnection 返回数据库连接的单例
 func GetConnection() *gorm.DB {
-	if application.DefaultApp.Config.DatabaseFile == "" {
-		panic("please set db dir first")
+	if databaseFile == "" {
+		panic("please set db file first")
 	}
-	if err := utils.CreateFile(application.DefaultApp.Config.DatabaseFile); err != nil {
+	if err := utils.CreateFile(databaseFile); err != nil {
 		panic(err)
 	}
 	once.Do(func() {
 		var err error
-		db, err = gorm.Open(sqlite.Open(application.DefaultApp.Config.DatabaseFile), &gorm.Config{})
+		db, err = gorm.Open(sqlite.Open(databaseFile), &gorm.Config{})
 		if err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
 		if err = db.AutoMigrate(&models.ICP{}, &models.ICPQueryLog{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
 		if err = db.AutoMigrate(&models.ICPTask{}, &models.ICPTaskSlice{}, &models.ItemWithID{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
 		if err = db.AutoMigrate(&models.ExportLog{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
 		if err = db.AutoMigrate(&models.CacheTotal{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
 		if err = db.AutoMigrate(&models.History{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
 		if err = db.AutoMigrate(&models.Fofa{}, &models.FOFAQueryLog{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
-		if err = db.AutoMigrate(&models.Hunter{}, &hunter.Component{}, &models.HunterQueryLog{}, &models.HunterRestToken{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
+		if err = db.AutoMigrate(&models.Hunter{}, &hunter.Component{}, &models.HunterQueryLog{}, &models.HunterUser{}); err != nil {
 			panic(err)
 		}
 		if err = db.AutoMigrate(&models.Quake{}, &models.QuakeRealtimeQueryLog{}, &quakeModel.Service{}, &quakeModel.Component{}); err != nil {
-			application.DefaultApp.Logger.Info(err)
+			panic(err)
+		}
+		if err = db.AutoMigrate(&shodan2.QueryLog{}, &shodan2.HostSearchResult{}); err != nil {
 			panic(err)
 		}
 		if err = db.AutoMigrate(
@@ -74,7 +74,6 @@ func GetConnection() *gorm.DB {
 			//&model.ZoneAim{},
 			&models.ZoneQueryLog{},
 		); err != nil {
-			application.DefaultApp.Logger.Info(err)
 			panic(err)
 		}
 		if err = db.AutoMigrate(
@@ -82,7 +81,12 @@ func GetConnection() *gorm.DB {
 			&models.VersionDecompileTask{},
 			&models.Info{},
 		); err != nil {
-			application.DefaultApp.Logger.Info(err)
+			panic(err)
+		}
+
+		if err = db.AutoMigrate(
+			&models.ProxyHistory{},
+		); err != nil {
 			panic(err)
 		}
 

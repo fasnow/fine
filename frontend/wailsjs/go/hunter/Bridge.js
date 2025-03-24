@@ -6,8 +6,8 @@ export function Export(arg1, arg2, arg3) {
   return window['go']['hunter']['Bridge']['Export'](arg1, arg2, arg3);
 }
 
-export function GetRestToken() {
-  return window['go']['hunter']['Bridge']['GetRestToken']();
+export function GetUserInfo() {
+  return window['go']['hunter']['Bridge']['GetUserInfo']();
 }
 
 export function Query(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) {

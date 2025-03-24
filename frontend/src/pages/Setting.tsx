@@ -10,6 +10,7 @@ import { SetAuth as SetFofaAuth } from "../../wailsjs/go/fofa/Bridge";
 import { SetAuth as SetQuakeAuth } from "../../wailsjs/go/quake/Bridge";
 import { SetAuth as SetTianYanChaAuth } from "../../wailsjs/go/tianyancha/Bridge";
 import { SetAuth as SetAiQiChaAuth } from "../../wailsjs/go/aiqicha/Bridge";
+import { SetAuth as SetShodanAuth } from "../../wailsjs/go/shodan/Bridge";
 import { config } from "../../wailsjs/go/models";
 import {
     SaveProxy,
@@ -388,6 +389,19 @@ export const Setting: React.FC = () => {
                           return false
                       }
                   }}
+            />
+            <Password label={'Shodan'} labelWidth={80} width={400} value={cfg.Shodan.Token}
+                      onSubmit={async (value) => {
+                          try {
+                              await SetShodanAuth(value)
+                              const t = {...cfg, Shodan: {...cfg.Shodan, Token: value}} as config.Config;
+                              dispatch(appActions.setConfig(t))
+                              return true
+                          } catch (e) {
+                              errorNotification("错误", e, 3)
+                              return false
+                          }
+                      }}
             />
             <Password label={'天眼查'} placeholder={"auth_token"} labelWidth={80} width={400} value={cfg.TianYanCha.Token}
                   onSubmit={async (value) => {

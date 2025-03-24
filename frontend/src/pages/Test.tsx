@@ -64,11 +64,9 @@ import {
     SideBarDef,
     ValueFormatterParams
 } from "ag-grid-community";
-import {Fetch} from "../../wailsjs/go/application/Application";
 import {GetUserInfo, HostSearch, SetAuth} from "../../wailsjs/go/shodan/Bridge";
 import Label from "@/component/Label";
 import Password from "@/component/Password";
-import {shodanData} from "@/pages/TestData";
 
 const UserPanel: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)

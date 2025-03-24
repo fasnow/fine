@@ -25,8 +25,8 @@ type Bridge struct {
 	exportLogBridge *exportlog.Bridge
 }
 
-func NewFofaBridge(app *application.Application) *Bridge {
-	tt := NewClient(app.Config.Fofa.Token)
+func NewBridge(app *application.Application) *Bridge {
+	tt := New(app.Config.Fofa.Token)
 	tt.UseProxyManager(app.ProxyManager)
 	db := database.GetConnection()
 	return &Bridge{
@@ -46,15 +46,6 @@ type QueryResult struct {
 }
 
 func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int64, fields string, full bool) (*QueryResult, error) {
-	r.app.Logger.WithFields(map[string]interface{}{
-		"pageID":   pageID,
-		"query":    query,
-		"pageNum":  pageNum,
-		"pageSize": pageSize,
-		"fields":   fields,
-		"full":     full,
-	}).Debug("传入参数")
-
 	queryResult := &QueryResult{
 		Result: &Result{},
 	}
@@ -86,11 +77,11 @@ func (r *Bridge) Query(pageID int64, query string, pageNum, pageSize int64, fiel
 	}
 
 	//获取新数据
-	req := NewGetDataReqBuilder().
+	req := NewSearchAllReqBuilder().
 		Query(query).
 		Page(pageNum).
 		Size(pageSize).Fields(fields).Full(full).Build()
-	result, err := r.fofa.Get(req)
+	result, err := r.fofa.Query(req)
 	if err != nil {
 		r.app.Logger.Error(err)
 		return nil, err
@@ -139,14 +130,14 @@ func (r *Bridge) Export(pageID int64, pageNum, pageSize int64) (int64, error) {
 	go func() {
 		for index := int64(1); index <= pageNum; index++ {
 			result, err1 := backoff.RetryWithData(func() (*Result, error) {
-				req := NewGetDataReqBuilder().
+				req := NewSearchAllReqBuilder().
 					Query(queryLog.Query).
 					Page(index).
 					Size(pageSize).
 					Fields(queryLog.Fields).
 					Full(queryLog.Full).
 					Build()
-				result, err2 := r.fofa.Get(req)
+				result, err2 := r.fofa.Query(req)
 				if err2 != nil {
 					r.app.Logger.Debug(err2)
 					return nil, err2 // 触发重试
@@ -212,7 +203,7 @@ func (r *Bridge) StatisticalAggs(fields, query string) (*StatisticalAggsResult, 
 	}); err != nil {
 		r.app.Logger.Info(fields, query, err)
 	}
-	return r.fofa.StatisticalAggs.Fields(fields).Query(query)
+	return r.fofa.StatisticalAggs.Query(NewStatAggsReqBuilder().Fields(fields).Query(query).Build())
 }
 
 func (r *Bridge) HostAggs(host string) (*HostAggsResult, error) {
@@ -222,5 +213,5 @@ func (r *Bridge) HostAggs(host string) (*HostAggsResult, error) {
 	}); err != nil {
 		r.app.Logger.Info(host, err)
 	}
-	return r.fofa.HostAggs.Detail(true).Host(host)
+	return r.fofa.HostAggs.Query(NewHostStatReqBuilder().Detail(true).Host(host).Build())
 }

@@ -11,7 +11,7 @@ type Bridge struct {
 	historyRepo repository.HistoryRepository
 }
 
-func NewHistoryBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	return &Bridge{
 		app:         app,
 		historyRepo: repository.NewHistoryRepository(database.GetConnection()),

@@ -3,56 +3,109 @@ package fofa
 import (
 	"encoding/base64"
 	"fine/backend/service/service"
+	"fmt"
 	"strconv"
 )
 
-type GetDataReqBuilder struct {
-	req *Req
+type SearchAllReqBuilder struct {
+	req *service.Request
 }
 
-type GetDataReq struct {
-	req *Req
-}
-
-func NewGetDataReqBuilder() *GetDataReqBuilder {
-	builder := &GetDataReqBuilder{}
-	builder.req = &Req{
-		QueryParams: &service.QueryParams{},
-	}
+func NewSearchAllReqBuilder() *SearchAllReqBuilder {
+	builder := &SearchAllReqBuilder{}
+	req := service.NewRequest()
+	req.Method = "GET"
+	req.Path = "/search/all"
+	builder.req = req
 	return builder
 }
 
-func (builder *GetDataReqBuilder) Query(query string) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("qbase64", base64.StdEncoding.EncodeToString([]byte(query)))
-	return builder
+func (r *SearchAllReqBuilder) Query(query string) *SearchAllReqBuilder {
+	r.req.QueryParams.Set("qbase64", base64.StdEncoding.EncodeToString([]byte(query)))
+	return r
 }
 
-func (builder *GetDataReqBuilder) Page(page int64) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("page", strconv.Itoa(int(page)))
-	return builder
+func (r *SearchAllReqBuilder) Page(page int64) *SearchAllReqBuilder {
+	r.req.QueryParams.Set("page", strconv.Itoa(int(page)))
+	return r
 }
 
-func (builder *GetDataReqBuilder) Size(size int64) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("size", strconv.Itoa(int(size)))
-	return builder
+func (r *SearchAllReqBuilder) Size(size int64) *SearchAllReqBuilder {
+	r.req.QueryParams.Set("size", strconv.Itoa(int(size)))
+	return r
 }
 
-func (builder *GetDataReqBuilder) Full(full bool) *GetDataReqBuilder {
+func (r *SearchAllReqBuilder) Full(full bool) *SearchAllReqBuilder {
 	if full {
-		builder.req.QueryParams.Set("full", "true")
+		r.req.QueryParams.Set("full", "true")
 	} else {
-		builder.req.QueryParams.Set("full", "false")
+		r.req.QueryParams.Set("full", "false")
 	}
+	return r
+}
+
+func (r *SearchAllReqBuilder) Fields(fields string) *SearchAllReqBuilder {
+	r.req.QueryParams.Set("fields", fields)
+	return r
+}
+
+func (r *SearchAllReqBuilder) Build() *service.Request {
+	return r.req
+}
+
+type StatAggsReqBuilder struct {
+	req *service.Request
+}
+
+func NewStatAggsReqBuilder() *StatAggsReqBuilder {
+	builder := &StatAggsReqBuilder{}
+	req := service.NewRequest()
+	req.Method = "GET"
+	req.Path = "/search/stats"
+	builder.req = req
 	return builder
 }
 
-func (builder *GetDataReqBuilder) Fields(fields string) *GetDataReqBuilder {
-	builder.req.QueryParams.Set("fields", fields)
+func (r *StatAggsReqBuilder) Fields(fields string) *StatAggsReqBuilder {
+	r.req.QueryParams.Set("fields", fields)
+	return r
+}
+
+func (r *StatAggsReqBuilder) Query(query string) *StatAggsReqBuilder {
+	r.req.QueryParams.Set("qbase64", base64.StdEncoding.EncodeToString([]byte(query)))
+	return r
+}
+
+func (r *StatAggsReqBuilder) Build() *service.Request {
+	return r.req
+}
+
+type HostAggsReqBuilder struct {
+	req *service.Request
+}
+
+func NewHostStatReqBuilder() *HostAggsReqBuilder {
+	builder := &HostAggsReqBuilder{}
+	req := service.NewRequest()
+	req.Method = "GET"
+	builder.req = req
 	return builder
 }
 
-func (builder *GetDataReqBuilder) Build() *GetDataReq {
-	req := &GetDataReq{}
-	req.req = builder.req
-	return req
+func (r *HostAggsReqBuilder) Detail(detail bool) *HostAggsReqBuilder {
+	if detail {
+		r.req.QueryParams.Set("detail", "true")
+	} else {
+		r.req.QueryParams.Set("detail", "false")
+	}
+	return r
+}
+
+func (r *HostAggsReqBuilder) Host(host string) *HostAggsReqBuilder {
+	r.req.Path = fmt.Sprintf("/host/%s", host)
+	return r
+}
+
+func (r *HostAggsReqBuilder) Build() *service.Request {
+	return r.req
 }

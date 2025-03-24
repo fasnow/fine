@@ -13,10 +13,25 @@ type HunterRepository interface {
 	GetByPaginationAndTaskID(pageID int64, pageNum, pageSize int) ([]*models.Hunter, error)
 	CreateQueryField(item *models.HunterQueryLog) error
 	GetQueryFieldByTaskID(pageID int64) (*models.HunterQueryLog, error)
+	CreateUserInfo(user hunter.User) error
+	GetLastUserInfo() (*models.HunterUser, error)
 }
 
 type HunterRepositoryImpl struct {
 	db *gorm.DB
+}
+
+func (r *HunterRepositoryImpl) GetLastUserInfo() (*models.HunterUser, error) {
+	var user = &models.HunterUser{}
+	if err := r.db.Model(&user).Last(user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (r *HunterRepositoryImpl) CreateUserInfo(user hunter.User) error {
+	u := &models.HunterUser{User: user}
+	return r.db.Model(&models.HunterUser{}).Create(u).Error
 }
 
 func NewHunterRepository(db *gorm.DB) HunterRepository {

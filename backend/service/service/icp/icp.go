@@ -1,13 +1,21 @@
 package icp
 
 import (
+	"crypto/md5"
 	"encoding/base64"
 	"errors"
 	"fine/backend/application"
 	"fine/backend/proxy/v2"
 	"fine/backend/service/model/icp"
+	"fine/backend/service/service"
+	"fine/backend/utils"
+	"fmt"
+	"github.com/tidwall/gjson"
+	"io"
 	"net/http"
+	"strconv"
 	"sync"
+	"time"
 )
 
 var (
@@ -37,9 +45,6 @@ type ICP struct {
 	refreshToken string
 	expireIn     int64
 	sign         string
-	page         int
-	size         int
-	serviceType  string // 1,6,7,8 网站，app，小程序，快应用
 	mutex        sync.Mutex
 }
 
@@ -68,4 +73,148 @@ func NewClient() *ICP {
 
 func (r *ICP) UseProxyManager(manager *proxy.Manager) {
 	r.http = manager.GetClient()
+}
+
+func (r *ICP) SetTokenFromRemote() error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	timeStampInt := time.Now().UnixMilli()
+	if r.expireIn > timeStampInt {
+		return nil
+	}
+	timeStampStr := strconv.FormatInt(timeStampInt, 10)
+	req := service.NewRequest()
+	req.Method = "POST"
+	req.BodyParams.Set("authKey", fmt.Sprintf("%x", md5.Sum([]byte("testtest"+timeStampStr))))
+	req.BodyParams.Set("timeStamp", timeStampStr)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	req.Header.Set("Referer", referer)
+	req.Header.Add("User-Agent", proxy.DefaultUA)
+	req.Header.Set("Cookie", "__jsluid_s = 6452684553c30942fcb8cff8d5aa5a5b")
+	req.BodyParams.Decorate(req)
+	response, err := req.Do(r.http, getTokenUrl)
+	if err != nil {
+		return err
+	}
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+
+	// 被ban或者服务器出错
+	if response.StatusCode != 200 {
+		return errors.New(fmt.Sprintf("%v\n%v", response.StatusCode, string(body)))
+	}
+
+	var stringBody = string(body)
+	var code = gjson.Get(stringBody, "code").Int()
+	if code != 200 {
+		return errors.New(fmt.Sprintf("%v\n%v", response.StatusCode, string(body)))
+	}
+	r.expireIn = timeStampInt + gjson.Get(stringBody, "params.expire").Int()
+	r.token = gjson.Get(stringBody, "params.bussiness").String()
+	r.refreshToken = gjson.Get(stringBody, "params.refresh").String()
+	return nil
+}
+
+func (r *ICP) request(req *service.Request) ([]byte, error) {
+	req.BodyParams.Decorate(req)
+	req.Header.Set("Token", r.token)
+	req.Header.Set("Sign", r.sign)
+	return req.Fetch(r.http, queryUrl, func(response *http.Response) error {
+		if response.StatusCode != 200 {
+			return errors.New(response.Status)
+		}
+		return nil
+	})
+}
+
+func (r *ICP) Query(req *service.Request) (*Result, error) {
+	bytes, err := r.request(req)
+	if err != nil {
+		return nil, err
+	}
+	bodyStr := string(bytes)
+	code := gjson.Get(bodyStr, "code").Int()
+
+	//{ "success": false, "code": 401, "msg": "请求非法,验证码不匹配!!" }
+	//{ "success": false, "code": 401, "msg": "token过期,请及时刷新页面" }
+	//{ "success": false, "code": 401, "msg": "请求非法,已阻止,请及时刷新页面" }
+	msg := gjson.Get(bodyStr, "msg").String()
+	if code != 200 {
+		return nil, errors.New(msg)
+	}
+
+	pageNum := gjson.Get(bodyStr, "params.pageNum").Int()
+	pageSize := gjson.Get(bodyStr, "params.pageSize").Int()
+	total := gjson.Get(bodyStr, "params.total").Int()
+	list := gjson.Get(bodyStr, "params.list").Array()
+
+	serviceTypeName := ""
+	switch req.BodyParams.Get("serviceType") {
+	case "1":
+		serviceTypeName = "网站"
+		break
+	case "6":
+		serviceTypeName = "APP"
+		break
+	case "7":
+		serviceTypeName = "小程序"
+		break
+	case "8":
+		serviceTypeName = "快应用"
+		break
+	default:
+	}
+
+	items := make([]*icp.Item, 0)
+	for _, item := range list {
+		itemStr := item.String()
+		serviceName := ""
+		if req.BodyParams.Get("serviceType") == "1" {
+			serviceName = gjson.Get(itemStr, "domain").String()
+		} else {
+			serviceName = gjson.Get(itemStr, "serviceName").String()
+		}
+		tt := &icp.Item{
+			ServiceName:      serviceName,
+			LeaderName:       gjson.Get(itemStr, "leaderName").String(),
+			NatureName:       gjson.Get(itemStr, "natureName").String(),
+			ServiceLicence:   gjson.Get(itemStr, "serviceLicence").String(),
+			UnitName:         gjson.Get(itemStr, "unitName").String(),
+			UpdateRecordTime: gjson.Get(itemStr, "updateRecordTime").String(),
+			ServiceType:      serviceTypeName,
+		}
+		items = append(items, tt)
+	}
+
+	return &Result{
+		PageNum:  int(pageNum),
+		PageSize: int(pageSize),
+		Items:    items,
+		Total:    int(total),
+	}, nil
+}
+
+func (r *ICP) Export(items []*icp.Item, filename string) error {
+	var data [][]any
+	headers := append([]any{"序号"}, []any{"企业名称", "备案内容",
+		"备案号", "备案类型", "备案法人", "单位性质", "审核日期"}...)
+	data = append(data, headers)
+	for index, item := range items {
+		var tmpItem = []any{
+			index + 1,
+			item.UnitName,
+			item.ServiceName,
+			item.ServiceLicence,
+			item.ServiceType,
+			item.LeaderName,
+			item.NatureName,
+			item.UpdateRecordTime}
+		data = append(data, tmpItem)
+	}
+	if err := utils.SaveToExcel(data, filename); err != nil {
+		return err
+	}
+	return nil
 }

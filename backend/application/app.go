@@ -6,6 +6,9 @@ import (
 	"fine/backend/constant/event"
 	"fine/backend/constant/history"
 	"fine/backend/constant/status"
+	"fine/backend/database"
+	"fine/backend/database/models"
+	"fine/backend/database/repository"
 	"fine/backend/logger"
 	"fine/backend/proxy/v2"
 	"fine/backend/utils"
@@ -28,7 +31,7 @@ import (
 	"time"
 )
 
-const Version = "2.0.2"
+const Version = "2.1.0"
 
 func init() {
 	ini.PrettyFormat = false
@@ -49,6 +52,7 @@ var iniOptions = ini.LoadOptions{
 }
 
 var defaultConfig = &config.Config{
+	Version: Version,
 	Timeout: 20 * time.Second,
 	Proxy: config.Proxy{
 		Enable: false,
@@ -65,10 +69,10 @@ var defaultConfig = &config.Config{
 		Interval: 1500 * time.Millisecond,
 	},
 	Quake: config.Quake{
-		Interval: 1000 * time.Millisecond,
+		Interval: 1 * time.Second,
 	},
 	Zone: config.Zone{
-		Interval: 1000 * time.Millisecond,
+		Interval: 1 * time.Second,
 	},
 	ICP: config.ICP{
 		Timeout: 10 * time.Second,
@@ -85,6 +89,9 @@ var defaultConfig = &config.Config{
 		AuthErrorRetryNum2:      999,
 		ForbiddenErrorRetryNum2: 999,
 		Concurrency:             5,
+	},
+	Shodan: config.Shodan{
+		Interval: 1 * time.Second,
 	},
 	TianYanCha: config.TianYanCha{Token: ""},
 	AiQiCha:    config.AiQiCha{Cookie: ""},
@@ -110,6 +117,8 @@ type Application struct {
 	ProxyManager *proxy.Manager
 	Logger       *logrus.Logger
 	UserHome     string
+
+	proxyHistoryRepo repository.ProxyHistoryRepository
 }
 
 func NewApp() *Application {
@@ -119,6 +128,8 @@ func NewApp() *Application {
 	}
 	app.init()
 	app.UseProxyManager(app.ProxyManager)
+	database.SetDatabaseFile(app.Config.DatabaseFile)
+	app.proxyHistoryRepo = repository.NewProxyHistoryRepository(database.GetConnection())
 	return app
 }
 
@@ -309,6 +320,18 @@ func (r *Application) Exit() {
 	os.Exit(0)
 }
 
+func (r *Application) GetProxyHistory() ([]config.Proxy, error) {
+	histories, _, err := r.proxyHistoryRepo.GetByPagination(1, 20)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]config.Proxy, 0)
+	for _, proxyHistory := range histories {
+		items = append(items, proxyHistory.Proxy)
+	}
+	return items, nil
+}
+
 func ShowErrorMessage(message string) {
 	switch runtime.GOOS {
 	case "darwin":
@@ -419,6 +442,11 @@ func (r *Application) SaveProxy(proxy config.Proxy) error {
 		}
 		_ = r.ProxyManager.SetProxy(fmt.Sprintf("%s://%s:%s", proxy.Type, proxy.Host, proxy.Port))
 		r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
+		if err := r.proxyHistoryRepo.Create(models.ProxyHistory{
+			Proxy: proxy,
+		}); err != nil {
+			r.Logger.Info(err)
+		}
 		return nil
 	}
 	_ = r.ProxyManager.SetProxy("")
@@ -436,16 +464,6 @@ func (r *Application) WriteConfig(conf *config.Config) error {
 
 func (r *Application) SaveQueryOnEnter(queryOnEnter config.QueryOnEnter) error {
 	r.Config.QueryOnEnter = queryOnEnter
-	err := r.WriteConfig(r.Config)
-	if err != nil {
-		r.Logger.Info(err)
-		return err
-	}
-	return nil
-}
-
-func (r *Application) SaveWechat(wechat config.Wechat) error {
-	r.Config.Wechat = wechat
 	err := r.WriteConfig(r.Config)
 	if err != nil {
 		r.Logger.Info(err)
@@ -505,29 +523,6 @@ func (r *Application) SaveLogDataDir(dir string) error {
 	return nil
 }
 
-func (r *Application) SaveICPConfig(cfg config.ICP) error {
-	r.Config.ICP.AuthErrorRetryNum1 = cfg.AuthErrorRetryNum1
-	r.Config.ICP.AuthErrorRetryNum2 = cfg.AuthErrorRetryNum2
-	r.Config.ICP.ForbiddenErrorRetryNum1 = cfg.ForbiddenErrorRetryNum1
-	r.Config.ICP.ForbiddenErrorRetryNum2 = cfg.ForbiddenErrorRetryNum2
-	r.Config.ICP.Concurrency = cfg.Concurrency
-	err := r.WriteConfig(r.Config)
-	if err != nil {
-		r.Logger.Info(err)
-		return err
-	}
-	return nil
-}
-
-func (r *Application) GetWechatRules() []string {
-	var t []string
-	for _, rule := range r.Config.Wechat.Rules {
-		tt := strconv.Quote(rule)
-		t = append(t, tt[1:len(tt)-1])
-	}
-	return t
-}
-
 func (r *Application) GetAllConstants() *Constant {
 	var statuses = status.StatusEnum{
 		Pending: status.Pending,
@@ -570,6 +565,7 @@ func (r *Application) GetAllConstants() *Constant {
 		ICP:    history.ICP,
 		TYC:    history.TYC,
 		AQC:    history.AQC,
+		Shodan: history.Shodan,
 	}
 	return &Constant{
 		Event:   events,

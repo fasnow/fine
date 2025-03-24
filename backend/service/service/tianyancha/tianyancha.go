@@ -23,6 +23,6 @@ func (r *TianYanCha) UseProxyManager(manager *proxy.Manager) {
 	r.http = manager.GetClient()
 }
 
-func (r *TianYanCha) SetToken(value string) {
+func (r *TianYanCha) SetAuth(value string) {
 	r.token = value
 }

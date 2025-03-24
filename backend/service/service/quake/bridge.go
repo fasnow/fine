@@ -26,9 +26,9 @@ type Bridge struct {
 	exportLogBridge *exportlog.Bridge
 }
 
-func NewQuakeBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	t := app.Config.Quake
-	tt := NewClient(t.Token)
+	tt := New(t.Token)
 	tt.UseProxyManager(app.ProxyManager)
 	db := database.GetConnection()
 	return &Bridge{
@@ -121,7 +121,7 @@ func (r *Bridge) RealtimeServiceDataQuery(pageID int64, options RealtimeDataQuer
 	}
 
 	//获取新数据
-	req := NewGetRealtimeDataBuilder().
+	req := NewRealtimeServiceReqBuilder().
 		Query(options.Query).
 		Page(options.PageNum).
 		Size(options.PageSize).
@@ -132,8 +132,7 @@ func (r *Bridge) RealtimeServiceDataQuery(pageID int64, options RealtimeDataQuer
 		Exclude(options.Exclude).
 		Latest(options.Latest).
 		IgnoreCache(options.IgnoreCache).
-		Rule(options.Rule).
-		Build()
+		Rule(options.Rule)
 	result, err := r.quake.RealtimeServer.Service(req)
 	if err != nil {
 		r.app.Logger.Error(err)
@@ -220,7 +219,7 @@ func (r *Bridge) RealtimeServiceDataExport(pageID int64, pageNum, pageSize int) 
 	go func() {
 		for index := 1; index <= pageNum; index++ {
 			result, err1 := backoff.RetryWithData(func() (*RealtimeServiceDataResult, error) {
-				req := NewGetRealtimeDataBuilder().
+				req := NewRealtimeServiceReqBuilder().
 					Query(queryLog.Query).
 					Page(index).
 					Size(pageSize).
@@ -231,8 +230,7 @@ func (r *Bridge) RealtimeServiceDataExport(pageID int64, pageNum, pageSize int) 
 					Exclude(queryLog.Exclude).
 					Latest(queryLog.Latest).
 					IgnoreCache(queryLog.IgnoreCache).
-					Rule(queryLog.Rule).
-					Build()
+					Rule(queryLog.Rule)
 				result, err2 := r.quake.RealtimeServer.Service(req)
 				if err2 != nil {
 					r.app.Logger.Error(err2)
@@ -291,7 +289,7 @@ func (r *Bridge) RealtimeServiceDataExport(pageID int64, pageNum, pageSize int) 
 //	if options.PageNum <= 0 {
 //		httpoutput.HttpErrOutput(c, statuscode.CodeOtherError, utils.FormatError(client.ErrorQueryPage))
 //	}
-//	req := quakeCient.NewGetRealtimeDataBuilder().
+//	req := quakeCient.NewRealtimeServiceReqBuilder().
 //		Query(options.Query).
 //		PageNum(options.PageNum).
 //		Size(options.Size).

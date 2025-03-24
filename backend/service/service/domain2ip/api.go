@@ -17,7 +17,7 @@ type IP2Domain struct {
 	app  *application.Application
 }
 
-func NewClient(app *application.Application) *IP2Domain {
+func New(app *application.Application) *IP2Domain {
 	return &IP2Domain{
 		app:  app,
 		http: &http.Client{},

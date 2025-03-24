@@ -9,7 +9,7 @@ import {proxy} from '../models';
 
 export function CheckRunningTask():Promise<void>;
 
-export function CheckUpdate():Promise<{[key: string]: string}>;
+export function CheckUpdate():Promise<Record<string, string>>;
 
 export function EvenDetail():Promise<event.EventDetail>;
 
@@ -21,13 +21,11 @@ export function GetAllConstants():Promise<application.Constant>;
 
 export function GetContext():Promise<context.Context>;
 
-export function GetWechatRules():Promise<Array<string>>;
+export function GetProxyHistory():Promise<Array<config.Proxy>>;
 
 export function SaveDatabaseFile(arg1:string):Promise<void>;
 
 export function SaveExportDataDir(arg1:string):Promise<void>;
-
-export function SaveICPConfig(arg1:config.ICP):Promise<void>;
 
 export function SaveLogDataDir(arg1:string):Promise<void>;
 
@@ -36,8 +34,6 @@ export function SaveProxy(arg1:config.Proxy):Promise<void>;
 export function SaveQueryOnEnter(arg1:config.QueryOnEnter):Promise<void>;
 
 export function SaveTimeout(arg1:time.Duration):Promise<void>;
-
-export function SaveWechat(arg1:config.Wechat):Promise<void>;
 
 export function SaveWechatDataDir(arg1:string):Promise<void>;
 

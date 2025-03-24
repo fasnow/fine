@@ -317,6 +317,20 @@ export namespace config {
 		    return a;
 		}
 	}
+	export class Shodan {
+	    Token: string;
+	    Interval: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Shodan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Token = source["Token"];
+	        this.Interval = source["Interval"];
+	    }
+	}
 	export class Zone {
 	    Token: string;
 	    Interval: number;
@@ -407,6 +421,7 @@ export namespace config {
 	    Hunter: Hunter;
 	    Quake: Quake;
 	    Zone: Zone;
+	    Shodan: Shodan;
 	    ICP: ICP;
 	    TianYanCha: TianYanCha;
 	    AiQiCha: AiQiCha;
@@ -431,6 +446,7 @@ export namespace config {
 	        this.Hunter = this.convertValues(source["Hunter"], Hunter);
 	        this.Quake = this.convertValues(source["Quake"], Quake);
 	        this.Zone = this.convertValues(source["Zone"], Zone);
+	        this.Shodan = this.convertValues(source["Shodan"], Shodan);
 	        this.ICP = this.convertValues(source["ICP"], ICP);
 	        this.TianYanCha = this.convertValues(source["TianYanCha"], TianYanCha);
 	        this.AiQiCha = this.convertValues(source["AiQiCha"], AiQiCha);
@@ -457,6 +473,7 @@ export namespace config {
 		    return a;
 		}
 	}
+	
 	
 	
 	
@@ -1020,6 +1037,7 @@ export namespace history {
 	    ICP: number;
 	    TYC: number;
 	    AQC: number;
+	    Shodan: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new HistoryEnum(source);
@@ -1034,6 +1052,7 @@ export namespace history {
 	        this.ICP = source["ICP"];
 	        this.TYC = source["TYC"];
 	        this.AQC = source["AQC"];
+	        this.Shodan = source["Shodan"];
 	    }
 	}
 
@@ -1129,10 +1148,23 @@ export namespace hunter {
 		    return a;
 		}
 	}
+	export class User {
+	    AccountType: string;
+	    RestQuota: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new User(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.AccountType = source["AccountType"];
+	        this.RestQuota = source["RestQuota"];
+	    }
+	}
 	export class QueryResult {
-	    accountType: string;
+	    User: User;
 	    consumeQuota: number;
-	    restQuota: number;
 	    syntaxPrompt: string;
 	    total: number;
 	    pageNum: number;
@@ -1147,9 +1179,8 @@ export namespace hunter {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.accountType = source["accountType"];
+	        this.User = this.convertValues(source["User"], User);
 	        this.consumeQuota = source["consumeQuota"];
-	        this.restQuota = source["restQuota"];
 	        this.syntaxPrompt = source["syntaxPrompt"];
 	        this.total = source["total"];
 	        this.pageNum = source["pageNum"];
@@ -1501,6 +1532,220 @@ export namespace models {
 
 }
 
+export namespace properties {
+	
+	export class General {
+	    asn: string;
+	    cpe23: string[];
+	    data: string;
+	    device: string;
+	    devicetype: string;
+	    domains: string[];
+	    hash: number;
+	    hostnames: string[];
+	    ip: number;
+	    ip_str: string;
+	    info: string;
+	    ipv6: string;
+	    isp: string;
+	    link: string;
+	    // Go type: datatypes
+	    mac: any;
+	    // Go type: datatypes
+	    opts: any;
+	    org: string;
+	    os: string;
+	    platform: string;
+	    port: number;
+	    product: string;
+	    tags: string[];
+	    timestamp: string;
+	    transport: string;
+	    uptime: number;
+	    vendor: string;
+	    version: string;
+	    // Go type: datatypes
+	    vulns: any;
+	    // Go type: datatypes
+	    location: any;
+	    // Go type: datatypes
+	    http: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new General(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.asn = source["asn"];
+	        this.cpe23 = source["cpe23"];
+	        this.data = source["data"];
+	        this.device = source["device"];
+	        this.devicetype = source["devicetype"];
+	        this.domains = source["domains"];
+	        this.hash = source["hash"];
+	        this.hostnames = source["hostnames"];
+	        this.ip = source["ip"];
+	        this.ip_str = source["ip_str"];
+	        this.info = source["info"];
+	        this.ipv6 = source["ipv6"];
+	        this.isp = source["isp"];
+	        this.link = source["link"];
+	        this.mac = this.convertValues(source["mac"], null);
+	        this.opts = this.convertValues(source["opts"], null);
+	        this.org = source["org"];
+	        this.os = source["os"];
+	        this.platform = source["platform"];
+	        this.port = source["port"];
+	        this.product = source["product"];
+	        this.tags = source["tags"];
+	        this.timestamp = source["timestamp"];
+	        this.transport = source["transport"];
+	        this.uptime = source["uptime"];
+	        this.vendor = source["vendor"];
+	        this.version = source["version"];
+	        this.vulns = this.convertValues(source["vulns"], null);
+	        this.location = this.convertValues(source["location"], null);
+	        this.http = this.convertValues(source["http"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class HTTPRedirect {
+	    data: string;
+	    host: string;
+	    location: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HTTPRedirect(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.data = source["data"];
+	        this.host = source["host"];
+	        this.location = source["location"];
+	    }
+	}
+	export class HTTPFavicon {
+	    data: string;
+	    hash: number;
+	    location: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HTTPFavicon(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.data = source["data"];
+	        this.hash = source["hash"];
+	        this.location = source["location"];
+	    }
+	}
+	export class HTTPComponent {
+	    categories: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new HTTPComponent(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.categories = source["categories"];
+	    }
+	}
+	export class HTTP {
+	    components: Record<string, HTTPComponent>;
+	    dom_hash: number;
+	    favicon: HTTPFavicon;
+	    headers_hash: number;
+	    host: string;
+	    html: string;
+	    html_hash: number;
+	    location: string;
+	    redirects: HTTPRedirect[];
+	    robots: string;
+	    robots_hash: number;
+	    securitytxt: string;
+	    securitytxt_hash: number;
+	    server: string;
+	    server_hash: number;
+	    sitemap: string;
+	    sitemap_hash: number;
+	    status: number;
+	    title: string;
+	    title_hash: number;
+	    waf: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HTTP(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.components = this.convertValues(source["components"], HTTPComponent, true);
+	        this.dom_hash = source["dom_hash"];
+	        this.favicon = this.convertValues(source["favicon"], HTTPFavicon);
+	        this.headers_hash = source["headers_hash"];
+	        this.host = source["host"];
+	        this.html = source["html"];
+	        this.html_hash = source["html_hash"];
+	        this.location = source["location"];
+	        this.redirects = this.convertValues(source["redirects"], HTTPRedirect);
+	        this.robots = source["robots"];
+	        this.robots_hash = source["robots_hash"];
+	        this.securitytxt = source["securitytxt"];
+	        this.securitytxt_hash = source["securitytxt_hash"];
+	        this.server = source["server"];
+	        this.server_hash = source["server_hash"];
+	        this.sitemap = source["sitemap"];
+	        this.sitemap_hash = source["sitemap_hash"];
+	        this.status = source["status"];
+	        this.title = source["title"];
+	        this.title_hash = source["title_hash"];
+	        this.waf = source["waf"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+
+}
+
 export namespace proxy {
 	
 	export class Manager {
@@ -1834,10 +2079,107 @@ export namespace quake {
 	        this.credit = source["credit"];
 	    }
 	}
+	export class UserRoleValidity {
+	    "注册用户": any;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserRoleValidity(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this["注册用户"] = source["注册用户"];
+	    }
+	}
+	export class UserInvitationCodeInfo {
+	    code: string;
+	    invite_acquire_credit: number;
+	    invite_number: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserInvitationCodeInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.code = source["code"];
+	        this.invite_acquire_credit = source["invite_acquire_credit"];
+	        this.invite_number = source["invite_number"];
+	    }
+	}
+	export class UserEnterpriseInformation {
+	    name: any;
+	    email: any;
+	    status: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserEnterpriseInformation(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.email = source["email"];
+	        this.status = source["status"];
+	    }
+	}
+	export class UserPrivacyLog {
+	    quake_log_status: boolean;
+	    quake_log_time: any;
+	    anonymous_model: boolean;
+	    status: boolean;
+	    time: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserPrivacyLog(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.quake_log_status = source["quake_log_status"];
+	        this.quake_log_time = source["quake_log_time"];
+	        this.anonymous_model = source["anonymous_model"];
+	        this.status = source["status"];
+	        this.time = source["time"];
+	    }
+	}
+	export class UserDisable {
+	    disable_time: any;
+	    start_time: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserDisable(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.disable_time = source["disable_time"];
+	        this.start_time = source["start_time"];
+	    }
+	}
+	export class UserInfo {
+	    id: string;
+	    username: string;
+	    fullname: string;
+	    email: any;
+	    group: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new UserInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.username = source["username"];
+	        this.fullname = source["fullname"];
+	        this.email = source["email"];
+	        this.group = source["group"];
+	    }
+	}
 	export class User {
 	    id: string;
-	    // Go type: struct { ID string "json:\"id\""; Username string "json:\"username\""; Fullname string "json:\"fullname\""; Email interface {} "json:\"email\""; Group []string "json:\"group\"" }
-	    user: any;
+	    user: UserInfo;
 	    baned: boolean;
 	    ban_status: string;
 	    month_remaining_credit: number;
@@ -1850,17 +2192,12 @@ export namespace quake {
 	    mobile_phone: string;
 	    source: string;
 	    time: string;
-	    // Go type: struct { DisableTime interface {} "json:\"disable_time\""; StartTime interface {} "json:\"start_time\"" }
-	    disable: any;
-	    // Go type: struct { QuakeLogStatus bool "json:\"quake_log_status\""; QuakeLogTime interface {} "json:\"quake_log_time\""; AnonymousModel bool "json:\"anonymous_model\""; Status bool "json:\"status\""; Time interface {} "json:\"time\"" }
-	    privacy_log: any;
-	    // Go type: struct { Name interface {} "json:\"name\""; Email interface {} "json:\"email\""; Status string "json:\"status\"" }
-	    enterprise_information: any;
-	    // Go type: struct { Code string "json:\"code\""; InviteAcquireCredit int "json:\"invite_acquire_credit\""; InviteNumber int "json:\"invite_number\"" }
-	    invitation_code_info: any;
+	    disable: UserDisable;
+	    privacy_log: UserPrivacyLog;
+	    enterprise_information: UserEnterpriseInformation;
+	    invitation_code_info: UserInvitationCodeInfo;
 	    is_cashed_invitation_code: boolean;
-	    // Go type: struct { NamingFailed interface {} "json:\"注册用户\"" }
-	    role_validity: any;
+	    role_validity: UserRoleValidity;
 	    personal_information_status: boolean;
 	    role: UserRole[];
 	
@@ -1871,7 +2208,7 @@ export namespace quake {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
-	        this.user = this.convertValues(source["user"], Object);
+	        this.user = this.convertValues(source["user"], UserInfo);
 	        this.baned = source["baned"];
 	        this.ban_status = source["ban_status"];
 	        this.month_remaining_credit = source["month_remaining_credit"];
@@ -1884,14 +2221,324 @@ export namespace quake {
 	        this.mobile_phone = source["mobile_phone"];
 	        this.source = source["source"];
 	        this.time = source["time"];
-	        this.disable = this.convertValues(source["disable"], Object);
-	        this.privacy_log = this.convertValues(source["privacy_log"], Object);
-	        this.enterprise_information = this.convertValues(source["enterprise_information"], Object);
-	        this.invitation_code_info = this.convertValues(source["invitation_code_info"], Object);
+	        this.disable = this.convertValues(source["disable"], UserDisable);
+	        this.privacy_log = this.convertValues(source["privacy_log"], UserPrivacyLog);
+	        this.enterprise_information = this.convertValues(source["enterprise_information"], UserEnterpriseInformation);
+	        this.invitation_code_info = this.convertValues(source["invitation_code_info"], UserInvitationCodeInfo);
 	        this.is_cashed_invitation_code = source["is_cashed_invitation_code"];
-	        this.role_validity = this.convertValues(source["role_validity"], Object);
+	        this.role_validity = this.convertValues(source["role_validity"], UserRoleValidity);
 	        this.personal_information_status = source["personal_information_status"];
 	        this.role = this.convertValues(source["role"], UserRole);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	
+	
+
+}
+
+export namespace shodan {
+	
+	export class Count {
+	    count: number;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Count(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.count = source["count"];
+	        this.value = source["value"];
+	    }
+	}
+	export class Facets {
+	    asn: Count[];
+	    "bitcoin.ip": Count[];
+	    "bitcoin.ip_count": Count[];
+	    "bitcoin.port": Count[];
+	    "bitcoin.user_agent": Count[];
+	    "bitcoin.version": Count[];
+	    city: Count[];
+	    "cloud.provider": Count[];
+	    "cloud.region": Count[];
+	    "cloud.service": Count[];
+	    country: Count[];
+	    cpe: Count[];
+	    device: Count[];
+	    domain: Count[];
+	    has_screenshot: Count[];
+	    hash: Count[];
+	    "http.component": Count[];
+	    "http.component_category": Count[];
+	    "http.favicon.hash": Count[];
+	    "http.headers_hash": Count[];
+	    "http.html_hash": Count[];
+	    "http.robots_hash": Count[];
+	    "http.status": Count[];
+	    "http.title": Count[];
+	    "http.waf": Count[];
+	    ip: Count[];
+	    isp: Count[];
+	    link: Count[];
+	    "mongodb.database.name": Count[];
+	    "ntp.ip": Count[];
+	    "ntp.ip_count": Count[];
+	    "ntp.more": Count[];
+	    "ntp.port": Count[];
+	    org: Count[];
+	    os: Count[];
+	    port: Count[];
+	    postal: Count[];
+	    product: Count[];
+	    "redis.key": Count[];
+	    region: Count[];
+	    "rsync.module": Count[];
+	    "screenshot.hash": Count[];
+	    "screenshot.label": Count[];
+	    "snmp.contact": Count[];
+	    "snmp.location": Count[];
+	    "snmp.name": Count[];
+	    "ssh.cipher": Count[];
+	    "ssh.fingerprint": Count[];
+	    "ssh.hassh": Count[];
+	    "ssh.mac": Count[];
+	    "ssh.type": Count[];
+	    "ssl.alpn": Count[];
+	    "ssl.cert.alg": Count[];
+	    "ssl.cert.expired": Count[];
+	    "ssl.cert.extension": Count[];
+	    "ssl.cert.fingerprint": Count[];
+	    "ssl.cert.issuer.cn": Count[];
+	    "ssl.cert.pubkey.bits": Count[];
+	    "ssl.cert.pubkey.type": Count[];
+	    "ssl.cert.serial": Count[];
+	    "ssl.cert.subject.cn": Count[];
+	    "ssl.chain_count": Count[];
+	    "ssl.cipher.bits": Count[];
+	    "ssl.cipher.name": Count[];
+	    "ssl.cipher.version": Count[];
+	    "ssl.ja3s": Count[];
+	    "ssl.jarm": Count[];
+	    "ssl.version": Count[];
+	    state: Count[];
+	    tag: Count[];
+	    "telnet.do": Count[];
+	    "telnet.dont": Count[];
+	    "telnet.option": Count[];
+	    "telnet.will": Count[];
+	    "telnet.wont": Count[];
+	    uptime: Count[];
+	    version: Count[];
+	    vuln: Count[];
+	    "vuln.verified": Count[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Facets(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.asn = this.convertValues(source["asn"], Count);
+	        this["bitcoin.ip"] = this.convertValues(source["bitcoin.ip"], Count);
+	        this["bitcoin.ip_count"] = this.convertValues(source["bitcoin.ip_count"], Count);
+	        this["bitcoin.port"] = this.convertValues(source["bitcoin.port"], Count);
+	        this["bitcoin.user_agent"] = this.convertValues(source["bitcoin.user_agent"], Count);
+	        this["bitcoin.version"] = this.convertValues(source["bitcoin.version"], Count);
+	        this.city = this.convertValues(source["city"], Count);
+	        this["cloud.provider"] = this.convertValues(source["cloud.provider"], Count);
+	        this["cloud.region"] = this.convertValues(source["cloud.region"], Count);
+	        this["cloud.service"] = this.convertValues(source["cloud.service"], Count);
+	        this.country = this.convertValues(source["country"], Count);
+	        this.cpe = this.convertValues(source["cpe"], Count);
+	        this.device = this.convertValues(source["device"], Count);
+	        this.domain = this.convertValues(source["domain"], Count);
+	        this.has_screenshot = this.convertValues(source["has_screenshot"], Count);
+	        this.hash = this.convertValues(source["hash"], Count);
+	        this["http.component"] = this.convertValues(source["http.component"], Count);
+	        this["http.component_category"] = this.convertValues(source["http.component_category"], Count);
+	        this["http.favicon.hash"] = this.convertValues(source["http.favicon.hash"], Count);
+	        this["http.headers_hash"] = this.convertValues(source["http.headers_hash"], Count);
+	        this["http.html_hash"] = this.convertValues(source["http.html_hash"], Count);
+	        this["http.robots_hash"] = this.convertValues(source["http.robots_hash"], Count);
+	        this["http.status"] = this.convertValues(source["http.status"], Count);
+	        this["http.title"] = this.convertValues(source["http.title"], Count);
+	        this["http.waf"] = this.convertValues(source["http.waf"], Count);
+	        this.ip = this.convertValues(source["ip"], Count);
+	        this.isp = this.convertValues(source["isp"], Count);
+	        this.link = this.convertValues(source["link"], Count);
+	        this["mongodb.database.name"] = this.convertValues(source["mongodb.database.name"], Count);
+	        this["ntp.ip"] = this.convertValues(source["ntp.ip"], Count);
+	        this["ntp.ip_count"] = this.convertValues(source["ntp.ip_count"], Count);
+	        this["ntp.more"] = this.convertValues(source["ntp.more"], Count);
+	        this["ntp.port"] = this.convertValues(source["ntp.port"], Count);
+	        this.org = this.convertValues(source["org"], Count);
+	        this.os = this.convertValues(source["os"], Count);
+	        this.port = this.convertValues(source["port"], Count);
+	        this.postal = this.convertValues(source["postal"], Count);
+	        this.product = this.convertValues(source["product"], Count);
+	        this["redis.key"] = this.convertValues(source["redis.key"], Count);
+	        this.region = this.convertValues(source["region"], Count);
+	        this["rsync.module"] = this.convertValues(source["rsync.module"], Count);
+	        this["screenshot.hash"] = this.convertValues(source["screenshot.hash"], Count);
+	        this["screenshot.label"] = this.convertValues(source["screenshot.label"], Count);
+	        this["snmp.contact"] = this.convertValues(source["snmp.contact"], Count);
+	        this["snmp.location"] = this.convertValues(source["snmp.location"], Count);
+	        this["snmp.name"] = this.convertValues(source["snmp.name"], Count);
+	        this["ssh.cipher"] = this.convertValues(source["ssh.cipher"], Count);
+	        this["ssh.fingerprint"] = this.convertValues(source["ssh.fingerprint"], Count);
+	        this["ssh.hassh"] = this.convertValues(source["ssh.hassh"], Count);
+	        this["ssh.mac"] = this.convertValues(source["ssh.mac"], Count);
+	        this["ssh.type"] = this.convertValues(source["ssh.type"], Count);
+	        this["ssl.alpn"] = this.convertValues(source["ssl.alpn"], Count);
+	        this["ssl.cert.alg"] = this.convertValues(source["ssl.cert.alg"], Count);
+	        this["ssl.cert.expired"] = this.convertValues(source["ssl.cert.expired"], Count);
+	        this["ssl.cert.extension"] = this.convertValues(source["ssl.cert.extension"], Count);
+	        this["ssl.cert.fingerprint"] = this.convertValues(source["ssl.cert.fingerprint"], Count);
+	        this["ssl.cert.issuer.cn"] = this.convertValues(source["ssl.cert.issuer.cn"], Count);
+	        this["ssl.cert.pubkey.bits"] = this.convertValues(source["ssl.cert.pubkey.bits"], Count);
+	        this["ssl.cert.pubkey.type"] = this.convertValues(source["ssl.cert.pubkey.type"], Count);
+	        this["ssl.cert.serial"] = this.convertValues(source["ssl.cert.serial"], Count);
+	        this["ssl.cert.subject.cn"] = this.convertValues(source["ssl.cert.subject.cn"], Count);
+	        this["ssl.chain_count"] = this.convertValues(source["ssl.chain_count"], Count);
+	        this["ssl.cipher.bits"] = this.convertValues(source["ssl.cipher.bits"], Count);
+	        this["ssl.cipher.name"] = this.convertValues(source["ssl.cipher.name"], Count);
+	        this["ssl.cipher.version"] = this.convertValues(source["ssl.cipher.version"], Count);
+	        this["ssl.ja3s"] = this.convertValues(source["ssl.ja3s"], Count);
+	        this["ssl.jarm"] = this.convertValues(source["ssl.jarm"], Count);
+	        this["ssl.version"] = this.convertValues(source["ssl.version"], Count);
+	        this.state = this.convertValues(source["state"], Count);
+	        this.tag = this.convertValues(source["tag"], Count);
+	        this["telnet.do"] = this.convertValues(source["telnet.do"], Count);
+	        this["telnet.dont"] = this.convertValues(source["telnet.dont"], Count);
+	        this["telnet.option"] = this.convertValues(source["telnet.option"], Count);
+	        this["telnet.will"] = this.convertValues(source["telnet.will"], Count);
+	        this["telnet.wont"] = this.convertValues(source["telnet.wont"], Count);
+	        this.uptime = this.convertValues(source["uptime"], Count);
+	        this.version = this.convertValues(source["version"], Count);
+	        this.vuln = this.convertValues(source["vuln"], Count);
+	        this["vuln.verified"] = this.convertValues(source["vuln.verified"], Count);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class HostSearchResult {
+	    matches: properties.General[];
+	    // Go type: Facets
+	    facets: any;
+	    total: number;
+	    pageID: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new HostSearchResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.matches = this.convertValues(source["matches"], properties.General);
+	        this.facets = this.convertValues(source["facets"], null);
+	        this.total = source["total"];
+	        this.pageID = source["pageID"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class UsageLimits {
+	    scan_credits: number;
+	    query_credits: number;
+	    monitored_ips: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UsageLimits(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.scan_credits = source["scan_credits"];
+	        this.query_credits = source["query_credits"];
+	        this.monitored_ips = source["monitored_ips"];
+	    }
+	}
+	export class User {
+	    scan_credits: number;
+	    usage_limits: UsageLimits;
+	    plan: string;
+	    https: boolean;
+	    unlocked: boolean;
+	    query_credits: number;
+	    monitored_ips: number;
+	    unlocked_left: number;
+	    telnet: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new User(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.scan_credits = source["scan_credits"];
+	        this.usage_limits = this.convertValues(source["usage_limits"], UsageLimits);
+	        this.plan = source["plan"];
+	        this.https = source["https"];
+	        this.unlocked = source["unlocked"];
+	        this.query_credits = source["query_credits"];
+	        this.monitored_ips = source["monitored_ips"];
+	        this.unlocked_left = source["unlocked_left"];
+	        this.telnet = source["telnet"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

@@ -48,7 +48,7 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "antd": "^5.24.0",
+    "antd": "^5.24.4",
     "cheerio": "^1.0.0-rc.3",
     "crypto-js": "^4.2.0",
     "css-tree": "^1.0.0-alpha.28",

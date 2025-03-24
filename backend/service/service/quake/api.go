@@ -3,9 +3,11 @@ package quake
 import (
 	"errors"
 	"fine/backend/service/model/quake"
+	"fine/backend/service/service"
 	"fine/backend/utils"
 	"github.com/buger/jsonparser"
 	"github.com/goccy/go-json"
+	"github.com/tidwall/gjson"
 	"io"
 	"net/http"
 	"strconv"
@@ -19,80 +21,8 @@ type RealtimeServiceDataResult struct {
 	Total    int64                        `json:"total"`
 }
 
-//type Component struct {
-//	ProductLevel   string   `json:"product_level"`
-//	ProductType    []string `json:"product_type"`
-//	ProductVendor  string   `json:"product_vendor"`
-//	ProductNameCn  string   `json:"product_name_cn"`
-//	ProductNameEn  string   `json:"product_name_en"`
-//	ID             string   `json:"id"`
-//	Number        string   `json:"version"`
-//	ProductCatalog []string `json:"product_catalog"`
-//}
-
-//type ServiceItem struct {
-//	Response string `json:"response"`
-//	//TLSJarm  struct { //该字段为string或者struct
-//	//	JarmHash string   `json:"jarm_hash"`
-//	//	JarmAns  []string `json:"jarm_ans"`
-//	//} `json:"tls-jarm"`
-//	ResponseHash string `json:"response_hash"`
-//	Name         string `json:"name"`
-//	HTTP         struct {
-//		Server     string `json:"server"`
-//		StatusCode any    `json:"status_code"` //200 or 暂无权限
-//		Title      string `json:"title"`
-//		Host       string `json:"host"`
-//		Path       string `json:"path"`
-//	} `json:"http"`
-//	Cert string `json:"cert"`
-//}
-//
-//type Location struct {
-//	Owner       string    `json:"owner"`
-//	ProvinceCn  string    `json:"province_cn"`
-//	ProvinceEn  string    `json:"province_en"`
-//	Isp         string    `json:"isp"` //运营商
-//	CountryEn   string    `json:"country_en"`
-//	DistrictCn  string    `json:"district_cn"`
-//	Gps         []float64 `json:"gps"`
-//	StreetCn    string    `json:"street_cn"`
-//	CityEn      string    `json:"city_en"`
-//	DistrictEn  string    `json:"district_en"`
-//	CountryCn   string    `json:"country_cn"`
-//	StreetEn    string    `json:"street_en"`
-//	CityCn      string    `json:"city_cn"`
-//	CountryCode string    `json:"country_code"`
-//	Asname      string    `json:"asname"`
-//	SceneCn     string    `json:"scene_cn"`
-//	SceneEn     string    `json:"scene_en"`
-//	Radius      float64   `json:"radius"`
-//}
-//type RealtimeServiceItem struct {
-//	Components []Component `json:"components"`
-//	Org        string      `json:"org"` //自治域
-//	IP         string      `json:"ip"`
-//	OsVersion  string      `json:"os_version"`
-//	IsIpv6     bool        `json:"is_ipv6"`
-//	Transport  string      `json:"transport"`
-//	Hostname   string      `json:"hostname"`
-//	Port       int         `json:"port"`
-//	Service    ServiceItem `json:"service"`
-//	Domain     string      `json:"domain"`
-//	OsName     string      `json:"os_name"`
-//	Location   Location    `json:"location"`
-//	Time       string      `json:"time"`
-//	Asn        int         `json:"asn"` //自治域编号
-//}
-
-func (r *realtimeService) Service(req *GetRealtimeDataReq) (*RealtimeServiceDataResult, error) {
-	postOptions, _ := json.Marshal(req.req.Body)
-	postData := strings.NewReader(string(postOptions))
-	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApi, postData)
-	if err != nil {
-		return nil, err
-	}
-	byteData, page, size, total, err := r.client.parser(request)
+func (r *realtimeService) Service(req *RealtimeServiceReq) (*RealtimeServiceDataResult, error) {
+	byteData, page, size, total, err := r.client.parser(req.Build(), RealTimeServiceDataAPIUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -181,14 +111,8 @@ type RHDQueryResult struct {
 //	Asn  int       `json:"asn"` //自治域编号
 //}
 
-func (r *realtimeService) Host(req *GetRealtimeDataReq) (*RHDQueryResult, error) {
-	postOptions, _ := json.Marshal(req.req.Body)
-	postData := strings.NewReader(string(postOptions))
-	request, err := http.NewRequest("POST", QuakeRealTimeServiceDataApi, postData)
-	if err != nil {
-		return nil, err
-	}
-	byteData, page, size, total, err := r.client.parser(request)
+func (r *realtimeService) Host(req *RealtimeServiceReq) (*RHDQueryResult, error) {
+	byteData, page, size, total, err := r.client.parser(req.Build(), RealTimeHostDataAPIUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -225,38 +149,28 @@ func (a *aggregationData) Host() {
 
 }
 
-func (r *Quake) parser(request *http.Request) ([]byte, int, int, int64, error) {
-	body, err2 := r.send(request)
-	if err2 != nil {
-		return nil, 0, 0, 0, err2
-	}
-	tmpCode, valueType, _, err := jsonparser.Get(body, "code")
+func (r *Quake) parser(req *service.Request, baseUrl string) ([]byte, int, int, int64, error) {
+	bytes, err := r.request(req, baseUrl)
 	if err != nil {
-		return nil, 0, 0, 0, UnexpectedStructureError
+		return nil, 0, 0, 0, err
 	}
-	if valueType == jsonparser.String {
-		message, err := jsonparser.GetString(body, "message")
-		if err != nil {
-			return nil, 0, 0, 0, UnexpectedStructureError
-		}
+	body := string(bytes)
+	tmpCode := gjson.Get(body, "code")
+	if tmpCode.Type == gjson.String {
+		message := gjson.Get(body, "message").String()
 		return nil, 0, 0, 0, errors.New(message)
 	}
-	code, _ := strconv.Atoi(string(tmpCode))
+
+	code := tmpCode.Int()
 	if code != 0 {
-		message, err := jsonparser.GetString(body, "message")
-		if err != nil {
-			return nil, 0, 0, 0, UnexpectedStructureError
-		}
+		message := gjson.Get(body, "message").String()
 		return nil, 0, 0, 0, errors.New(message)
 	}
-	tmpData, _, _, err := jsonparser.Get(body, "data")
-	if err != nil {
-		return nil, 0, 0, 0, UnexpectedStructureError
-	}
-	total, _ := jsonparser.GetInt(body, "meta", "pagination", "total")
-	page, _ := jsonparser.GetInt(body, "meta", "pagination", "page_index")
-	size, _ := jsonparser.GetInt(body, "meta", "pagination", "page_size")
-	return tmpData, int(page), int(size), total, nil
+	tmpData := gjson.Get(body, "data").Raw
+	total := gjson.Get(body, "meta.pagination.total").Int()
+	page := gjson.Get(body, "meta.pagination.page_index").Int()
+	size := gjson.Get(body, "meta.pagination.page_size").Int()
+	return []byte(tmpData), int(page), int(size), total, nil
 }
 
 func (f *faviconSimilarityData) Get(faviconHash string, similar float64, size int, ignoreCache bool, startTime string, endTime string) ([]*map[string]any, error) {
@@ -282,7 +196,7 @@ func (f *faviconSimilarityData) Get(faviconHash string, similar float64, size in
 
 	data, _ := json.Marshal(param)
 	reqBody := strings.NewReader(string(data))
-	req, _ = http.NewRequest("POST", QuakeFaviconSimilarityDataApiUrl, reqBody)
+	req, _ = http.NewRequest("POST", FaviconSimilarityDataAPIUrl, reqBody)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-QuakeToken", f.client.key)
 	response, err := f.client.http.Do(req)
@@ -375,24 +289,26 @@ func (f *filterField) AggregationHost() ([]*string, error) {
 }
 
 func (f *filterField) parser(fieldType QueryType) ([]*string, error) {
-	var req *http.Request
+	req := service.NewRequest()
+	req.Method = "GET"
+	baseUrl := ""
 	switch fieldType {
 	case Service:
-		req, _ = http.NewRequest("GET", QuakeServiceDataFilterFieldApiUrl, nil)
+		baseUrl = ServiceDataFilterFieldAPIUrl
 		break
 	case AggregationService:
-		req, _ = http.NewRequest("GET", QuakeAggregationServiceDataApiUrl, nil)
+		baseUrl = AggregationServiceDataAPIUrl
 		break
 	case Host:
-		req, _ = http.NewRequest("GET", QuakeHostDataFilterFieldApiUrl, nil)
+		baseUrl = HostDataFilterFieldAPIUrl
 		break
 	case AggregationHost:
-		req, _ = http.NewRequest("GET", QuakeAggregationHostDataApiUrl, nil)
+		baseUrl = AggregationHostDataAPIUrl
 		break
 	default:
 		return nil, UnexpectedFieldTypeError
 	}
-	body, _, _, _, err := f.client.parser(req)
+	body, _, _, _, err := f.client.parser(req, baseUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -407,54 +323,41 @@ func (f *filterField) parser(fieldType QueryType) ([]*string, error) {
 	return tmp, nil
 }
 
-type User struct {
-	ID   string `json:"id"`
-	User struct {
-		ID       string   `json:"id"`
-		Username string   `json:"username"`
-		Fullname string   `json:"fullname"`
-		Email    any      `json:"email"`
-		Group    []string `json:"group"`
-	} `json:"user"`
-	Baned                bool   `json:"baned"`
-	BanStatus            string `json:"ban_status"`
-	MonthRemainingCredit int    `json:"month_remaining_credit"`
-	ConstantCredit       int    `json:"constant_credit"`
-	Credit               int    `json:"credit"`
-	PersistentCredit     int    `json:"persistent_credit"`
-	FreeQueryAPICount    int    `json:"free_query_api_count"`
-	AvatarID             string `json:"avatar_id"`
-	Token                string `json:"token"`
-	MobilePhone          string `json:"mobile_phone"`
-	Source               string `json:"source"`
-	Time                 string `json:"time"`
-	Disable              struct {
-		DisableTime any `json:"disable_time"`
-		StartTime   any `json:"start_time"`
-	} `json:"disable"`
-	PrivacyLog struct {
-		QuakeLogStatus bool `json:"quake_log_status"`
-		QuakeLogTime   any  `json:"quake_log_time"`
-		AnonymousModel bool `json:"anonymous_model"`
-		Status         bool `json:"status"`
-		Time           any  `json:"time"`
-	} `json:"privacy_log"`
-	EnterpriseInformation struct {
-		Name   any    `json:"name"`
-		Email  any    `json:"email"`
-		Status string `json:"status"`
-	} `json:"enterprise_information"`
-	InvitationCodeInfo struct {
-		Code                string `json:"code"`
-		InviteAcquireCredit int    `json:"invite_acquire_credit"`
-		InviteNumber        int    `json:"invite_number"`
-	} `json:"invitation_code_info"`
-	IsCashedInvitationCode bool `json:"is_cashed_invitation_code"`
-	RoleValidity           struct {
-		NamingFailed any `json:"注册用户"`
-	} `json:"role_validity"`
-	PersonalInformationStatus bool        `json:"personal_information_status"`
-	Role                      []*UserRole `json:"role"`
+type UserInfo struct {
+	ID       string   `json:"id"`
+	Username string   `json:"username"`
+	Fullname string   `json:"fullname"`
+	Email    any      `json:"email"`
+	Group    []string `json:"group"`
+}
+
+type UserDisable struct {
+	DisableTime any `json:"disable_time"`
+	StartTime   any `json:"start_time"`
+}
+
+type UserPrivacyLog struct {
+	QuakeLogStatus bool `json:"quake_log_status"`
+	QuakeLogTime   any  `json:"quake_log_time"`
+	AnonymousModel bool `json:"anonymous_model"`
+	Status         bool `json:"status"`
+	Time           any  `json:"time"`
+}
+
+type UserEnterpriseInformation struct {
+	Name   any    `json:"name"`
+	Email  any    `json:"email"`
+	Status string `json:"status"`
+}
+
+type UserInvitationCodeInfo struct {
+	Code                string `json:"code"`
+	InviteAcquireCredit int    `json:"invite_acquire_credit"`
+	InviteNumber        int    `json:"invite_number"`
+}
+
+type UserRoleValidity struct {
+	NamingFailed any `json:"注册用户"`
 }
 
 type UserRole struct {
@@ -463,10 +366,36 @@ type UserRole struct {
 	Credit   int    `json:"credit"`
 }
 
+type User struct {
+	ID                        string                    `json:"id"`
+	User                      UserInfo                  `json:"user"`
+	Baned                     bool                      `json:"baned"`
+	BanStatus                 string                    `json:"ban_status"`
+	MonthRemainingCredit      int                       `json:"month_remaining_credit"`
+	ConstantCredit            int                       `json:"constant_credit"`
+	Credit                    int                       `json:"credit"`
+	PersistentCredit          int                       `json:"persistent_credit"`
+	FreeQueryAPICount         int                       `json:"free_query_api_count"`
+	AvatarID                  string                    `json:"avatar_id"`
+	Token                     string                    `json:"token"`
+	MobilePhone               string                    `json:"mobile_phone"`
+	Source                    string                    `json:"source"`
+	Time                      string                    `json:"time"`
+	Disable                   UserDisable               `json:"disable"`
+	PrivacyLog                UserPrivacyLog            `json:"privacy_log"`
+	EnterpriseInformation     UserEnterpriseInformation `json:"enterprise_information"`
+	InvitationCodeInfo        UserInvitationCodeInfo    `json:"invitation_code_info"`
+	IsCashedInvitationCode    bool                      `json:"is_cashed_invitation_code"`
+	RoleValidity              UserRoleValidity          `json:"role_validity"`
+	PersonalInformationStatus bool                      `json:"personal_information_status"`
+	Role                      []*UserRole               `json:"role"`
+}
+
 func (r *Quake) User() (*User, error) {
-	req, _ := http.NewRequest("GET", QuakeUserApiUrl, nil)
-	//req.Header.Set("Content-Type", "application/json")
-	body, err := r.send(req)
+	req := service.NewRequest()
+	req.Method = "GET"
+	req.Header.Set("X-QuakeToken", r.key)
+	bytes, err := req.Fetch(r.http, UserAPIUrl, r.condition)
 	if err != nil {
 		return nil, err
 	}
@@ -477,7 +406,7 @@ func (r *Quake) User() (*User, error) {
 		Meta    struct {
 		} `json:"meta"`
 	}
-	err = json.Unmarshal(body, &tmpResponse)
+	err = json.Unmarshal(bytes, &tmpResponse)
 	if err != nil && err.Error() == WrongJsonFormat {
 		return nil, errors.New(QuakeUnexpectedJsonResponse)
 	} else if err != nil {
@@ -551,28 +480,25 @@ func (r *Quake) Export(items []*quake.RealtimeServiceItem, filename string) erro
 	return nil
 }
 
-// 发送请求并返回响应体
-func (r *Quake) send(request *http.Request) ([]byte, error) {
-	request.Header.Set("X-QuakeToken", r.key)
-	if request.Method == "POST" {
-		request.Header.Set("Content-Type", "application/json")
-	}
-	response, err := r.http.Do(request)
-	if err != nil {
-		return nil, err
-	}
+func (r *Quake) condition(response *http.Response) error {
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if response.StatusCode == 401 {
-		return nil, errors.New("invalid quake key")
+		return errors.New("invalid quake key")
 	}
 	if response.StatusCode != 200 {
-		return nil, errors.New(strconv.Itoa(response.StatusCode))
+		return errors.New(strconv.Itoa(response.StatusCode))
 	}
 	if string(body) == QuakeUnauthorized {
-		return nil, errors.New(QuakeInvalidKey)
+		return errors.New(QuakeInvalidKey)
 	}
-	return body, nil
+	return nil
+}
+
+func (r *Quake) request(req *service.Request, baseUrl string) ([]byte, error) {
+	req.Header.Set("X-QuakeToken", r.key)
+	req.Header.Set("Content-Type", "application/json")
+	return req.Fetch(r.http, baseUrl, r.condition)
 }

@@ -10,8 +10,12 @@ import (
 	"time"
 )
 
-const DefaultUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+const DefaultUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 const DefaultTimeout = 20 * time.Second
+
+var DefaultHTTP = &http.Client{
+	Timeout: DefaultTimeout,
+}
 
 type Manager struct {
 	client   *http.Client
@@ -28,7 +32,7 @@ type CustomTransport struct {
 // RoundTrip 实现了 RoundTripper 接口的 RoundTrip 方法
 func (c *CustomTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// 设置默认 UA
-	if _, ok := req.Header["User-Agent"]; !ok {
+	if ua := req.Header.Get("User-Agent"); ua == "" {
 		req.Header.Set("User-Agent", DefaultUA)
 	}
 
@@ -51,7 +55,7 @@ func NewManager() *Manager {
 			Transport: &CustomTransport{
 				Header: http.Header{"User-Agent": []string{DefaultUA}},
 			},
-			Timeout: 20 * time.Second,
+			Timeout: DefaultTimeout,
 			// 禁止重定向
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -62,11 +66,19 @@ func NewManager() *Manager {
 
 // SetProxy 支持 HTTP 和 SOCKS5 代理，空值则为默认
 func (r *Manager) SetProxy(s string) error {
-	var transport = r.client.Transport.(*CustomTransport)
 	if s == "" {
-		transport.Transport.Proxy = nil
+		r.client.Transport = &CustomTransport{
+			Header: http.Header{"User-Agent": []string{DefaultUA}},
+		}
+		r.proxyUrl = ""
 		return nil
 	}
+	if r.client.Transport == nil {
+		r.client.Transport = &CustomTransport{
+			Header: http.Header{"User-Agent": []string{DefaultUA}},
+		}
+	}
+	var transport = r.client.Transport.(*CustomTransport)
 	proxyURL, err := url.Parse(s)
 	if err != nil {
 		return err

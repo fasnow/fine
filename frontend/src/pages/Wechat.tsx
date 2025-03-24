@@ -23,7 +23,7 @@ import {
     ClearApplet,
     ClearDecompiled,
     Decompile,
-    GetMatchedString, SaveWechatRules,
+    GetMatchedString, GetWechatRules, SaveWechatRules, SetAppletPath,
 } from "../../wailsjs/go/wechat/Bridge";
 import { DecompileIcon } from "@/component/Icon";
 import InfoToFront = wechat.InfoToFront;
@@ -31,7 +31,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { appActions, RootState } from "@/store/store";
 import {Join} from "../../wailsjs/go/osoperation/Path";
 import {OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/osoperation/Runtime";
-import {GetWechatRules, SaveWechat} from "../../wailsjs/go/application/Application";
 import {copy} from "@/util/util";
 import VersionTaskStatus = wechat.VersionTaskStatus;
 
@@ -84,6 +83,7 @@ export const MiniProgram: React.FC = () => {
         })
 
         EventsOn(event.DecompileWxMiniProgramTicker, (eventDetail:event.EventDetail) => {
+            console.log(eventDetail.Data)
             setData(eventDetail.Data)
         })
     }, []);
@@ -110,10 +110,9 @@ export const MiniProgram: React.FC = () => {
         OpenDirectoryDialog().then(
             result => {
                 if (result) {
-                    const t = { ...cfg.Wechat, Applet: result }
-                    SaveWechat(t).then(
+                    SetAppletPath(result).then(
                         () => {
-                            const tt = { ...cfg, Wechat: { ...t } } as config.Config
+                            const tt = { ...cfg, Wechat: { ...cfg.Wechat,Applet:result } } as config.Config
                             dispatch(appActions.setConfig(tt))
                         }
                     ).catch(

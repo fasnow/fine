@@ -13,7 +13,7 @@ import {
     Select,
     Space,
     Switch,
-    Tabs,
+    Tabs, Tag,
     Tooltip
 } from 'antd';
 import {
@@ -27,8 +27,6 @@ import { errorNotification } from '@/component/Notification';
 import { QUERY_FIRST } from '@/component/type';
 import { RootState, appActions, userActions } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import PointBuy from "@/assets/images/point-buy.svg"
-import PointFree from "@/assets/images/point-free.svg"
 import { ExportDataPanelProps } from './Props';
 import { buttonProps } from './Setting';
 import {copy, getAllDisplayedColumnKeys, getSortedData, RangePresets} from '@/util/util';
@@ -44,13 +42,15 @@ import { FindByPartialKey } from "../../wailsjs/go/history/Bridge";
 import {
     ColDef,
     GetContextMenuItemsParams,
-    ICellRendererParams,
-    ProcessCellForExportParams, SideBarDef
+    ProcessCellForExportParams, SideBarDef, ValueFormatterParams, ValueGetterParams
 } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
 import Help from "@/pages/QukeUsage";
+import {Coin1, Coin2} from "@/component/Icon";
+import Password from "@/component/Password";
+import Label from "@/component/Label";
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
@@ -159,82 +159,6 @@ const defaultQueryOption: QueryOptions = {
     ipList: [],
     latest: false,
     queryFields: []
-}
-
-const AuthSetting: React.FC = () => {
-    const [open, setOpen] = useState<boolean>(false)
-    const [editable, setEditable] = useState(false)
-    const dispatch = useDispatch()
-    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
-    const [key, setKey] = useState("")
-
-    useEffect(() => {
-        setKey(cfg.Quake.Token)
-    }, [cfg.Quake])
-
-
-    const save = () => {
-        SetAuth(key).then(
-            () => {
-                const t = { ...cfg, Quake: { ...cfg.Quake, Token: key } } as config.Config;
-                dispatch(appActions.setConfig(t))
-                setOpen(false)
-                setEditable(false)
-            }
-        ).catch(
-            err => {
-                errorNotification("错误", err)
-                setKey(cfg.Quake.Token)
-            }
-        )
-    }
-
-    const cancel = () => {
-        setEditable(false);
-        setOpen(false)
-        setKey(cfg.Quake.Token)
-    }
-
-    return <>
-        <Tooltip title="设置" placement={"right"}>
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
-        </Tooltip>
-        <Modal
-            open={open}
-            onCancel={() => setOpen(false)}
-            onOk={() => {
-                setOpen(false)
-            }}
-            footer={null}
-            closeIcon={null}
-            width={420}
-            destroyOnClose
-        >
-            <Flex vertical gap={10}>
-                <Input.Password value={key} placeholder="token" onChange={
-                    e => {
-                        if (!editable) return
-                        setKey(e.target.value)
-                    }
-                } />
-                <Flex gap={10} justify={"end"}>
-                    {
-                        !editable ?
-                            <Button {...buttonProps} onClick={() => setEditable(true)}>修改</Button>
-                            :
-                            <>
-                                <Button {...buttonProps} htmlType="submit"
-                                    onClick={save}
-                                >保存</Button>
-                                <Button {...buttonProps} htmlType="submit"
-                                    onClick={cancel}
-                                >取消</Button>
-                            </>
-                    }
-                </Flex>
-            </Flex>
-        </Modal>
-    </>
 }
 
 const ExportDataPanel = (props: { id: number; total: number; currentPageSize: number, }) => {
@@ -412,11 +336,11 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         { headerName: 'IP', field: "ip", width: 150, pinned: 'left' },
         { headerName: '域名', field: "domain", width: 200 },
         { headerName: '端口', field: "port", width: 80 },
-        { headerName: '协议', field: "protocol", width: 80, cellRenderer: (params: ICellRendererParams) => params.data?.service?.name || "" },
-        { headerName: '网站标题', field: "web_title", width: 200, cellRenderer: (params: ICellRendererParams) => params.data?.service?.http?.title },
-        { headerName: '响应码', field: "status_code", width: 80, cellRenderer: (params: ICellRendererParams) => params.data?.service?.http?.status_code },
+        { headerName: '协议', field: "protocol", width: 80, valueGetter: (params: ValueGetterParams) => params.data?.service?.name || "" },
+        { headerName: '网站标题', field: "web_title", width: 200, valueGetter: (params: ValueGetterParams) => params.data?.service?.http?.title },
+        { headerName: '响应码', field: "status_code", width: 80, valueGetter: (params: ValueGetterParams)  => params.data?.service?.http?.status_code },
         {
-            headerName: '产品应用', field: "components", width: 100, cellRenderer: (params: ICellRendererParams) => {
+            headerName: '产品应用', field: "components", width: 100, valueGetter: (params: ValueGetterParams)  => {
                 const tmp = params.data?.components?.map((component: quake.Component) => {
                     return component.product_name_en + component.version
                 })
@@ -424,9 +348,9 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             }
         },
         { headerName: '网站服务器', field: "os", width: 100 },
-        { headerName: '网站路径', field: "path", width: 100, cellRenderer: (params: ICellRendererParams) => params.data?.service?.http?.path },
+        { headerName: '网站路径', field: "path", width: 100, valueGetter: (params: ValueGetterParams)  => params.data?.service?.http?.path },
         {
-            headerName: '地理位置', field: "location", width: 100, cellRenderer: (params: ICellRendererParams) => {
+            headerName: '地理位置', field: "location", width: 100, valueGetter: (params: ValueGetterParams)  => {
                 if(!params.data) return <></>
                 const location: string[] = []
                 if (params.data.location.country_cn) {
@@ -446,7 +370,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         },
         { headerName: '更新时间', field: "time", width: 100 },
         { headerName: 'ASN', field: "asn", width: 100 },
-        { headerName: '运营商', field: "isp", width: 100, cellRenderer: (params: ICellRendererParams) => params.data?.location?.isp },
+        { headerName: '运营商', field: "isp", width: 100, valueGetter: (params: ValueGetterParams)  => params.data?.location?.isp },
     ]);
     const gridRef = useRef<AgGridReact>(null);
     const defaultColDef = useMemo<ColDef>(() => {
@@ -891,17 +815,31 @@ const UserPanel = () => {
     const user = useSelector((state: RootState) => state.user.quake)
     const [spin, setSpin] = useState<boolean>(false)
     const dispatch = useDispatch()
+    const [open, setOpen] = useState<boolean>(false)
+    const cfg = useSelector((state: RootState) => state.app.global.config || new config.Config())
 
     useEffect(() => {
-        updateRestToken()
+        getUserInfo()
     }, []);
 
-    const updateRestToken = async () => {
+    const getUserInfo = async () => {
         try {
             const user = await GetUserInfo()
             dispatch(userActions.setQuakeUser(user))
         } catch (err) {
             errorNotification("Quake用户信息", err)
+        }
+    }
+
+    const save = async (key: string) => {
+        try {
+            await SetAuth(key)
+            const t = {...cfg, Quake: {...cfg.Quake, Token: key}} as config.Config;
+            dispatch(appActions.setConfig(t))
+            return true
+        } catch (e) {
+            errorNotification("错误", e)
+            return false
         }
     }
 
@@ -912,41 +850,67 @@ const UserPanel = () => {
         alignItems: "center",
         backgroundColor: "#f1f3f4"
     }}>
-        <AuthSetting />
-        <Divider type="vertical" />
-        <Space>
-            <Tooltip title="永久积分">
-                <div style={{
-                    height: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: "#f5222d"
-                }}>
-                    <img src={PointBuy} />
-                    {user.persistent_credit}
-                </div>
+        <Flex align={"center"}>
+            <Tooltip title="设置" placement={"bottom"}>
+                <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
             </Tooltip>
-            <Tooltip title="月度积分">
-                <div style={{
-                    height: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: "#f5222d"
-                }}>
-                    <img src={PointFree} />
-                    {user.month_remaining_credit}
-                </div>
-            </Tooltip>
-            <Tooltip title="刷新余额">
-                <Button size="small" shape="circle" type="text" icon={<SyncOutlined spin={spin}
-                    onClick={async () => {
-                        setSpin(true)
-                        await updateRestToken()
-                        setSpin(false)
-                    }}
-                />}></Button>
-            </Tooltip>
-        </Space>
+            <Flex gap={10}>
+                <Tooltip title="永久积分" placement={"bottom"}>
+                    <div style={{
+                        height: "24px",
+                        display: "flex",
+                        alignItems: "center",
+                        color: "#f5222d"
+                    }}>
+                        <Coin1/>
+                        {user.persistent_credit || 0}
+                    </div>
+                </Tooltip>
+                <Tooltip title="月度积分" placement={"bottom"}>
+                    <div style={{
+                        height: "24px",
+                        display: "flex",
+                        alignItems: "center",
+                        color: "#f5222d"
+                    }}>
+                        <Coin2/>
+                        {user.month_remaining_credit || 0}
+                    </div>
+                </Tooltip>
+                <Tooltip title="刷新余额" placement={"bottom"}>
+                    <Button size="small" shape="circle" type="text"
+                            icon={<SyncOutlined
+                                spin={spin}
+                                onClick={async () => {
+                                    setSpin(true)
+                                    await getUserInfo()
+                                    setSpin(false)
+                                }
+                            }
+                    />}/>
+                </Tooltip>
+            </Flex>
+        </Flex>
+        <Modal
+            open={open}
+            onCancel={() => setOpen(false)}
+            onOk={() => {
+                setOpen(false)
+            }}
+            footer={null}
+            closeIcon={null}
+            width={600}
+            destroyOnClose
+        >
+            <Flex vertical gap={10}>
+                <Tag bordered={false} color="processing">
+                    API信息
+                </Tag>
+                <Password labelWidth={100} value={cfg.Quake.Token} label={"API key"} onSubmit={save}/>
+                <Label labelWidth={100} label={"永久积分"} value={`${user.persistent_credit || 0}`}/>
+                <Label labelWidth={100} label={"月度积分"} value={`${user.month_remaining_credit || 0}`}/>
+            </Flex>
+        </Modal>
     </div>
 }
 

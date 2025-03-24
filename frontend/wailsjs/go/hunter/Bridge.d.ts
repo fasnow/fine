@@ -4,7 +4,7 @@ import {hunter} from '../models';
 
 export function Export(arg1:number,arg2:number,arg3:number):Promise<number>;
 
-export function GetRestToken():Promise<number>;
+export function GetUserInfo():Promise<hunter.User>;
 
 export function Query(arg1:number,arg2:string,arg3:number,arg4:number,arg5:string,arg6:string,arg7:number,arg8:string,arg9:boolean):Promise<hunter.QueryResult>;
 

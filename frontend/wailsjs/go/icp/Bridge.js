@@ -26,6 +26,10 @@ export function Query(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['icp']['Bridge']['Query'](arg1, arg2, arg3, arg4, arg5);
 }
 
+export function SaveICPConfig(arg1) {
+  return window['go']['icp']['Bridge']['SaveICPConfig'](arg1);
+}
+
 export function SetProxy(arg1) {
   return window['go']['icp']['Bridge']['SetProxy'](arg1);
 }

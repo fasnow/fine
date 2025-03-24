@@ -36,27 +36,29 @@ type TaskState struct {
 }
 
 type Bridge struct {
-	app             *application.Application
-	icp             *ICP
-	icpRepo         repository.IcpRepository
-	icpTaskRepo     repository.IcpTaskRepository
-	historyRepo     repository.HistoryRepository
-	cacheTotal      repository.CacheTotal
-	mutex           sync.Mutex
-	taskState       map[int64]*TaskState
-	exportLogBridge *exportlog.Bridge
+	app              *application.Application
+	icp              *ICP
+	mutex            sync.Mutex
+	taskState        map[int64]*TaskState
+	exportLogBridge  *exportlog.Bridge
+	icpRepo          repository.IcpRepository
+	icpTaskRepo      repository.IcpTaskRepository
+	historyRepo      repository.HistoryRepository
+	cacheTotal       repository.CacheTotal
+	proxyHistoryRepo repository.ProxyHistoryRepository
 }
 
 func NewICPBridge(app *application.Application) *Bridge {
 	db := database.GetConnection()
 	bridgeClient := &Bridge{
-		app:             app,
-		icpRepo:         repository.NewIcpRepository(db),
-		icpTaskRepo:     repository.NewIcpTaskRepository(db),
-		historyRepo:     repository.NewHistoryRepository(db),
-		cacheTotal:      repository.NewCacheTotal(db),
-		taskState:       map[int64]*TaskState{},
-		exportLogBridge: exportlog.NewBridge(app),
+		app:              app,
+		taskState:        map[int64]*TaskState{},
+		exportLogBridge:  exportlog.NewBridge(app),
+		icpRepo:          repository.NewIcpRepository(db),
+		icpTaskRepo:      repository.NewIcpTaskRepository(db),
+		historyRepo:      repository.NewHistoryRepository(db),
+		cacheTotal:       repository.NewCacheTotal(db),
+		proxyHistoryRepo: repository.NewProxyHistoryRepository(db),
 	}
 	icpClient := NewClient()
 	bridgeClient.icp = icpClient
@@ -157,7 +159,8 @@ func (r *Bridge) query(pageNum, pageSize int, serviceType string, query string, 
 	ctx2, cancel := ctx.WithCancel(ctx.Background())
 	var err1 error
 	result, _ := backoff.RetryWithData(func() (*Result, error) {
-		if result, err3 := r.icp.PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).Query(query); err3 != nil {
+		req := NewQueryReqBuilder().PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).UnitName(query).Build()
+		if result, err3 := r.icp.Query(req); err3 != nil {
 			err1 = err3
 			// 认证错误
 			if err3.Error() == IllegalRequestError.Error() || err3.Error() == CaptchaMismatchError.Error() || err3.Error() == TokenExpiredError.Error() {
@@ -200,7 +203,8 @@ func (r *Bridge) queryWithStatusContext(pageNum, pageSize int, serviceType strin
 	var err1 error
 	var canceled bool
 	result, _ := backoff.RetryWithData(func() (*Result, error) {
-		if result, err3 := r.icp.PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).Query(query); err3 != nil {
+		req := NewQueryReqBuilder().PageNum(pageNum).PageSize(pageSize).ServiceType(serviceType).UnitName(query).Build()
+		if result, err3 := r.icp.Query(req); err3 != nil {
 			err1 = err3
 
 			// 这里添加一个额外上下文判断是为了避免当暂停任务时如果正在retry且retry上限比较高则无法及时终止
@@ -286,7 +290,8 @@ func (r *Bridge) Export(pageID int64) (int64, error) {
 	var err1 error
 	go func() {
 		result, _ := backoff.RetryWithData(func() (*Result, error) {
-			if result, err3 := r.icp.PageNum(1).PageSize(queryLog.Total).ServiceType(queryLog.ServiceType).Query(queryLog.UnitName); err3 != nil {
+			req := NewQueryReqBuilder().PageNum(1).PageSize(queryLog.Total).ServiceType(queryLog.ServiceType).UnitName(queryLog.UnitName).Build()
+			if result, err3 := r.icp.Query(req); err3 != nil {
 				if err3.Error() == IllegalRequestError.Error() || err3.Error() == CaptchaMismatchError.Error() || err3.Error() == TokenExpiredError.Error() {
 					if err4 := backoff.Retry(func() error {
 						if err5 := r.icp.SetTokenFromRemote(); err5 != nil {
@@ -334,6 +339,20 @@ func (r *Bridge) queryAll(serviceType, query string, statCtx *context.StatusCont
 	return result2, nil
 }
 
+func (r *Bridge) SaveICPConfig(cfg config.ICP) error {
+	r.app.Config.ICP.AuthErrorRetryNum1 = cfg.AuthErrorRetryNum1
+	r.app.Config.ICP.AuthErrorRetryNum2 = cfg.AuthErrorRetryNum2
+	r.app.Config.ICP.ForbiddenErrorRetryNum1 = cfg.ForbiddenErrorRetryNum1
+	r.app.Config.ICP.ForbiddenErrorRetryNum2 = cfg.ForbiddenErrorRetryNum2
+	r.app.Config.ICP.Concurrency = cfg.Concurrency
+	err := r.app.WriteConfig(r.app.Config)
+	if err != nil {
+		r.app.Logger.Info(err)
+		return err
+	}
+	return nil
+}
+
 func (r *Bridge) SetProxy(p config.Proxy) error {
 	if r.app.Config.ICP.Proxy != p {
 		r.app.Config.ICP.Proxy.Type = p.Type
@@ -366,10 +385,13 @@ func (r *Bridge) SetProxy(p config.Proxy) error {
 			}
 		}
 		if err := pm.SetProxy(fmt.Sprintf("%s://%s:%s", p.Type, p.Host, p.Port)); err != nil {
-			r.app.Logger.Error(err)
+
 			return err
 		}
 		r.app.Logger.Info("icp proxy enabled on " + pm.ProxyString())
+		if err := r.proxyHistoryRepo.Create(models.ProxyHistory{Proxy: p}); err != nil {
+			r.app.Logger.Error(err)
+		}
 		return nil
 	}
 	r.app.Logger.Info("icp proxy disabled using global proxy")

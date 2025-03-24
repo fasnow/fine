@@ -6,7 +6,8 @@ interface PasswordProps {
     labelWidth?: string | number
     value: string
     width?: string | number
-    onSubmit: (path:string)=>Promise<boolean>
+    onSubmit: (path:string)=>Promise<boolean>|boolean
+    onCancel?: ()=>void
     placeholder?: string,
 }
 
@@ -28,6 +29,9 @@ const Password:React.FC<PasswordProps>=(props)=>{
     }
 
     const cancel = () => {
+        if (props.onCancel){
+            props.onCancel()
+        }
         setKey(props.value)
         setEditable(false)
     }
@@ -35,7 +39,16 @@ const Password:React.FC<PasswordProps>=(props)=>{
     return <Flex justify={"left"}>
         {
             props.label &&
-            <span style={{display: "inline-block", textAlign: "left", paddingRight: "5px", height: "24px", width: props.labelWidth || 'fit-content'}}>{props.label}</span>
+            <span style={{
+                display: "inline-block",
+                textAlign: "left",
+                paddingRight: "5px",
+                height: "24px",
+                width: props.labelWidth || 'fit-content',
+                minWidth: props.labelWidth || 'fit-content',
+                whiteSpace: 'nowrap'
+            }}
+            >{props.label}</span>
         }
         <Input.Password placeholder={props.placeholder} style={{width: "400px", marginRight: "10px"}} value={key} onChange={(e) => { if (editable) setKey(e.target.value) }} size={"small"} />
         <Flex gap={10}>

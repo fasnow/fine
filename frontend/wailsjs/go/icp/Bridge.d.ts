@@ -17,6 +17,8 @@ export function GetRunningTaskNum():Promise<number>;
 
 export function Query(arg1:number,arg2:string,arg3:number,arg4:number,arg5:string):Promise<icp.Data>;
 
+export function SaveICPConfig(arg1:config.ICP):Promise<void>;
+
 export function SetProxy(arg1:config.Proxy):Promise<void>;
 
 export function SetProxyTimeout(arg1:time.Duration):Promise<void>;

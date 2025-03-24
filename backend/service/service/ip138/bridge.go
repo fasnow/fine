@@ -12,7 +12,7 @@ type Bridge struct {
 	exportLogRepo repository.ExportLogRepository
 }
 
-func NewIP138Bridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	tt := NewClient()
 	tt.UseProxyManager(app.ProxyManager)
 	db := database.GetConnection()

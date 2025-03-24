@@ -21,7 +21,7 @@ type Bridge struct {
 	app *application.Application
 }
 
-func NewHttpxBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	return &Bridge{
 		app: app,
 	}

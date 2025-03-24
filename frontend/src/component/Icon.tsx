@@ -61,3 +61,49 @@ export const Chrome = (props: Partial<CustomIconComponentProps>) => (
         )
     } />
 )
+
+export const Coin1 = (props: Partial<CustomIconComponentProps>) => (
+    <Icon {...props} component={
+        () => (
+            <svg width="1em" height="1em" className="icon" viewBox="0 0 1024 1024" version="1.1"
+                 xmlns="http://www.w3.org/2000/svg" p-id="9839"
+                 data-spm-anchor-id="a313x.search_index.0.i2.75443a81BE6yba">
+                <path
+                    d="M161.92 580.736l29.888 58.88C171.328 659.776 160 681.728 160 704c0 82.304 155.328 160 352 160s352-77.696 352-160c0-22.272-11.392-44.16-31.808-64.32l30.464-58.432C903.936 615.808 928 657.664 928 704c0 129.728-188.544 224-416 224S96 833.728 96 704c0-46.592 24.32-88.576 65.92-123.264"
+                    p-id="9840" data-spm-anchor-id="a313x.search_index.0.i3.75443a81BE6yba" className="selected"
+                    fill="#d81e06"></path>
+                <path
+                    d="M161.92 388.736l29.888 58.88C171.328 467.84 160 489.792 160 512c0 82.304 155.328 160 352 160s352-77.696 352-160c0-22.272-11.392-44.16-31.808-64.32l30.464-58.432C903.936 423.808 928 465.664 928 512c0 129.728-188.544 224-416 224S96 641.728 96 512c0-46.592 24.32-88.576 65.92-123.264"
+                    p-id="9841" data-spm-anchor-id="a313x.search_index.0.i1.75443a81BE6yba" className="selected"
+                    fill="#d81e06"></path>
+                <path
+                    d="M512 544c-227.456 0-416-94.272-416-224S284.544 96 512 96s416 94.272 416 224-188.544 224-416 224m0-64c196.672 0 352-77.696 352-160S708.672 160 512 160s-352 77.696-352 160 155.328 160 352 160"
+                    p-id="9842" data-spm-anchor-id="a313x.search_index.0.i0.75443a81BE6yba" className="selected"
+                    fill="#d81e06"></path>
+            </svg>
+        )
+    } />
+)
+
+export const Coin2 = (props: Partial<CustomIconComponentProps>) => (
+    <Icon {...props} component={
+        () => (
+            <svg width="1em" height="1em" className="icon" viewBox="0 0 1024 1024" version="1.1"
+                 xmlns="http://www.w3.org/2000/svg" p-id="9839"
+                 data-spm-anchor-id="a313x.search_index.0.i2.75443a81BE6yba">
+                <path
+                    d="M161.92 580.736l29.888 58.88C171.328 659.776 160 681.728 160 704c0 82.304 155.328 160 352 160s352-77.696 352-160c0-22.272-11.392-44.16-31.808-64.32l30.464-58.432C903.936 615.808 928 657.664 928 704c0 129.728-188.544 224-416 224S96 833.728 96 704c0-46.592 24.32-88.576 65.92-123.264"
+                    p-id="9840" data-spm-anchor-id="a313x.search_index.0.i3.75443a81BE6yba" className="selected"
+                    fill="#1296db"></path>
+                <path
+                    d="M161.92 388.736l29.888 58.88C171.328 467.84 160 489.792 160 512c0 82.304 155.328 160 352 160s352-77.696 352-160c0-22.272-11.392-44.16-31.808-64.32l30.464-58.432C903.936 423.808 928 465.664 928 512c0 129.728-188.544 224-416 224S96 641.728 96 512c0-46.592 24.32-88.576 65.92-123.264"
+                    p-id="9841" data-spm-anchor-id="a313x.search_index.0.i1.75443a81BE6yba" className="selected"
+                    fill="#1296db"></path>
+                <path
+                    d="M512 544c-227.456 0-416-94.272-416-224S284.544 96 512 96s416 94.272 416 224-188.544 224-416 224m0-64c196.672 0 352-77.696 352-160S708.672 160 512 160s-352 77.696-352 160 155.328 160 352 160"
+                    p-id="9842" data-spm-anchor-id="a313x.search_index.0.i0.75443a81BE6yba" className="selected"
+                    fill="#1296db"></path>
+            </svg>
+        )
+    } />
+)

@@ -4,294 +4,175 @@ import (
 	"fine/backend/service/service"
 )
 
-type Req[i interface{}] struct {
-	HttpMethod  string
-	ApiPath     string
-	Body        i
-	QueryParams *service.QueryParams
-	//PathParams  *plugin.PathParams
+type RealtimeHostReq struct {
+	req *service.Request
 }
 
-type GetRealtimeDataReqBody struct {
-	Query       string   `json:"query"`                  //是	*	查询语句
-	Rule        string   `json:"rule,omitempty"`         //否	无	类型为IP列表的服务数据收藏名称
-	IpList      []string `json:"ip_list,omitempty"`      //否	无	IP列表
-	Start       int      `json:"start,omitempty"`        //否	0	分页起始
-	Size        int      `json:"size,omitempty"`         //否	10	分页大小
-	IgnoreCache bool     `json:"ignore_cache,omitempty"` //否	false	是否忽略缓存
-	StartTime   string   `json:"start_time,omitempty"`   //否	无	查询起始时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-	EndTime     string   `json:"end_time,omitempty"`     //否	无	查询截止时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-	Include     []string `json:"include,omitempty"`      //否	无	包含字段
-	Exclude     []string `json:"exclude,omitempty"`      //否	无	排除字段
-	Latest      bool     `json:"latest,omitempty"`       //否	false	是否使用最新数据
-}
-
-type GetRealtimeDataReq struct {
-	req *Req[GetRealtimeDataReqBody]
-}
-
-type GetRealtimeDataReqBuilder struct {
-	req *Req[GetRealtimeDataReqBody]
-}
-
-func NewGetRealtimeDataBuilder() *GetRealtimeDataReqBuilder {
-	builder := &GetRealtimeDataReqBuilder{}
-	builder.req = &Req[GetRealtimeDataReqBody]{
-		QueryParams: &service.QueryParams{},
-	}
+func NewRealtimeHostReqBuilder() *RealtimeHostReq {
+	builder := &RealtimeHostReq{}
+	req := service.NewRequest()
+	req.Method = "POST"
+	builder.req = req
 	return builder
 }
 
 // Query 是	*	查询语句
-func (builder *GetRealtimeDataReqBuilder) Query(query string) *GetRealtimeDataReqBuilder {
-	builder.req.Body.Query = query
-	return builder
+func (r *RealtimeHostReq) Query(query string) *RealtimeHostReq {
+	r.req.BodyMap["query"] = query
+	return r
 }
 
 // Rule 否	无	类型为IP列表的服务数据收藏名称
-func (builder *GetRealtimeDataReqBuilder) Rule(rule string) *GetRealtimeDataReqBuilder {
-	builder.req.Body.Rule = rule
-	return builder
+func (r *RealtimeHostReq) Rule(rule string) *RealtimeHostReq {
+	r.req.BodyMap["rule"] = rule
+	return r
 }
 
 // IpList 否	无	IP列表
-func (builder *GetRealtimeDataReqBuilder) IpList(ipList []string) *GetRealtimeDataReqBuilder {
-	builder.req.Body.IpList = ipList
-	return builder
+func (r *RealtimeHostReq) IpList(ipList []string) *RealtimeHostReq {
+	r.req.BodyMap["ip_list"] = ipList
+	return r
 }
 
 // Page 否	0	分页起始
-func (builder *GetRealtimeDataReqBuilder) Page(page int) *GetRealtimeDataReqBuilder {
-	builder.req.Body.Start = page
-	return builder
+func (r *RealtimeHostReq) Page(page int) *RealtimeHostReq {
+	r.req.BodyMap["start"] = page
+	return r
 }
 
 // Size 否	10	分页大小
-func (builder *GetRealtimeDataReqBuilder) Size(size int) *GetRealtimeDataReqBuilder {
-	builder.req.Body.Size = size
-	return builder
+func (r *RealtimeHostReq) Size(size int) *RealtimeHostReq {
+	r.req.BodyMap["size"] = size
+	return r
 }
 
 // IgnoreCache 否	false	是否忽略缓存
-func (builder *GetRealtimeDataReqBuilder) IgnoreCache(ignoreCache bool) *GetRealtimeDataReqBuilder {
-	builder.req.Body.IgnoreCache = ignoreCache
-	return builder
+func (r *RealtimeHostReq) IgnoreCache(ignoreCache bool) *RealtimeHostReq {
+	r.req.BodyMap["ignore_cache"] = ignoreCache
+	return r
 }
 
 // StartTime 否	无	查询起始时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-func (builder *GetRealtimeDataReqBuilder) StartTime(startTime string) *GetRealtimeDataReqBuilder {
-	builder.req.Body.StartTime = startTime
-	return builder
+func (r *RealtimeHostReq) StartTime(startTime string) *RealtimeHostReq {
+	r.req.BodyMap["start_time"] = startTime
+	return r
 }
 
 // EndTime 否	无	查询截止时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-func (builder *GetRealtimeDataReqBuilder) EndTime(endTime string) *GetRealtimeDataReqBuilder {
-	builder.req.Body.EndTime = endTime
-	return builder
+func (r *RealtimeHostReq) EndTime(endTime string) *RealtimeHostReq {
+	r.req.BodyMap["end_time"] = endTime
+	return r
 }
 
 // Include 否	无	包含字段
-func (builder *GetRealtimeDataReqBuilder) Include(include []string) *GetRealtimeDataReqBuilder {
-	builder.req.Body.Include = include
-	return builder
+func (r *RealtimeHostReq) Include(include []string) *RealtimeHostReq {
+	r.req.BodyMap["include"] = include
+	return r
 }
 
 // Exclude 否	无	排除字段
-func (builder *GetRealtimeDataReqBuilder) Exclude(exclude []string) *GetRealtimeDataReqBuilder {
-	builder.req.Body.Exclude = exclude
-	return builder
+func (r *RealtimeHostReq) Exclude(exclude []string) *RealtimeHostReq {
+	r.req.BodyMap["exclude"] = exclude
+	return r
 }
 
-// Latest 否	false	是否使用最新数据，只对服务数据生效
-func (builder *GetRealtimeDataReqBuilder) Latest(latest bool) *GetRealtimeDataReqBuilder {
-	builder.req.Body.Latest = latest
-	return builder
-}
-
-func (builder *GetRealtimeDataReqBuilder) Build() *GetRealtimeDataReq {
-	req := &GetRealtimeDataReq{}
-	builder.req.Body.Start = builder.req.Body.Size * (builder.req.Body.Start - 1)
-	req.req = builder.req
-	return req
-}
-
-type GetDeepDataReqBody struct {
-	PaginationId string   `json:"pagination_id,omitempty"` //否	无	分页id，指定分页id能够获取更多分页数据，分页id过期时间为5分钟
-	Query        string   `json:"query"`                   //是	*	查询语句
-	Rule         string   `json:"rule,omitempty"`          //否	无	类型为IP列表的服务数据收藏名称
-	IpList       []string `json:"ip_list,omitempty"`       //否	无	IP列表
-	Size         int      `json:"size,omitempty"`          //否	10	分页大小
-	IgnoreCache  bool     `json:"ignore_cache,omitempty"`  //否	false	是否忽略缓存
-	StartTime    string   `json:"start_time,omitempty"`    //否	无	查询起始时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-	EndTime      string   `json:"end_time,omitempty"`      //否	无	查询截止时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-	Include      []string `json:"include,omitempty"`       //否	无	包含字段
-	Exclude      []string `json:"exclude,omitempty"`       //否	无	排除字段
-	Latest       bool     `json:"latest,omitempty"`        //否	false	是否使用最新数据
-}
-
-type GetDeepDataReq struct {
-	req *Req[GetDeepDataReqBody]
-}
-type GetDeepDataReqBuilder struct {
-	req *Req[GetDeepDataReqBody]
-}
-
-func NewGetDeepDataReqBuilder() *GetDeepDataReqBuilder {
-	builder := &GetDeepDataReqBuilder{}
-	builder.req = &Req[GetDeepDataReqBody]{
-		QueryParams: &service.QueryParams{},
+func (r *RealtimeHostReq) Build() *service.Request {
+	pageNum, ok := r.req.BodyMap["start"].(int)
+	if !ok {
+		pageNum = 1
 	}
+	pageSize, _ := r.req.BodyMap["size"].(int)
+	r.req.BodyMap["start"] = pageSize * (pageNum - 1)
+	r.req.BodyMap.Decorate(r.req)
+	return r.req
+}
+
+type RealtimeServiceReq struct {
+	RealtimeHostReq
+}
+
+func NewRealtimeServiceReqBuilder() *RealtimeServiceReq {
+	builder := &RealtimeServiceReq{}
+	req := service.NewRequest()
+	req.Method = "POST"
+	builder.req = req
 	return builder
 }
 
-// PaginationId 否	无	分页id，指定分页id能够获取更多分页数据，分页id过期时间为5分钟
-func (builder *GetDeepDataReqBuilder) PaginationId(paginationId string) *GetDeepDataReqBuilder {
-	builder.req.Body.PaginationId = paginationId
-	return builder
+// Latest 否	false	是否使用最新数据，只对服务数据生效
+func (r *RealtimeServiceReq) Latest(latest bool) *RealtimeServiceReq {
+	r.req.BodyMap["latest"] = latest
+	return r
 }
 
 // Query 是	*	查询语句
-func (builder *GetDeepDataReqBuilder) Query(query string) *GetDeepDataReqBuilder {
-	builder.req.Body.Query = query
-	return builder
+func (r *RealtimeServiceReq) Query(query string) *RealtimeServiceReq {
+	r.RealtimeHostReq.Query(query)
+	return r
 }
 
 // Rule 否	无	类型为IP列表的服务数据收藏名称
-func (builder *GetDeepDataReqBuilder) Rule(rule string) *GetDeepDataReqBuilder {
-	builder.req.Body.Rule = rule
-	return builder
+func (r *RealtimeServiceReq) Rule(rule string) *RealtimeServiceReq {
+	if rule != "" {
+		r.RealtimeHostReq.Rule(rule)
+	}
+	return r
 }
 
 // IpList 否	无	IP列表
-func (builder *GetDeepDataReqBuilder) IpList(ipList []string) *GetDeepDataReqBuilder {
-	builder.req.Body.IpList = ipList
-	return builder
+func (r *RealtimeServiceReq) IpList(ipList []string) *RealtimeServiceReq {
+	if len(ipList) > 0 {
+		r.RealtimeHostReq.IpList(ipList)
+	}
+	return r
+}
+
+// Page 否	0	分页起始
+func (r *RealtimeServiceReq) Page(page int) *RealtimeServiceReq {
+	r.RealtimeHostReq.Page(page)
+	return r
 }
 
 // Size 否	10	分页大小
-func (builder *GetDeepDataReqBuilder) Size(size int) *GetDeepDataReqBuilder {
-	builder.req.Body.Size = size
-	return builder
+func (r *RealtimeServiceReq) Size(Size int) *RealtimeServiceReq {
+	r.RealtimeHostReq.Size(Size)
+	return r
 }
 
 // IgnoreCache 否	false	是否忽略缓存
-func (builder *GetDeepDataReqBuilder) IgnoreCache(ignoreCache bool) *GetDeepDataReqBuilder {
-	builder.req.Body.IgnoreCache = ignoreCache
-	return builder
+func (r *RealtimeServiceReq) IgnoreCache(ignoreCache bool) *RealtimeServiceReq {
+	r.RealtimeHostReq.IgnoreCache(ignoreCache)
+	return r
 }
 
 // StartTime 否	无	查询起始时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-func (builder *GetDeepDataReqBuilder) StartTime(startTime string) *GetDeepDataReqBuilder {
-	builder.req.Body.StartTime = startTime
-	return builder
+func (r *RealtimeServiceReq) StartTime(startTime string) *RealtimeServiceReq {
+	if startTime != "" {
+		r.RealtimeHostReq.StartTime(startTime)
+	}
+	return r
 }
 
 // EndTime 否	无	查询截止时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-func (builder *GetDeepDataReqBuilder) EndTime(endTime string) *GetDeepDataReqBuilder {
-	builder.req.Body.EndTime = endTime
-	return builder
+func (r *RealtimeServiceReq) EndTime(endTime string) *RealtimeServiceReq {
+	if endTime != "" {
+		r.RealtimeHostReq.EndTime(endTime)
+	}
+	return r
 }
 
 // Include 否	无	包含字段
-func (builder *GetDeepDataReqBuilder) Include(include []string) *GetDeepDataReqBuilder {
-	builder.req.Body.Include = include
-	return builder
+func (r *RealtimeServiceReq) Include(include []string) *RealtimeServiceReq {
+	if len(include) > 0 {
+		r.RealtimeHostReq.Include(include)
+	}
+	return r
 }
 
 // Exclude 否	无	排除字段
-func (builder *GetDeepDataReqBuilder) Exclude(exclude []string) *GetDeepDataReqBuilder {
-	builder.req.Body.Exclude = exclude
-	return builder
-}
-
-// Latest 否	false	是否使用最新数据，只对服务数据生效
-func (builder *GetDeepDataReqBuilder) Latest(latest bool) *GetDeepDataReqBuilder {
-	builder.req.Body.Latest = latest
-	return builder
-}
-
-func (builder *GetDeepDataReqBuilder) Build() *GetDeepDataReq {
-	req := &GetDeepDataReq{}
-	req.req = builder.req
-	return req
-}
-
-type GetAggregationDataReqBody struct {
-	Query           string   `json:"query,omitempty"`
-	Rule            string   `json:"rule,omitempty"`
-	IpList          []string `json:"ip_list,omitempty"`
-	Size            int      `json:"size,omitempty"`
-	IgnoreCache     bool     `json:"ignore_cache,omitempty"`
-	AggregationList []string `json:"aggregation_list,omitempty"`
-	StartTime       string   `json:"start_time,omitempty"`
-	EndTime         string   `json:"end_time,omitempty"`
-	Latest          bool     `json:"latest,omitempty"` //仅用于服务数据查询
-}
-
-type GetAggregationDataReq struct {
-	req *Req[GetAggregationDataReqBody]
-}
-
-type GetAggregationDataReqBuilder struct {
-	req *Req[GetAggregationDataReqBody]
-}
-
-// Query 是	*	查询语句
-func (builder *GetAggregationDataReqBuilder) Query(query string) *GetAggregationDataReqBuilder {
-	builder.req.Body.Query = query
-	return builder
-}
-
-// Rule 否	无	类型为IP列表的服务数据收藏名称
-func (builder *GetAggregationDataReqBuilder) Rule(rule string) *GetAggregationDataReqBuilder {
-	builder.req.Body.Rule = rule
-	return builder
-}
-
-// IpList 否	无	IP列表
-func (builder *GetAggregationDataReqBuilder) IpList(ipList []string) *GetAggregationDataReqBuilder {
-	builder.req.Body.IpList = ipList
-	return builder
-}
-
-// Size 否	10	分页大小
-func (builder *GetAggregationDataReqBuilder) Size(size int) *GetAggregationDataReqBuilder {
-	builder.req.Body.Size = size
-	return builder
-}
-
-// IgnoreCache 否	false	是否忽略缓存
-func (builder *GetAggregationDataReqBuilder) IgnoreCache(ignoreCache bool) *GetAggregationDataReqBuilder {
-	builder.req.Body.IgnoreCache = ignoreCache
-	return builder
-}
-
-// AggregationList 需要获取的聚合名称列表
-func (builder *GetAggregationDataReqBuilder) AggregationList(AggregationList []string) *GetAggregationDataReqBuilder {
-	builder.req.Body.AggregationList = AggregationList
-	return builder
-}
-
-// StartTime 否	无	查询起始时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-func (builder *GetAggregationDataReqBuilder) StartTime(startTime string) *GetAggregationDataReqBuilder {
-	builder.req.Body.StartTime = startTime
-	return builder
-}
-
-// EndTime 否	无	查询截止时间，接受2020-10-14 00:00:00格式的数据，时区为UTC
-func (builder *GetAggregationDataReqBuilder) EndTime(endTime string) *GetAggregationDataReqBuilder {
-	builder.req.Body.EndTime = endTime
-	return builder
-}
-
-// Latest 否	false	是否使用最新数据，只对服务数据生效
-func (builder *GetAggregationDataReqBuilder) Latest(latest bool) *GetAggregationDataReqBuilder {
-	builder.req.Body.Latest = latest
-	return builder
-}
-
-func (builder *GetAggregationDataReqBuilder) Build() *GetAggregationDataReq {
-	req := &GetAggregationDataReq{}
-	req.req = builder.req
-	return req
+func (r *RealtimeServiceReq) Exclude(exclude []string) *RealtimeServiceReq {
+	if len(exclude) > 0 {
+		r.RealtimeHostReq.Exclude(exclude)
+	}
+	return r
 }

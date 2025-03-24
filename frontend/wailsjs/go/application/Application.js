@@ -30,8 +30,8 @@ export function GetContext() {
   return window['go']['application']['Application']['GetContext']();
 }
 
-export function GetWechatRules() {
-  return window['go']['application']['Application']['GetWechatRules']();
+export function GetProxyHistory() {
+  return window['go']['application']['Application']['GetProxyHistory']();
 }
 
 export function SaveDatabaseFile(arg1) {
@@ -40,10 +40,6 @@ export function SaveDatabaseFile(arg1) {
 
 export function SaveExportDataDir(arg1) {
   return window['go']['application']['Application']['SaveExportDataDir'](arg1);
-}
-
-export function SaveICPConfig(arg1) {
-  return window['go']['application']['Application']['SaveICPConfig'](arg1);
 }
 
 export function SaveLogDataDir(arg1) {
@@ -60,10 +56,6 @@ export function SaveQueryOnEnter(arg1) {
 
 export function SaveTimeout(arg1) {
   return window['go']['application']['Application']['SaveTimeout'](arg1);
-}
-
-export function SaveWechat(arg1) {
-  return window['go']['application']['Application']['SaveWechat'](arg1);
 }
 
 export function SaveWechatDataDir(arg1) {

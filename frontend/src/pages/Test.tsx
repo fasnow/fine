@@ -1,93 +1,519 @@
-import {
-    CloudDownloadOutlined,
-    LoadingOutlined, QuestionOutlined, SendOutlined, SettingOutlined
-} from '@ant-design/icons';
+import React, {CSSProperties, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     Button,
-    Radio,
+    Divider,
     Flex,
+    Form,
+    Input,
+    InputNumber,
     Modal,
     Pagination,
-    Select,
-    Tag,
-    Tooltip,
-    Checkbox,
     Popover,
-    Popconfirm,
+    Select,
     Space,
-    ConfigProvider
+    Spin,
+    Switch,
+    Tabs,
+    Tooltip,
+    Upload,
+    Radio, Tag
 } from 'antd';
-import React, {CSSProperties, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import { QUERY_FIRST } from "@/component/type";
-import { errorNotification } from '@/component/Notification';
-import {useDispatch, useSelector} from 'react-redux';
-import {copy, getAllDisplayedColumnKeys, getSortedData} from '@/util/util';
-import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
-
-import {Export, Query, SetProxy} from "../../wailsjs/go/icp/Bridge";
+import {
+    GlobalOutlined,
+    DiffOutlined,
+    BugOutlined,
+    CloudDownloadOutlined,
+    InboxOutlined,
+    LoadingOutlined,
+    SearchOutlined, SyncOutlined,
+    UserOutlined, FileTextOutlined
+} from '@ant-design/icons';
+import {errorNotification, errorNotification1} from '@/component/Notification';
+import { QUERY_FIRST } from '@/component/type';
+import { RootState, appActions, userActions } from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { ExportDataPanelProps } from './Props';
+import {config, event, properties} from "../../wailsjs/go/models";
+import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
+import {Coin1, Coin2, Dots} from "@/component/Icon";
+import MurmurHash3 from "murmurhash3js"
+import { Buffer } from "buffer"
+import { toUint8Array } from "js-base64";
+import {
+    copy,
+    getAllDisplayedColumnKeys,
+    getAllDisplayedColumnKeysNoIndex,
+    getSortedData,
+    truncateString
+} from "@/util/util";
 import { WithIndex } from "@/component/Interface";
-import {config, event, icp} from "../../wailsjs/go/models";
-import {appActions, RootState, userActions} from "@/store/store";
-import TabsV2 from "@/component/TabsV2";
+import { TargetKey } from "@/pages/Constants";
+import TabLabel from "@/component/TabLabel";
+import type { Tab } from "rc-tabs/lib/interface"
 import Candidate, { ItemType } from "@/component/Candidate";
 import { FindByPartialKey } from "../../wailsjs/go/history/Bridge";
-import { AgGridReact } from "ag-grid-react";
+import {AgGridReact, CustomCellRendererProps, CustomTooltipProps} from "ag-grid-react";
+import "ag-grid-enterprise";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
-import { ColDef, GetContextMenuItemsParams, MenuItemDef } from "ag-grid-community";
-import {GetRestToken} from "../../wailsjs/go/hunter/Bridge";
-import {Proxy} from "@/pages/Setting";
-import {SaveProxy} from "../../wailsjs/go/application/Application";
-import TextArea from "antd/es/input/TextArea";
-import IcpBulk from "@/pages/IcpBulk";
+import {
+    ColDef,
+    GetContextMenuItemsParams,
+    ICellRendererComp,
+    ICellRendererParams, ITooltipParams,
+    SideBarDef,
+    ValueFormatterParams
+} from "ag-grid-community";
+import {GetUserInfo, HostSearch, SetAuth} from "../../wailsjs/go/shodan/Bridge";
+import Label from "@/component/Label";
+import Password from "@/component/Password";
 
-type PageDataType = WithIndex<icp.Item>
+const UserPanel: React.FC = () => {
+    const [open, setOpen] = useState<boolean>(false)
+    const dispatch = useDispatch()
+    const cfg = useSelector((state: RootState) => state.app.global.config)
+    const user = useSelector((state: RootState) => state.user.shodan)
+    const [spin, setSpin] = useState(false)
 
-const LabelCssProps: CSSProperties = {
-    display: "inline-block",
-    textAlign: "left",
-    minWidth: "60px",
-    width: "60px",
-    fontWeight: "bold",
-    color: "#333"
+    useEffect(() => {
+        getUserInfo()
+    }, [])
+
+    const getUserInfo = async () => {
+        try {
+            const r = await GetUserInfo()
+            dispatch(userActions.setShodanUser(r))
+        } catch (e) {
+            errorNotification("错误", e)
+        }
+    }
+
+    const save = async (key: string) => {
+        try {
+            await SetAuth(key)
+            const t = {...cfg, Shodan: {...cfg.Shodan, Token: key}} as config.Config;
+            dispatch(appActions.setConfig(t))
+            return true
+        } catch (e) {
+            errorNotification("错误", e)
+            return false
+        }
+    }
+
+    return <div style={{
+        width: "auto",
+        height: "23px",
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#f1f3f4"
+    }}>
+        <Flex align={"center"}>
+            <Tooltip title="设置" placement={"bottom"}>
+                <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
+            </Tooltip>
+            <Flex gap={10}>
+                <Tooltip title="剩余查询积分" placement={"bottom"}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: "center",
+                        color: "#f5222d"
+                    }}>
+                        <Coin1 />
+                        {user.query_credits || 0}
+                    </div>
+                </Tooltip>
+                <Tooltip title="剩余扫描积分" placement={"bottom"}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: "center",
+                        color: "#f5222d"
+                    }}>
+                        <Coin2/>
+                        {user.scan_credits || 0}
+                    </div>
+                </Tooltip>
+                <Tooltip title="刷新余额" placement={"bottom"}>
+                    <Button size="small" shape="circle" type="text"
+                            icon={<SyncOutlined
+                                spin={spin}
+                                onClick={async () => {
+                                    setSpin(true)
+                                    await getUserInfo()
+                                    setSpin(false)
+                                }
+                            }
+                    />}/>
+                </Tooltip>
+            </Flex>
+        </Flex>
+        <Modal
+            open={open}
+            onCancel={() => setOpen(false)}
+            onOk={() => {
+                setOpen(false)
+            }}
+            footer={null}
+            closeIcon={null}
+            width={600}
+            destroyOnClose
+        >
+            <Flex vertical gap={10}>
+                <Tag bordered={false} color="processing">
+                    API信息
+                </Tag>
+                <Password labelWidth={100} value={cfg.Shodan.Token} label={"API key"} onSubmit={save} />
+                <Flex vertical gap={5}>
+                    <Label labelWidth={100} label="订阅计划" value={user.plan}/>
+                    <Label labelWidth={100} label="剩余查询积分" value={`${user.query_credits||0}/${user.usage_limits?.query_credits||0}`}/>
+                    <Label labelWidth={100} label="剩余扫描积分" value={`${user.scan_credits||0}/${user.usage_limits?.scan_credits||0}`}/>
+                    <Label labelWidth={100} label="已监控IP数" value={`${user.monitored_ips||0}/${user.usage_limits?.monitored_ips||0}`}/>
+                    <Label labelWidth={100} label="已锁定" value={user.unlocked?"否":"是"}/>
+                </Flex>
+            </Flex>
+        </Modal>
+    </div>
 }
 
-const SerivceOptions = [
-    { value: '1', label: '网站', },
-    { value: '6', label: 'APP', },
-    { value: '7', label: '小程序', },
-    { value: '8', label: '快应用', },
-]
-
-const TabContent: React.FC = () => {
-    const gridRef = useRef<AgGridReact>(null)
-    const [pageSizeOptions] = useState([40, 80, 100])
-    const [inputCache, setInputCache] = useState<string>("")
-    const [total, setTotal] = useState<number>(0)
-    const [currentPageNum, setCurrentPageNum] = useState<number>(1)
-    const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
-    const [loading, setLoading] = useState<boolean>(false)
+const ExportDataPanel = (props: { id: number; total: number; currentPageSize: number, }) => {
+    const user = useSelector((state: RootState) => state.user.shodan)
+    const [pageNum, setPageNum] = useState<number>(0)
+    const [pageSize, setPageSize] = useState<number>(props.currentPageSize)
+    const [status, setStatus] = useState<"" | "error" | "warning">("")
     const [isExporting, setIsExporting] = useState<boolean>(false)
+    const [exportable, setExportable] = useState<boolean>(false)
+    const [maxPage, setMaxPage] = useState<number>(0)
     const [disable, setDisable] = useState<boolean>(false)
-    const [serviceType, setServiceType] = useState<string>("1")
-    const [serviceTypes, setServiceTypes] = useState<string[]>(["1"])
-    const [serviceTypeCache, setServiceTypeCache] = useState<string>(serviceType)
-    const pageIDMap = useRef<{ [key: number]: number }>({})
-    const exportID = useRef(0)
-    const [pageData, setPageData] = useState<PageDataType[]>([])
-    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.ICP)
-    const history = useSelector((state: RootState) => state.app.global.history)
+    const dispatch = useDispatch()
     const event = useSelector((state: RootState) => state.app.global.event)
     const stat = useSelector((state: RootState) => state.app.global.status)
-    const [queryType, setQueryType] = useState<1|2>(1)
-    const [columnDefs] = useState<ColDef[]>([
-        { headerName: '序号', field: "index", width: 80, pinned: 'left' },
-        { headerName: '名称', field: "unitName", width: 250, pinned: 'left' },
-        { headerName: '备案内容', field: "serviceName", width: 200 },
-        { headerName: '备案号', field: "serviceLicence", width: 200 },
-        { headerName: '备案法人', field: "leaderName", width: 150 },
-        { headerName: '单位性质', field: "natureName", width: 100 },
-        { headerName: '审核日期', field: "updateRecordTime", width: 200, },
+    const exportID = useRef(0)
+
+    useEffect(() => {
+        EventsOn(event.FOFAExport, (eventDetail:any) => {
+            if (eventDetail.ID !== exportID.current){
+                return
+            }
+            if (eventDetail.Status === stat.Stopped){
+                setIsExporting(false)
+                setDisable(false)
+                updateRestToken()
+            } else if (eventDetail.Status === stat.Error){
+                errorNotification("错误",eventDetail.Error)
+            }
+        })
+    }, []);
+
+    useEffect(() => {
+        const maxPage = Math.ceil(props.total / pageSize)
+        setMaxPage(maxPage)
+        if (pageNum > maxPage) {
+            setPageNum(maxPage)
+        }
+    }, [pageSize, props.total])
+
+    useEffect(() => {
+        if (pageNum > maxPage) {
+            setPageNum(maxPage)
+        }
+    }, [pageNum])
+
+    const updateRestToken = () => {
+        GetUserInfo().then(
+            result => {
+                dispatch(userActions.setFofaUser(result))
+            }
+        ).catch(
+            err => errorNotification("更新FOFA剩余积分", err)
+        )
+    }
+
+    const exportData = async (page: number) => {
+        setIsExporting(true)
+        if (!props.id) {
+            errorNotification("导出结果", QUERY_FIRST)
+            setIsExporting(false)
+            return
+        }
+        setDisable(true)
+        // Export(props.id, page, pageSize)
+        //     .then(r=>exportID.current = r)
+        //     .catch(
+        //         err => {
+        //             errorNotification("导出结果", err)
+        //             setIsExporting(false)
+        //             setDisable(false)
+        //         })
+    }
+
+    return <>
+        <Button
+            disabled={disable}
+            size="small"
+            onClick={() => setExportable(true)}
+            icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}
+        >
+            {isExporting ? "正在导出" : "导出结果"}
+        </Button>
+        <Modal
+            {...ExportDataPanelProps}
+            title="导出结果"
+            open={exportable}
+            onOk={async () => {
+                if ((maxPage === 0) || (maxPage > 0 && (maxPage < pageNum || pageNum <= 0))) {
+                    setStatus("error")
+                    return
+                } else {
+                    setStatus("")
+                }
+                setExportable(false)
+                exportData(pageNum)
+            }}
+            onCancel={() => {
+                setExportable(false);
+                setStatus("")
+            }}
+        >
+            {/*<div style={{ display: 'flex', flexDirection: 'column', gap: "5px" }}>*/}
+
+            {/*    <span style={{*/}
+            {/*        display: 'flex',*/}
+            {/*        flexDirection: "row",*/}
+            {/*        gap: "10px",*/}
+            {/*        backgroundColor: '#f3f3f3',*/}
+            {/*        width: "100%"*/}
+            {/*    }}>当前F点: <label style={{ color: "red" }}>{user.fofa_point}</label></span>*/}
+            {/*    <Form layout="inline" size='small'>*/}
+            {/*        <Form.Item label={"导出分页大小"}>*/}
+            {/*            <Select*/}
+            {/*                style={{ width: '80px' }}*/}
+            {/*                defaultValue={pageSize}*/}
+            {/*                options={pageSizeOptions.map(size => ({ label: size.toString(), value: size }))}*/}
+            {/*                onChange={(size) => {*/}
+            {/*                    setPageSize(size)*/}
+            {/*                }}*/}
+            {/*            />*/}
+            {/*        </Form.Item>*/}
+            {/*        <Form.Item label={`导出页数(max:${maxPage})`}>*/}
+            {/*            <InputNumber*/}
+            {/*                status={status}*/}
+            {/*                min={0}*/}
+            {/*                value={pageNum}*/}
+            {/*                onChange={(value: number | null) => {*/}
+            {/*                    if (value != null) {*/}
+            {/*                        if (value > maxPage) {*/}
+            {/*                            setPageNum(maxPage)*/}
+            {/*                        } else {*/}
+            {/*                            setPageNum(value)*/}
+            {/*                        }*/}
+            {/*                    }*/}
+            {/*                }}*/}
+            {/*                keyboard={true}*/}
+            {/*            />*/}
+            {/*        </Form.Item>*/}
+            {/*    </Form>*/}
+            {/*</div>*/}
+        </Modal></>
+}
+
+
+type PageDataType = WithIndex<properties.General>
+
+const pageSizeOptions = [100]
+
+interface TabContentProps {
+    colDefs?: ColDef[] | undefined | null,
+    input?: string,
+    full?: boolean,//全量搜索
+    newTab?: (input: string, colDef: ColDef[] | undefined | null) => void
+}
+
+class CountryCellRenderer implements ICellRendererComp {
+    eGui!: HTMLElement;
+
+    init(params: ICellRendererParams) {
+        const flag = `<img border="0" width="15" height="10" src="https://www.ag-grid.com/example-assets/flags/${params.data.code}.png">`;
+
+        const eTemp = document.createElement("div");
+        eTemp.innerHTML = `<span style="cursor: default;">${flag} ${params.value}</span>`;
+        this.eGui = eTemp.firstElementChild as HTMLElement;
+    }
+
+    getGui() {
+        return this.eGui;
+    }
+
+    refresh(params: ICellRendererParams): boolean {
+        return false;
+    }
+}
+
+const HTTPDetailView = (props:{http:properties.HTTP})=>{
+    const LabelCss:CSSProperties = {
+        display:'inline-block',
+        whiteSpace: 'nowrap',
+        marginRight: '5px',
+        width: '100px',
+    }
+    const title_hash = props.http?.title_hash
+    const headers_hash =props.http?.headers_hash
+    const dom_hash =props.http?.dom_hash
+    const favicon_data =props.http?.favicon?.data
+    const favicon_hash =props.http?.favicon?.hash
+    return <table style={{
+        padding: "10px",
+        borderRadius: '10px',
+        boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
+        backgroundColor: 'rgba(255, 255, 255,1)', /* 设置背景颜色和透明度 */
+        maxHeight: '400px',
+        maxWidth: '600px',
+        overflow: 'auto',
+    }}>
+        <tbody>
+        <tr>
+            <td>Title</td><td>{props.http?.title}</td>
+        </tr>
+        <tr>
+            <td>TitleHash</td><td>{title_hash}</td>
+        </tr>
+        <tr>
+            <td>HeadersHash</td><td>{headers_hash}</td>
+        </tr>
+        <tr>
+            <td>DOMHash</td><td>{dom_hash}</td>
+        </tr>
+        <tr>
+            <td>FaviconHash</td><td>{favicon_hash}</td>
+        </tr>
+        <tr>
+            <td>Components</td><td>{props.http?.components && Object.keys(props.http.components).join(" | ")}</td>
+        </tr>
+        </tbody>
+    </table>
+}
+
+const TabContent: React.FC<TabContentProps> = (props) => {
+    const [input, setInput] = useState<string>(props.input || "")
+    const [inputCache, setInputCache] = useState<string>(input)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [loading2, setLoading2] = useState<boolean>(false)
+    const pageIDMap = useRef<{ [key: number]: number }>({})
+    const [total, setTotal] = useState<number>(0)
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
+    const [clicked, setClicked] = useState(false);
+    const [hovered, setHovered] = useState(false);
+    const [faviconUrl, setFaviconUrl] = useState("");
+    const dispatch = useDispatch()
+    const allowEnterPress = useSelector((state: RootState) => state.app.global.config?.QueryOnEnter.Assets)
+    const history = useSelector((state: RootState) => state.app.global.history)
+    const [pageData, setPageData] = useState<PageDataType[]>([]);
+    const [columnDefs] = useState<ColDef[]>(props.colDefs || [
+        { headerName: '序号', field: "index", width: 80,pinned: "left"},
+        { headerName: 'IP', field: "ip_str", width: 150,pinned: "left", tooltipField: 'ip_str',},
+        { headerName: '端口', field: "port", width: 80,pinned: "left", tooltipField: 'port',},
+        { headerName: '标题', field: "http", width: 200,
+            valueFormatter:(params:ValueFormatterParams)=> params.value?.title,
+            tooltipField: "http",
+            tooltipComponent: (params: CustomTooltipProps ) =>{
+                if (params.value){
+                    return <HTTPDetailView http={params.value}/>
+                }
+            },
+            cellRenderer:(params:ICellRendererParams)=><>{params.value?.title}</>,
+        },
+        { headerName: '响应体Hash', field: "hash", width: 150,tooltipField: "data",
+            tooltipComponent: (params: CustomTooltipProps ) =>{
+                if (params.value){
+                    return <pre style={{
+                        padding: "10px",
+                        borderRadius: '10px',
+                        boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
+                        backgroundColor: 'rgba(255, 255, 255,1)', /* 设置背景颜色和透明度 */
+                        maxHeight: '400px',
+                        maxWidth: '600px',
+                        overflow: 'auto',
+                    }}>
+                        <code>{params.value}</code>
+                    </pre>
+                }
+            },
+            cellRenderer:(params:ICellRendererParams)=><Space size={5}><FileTextOutlined />{params.value}</Space>,
+        },
+        { headerName: '子域名', field: "hostnames", width: 80,
+            valueFormatter:(params:ValueFormatterParams)=>params.value && Object.keys(params.value).join(","),
+            tooltipField: "hostnames",
+            tooltipComponent: (params: CustomTooltipProps ) =>{
+                return <Flex vertical style={{
+                    padding: "10px",
+                    borderRadius: '10px',
+                    boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
+                    backgroundColor: 'rgba(255, 255, 255,1)', /* 设置背景颜色和透明度 */
+                    maxHeight: '200px',
+                    maxWidth: '600px',
+                    overflow: 'auto'
+                }} gap={5}>
+                    {params.value?.map((name:string)=>{
+                        return <span key={name}>{name}</span>
+                    })}
+                </Flex>
+            },
+            cellRenderer:(params:ICellRendererParams)=>params.value?.length > 0 && <Space size={5}><GlobalOutlined />{params.value.length}</Space>,
+        },
+        { headerName: '域名', field: "domains", width: 80,
+            valueFormatter:(params:ValueFormatterParams)=>params.value && Object.keys(params.value).join(","),
+            tooltipField: "domains",
+            tooltipComponent: (params: CustomTooltipProps ) =>{
+                return <Flex vertical style={{
+                    padding: "10px",
+                    borderRadius: '10px',
+                    boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
+                    backgroundColor: 'rgba(255, 255, 255,1)', /* 设置背景颜色和透明度 */
+                    maxHeight: '200px',
+                    maxWidth: '600px',
+                    overflow: 'auto'
+                }} gap={5}>
+                    {params.value?.map((name:string)=>{
+                        return <span key={name}>{name}</span>
+                    })}
+                </Flex>
+            },
+            cellRenderer:(params:ICellRendererParams)=>params.value?.length > 0 && <Space size={5}><GlobalOutlined />{params.value.length}</Space>,
+        },
+        { headerName: '漏洞', field: "vulns", width: 80,
+            valueFormatter:(params:ValueFormatterParams)=>params.value && Object.keys(params.value).join(" "),
+            tooltipField: "vulns",
+            tooltipComponent: (params: CustomTooltipProps ) =>{
+                if (params.value){
+                    const keys = Object.keys(params.value)
+                    return <div  style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        padding: "5px",
+                        borderRadius: '10px',
+                        boxSizing: 'content-box',
+                        boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
+                        backgroundColor: 'rgba(241, 241, 241,1)', /* 设置背景颜色和透明度 */
+                        maxHeight: '200px',
+                        maxWidth: '600px',
+                        overflow: 'auto'
+                    }} >
+                        {keys.map(name=>{
+                            return <span style={{whiteSpace: 'nowrap'}} key={name}>{name}</span>
+                        })}
+                    </div>
+                }
+            },
+            cellRenderer:(params:ICellRendererParams)=>params.value && Object.keys(params.value).length > 0 && <Space size={5}><BugOutlined />{Object.keys(params.value).length}</Space>,
+        },
+        { headerName: '标签', field: "tags", width: 80, tooltipField: 'tags',},
+        { headerName: '地理位置', field: "location", width: 100,
+            valueFormatter:(params:ValueFormatterParams)=> params.value && `${params.value?.country_code} ${params.value?.city}`,
+            tooltipValueGetter:(params:ITooltipParams)=> params.value && `${params.value?.country_name} ${params.value?.city}`,
+        },
+        { headerName: 'ASN', field: "asn", width: 110, tooltipField: 'asn',},
+        { headerName: '运营商', field: "isp", width: 120, tooltipField: 'isp',},
+        { headerName: '组织', field: "org", width: 120, tooltipField: 'org',},
+        { headerName: '更新时间', field: "timestamp", width: 200, pinned: "right", tooltipField: 'timestamp',},
     ]);
     const defaultColDef = useMemo<ColDef>(() => {
         return {
@@ -102,16 +528,62 @@ const TabContent: React.FC = () => {
             suppressHeaderFilterButton: true,
         }
     }, [])
-    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): (MenuItemDef)[] => {
+    const defaultSideBarDef = useMemo<SideBarDef>(() => {
+        return {
+            toolPanels: [
+                {
+                    id: "columns",
+                    labelDefault: "表格字段",
+                    labelKey: "columns",
+                    iconKey: "columns",
+                    toolPanel: "agColumnsToolPanel",
+                    toolPanelParams: {
+                        suppressRowGroups: false,
+                        suppressValues: false,
+                        suppressPivots: true,
+                        suppressPivotMode: true,
+                        suppressColumnFilter: false,
+                        suppressColumnSelectAll: true,
+                        suppressColumnExpandAll: true,
+                        suppressCellSelection: true
+                    },
+                },
+            ],
+        }
+    }, [])
+    const gridRef = useRef<AgGridReact>(null)
+    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams):any => {
         if(!pageData || pageData.length === 0 || !params.node)return []
         return [
             {
                 name: "浏览器打开URL",
-                disabled: serviceType !== "1",
+                disabled: !params.node?.data.link,
                 action: () => {
-                    BrowserOpenURL("http://" + params.node?.data?.serviceName)
+                    props.newTab && BrowserOpenURL(params.node?.data.link)
                 },
             },
+            {
+                name: "查询C段",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip + "/24", getColDefs())
+                },
+            },
+            {
+                name: "查询IP",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    props.newTab && props.newTab("ip=" + params.node?.data.ip, getColDefs())
+                },
+            },
+            {
+                name: "查询标题",
+                disabled: !params.node?.data.title,
+                action: () => {
+                    props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs())
+                },
+            },
+            "separator",
             {
                 name: "复制单元格",
                 disabled: !params.value,
@@ -139,149 +611,144 @@ const TabContent: React.FC = () => {
                     })
                     copy(colValues.join('\n'))
                 },
-            }
+            },
+            {
+                name: "复制URL列",
+                disabled: !params.node?.data.ip,
+                action: () => {
+                    const colValues = getSortedData<PageDataType>(gridRef.current?.api).map((item: PageDataType) => {
+                        return item['link']
+                    })
+                    copy(colValues)
+                },
+            },
         ];
-    }, [pageData, serviceType]);
-    const [running, setRunning] = useState<boolean>(false)
-    const [process, setProcess] = useState<string>("0")
-    const [timeSpent, setTimeSpent] = useState<string>("0s")
+    },[pageData]);
 
     useEffect(() => {
-        EventsOn(event.ICPExport,  (eventDetail:event.EventDetail)=> {
-            if (eventDetail.ID !== exportID.current){
-                return
-            }
-            setIsExporting(false)
-            setDisable(false)
-            if (eventDetail.Status === stat.Error){
-                errorNotification("错误",eventDetail.Error)
-            }
-        })
-    }, []);
-
-    const preHandleQuery = async (v: string) => {
-        if (v === "") {
-            return
+        if (props.input) {
+            setInput(props.input)
+            handleNewQuery(props.input, currentPageSize)
         }
-        setInputCache(v)
-        setServiceTypeCache(serviceType)
-        handleNewQuery(0, v, currentPageSize)
+        // const t = shodanData.matches as unknown as PageDataType[]
+        // setPageData(t)
+    }, [])
+
+    const getColDefs = () => {
+        if (gridRef.current?.api) {
+            console.log(gridRef.current.api.getColumnDefs())
+            return gridRef.current.api.getColumnDefs()
+        }
+        return columnDefs
     }
 
-    const handleNewQuery = (taskID: number, unitName: string, pageSize: number) => {
-        pageIDMap.current = {}
-        setCurrentPageNum(1)
-        setTotal(0)
+    const handleNewQuery = (query: string, pageSize: number) => {
+        setPageData([])
+        const t = query.trim()
+        if (t === "") {
+            return
+        }
+        setInputCache(t)
         setLoading(true)
-        //不能使用inputCache，setInputCache(tmpInput)为异步更新，此时inputCache还没有更新
-        Query(taskID, unitName, 1, pageSize, serviceType).then(
-            result => {
+        setTotal(0)
+        setCurrentPage(1)
+        pageIDMap.current = {}
+        HostSearch(0, t, "", 1,false).then(
+            (result) => {
+                console.log(result)
+                GetUserInfo().then(
+                    r=>dispatch(userActions.setShodanUser(r))
+                )
                 let index = 0
+                setPageData(result.matches.map(item => ({ index: ++index, ...item } as PageDataType)))
                 setTotal(result.total)
-                setPageData(result.items?.map((item) => {
-                    index++
-                    return { ...item, index: index }
-                }))
-                pageIDMap.current[1] = result.pageID
                 setLoading(false)
+                pageIDMap.current[1] = result.pageID
             }
         ).catch(
             err => {
-                errorNotification("ICP查询出错", err)
-                setPageData([])
+                errorNotification("Shodan查询出错", err)
                 setLoading(false)
+                setPageData([])
+                return
             }
         )
     }
 
-    const handlePaginationChange = (newPage: number, newSize: number) => {
-        //page发生变换
-        if (newPage !== currentPageNum && newSize === currentPageSize) {
+    const handlePaginationChange = async (newPage: number, newPageSize: number) => {
+        //page发生变换，size使用原size
+        if (newPage !== currentPage && newPageSize === currentPageSize) {
             setLoading(true)
             let pageID = pageIDMap.current[newPage]
-            Query(pageID ? pageID : 0, inputCache, newPage, newSize, serviceTypeCache).then(
+            pageID = pageID ? pageID : 0
+            HostSearch(pageID, inputCache, "", newPage,false).then(
                 (result) => {
+                    GetUserInfo().then(
+                        r=>dispatch(userActions.setShodanUser(r))
+                    )
                     let index = (newPage - 1) * currentPageSize
-                    setPageData(result.items?.map((item) => ({ index: ++index, ...item })))
-                    setCurrentPageNum(newPage)
+                    setPageData(result.matches.map(item => ({ index: ++index, ...item } as PageDataType)))
+                    setTotal(result.total)
+                    setCurrentPage(newPage)
                     setLoading(false)
                     pageIDMap.current[newPage] = result.pageID
                 }
             ).catch(
                 err => {
-                    errorNotification("ICP查询出错", err)
+                    errorNotification("Shodan查询出错", err)
                     setLoading(false)
+                    return
                 }
             )
         }
 
-        //size发生变换
-        if (newSize !== currentPageSize) {
-            setCurrentPageSize(newSize)
-            handleNewQuery(0, inputCache, newSize)
+        //size发生变换，page设为1
+        if (newPageSize !== currentPageSize) {
+            setCurrentPageSize(newPageSize)
+            handleNewQuery(inputCache, newPageSize)
         }
     }
 
-    const exportData = async () => {
-        if (pageIDMap.current[1] === undefined) {
-            errorNotification("导出结果", QUERY_FIRST)
-            setIsExporting(false);
-            setDisable(false);
-            return
-        }
-        setIsExporting(true)
-        setDisable(true)
-        try {
-            exportID.current = await Export(pageIDMap.current[1])
-        } catch (e) {
-            errorNotification("导出结果", e)
-            setDisable(false)
-            setIsExporting(false)
-        }
-    }
 
-    const footer = (<Flex justify={"space-between"} align={'center'} style={{ padding: '5px' }}>
-        <Pagination
-            showQuickJumper
-            showSizeChanger
-            total={total}
-            pageSizeOptions={pageSizeOptions}
-            defaultPageSize={pageSizeOptions[0]}
-            defaultCurrent={1}
-            current={currentPageNum}
-            showTotal={(total) => `${total} items`}
-            size="small"
-            onChange={(page, size) => handlePaginationChange(page, size)}
-        />
-        <Button
-            disabled={disable}
-            size="small"
-            onClick={ async () => {
-                await exportData()
-            }}
-            icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}
-        >
-            {isExporting ? "正在导出" : "导出结果"}
-        </Button>
-    </Flex>)
+    const footer = (
+        <Flex justify={"space-between"} align={'center'} style={{ padding: '5px' }}>
+            <Pagination
+                showQuickJumper
+                showSizeChanger
+                total={total}
+                pageSizeOptions={pageSizeOptions}
+                defaultPageSize={pageSizeOptions[0]}
+                defaultCurrent={1}
+                current={currentPage}
+                showTotal={(total) => `${total} items`}
+                size="small"
+                onChange={(page, size) => handlePaginationChange(page, size)}
+            />
+            <ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />
+        </Flex>)
 
-    return (<Flex vertical style={{ width: "100%", height: "100%" }} gap={5} >
-        <Flex vertical align={"center"}>
+    return <Flex vertical gap={5} style={{ height: '100%' }}>
+        <Flex justify={"center"} align={'center'}>
             <Candidate<string>
                 size={"small"}
                 style={{ width: 600 }}
                 placeholder='Search...'
                 allowClear
-                onPressEnter={(v) => {
+                value={input}
+                onSearch={(value) => handleNewQuery(value, currentPageSize)}
+                onPressEnter={(value) => {
                     if (!allowEnterPress) return
-                    preHandleQuery(v)
+                    handleNewQuery(value, currentPageSize)
                 }}
-                onSearch={(v) => preHandleQuery(v)}
                 items={[
                     {
+                        onSelectItem: (item) => {
+                            setInput(item.data)
+                        },
                         fetch: async (v) => {
                             try {
-                                const response = await FindByPartialKey(history.ICP, !v ? "" : v.toString());
+                                // @ts-ignore
+                                const response = await FindByPartialKey(history.Shodan, !v ? "" : v.toString());
                                 const a: ItemType<string>[] = response?.map(item => {
                                     const t: ItemType<string> = {
                                         value: item,
@@ -298,154 +765,109 @@ const TabContent: React.FC = () => {
                         }
                     }
                 ]}
-                addonBefore={<Select
-                    onChange={(value) => {
-                        setServiceType(value)
-                    }}
-                    defaultValue="1"
-                    options={[
-                        ...SerivceOptions,
-                        { value: '0', label: '历史结果', },
-                    ]}
-                    style={{ minWidth: 90 }}
-                />}
             />
-            ICP备案查询：请输入单位名称或域名或备案号查询，请勿使用子域名或者带http://www等字符的网址查询
         </Flex>
-        <div style={{ width: "100%", height: "100%"}}>
-            <AgGridReact
-                ref={gridRef}
-                loading={loading}
-                embedFullWidthRows
-                rowData={pageData}
-                columnDefs={columnDefs}
-                getContextMenuItems={getContextMenuItems}
-                sideBar={false}
-                headerHeight={32}
-                rowHeight={32}
-                defaultColDef={defaultColDef}
-                noRowsOverlayComponent={() => <NotFound />}
-                loadingOverlayComponent={() => <Loading />}
-            />
+        <div style={{width: "100%", height: "100%"}}>
+            <Flex vertical style={{width: "100%", height: "100%"}}>
+                <AgGridReact
+                    ref={gridRef}
+                    embedFullWidthRows
+                    loading={loading}
+                    rowData={pageData}
+                    columnDefs={columnDefs}
+                    getContextMenuItems={getContextMenuItems}
+                    sideBar={defaultSideBarDef}
+                    headerHeight={32}
+                    rowHeight={40}
+                    defaultColDef={defaultColDef}
+                    noRowsOverlayComponent={() => <NotFound />}
+                    loadingOverlayComponent={() => <Loading />}
+                    cellSelection={true}
+                    tooltipInteraction={true}
+                    tooltipShowDelay={0}
+                    // isFullWidthRow={()=>true}
+                    // fullWidthCellRenderer={fullWidthCellRenderer}
+                    // getRowHeight={()=>200}
+                    // autoSizeStrategy={{
+                    //     type:'fitGridWidth'
+                    // }}
+                />
+                {footer}
+            </Flex>
         </div>
-        {footer}
-    </Flex>)
+
+    </Flex>
 }
 
-const SettingPanel = () => {
-    const [open, setOpen] = useState<boolean>(false)
-    const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState) => state.app.global.config)
-    const proxy = useSelector((state:RootState) => state.app.global.config.ICP.Proxy)
-    const [url, setUrl] = useState<string>("")
+const Shodan = () => {
+    const [activeKey, setActiveKey] = useState<string>("")
+    const [items, setItems] = useState<Tab[]>([])
+    const indexRef = useRef(1)
 
     useEffect(() => {
-        setUrl(`${proxy?.Type}://${proxy?.Host}:${proxy?.Port}`)
-    }, [proxy])
+        const key = `${indexRef.current}`;
+        setItems([{
+            label: <TabLabel label={key} />,
+            key: key,
+            children: <TabContent newTab={addTab} />,
+            // children:<GridExample></GridExample>
+        }])
+        setActiveKey(key)
+    }, [])
 
-    const updateProxy = (p:config.Proxy) =>{
-        SetProxy(p).then(() => {
-            const tt = { ...cfg, ICP: {...cfg.ICP, Proxy: p} } as config.Config;
-            dispatch(appActions.setConfig(tt))
-        }).catch(
-            err => {
-                errorNotification("错误", err, 3)
-            }
-        )
-    }
+    const onTabChange = (newActiveKey: string) => {
+        setActiveKey(newActiveKey)
+    };
 
-    const onCancel = () =>{
-        setOpen(false)
-    }
-    const onOk = () =>{
-        setOpen(false)
-    }
+    const addTab = (input: string, colDef: ColDef[] | undefined | null) => {
+        const newActiveKey = `${++indexRef.current}`;
+        setActiveKey(newActiveKey)
+        setItems(prevState => [
+            ...prevState,
+            {
+                label: <TabLabel label={newActiveKey} />,
+                key: newActiveKey,
+                children: <TabContent
+                    colDefs={colDef}
+                    input={input}
+                    newTab={addTab}
+                />,
+            },
+        ])
+    };
 
-    const onOpen = () =>{
-        setOpen(true)
-    }
+    const removeTab = (targetKey: TargetKey) => {
+        const t = items.filter((item) => item.key !== targetKey);
+        const newActiveKey = t.length && activeKey === targetKey ? t[t.length - 1]?.key : activeKey
+        setItems(t)
+        setActiveKey(newActiveKey)
+    };
 
-    return <>
-        <Flex gap={5} align={"center"} justify={"center"} style={{backgroundColor: '#f2f2f2'}}>
-            <Tooltip title={"设置"} placement={"right"}>
-                <Button onClick={onOpen}
-                        size={"small"}
-                        type={"link"}
-                        icon={<SettingOutlined />}
-                        style={{minWidth:'100px'}}
-                >{
-                    proxy.Enable &&
-                    <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
-                        <Flex>
-                            <span style={{ display: "flex", marginBottom: "5px" }}>
-                                <SendOutlined rotate={315} style={{ color: proxy?.Enable ? "red" : "" }} />
-                            </span>
-                            {url}
-                        </Flex>
-                    </Tag>
-                }</Button>
-            </Tooltip>
-        </Flex>
-        <Modal
-            footer={null}
-            closeIcon={null}
-            destroyOnClose
-            open={open}
-            onCancel={onCancel}
-            onOk={onOk}
-            styles={{
-                body:{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: 'center'
-                }
-            }}
-            style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: 'center'
-            }}
-        >
-            <Flex vertical gap={10}>
-                <Tag bordered={false} color="blue">优先级高于全局代理，关闭时使用全局代理</Tag>
-                <Proxy labelWidth={40} proxy={proxy} update={updateProxy}/>
-            </Flex>
-        </Modal>
-    </>
-}
+    const onEditTab = (
+        targetKey: React.MouseEvent | React.KeyboardEvent | string,
+        action: 'add' | 'remove',
+    ) => {
+        if (action === 'add') {
+            addTab("", null);
+        } else {
+            removeTab(targetKey);
+        }
+    };
 
-const Icp: React.FC = () => {
-    const [queryType, setQueryType] = useState<1|2>(1)
     return (
-        <Flex vertical style={{height: '100%', width: '100%'}}>
-            <Flex >
-                <SettingPanel/>
-                <Radio.Group
-                    optionType="button"
-                    buttonStyle="solid"
-                    style={{width: '100%',border: 'none'}}
-                    size={'small'}
-                    block
-                    options={[
-                        { label: <Flex align={"center"}>单个查询<Tooltip placement={"bottom"} title={"如同网页查询"}><QuestionOutlined
-                                style={{fontSize:12, color: "blue"}}
-                            /></Tooltip></Flex>, value: 1 },
-                        { label: <Flex align={"center"}>批量查询（Beta）<Tooltip placement={"bottom"} title={"会直接导出全部结果，务必使用代理池工具，如：https://github.com/thinkoaa/Deadpool，如任务报错可点击 继续 继续任务"}><QuestionOutlined
-                                style={{fontSize:12, color: "blue"}}
-                            /></Tooltip></Flex>, value: 2 },
-                    ]}
-                    defaultValue={queryType}
-                    onChange={(e)=>setQueryType(e.target.value)}
-                />
-            </Flex>
-            <div style={{height: '100%', width: '100%', display : queryType === 1 ? 'block' : 'none'}}>
-                <TabsV2 defaultTabContent={<TabContent/>} />
-            </div>
-            <div style={{height: '100%', width: '100%', display : queryType === 2 ? 'block' : 'none'}}>
-                <TabsV2 defaultTabContent={<IcpBulk/>} />
-            </div>
-        </Flex>
-       )
+        <Tabs
+            style={{ height: '100%', width: '100%' }}
+            size="small"
+            tabBarExtraContent={{
+                left: <UserPanel />
+            }}
+            type="editable-card"
+            onChange={onTabChange}
+            activeKey={activeKey}
+            onEdit={onEditTab}
+            items={items}
+        />
+    );
 }
 
-export default Icp
+export default Shodan;

@@ -117,3 +117,4 @@ backend/service/service/wechat/decompile*
 **/log
 **/*.ini
 **/*.txt
+**/wailsjs

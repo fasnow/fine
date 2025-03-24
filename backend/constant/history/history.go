@@ -1,13 +1,14 @@
 package history
 
 const (
-	FOFA   = 0
-	Hunter = 1
-	Quake  = 2
-	Zone   = 3
-	ICP    = 4
-	TYC    = 5
-	AQC    = 6
+	FOFA = iota
+	Hunter
+	Quake
+	Zone
+	ICP
+	TYC
+	AQC
+	Shodan
 )
 
 type HistoryEnum struct {
@@ -18,4 +19,5 @@ type HistoryEnum struct {
 	ICP    int
 	TYC    int
 	AQC    int
+	Shodan int
 }

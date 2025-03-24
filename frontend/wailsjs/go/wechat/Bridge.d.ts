@@ -17,6 +17,8 @@ export function GetInfo(arg1:string):Promise<void>;
 
 export function GetMatchedString(arg1:string,arg2:string):Promise<Array<string>>;
 
+export function GetWechatRules():Promise<Array<string>>;
+
 export function SaveWechatRules(arg1:Array<string>):Promise<void>;
 
 export function SetAppletPath(arg1:string):Promise<void>;

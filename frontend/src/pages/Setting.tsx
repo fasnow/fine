@@ -10,15 +10,15 @@ import { SetAuth as SetFofaAuth } from "../../wailsjs/go/fofa/Bridge";
 import { SetAuth as SetQuakeAuth } from "../../wailsjs/go/quake/Bridge";
 import { SetAuth as SetTianYanChaAuth } from "../../wailsjs/go/tianyancha/Bridge";
 import { SetAuth as SetAiQiChaAuth } from "../../wailsjs/go/aiqicha/Bridge";
+import { SetAuth as SetShodanAuth } from "../../wailsjs/go/shodan/Bridge";
 import { config } from "../../wailsjs/go/models";
 import {
-    SaveICPConfig,
     SaveProxy,
     SaveQueryOnEnter,
     SaveTimeout,
 } from "../../wailsjs/go/application/Application";
 import {OpenDirectoryDialog} from "../../wailsjs/go/osoperation/Runtime";
-import {SetProxy, SetProxyTimeout} from "../../wailsjs/go/icp/Bridge";
+import {SaveICPConfig, SetProxy, SetProxyTimeout} from "../../wailsjs/go/icp/Bridge";
 import Number from "@/component/Number";
 import Password from "@/component/Password";
 
@@ -49,8 +49,6 @@ export const Proxy:React.FC<ProxyPros> = (props) => {
     useEffect(()=>{
         setProxyConf(props.proxy)
     }, [props.proxy])
-
-
 
     const cancel = () => {
         setProxyConf(props.proxy)
@@ -391,6 +389,19 @@ export const Setting: React.FC = () => {
                           return false
                       }
                   }}
+            />
+            <Password label={'Shodan'} labelWidth={80} width={400} value={cfg.Shodan.Token}
+                      onSubmit={async (value) => {
+                          try {
+                              await SetShodanAuth(value)
+                              const t = {...cfg, Shodan: {...cfg.Shodan, Token: value}} as config.Config;
+                              dispatch(appActions.setConfig(t))
+                              return true
+                          } catch (e) {
+                              errorNotification("错误", e, 3)
+                              return false
+                          }
+                      }}
             />
             <Password label={'天眼查'} placeholder={"auth_token"} labelWidth={80} width={400} value={cfg.TianYanCha.Token}
                   onSubmit={async (value) => {

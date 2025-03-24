@@ -1,8 +1,8 @@
 package models
 
 import (
-	"fine/backend/constant"
 	quakeModel "fine/backend/service/model/quake"
+	"gorm.io/datatypes"
 )
 
 type Quake struct {
@@ -16,13 +16,13 @@ type QuakeRealtimeQueryLog struct {
 	PageID      int64 `gorm:"unique"`
 	Query       string
 	Rule        string
-	IpList      constant.StringArray
+	IpList      datatypes.JSONSlice[string]
 	Page        int
 	PageSize    int
 	IgnoreCache bool
 	StartTime   string
 	EndTime     string
-	Include     constant.StringArray
-	Exclude     constant.StringArray
+	Include     datatypes.JSONSlice[string]
+	Exclude     datatypes.JSONSlice[string]
 	Latest      bool //仅用于实时服务数据查询
 }

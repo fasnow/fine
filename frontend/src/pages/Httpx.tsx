@@ -164,7 +164,7 @@ const TabContent = () => {
         setFlags(cfg.Httpx.Flags)
     }, [cfg.Httpx])
 
-    const saveHttpx = () => {
+    const saveHttpx = (path:string) => {
         SetConfig(path, flags).then(
             () => {
                 const t = { ...cfg, Httpx: { ...cfg.Httpx, Flags: flags, Path: path } } as config.Config;
@@ -182,7 +182,7 @@ const TabContent = () => {
             result => {
                 if (result) {
                     setPath(result)
-                    saveHttpx()
+                    saveHttpx(result)
                 }
             }
         ).catch(
@@ -239,7 +239,7 @@ const TabContent = () => {
                         <Space.Compact>
                             <Input value={path} size={"small"} style={{ width: "400px" }}
                                 onChange={e => setPath(e.target.value)}
-                                onBlur={saveHttpx}
+                                onBlur={()=>saveHttpx(path)}
                             />
                             <Button size={"small"} onClick={setHttpxPath}>选择</Button>
                         </Space.Compact>
@@ -249,7 +249,7 @@ const TabContent = () => {
                         <Tooltip title={"请勿添加-l或-u"} placement={"bottom"}>
                             <Input value={flags} size={"small"} style={{ width: "200px" }}
                                 onChange={e => setFlags(e.target.value)}
-                                onBlur={saveHttpx}
+                                onBlur={()=>saveHttpx(path)}
                             />
                         </Tooltip>
                     </Flex>

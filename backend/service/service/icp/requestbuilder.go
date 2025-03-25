@@ -1,8 +1,6 @@
 package icp
 
 import (
-	"bytes"
-	"encoding/json"
 	"fine/backend/service/service"
 	"strconv"
 )
@@ -27,35 +25,26 @@ func NewQueryReqBuilder() *QueryReqBuilder {
 }
 
 func (r *QueryReqBuilder) PageNum(pageNum int) *QueryReqBuilder {
-	r.req.BodyParams.Set("pageNum", strconv.Itoa(pageNum))
+	r.req.BodyMap["pageNum"] = strconv.Itoa(pageNum)
 	return r
 }
 
 func (r *QueryReqBuilder) PageSize(pageSize int) *QueryReqBuilder {
-	r.req.BodyParams.Set("pageSize", strconv.Itoa(pageSize))
+	r.req.BodyMap["pageSize"] = strconv.Itoa(pageSize)
 	return r
 }
 
 func (r *QueryReqBuilder) ServiceType(serviceType string) *QueryReqBuilder {
-	r.req.BodyParams.Set("serviceType", serviceType)
+	r.req.BodyMap["serviceType"] = serviceType
 	return r
 }
 
 func (r *QueryReqBuilder) UnitName(unitName string) *QueryReqBuilder {
-	r.req.BodyParams.Set("unitName", unitName)
+	r.req.BodyMap["unitName"] = unitName
 	return r
 }
 
 func (r *QueryReqBuilder) Build() *service.Request {
-	pageNum, _ := strconv.Atoi(r.req.BodyParams.Get("pageNum"))
-	pageSize, _ := strconv.Atoi(r.req.BodyParams.Get("pageSize"))
-	data := map[string]any{
-		"pageNum":     pageNum,
-		"pageSize":    pageSize,
-		"serviceType": r.req.BodyParams.Get("serviceType"),
-		"unitName":    r.req.BodyParams.Get("unitName"),
-	}
-	bt, _ := json.Marshal(data)
-	r.req.Body = bytes.NewReader(bt)
+	r.req.BodyMap.Decorate(r.req)
 	return r.req
 }

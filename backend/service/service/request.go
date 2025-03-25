@@ -15,7 +15,7 @@ type BodyParams struct {
 
 // Decorate 转为 Content-Type 为 application/x-www-form-urlencoded 对应的请求体
 func (r *BodyParams) Decorate(req *Request) {
-	if req.BodyParams == nil {
+	if req.BodyParams == nil || req.BodyParams.Values == nil {
 		return
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -49,7 +49,7 @@ func NewRequest() *Request {
 	return &Request{
 		Header:      make(http.Header),
 		QueryParams: make(url.Values),
-		BodyParams:  &BodyParams{},
+		BodyParams:  &BodyParams{Values: make(url.Values)},
 		BodyMap:     make(BodyMap),
 	}
 }

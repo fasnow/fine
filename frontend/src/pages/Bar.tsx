@@ -17,7 +17,7 @@ import "./Bar.css";
 import {useDispatch, useSelector} from "react-redux";
 import { GITHUB_URL, ISSUE_URL } from "@/component/type";
 import wailsJson from '../../../wails.json';
-import favicon from "../assets/images/paimon.svg"
+import favicon from "../assets/images/appicon.png"
 import { genshinLaunch } from "./op";
 import {appActions, RootState} from "@/store/store";
 import { Proxy as ProxyComp } from "./Setting"
@@ -47,7 +47,7 @@ const buttonStyle: React.CSSProperties = {
     transition: "0s",
     opacity: 1
 };
-const { confirm } = Modal;
+
 const appIcon = (platform: string) => {
     if (platform === "windows") {
         return <span

@@ -44,7 +44,7 @@ func TestBridge_SetProxy(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	result, err := b.Query(0, "baidu.com", 1, 1, "1")
+	result, err := b.Query(0, "王恕嵩", 1, 1, "1")
 	if err != nil {
 		t.Error(err)
 		return

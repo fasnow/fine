@@ -85,12 +85,12 @@ func (r *ICP) SetTokenFromRemote() error {
 	timeStampStr := strconv.FormatInt(timeStampInt, 10)
 	req := service.NewRequest()
 	req.Method = "POST"
-	req.BodyParams.Set("authKey", fmt.Sprintf("%x", md5.Sum([]byte("testtest"+timeStampStr))))
-	req.BodyParams.Set("timeStamp", timeStampStr)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Set("Referer", referer)
 	req.Header.Add("User-Agent", proxy.DefaultUA)
 	req.Header.Set("Cookie", "__jsluid_s = 6452684553c30942fcb8cff8d5aa5a5b")
+	req.BodyParams.Set("authKey", fmt.Sprintf("%x", md5.Sum([]byte("testtest"+timeStampStr))))
+	req.BodyParams.Set("timeStamp", timeStampStr)
 	req.BodyParams.Decorate(req)
 	response, err := req.Do(r.http, getTokenUrl)
 	if err != nil {
@@ -118,7 +118,6 @@ func (r *ICP) SetTokenFromRemote() error {
 }
 
 func (r *ICP) request(req *service.Request) ([]byte, error) {
-	req.BodyParams.Decorate(req)
 	req.Header.Set("Token", r.token)
 	req.Header.Set("Sign", r.sign)
 	return req.Fetch(r.http, queryUrl, func(response *http.Response) error {
@@ -151,7 +150,7 @@ func (r *ICP) Query(req *service.Request) (*Result, error) {
 	list := gjson.Get(bodyStr, "params.list").Array()
 
 	serviceTypeName := ""
-	switch req.BodyParams.Get("serviceType") {
+	switch req.BodyMap["serviceType"] {
 	case "1":
 		serviceTypeName = "网站"
 		break
@@ -171,7 +170,7 @@ func (r *ICP) Query(req *service.Request) (*Result, error) {
 	for _, item := range list {
 		itemStr := item.String()
 		serviceName := ""
-		if req.BodyParams.Get("serviceType") == "1" {
+		if req.BodyMap["serviceType"] == "1" {
 			serviceName = gjson.Get(itemStr, "domain").String()
 		} else {
 			serviceName = gjson.Get(itemStr, "serviceName").String()

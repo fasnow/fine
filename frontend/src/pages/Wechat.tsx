@@ -33,6 +33,7 @@ import {Join} from "../../wailsjs/go/osoperation/Path";
 import {OpenDirectoryDialog, OpenFolder} from "../../wailsjs/go/osoperation/Runtime";
 import {copy} from "@/util/util";
 import VersionTaskStatus = wechat.VersionTaskStatus;
+import DirectorySelector from "@/component/DirectorySelector";
 
 export const MiniProgram: React.FC = () => {
     const [data, setData] = useState<InfoToFront[]>([])
@@ -115,24 +116,20 @@ export const MiniProgram: React.FC = () => {
         )
     }
 
-    const configAppletPath = () => {
-        OpenDirectoryDialog().then(
-            result => {
-                if (result) {
-                    SetAppletPath(result).then(
-                        () => {
-                            const tt = { ...cfg, Wechat: { ...cfg.Wechat,Applet:result } } as config.Config
-                            dispatch(appActions.setConfig(tt))
-                        }
-                    ).catch(
-                        e => {
-                            errorNotification("错误", e)
-                            setAppletPath(cfg.Wechat.Applet)
-                        }
-                    )
+    const onSelect = (dir:string) =>{
+        if (dir) {
+            SetAppletPath(dir).then(
+                () => {
+                    const tt = { ...cfg, Wechat: { ...cfg.Wechat,Applet:dir } } as config.Config
+                    dispatch(appActions.setConfig(tt))
                 }
-            }
-        )
+            ).catch(
+                e => {
+                    errorNotification("错误", e)
+                    setAppletPath(cfg.Wechat.Applet)
+                }
+            )
+        }
     }
 
     const getApis=()=>{
@@ -149,19 +146,19 @@ export const MiniProgram: React.FC = () => {
     }
 
     return (
-        <div
+        <Flex
+            vertical
             style={{
-                display: 'flex',
-                flexDirection: "column",
-                // padding: "0 10px",
-                height: '100%'
+                padding: '5px',
+                height: '100%',
+                boxSizing: 'border-box'
             }}
+            gap={10}
         >
 
-            <Flex vertical gap={10} align={"center"} justify={"center"}>
+            <Flex vertical gap={5} align={"center"} justify={"center"}>
+                <DirectorySelector label={"微信Applet路径"} inputWidth={600} value={appletPath} onSelect={onSelect}/>
                 <Space.Compact style={{ justifyContent: "center" }}>
-                    <Input style={{ width: "600px", }} size={'small'} prefix={<>微信Applet路径</>} value={appletPath} />
-                    <Button size={"small"} onClick={configAppletPath} >选择</Button>
                     {
                         autoDecompile ?
                             < Button size={"small"} onClick={() => {
@@ -250,10 +247,8 @@ export const MiniProgram: React.FC = () => {
                 </Space.Compact>
                 建议先执行清空Applet目录以避免无法回溯是哪个小程序
             </Flex>
-            <Splitter style={{
-                flex: 1,overflow:"auto",padding: '5px'
-            }}>
-                <Splitter.Panel min={'15%'} defaultSize={"35%"}>
+            <Splitter style={{overflow: "hidden"}}>
+                <Splitter.Panel min={'15%'} defaultSize={"35%"} >
                     <ConfigProvider theme={{
                         components: {
                             List: {
@@ -263,8 +258,7 @@ export const MiniProgram: React.FC = () => {
                         }
                     }}>
                         <List
-                            style={{height: '100%',overflow:"auto"}}
-                            // style={{overflowY: "auto", height: "calc(100vh -400px)", width: "100%"}}
+                            style={{overflowY: "auto"}}
                             itemLayout="vertical"
                             dataSource={data}
                             renderItem={(item) => {
@@ -399,6 +393,6 @@ export const MiniProgram: React.FC = () => {
                     </Flex>
                 </Splitter.Panel>
             </Splitter>
-        </div>
+        </Flex>
     );
 };

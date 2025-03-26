@@ -255,25 +255,6 @@ interface FileSelectorProps {
     onSelect?: (path:string)=>void
 }
 
-const FileSelector:React.FC<FileSelectorProps>=(props)=>{
-    const onClick = () => {
-        OpenDirectoryDialog().then(
-            result => {
-                if (result && props.onSelect) {
-                    props.onSelect(result)
-                }
-            }
-        )
-    }
-    return <Flex>
-        <Flex style={{marginRight: '10px'}}>
-            <span style={{display: "inline-block", textAlign: "left", paddingRight: "5px", height: "24px", width: props.labelWidth || 'fit-content'}}>{props.label}</span>
-            <Input value={props.value} size={"small"} style={{width: props.width || '400px'}}/>
-        </Flex>
-        <Button size={"small"} shape={"round"} onClick={onClick}>选择</Button>
-    </Flex>
-}
-
 export const Setting: React.FC = () => {
     const dispatch = useDispatch()
     const cfg = useSelector((state:RootState) => state.app.global.config)

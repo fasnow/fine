@@ -13,17 +13,17 @@ interface PasswordProps {
 
 const Password:React.FC<PasswordProps>=(props)=>{
     const [editable, setEditable] = useState(false)
-    const [key, setKey] = useState(props.value)
+    const [value, setValue] = useState(props.value)
     const buttonProps: ButtonProps = {
         type: "default", shape: "round", size: "small"
     };
 
     useEffect(()=>{
-        setKey(props.value)
+        setValue(props.value)
     }, [props.value])
 
     const onClick=async () => {
-        if (await props.onSubmit(key || "")) {
+        if (await props.onSubmit(value || "")) {
             setEditable(false)
         }
     }
@@ -32,7 +32,7 @@ const Password:React.FC<PasswordProps>=(props)=>{
         if (props.onCancel){
             props.onCancel()
         }
-        setKey(props.value)
+        setValue(props.value)
         setEditable(false)
     }
 
@@ -50,7 +50,7 @@ const Password:React.FC<PasswordProps>=(props)=>{
             }}
             >{props.label}</span>
         }
-        <Input.Password placeholder={props.placeholder} style={{width: "400px", marginRight: "10px"}} value={key} onChange={(e) => { if (editable) setKey(e.target.value) }} size={"small"} />
+        <Input.Password placeholder={props.placeholder} style={{width: "600px", marginRight: "10px"}} value={value} onChange={(e) => { if (editable) setValue(e.target.value) }} size={"small"} />
         <Flex gap={10}>
             {
                 !editable ?

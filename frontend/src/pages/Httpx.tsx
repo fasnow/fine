@@ -24,15 +24,15 @@ import {
 } from "ag-grid-community";
 import {config, event} from "../../wailsjs/go/models";
 import EventDetail = event.EventDetail;
-import {OpenFileDialog} from "../../wailsjs/go/osoperation/Runtime";
-import {add} from "cheerio/lib/api/traversing";
+import DirectorySelector from "@/component/DirectorySelector";
+import LabelInput from "@/component/LabelInput";
 
 interface PageDataType { "index": number, "url": string, "detail": string }
 
 const TabContent = () => {
     const gridRef = useRef<AgGridReact>(null);
-    const [path, setPath] = useState<string>("")
-    const [flags, setFlags] = useState<string>("")
+    // const [path, setPath] = useState<string>("")
+    // const [flags, setFlags] = useState<string>("")
     const [running, setRunning] = useState<boolean>(false)
     const [targets, setTargets] = useState<string>("")
     const [offset, setOffset] = useState<number>(1)
@@ -155,37 +155,24 @@ const TabContent = () => {
         })
     }, []);
 
-    useEffect(() => {
-        setPath(cfg.Httpx.Path)
-        setFlags(cfg.Httpx.Flags)
-    }, [cfg.Httpx])
+    const saveHttpxFlag = (flag: string | number | undefined) => {
+        saveHttpx(cfg.Httpx.Path,flag)
+    }
 
-    const saveHttpx = (path:string) => {
-        SetConfig(path, flags).then(
+    const saveHttpxPath = (path:string) => {
+        if (!path)return
+        saveHttpx(path,cfg.Httpx.Flags)
+    }
+
+    const saveHttpx = (path: string, flag:  string | number | undefined)=>{
+        SetConfig(path, flag as string).then(
             () => {
-                const t = { ...cfg, Httpx: { ...cfg.Httpx, Flags: flags, Path: path } } as config.Config;
+                const t = { ...cfg, Httpx: { ...cfg.Httpx, Flags: flag, Path: path } } as config.Config;
                 dispatch(appActions.setConfig(t))
             }
         ).catch(e => {
             errorNotification("错误", e)
-            setPath(cfg.Httpx.Path)
-            setFlags(cfg.Httpx.Flags)
         })
-    }
-
-    const setHttpxPath = () => {
-        OpenFileDialog().then(
-            result => {
-                if (result) {
-                    setPath(result)
-                    saveHttpx(result)
-                }
-            }
-        ).catch(
-            err => {
-                errorNotification("错误", err)
-            }
-        )
     }
 
     const run = () => {
@@ -194,7 +181,7 @@ const TabContent = () => {
         setLimit(15)
         setTotal(0)
         totalRef.current = 0
-        Run(path, flags, targets).then(r => {
+        Run(cfg.Httpx.Path, cfg.Httpx.Flags, targets).then(r => {
             taskID.current = r
             setRunning(true)
         }).catch(err => {
@@ -231,25 +218,10 @@ const TabContent = () => {
         <Flex vertical gap={5} style={{ height: '100%' }}>
             <Flex gap={5} vertical>
                 <Flex gap={10} justify={"center"}>
-                    <Flex gap={5}>
-                        <span>Httpx路径</span>
-                        <Space.Compact>
-                            <Input value={path} size={"small"} style={{ width: "400px" }}
-                                onChange={e => setPath(e.target.value)}
-                                onBlur={()=>saveHttpx(path)}
-                            />
-                            <Button size={"small"} onClick={setHttpxPath}>选择</Button>
-                        </Space.Compact>
-                    </Flex>
-                    <Flex gap={5}>
-                        <span>程序参数</span>
-                        <Tooltip title={"请勿添加-l或-u"} placement={"bottom"}>
-                            <Input value={flags} size={"small"} style={{ width: "200px" }}
-                                onChange={e => setFlags(e.target.value)}
-                                onBlur={()=>saveHttpx(path)}
-                            />
-                        </Tooltip>
-                    </Flex>
+                    <DirectorySelector label="Httpx路径" value={cfg.Httpx.Path} inputWidth={400} onSelect={saveHttpxPath} />
+                    <Tooltip title={"请勿添加-l或-u"} placement={"bottom"}>
+                        <div><LabelInput label="程序参数" value={cfg.Httpx.Flags} onBlur={saveHttpxFlag}/></div>
+                    </Tooltip>
                     {!running && <Button size={"small"} onClick={run}>执行</Button>}
                     {running && <Button size={"small"} onClick={stop} icon={<SyncOutlined spin={running} />}>终止</Button>}
                 </Flex>
@@ -264,8 +236,8 @@ const TabContent = () => {
                     </Space.Compact>
                 </Flex>
             </Flex>
-            <Flex style={{ height: '100%' }}>
-                <Splitter style={{ height: '100%' }}>
+            <Flex style={{ height: '100%' , padding: '5px' , boxSizing: 'border-box'}}>
+                <Splitter style={{overflow: "hidden"}}>
                     <Splitter.Panel defaultSize="30%" min="20%" max="70%">
                         <TextArea
                             style={{ height: '100%' }}

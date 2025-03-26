@@ -43,7 +43,6 @@ export const MiniProgram: React.FC = () => {
     const [appletPath, setAppletPath] = useState<string>("")
     const dataCachePath = useRef<string>("")
     const [autoDecompile, setAutoDecompile] = useState<boolean>(false)
-    const [isClearing, setIsClearing] = useState<boolean>(false)
     const [open, setOpen] = useState<boolean>(false)
     const [rules, setRules] = useState<string>("")
     const dispatch = useDispatch()
@@ -52,7 +51,7 @@ export const MiniProgram: React.FC = () => {
     const status = useSelector((state: RootState) => state.app.global.status)
 
     useEffect(() => {
-        EventsOn(event.DecompileWxMiniProgram, (eventDetail:event.EventDetail) => {
+        EventsOn(event.DecompileWxMiniAPP, (eventDetail:event.EventDetail) => {
             console.log(eventDetail)
             if (eventDetail.Status === status.Running || eventDetail.Status === status.Stopped){
                 const index = data.findIndex((item:InfoToFront) => item.AppID === eventDetail.Data.AppID);
@@ -82,9 +81,19 @@ export const MiniProgram: React.FC = () => {
             }
         })
 
-        EventsOn(event.DecompileWxMiniProgramTicker, (eventDetail:event.EventDetail) => {
-            console.log(eventDetail.Data)
+        EventsOn(event.DecompileWxMiniAPPTicker, (eventDetail:event.EventDetail) => {
             setData(eventDetail.Data)
+        })
+        EventsOn(event.DecompileWxMiniAPPInfoTicker, (eventDetail:event.EventDetail) => {
+            const info = eventDetail.Data
+            setData(prevState => {
+                prevState.forEach(item => {
+                    if (item.AppID === info.AppID) {
+                        item.Info=info
+                    }
+                });
+                return prevState
+            })
         })
     }, []);
 
@@ -173,15 +182,10 @@ export const MiniProgram: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                         onConfirm={() => {
-                            setIsClearing(true)
                             ClearApplet().then(() => {
                                 // setTreeData([])
                             }).catch(
                                 err => errorNotification("错误", err)
-                            ).finally(
-                                () => {
-                                    setIsClearing(false)
-                                }
                             )
                         }}
                     >
@@ -194,14 +198,11 @@ export const MiniProgram: React.FC = () => {
                         okText="Yes"
                         cancelText="No"
                         onConfirm={() => {
-                            setIsClearing(true)
                             ClearDecompiled().catch(
                                 err => errorNotification("错误", err)
                             ).then(() => {
                                 // setTreeData([])
-                            }).finally(
-                                () => setIsClearing(false)
-                            )
+                            })
                         }}
                     >
                         <Button size={"small"}>清空反编译后的文件</Button>

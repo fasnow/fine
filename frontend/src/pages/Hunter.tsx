@@ -347,7 +347,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 name: "查询标题",
                 disabled: !params.node?.data.web_title,
                 action: () => {
-                    props.newTab && props.newTab("title=" + params.node?.data.title, getColDefs(), queryOption)
+                    props.newTab && props.newTab("title=" + params.node?.data.web_title, getColDefs(), queryOption)
                 },
             },
             'separator',

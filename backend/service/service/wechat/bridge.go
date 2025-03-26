@@ -12,9 +12,7 @@ import (
 	"fine/backend/utils"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 	"gorm.io/gorm"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -35,6 +33,7 @@ type Bridge struct {
 	regexMap                 sync.Map
 	wechat                   *WeChat
 	mutex                    sync.Mutex
+	autoDecompile            bool
 	decompileConcurrencyChan chan struct{}
 	extractConcurrencyChan   chan struct{}
 	decompileStatusChan      chan struct {
@@ -49,11 +48,13 @@ type Bridge struct {
 		Err  error
 		Msg  string
 	}
-	autoDecompile bool
+	miniAPPInfoChan                 chan wechat.Info
+	queryMiniAPPInfoConcurrencyChan chan struct{}
 }
 
 func (r *Bridge) UseProxyManager(manager *proxy.Manager) {
 	r.http = manager.GetClient()
+	r.wechat.UseProxyManager(manager)
 }
 
 func NewBridge(app *application.Application) *Bridge {
@@ -76,6 +77,8 @@ func NewBridge(app *application.Application) *Bridge {
 			Err  error
 			Msg  string
 		}, 1),
+		miniAPPInfoChan:                 make(chan wechat.Info, 5),
+		queryMiniAPPInfoConcurrencyChan: make(chan struct{}, 3),
 	}
 	c.SetRegex(app.Config.Wechat.Rules)
 	c.wxRepo.RestVersionTaskStatus()
@@ -122,27 +125,35 @@ func (r *Bridge) createVersionTaskStatuses(versions []*models.VersionDecompileTa
 func (r *Bridge) findOrCreateInfo(appID string) (*wechat.Info, error) {
 	appInfo, err := r.wxRepo.FindInfoByAppID(appID)
 	if err != nil {
-		fmt.Println(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			tmpInfo, e := r.queryAppID(appID)
-			fmt.Println(tmpInfo)
-			if e != nil {
-				return nil, e
-			}
-			if err2 := r.wxRepo.CreateInfo(&models.Info{
-				Info: &wechat.Info{
-					Nickname:      tmpInfo.Nickname,
-					Username:      tmpInfo.Username,
-					Description:   tmpInfo.Description,
-					Avatar:        tmpInfo.Avatar,
-					UsesCount:     tmpInfo.UsesCount,
-					PrincipalName: tmpInfo.PrincipalName,
-					AppID:         appID,
-				},
-			}); err2 != nil {
-				return nil, err2
-			}
-			return tmpInfo, nil
+			go func() {
+				r.queryMiniAPPInfoConcurrencyChan <- struct{}{}
+				defer func() {
+					time.Sleep(1 * time.Second)
+					<-r.queryMiniAPPInfoConcurrencyChan
+				}()
+				mimiAPPInfo, e := r.wechat.QueryMimiAPPInfo(appID)
+				if e != nil {
+					r.app.Logger.Error(e)
+					return
+				}
+				if err2 := r.wxRepo.CreateInfo(&models.Info{
+					Info: &wechat.Info{
+						Nickname:      mimiAPPInfo.Nickname,
+						Username:      mimiAPPInfo.Username,
+						Description:   mimiAPPInfo.Description,
+						Avatar:        mimiAPPInfo.Avatar,
+						UsesCount:     mimiAPPInfo.UsesCount,
+						PrincipalName: mimiAPPInfo.PrincipalName,
+						AppID:         appID,
+					},
+				}); err2 != nil {
+					r.app.Logger.Error(e)
+					return
+				}
+				r.miniAPPInfoChan <- *mimiAPPInfo
+			}()
+			return nil, nil
 		}
 		return nil, err
 	}
@@ -295,7 +306,7 @@ func (r *Bridge) emitDecompileStatus(task *models.VersionDecompileTask, stat int
 	if err != nil {
 		eventDetail.Error = err.Error()
 	}
-	event.EmitV2(event.DecompileWxMiniProgram, eventDetail)
+	event.EmitV2(event.DecompileWxMiniAPP, eventDetail)
 }
 
 func (r *Bridge) emitExtractInfoStatus(task *models.VersionDecompileTask, stat int, err error, msg string) {
@@ -318,7 +329,7 @@ func (r *Bridge) emitExtractInfoStatus(task *models.VersionDecompileTask, stat i
 	if err != nil {
 		eventDetail.Error = err.Error()
 	}
-	event.EmitV2(event.DecompileWxMiniProgram, eventDetail)
+	event.EmitV2(event.DecompileWxMiniAPP, eventDetail)
 }
 
 func (r *Bridge) fileMonitor() {
@@ -334,7 +345,7 @@ func (r *Bridge) fileMonitor() {
 				if r.autoDecompile {
 					r.decompileBulk(miniApps)
 				}
-				event.EmitV2(event.DecompileWxMiniProgramTicker, event.EventDetail{
+				event.EmitV2(event.DecompileWxMiniAPPTicker, event.EventDetail{
 					Status: status.Running,
 					Data:   miniApps,
 				})
@@ -342,6 +353,11 @@ func (r *Bridge) fileMonitor() {
 				r.emitDecompileStatus(data.Task, data.Stat, data.Err, data.Msg)
 			case data := <-r.extractStatusChan:
 				r.emitExtractInfoStatus(data.Task, data.Stat, data.Err, data.Msg)
+			case info := <-r.miniAPPInfoChan:
+				event.EmitV2(event.DecompileWxMiniAPPInfoTicker, event.EventDetail{
+					Status: status.Running,
+					Data:   info,
+				})
 			}
 		}
 	}()
@@ -395,34 +411,6 @@ func (r *Bridge) getRegex(regex string) (*regexp.Regexp, error) {
 	return compiled, nil
 }
 
-func (r *Bridge) queryAppID(appid string) (*wechat.Info, error) {
-	var request, _ = http.NewRequest("POST", "https://kainy.cn/api/weapp/info/", strings.NewReader("appid="+appid))
-	request.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-	response, err := r.http.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	bytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-	code := gjson.Get(string(bytes), "code").Int()
-	msg := gjson.Get(string(bytes), "error").String()
-	if code != 0 && code != 2 { //code = 2表示未收录
-		return nil, errors.New(msg)
-	}
-	result := &wechat.Info{
-		AppID: appid,
-	}
-	result.Nickname = gjson.Get(string(bytes), "data.nickname").String()
-	result.Username = gjson.Get(string(bytes), "data.username").String()
-	result.Description = gjson.Get(string(bytes), "data.description").String()
-	result.Avatar = gjson.Get(string(bytes), "data.avatar").String()
-	result.UsesCount = gjson.Get(string(bytes), "data.uses_count").String()
-	result.PrincipalName = gjson.Get(string(bytes), "data.principal_name").String()
-	return result, nil
-}
-
 func (r *Bridge) checkVersionTaskStatus(task *models.VersionDecompileTask, allowedStoppedStatus bool) bool {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
@@ -459,8 +447,8 @@ func (r *Bridge) GetAllMiniApp() ([]wechat.InfoToFront, error) {
 		}
 		itemToFront := wechat.InfoToFront{
 			MiniAppBaseInfo: miniProgram.MiniAppBaseInfo,
-			Info:            info,
 			Status:          status.Waiting,
+			Info:            info,
 			Versions:        versionStatuses,
 		}
 		itemsToFront = append(itemsToFront, itemToFront)
@@ -477,7 +465,7 @@ func (r *Bridge) GetInfo(appid string) error {
 	}
 
 	// 查询最新的信息
-	tmpInfo, e := r.queryAppID(appid)
+	tmpInfo, e := r.wechat.QueryMimiAPPInfo(appid)
 	if e != nil {
 		r.app.Logger.Error(e)
 		return e
@@ -625,4 +613,23 @@ func (r *Bridge) AutoDecompile(enable bool) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.autoDecompile = enable
+}
+
+type MiniAPPInfoCache struct {
+	mu    sync.Mutex
+	items []wechat.Info
+}
+
+func (r *MiniAPPInfoCache) TakeALl() []wechat.Info {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	result := make([]wechat.Info, len(r.items))
+	copy(result, r.items)
+	r.items = r.items[:0]
+	return result
+}
+func (r *MiniAPPInfoCache) Add(info wechat.Info) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.items = append(r.items, info)
 }

@@ -21,8 +21,9 @@ const (
 	ZoneMemberExport             = "ZoneMemberExport"
 	ZoneEmailExport              = "ZoneEmailExport"
 	Httpx                        = "Httpx"
-	DecompileWxMiniProgram       = "DecompileWxMiniProgram"
-	DecompileWxMiniProgramTicker = "DecompileWxMiniProgramTicker"
+	DecompileWxMiniAPP           = "DecompileWxMiniAPP"
+	DecompileWxMiniAPPTicker     = "DecompileWxMiniAPPTicker"
+	DecompileWxMiniAPPInfoTicker = "DecompileWxMiniAPPInfoTicker"
 	ICPBatchQuery                = "ICPBatchQuery"
 	ICPBatchQueryStatusUpdate    = "ICPBatchQueryStatusUpdate"
 	AiQiCha                      = "AiQiCha"
@@ -42,8 +43,9 @@ type EventEnum struct {
 	ZoneMemberExport             string
 	ZoneEmailExport              string
 	Httpx                        string
-	DecompileWxMiniProgram       string
-	DecompileWxMiniProgramTicker string
+	DecompileWxMiniAPP           string
+	DecompileWxMiniAPPTicker     string
+	DecompileWxMiniAPPInfoTicker string
 	ICPBatchQuery                string
 	ICPBatchQueryStatusUpdate    string
 	AiQiCha                      string

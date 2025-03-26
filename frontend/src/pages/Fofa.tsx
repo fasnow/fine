@@ -39,7 +39,13 @@ import {Coin1, Coin2, Dots} from "@/component/Icon";
 import MurmurHash3 from "murmurhash3js"
 import { Buffer } from "buffer"
 import { toUint8Array } from "js-base64";
-import {copy, getAllDisplayedColumnKeys, getAllDisplayedColumnKeysNoIndex, getSortedData} from "@/util/util";
+import {
+    copy, copyCol,
+    copyColByID, copyRow,
+    getAllDisplayedColumnKeys,
+    getAllDisplayedColumnKeysNoIndex,
+    getSortedData
+} from "@/util/util";
 import { WithIndex } from "@/component/Interface";
 import { TargetKey } from "@/pages/Constants";
 import TabLabel from "@/component/TabLabel";
@@ -467,31 +473,20 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 name: "复制该行",
                 disabled: !params.node?.data,
                 action: () => {
-                    const data:PageDataType = params.node?.data
-                    const values:any[] = [];
-                    getAllDisplayedColumnKeys(gridRef.current?.api, columnDefs).forEach(key=>{
-                        values.push(data[key as keyof PageDataType]);
-                    })
-                    copy(values.join(gridRef.current?.api.getGridOption("clipboardDelimiter")))
+                    copyRow<PageDataType>(params.node?.data,gridRef.current?.api,columnDefs)
                 },
             },
             {
                 name: "复制该列",
                 action: () => {
-                    const colValues = getSortedData<PageDataType>(gridRef.current?.api).map((item: PageDataType) => {
-                        return item[params.column?.getColId() as keyof PageDataType]
-                    })
-                    copy(colValues.join('\n'))
+                    copyCol<PageDataType>(params.column,gridRef.current?.api)
                 },
             },
             {
                 name: "复制URL列",
                 disabled: !params.node?.data.ip,
                 action: () => {
-                    const colValues = getSortedData<PageDataType>(gridRef.current?.api).map((item: PageDataType) => {
-                        return item['link']
-                    })
-                    copy(colValues)
+                    copyColByID<PageDataType>("link", gridRef.current?.api)
                 },
             },
         ];

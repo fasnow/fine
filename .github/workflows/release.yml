@@ -109,9 +109,13 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            fix: ICP查询BUG @ChinaRan0 #33;
-            fix: 爱企查接口BUG @zzbtlc #34。
-            
+            feature: 新图标 @ChinaRan0 #27, @xslzlccc #31, @JackeyLov5 #36;
+            enhance: 小程序信息异步显示;
+            enhance: 部分UI;
+            fix: httpx 路径选择BUG @Anonym0usPlayer #35;
+            fix: httpx flag无法保存;
+            fix: httpx 右键菜单;
+            fix: hunter 右键菜单"查询标题"。
             
             
 

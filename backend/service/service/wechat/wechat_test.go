@@ -1,7 +1,9 @@
 package wechat
 
 import (
+	"encoding/json"
 	"fine/backend/application"
+	"fine/backend/proxy/v2"
 	"fine/backend/utils"
 	"fmt"
 	"os"
@@ -134,4 +136,18 @@ func TestWeChat_GetAllMiniAppWxapkg(t *testing.T) {
 		return
 	}
 	t.Log(wxapkgs)
+}
+
+func TestWeChat_QueryMimiAPPInfo(t *testing.T) {
+	c := New(application.DefaultApp.Config.Wechat.Applet)
+	pm := proxy.NewManager()
+	c.UseProxyManager(pm)
+	pm.SetProxy("http://127.0.0.1:8081")
+	info, err := c.QueryMimiAPPInfo("wx2c348cf579062e56")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	bytes, _ := json.Marshal(info)
+	t.Log(string(bytes))
 }

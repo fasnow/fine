@@ -10,6 +10,7 @@ import (
 	"fine/backend/matcher"
 	"fine/backend/proxy/v2"
 	"fine/backend/service/model/wechat"
+	"fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/tidwall/gjson"
@@ -370,4 +371,35 @@ func (r *WeChat) getFilesInfo(data []byte) ([]*WxapkgFile, error) {
 	}
 
 	return fileList, nil
+}
+
+func (r *WeChat) QueryMimiAPPInfo(appid string) (*wechat.Info, error) {
+	req := service.NewRequest()
+	req.Method = "POST"
+	req.BodyParams.Set("appid", appid)
+	req.BodyParams.Decorate(req)
+	bodyBytes, err := req.Fetch(r.http, "https://kainy.cn/api/weapp/info/", func(response *http.Response) error {
+		if response.StatusCode != 200 {
+			return errors.New(response.Status)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	code := gjson.Get(string(bodyBytes), "code").Int()
+	msg := gjson.Get(string(bodyBytes), "error").String()
+	if code != 0 && code != 2 { //code = 2表示未收录
+		return nil, errors.New(msg)
+	}
+	result := &wechat.Info{
+		AppID: appid,
+	}
+	result.Nickname = gjson.Get(string(bodyBytes), "data.nickname").String()
+	result.Username = gjson.Get(string(bodyBytes), "data.username").String()
+	result.Description = gjson.Get(string(bodyBytes), "data.description").String()
+	result.Avatar = gjson.Get(string(bodyBytes), "data.avatar").String()
+	result.UsesCount = gjson.Get(string(bodyBytes), "data.uses_count").String()
+	result.PrincipalName = gjson.Get(string(bodyBytes), "data.principal_name").String()
+	return result, nil
 }

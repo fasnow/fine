@@ -3,9 +3,38 @@ import dayjs, {Dayjs} from "dayjs";
 import {message} from "antd";
 import {ColDef, GridApi} from "ag-grid-community";
 import duration from 'dayjs/plugin/duration';
+import {Column} from "ag-grid-community/dist/types/src/interfaces/iColumn";
 
 // 扩展 dayjs 以支持 duration 功能
 dayjs.extend(duration);
+
+export const copyRow = <T>(data:T,api:GridApi<T> | undefined  | null,colDefs:ColDef[])=>{
+    if(!data || !api || !colDefs){
+        return
+    }
+    const values:any[] = [];
+    getAllDisplayedColumnKeys(api, colDefs).forEach(key=>{
+        values.push(data[key as keyof T]);
+    })
+    copy(values.join(api.getGridOption("clipboardDelimiter")))
+}
+
+export const copyCol = <T>(col:Column | undefined | null, api:GridApi<T> | undefined)=>{
+    if (!col || !api){
+        return
+    }
+    const colValues = getSortedData<T>(api).map((item: T) => {
+        return item[col?.getColId() as keyof T]
+    })
+    copy(colValues.join('\n'))
+}
+
+export const copyColByID = <T>(colID:string,api:GridApi<T> | undefined)=>{
+    const colValues = getSortedData<T>(api).map((item: T) => {
+        return item[colID as keyof T]
+    })
+    copy(colValues)
+}
 
 export const formatTimeSpent = (seconds:number)=>{
     const dur = dayjs.duration(seconds, 'seconds');

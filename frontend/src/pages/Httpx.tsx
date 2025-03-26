@@ -9,12 +9,19 @@ import { Run, SetConfig, Stop } from "../../wailsjs/go/httpx/Bridge";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, appActions } from "@/store/store";
 import { Chrome } from "@/component/Icon";
-import { copy, strSplit } from "@/util/util";
+import {copy, copyCol, copyRow, getAllDisplayedColumnKeys, getSortedData, strSplit} from "@/util/util";
 import TabsV2 from "@/component/TabsV2";
 import { AgGridReact } from "ag-grid-react";
 import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
-import { ColDef, GetContextMenuItemsParams, ICellRendererParams, MenuItemDef, SideBarDef } from "ag-grid-community";
+import {
+    ColDef,
+    GetContextMenuItemsParams,
+    GetRowIdParams,
+    ICellRendererParams,
+    MenuItemDef,
+    SideBarDef
+} from "ag-grid-community";
 import {config, event} from "../../wailsjs/go/models";
 import EventDetail = event.EventDetail;
 import {OpenFileDialog} from "../../wailsjs/go/osoperation/Runtime";
@@ -35,7 +42,8 @@ const TabContent = () => {
     const cfg = useSelector((state: RootState) => state.app.global.config)
     const status = useSelector((state: RootState) => state.app.global.status)
     const [pageData, setPageData] = useState<PageDataType[]>([])
-    const totalRef = useRef(0)
+    const [total, setTotal] = useState(0)
+    const totalRef=useRef(0)
     const event = useSelector((state: RootState) => state.app.global.event)
     const [columnDefs] = useState<ColDef[]>([
         { headerName: '序号', field: "index", width: 80, pinned: 'left' },
@@ -87,7 +95,7 @@ const TabContent = () => {
         }
     }, [])
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams, ): (MenuItemDef)[] => {
-            if(!pageData || pageData.length === 0 || !params.node)return []
+            if(total === 0 || !params.node)return []
             return [
                 {
                     name: "浏览器打开URL",
@@ -107,31 +115,17 @@ const TabContent = () => {
                     name: "复制该行",
                     disabled: !params.node?.data,
                     action: () => {
-                        for (let i = 0; i < pageData.length; i++) {
-                            if (pageData[i].index === params.node?.data.index) {
-                                copy(pageData[i])
-                                break
-                            }
-                        }
+                        copyRow<PageDataType>(params.node?.data,gridRef.current?.api,columnDefs)
                     },
                 },
                 {
                     name: "复制该列",
                     action: () => {
-                        const colValues = pageData.map((item: PageDataType) => {
-                            const colId = params.column?.getColId()
-                            for (const key in item) {
-                                if (Object.prototype.hasOwnProperty.call(item, key) && key === colId) {
-                                    return item[key as keyof PageDataType]
-                                }
-                            }
-                            return ""
-                        })
-                        copy(colValues)
+                        copyCol<PageDataType>(params.column,gridRef.current?.api)
                     },
                 },
             ];
-        }, [pageData]);
+        }, [total]);
 
     useEffect(() => {
         //获取事件类的单例并设置httpx输出监听器用于输出到前端
@@ -145,9 +139,11 @@ const TabContent = () => {
                     return;
                 }
                 let t = strSplit(data, ' ', 2)
+                totalRef.current = totalRef.current+1
                 gridRef.current?.api?.applyTransactionAsync({
-                    add:[{ index: ++totalRef.current, url: t[0], detail: t[1] }]
+                    add:[{ index: totalRef.current, url: t[0], detail: t[1] }]
                 })
+                setTotal(totalRef.current)
             }else if (eventDetail.Status === status.Stopped){
                 taskID.current = 0
                 setRunning(false)
@@ -196,6 +192,7 @@ const TabContent = () => {
         setPageData([])
         setOffset(1)
         setLimit(15)
+        setTotal(0)
         totalRef.current = 0
         Run(path, flags, targets).then(r => {
             taskID.current = r
@@ -258,7 +255,7 @@ const TabContent = () => {
                 </Flex>
                 <Flex gap={20} justify={"center"}>
                     <Space.Compact size={"small"}>
-                        <InputNumber style={{ width: "150px" }} prefix={<div>总数:</div>} value={pageData.length} />
+                        <InputNumber style={{ width: "150px" }} prefix={<div>总数:</div>} value={total} />
                         <InputNumber style={{ width: "150px" }} prefix={<div>起始:</div>} min={1} value={offset}
                             onChange={(value) => value && setOffset(value)} />
                         <InputNumber style={{ width: "150px" }} prefix={<div>长度:</div>} value={limit}
@@ -285,6 +282,7 @@ const TabContent = () => {
                                 ref={gridRef}
                                 rowData={pageData}
                                 columnDefs={columnDefs}
+                                getRowId={(params: GetRowIdParams) => String(params.data.index)}
                                 getContextMenuItems={getContextMenuItems}
                                 headerHeight={32}
                                 rowHeight={32}

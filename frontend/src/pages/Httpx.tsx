@@ -26,6 +26,7 @@ import {config, event} from "../../wailsjs/go/models";
 import EventDetail = event.EventDetail;
 import DirectorySelector from "@/component/DirectorySelector";
 import LabelInput from "@/component/LabelInput";
+import FileSelector from "@/component/FileSelector";
 
 interface PageDataType { "index": number, "url": string, "detail": string }
 
@@ -218,7 +219,7 @@ const TabContent = () => {
         <Flex vertical gap={5} style={{ height: '100%' }}>
             <Flex gap={5} vertical>
                 <Flex gap={10} justify={"center"}>
-                    <DirectorySelector label="Httpx路径" value={cfg.Httpx.Path} inputWidth={400} onSelect={saveHttpxPath} />
+                    <FileSelector label="Httpx路径" value={cfg.Httpx.Path} inputWidth={400} onSelect={saveHttpxPath} />
                     <Tooltip title={"请勿添加-l或-u"} placement={"bottom"}>
                         <div><LabelInput label="程序参数" value={cfg.Httpx.Flags} onBlur={saveHttpxFlag}/></div>
                     </Tooltip>

@@ -1,4 +1,4 @@
-import React, {CSSProperties, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
 import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, Tag, Tooltip} from "antd";
 import TabsV2 from "@/component/TabsV2";
@@ -14,11 +14,11 @@ import type {CascaderProps} from 'antd/es/cascader'
 import Candidate, {ItemType} from "@/component/Candidate";
 import './Aiqicha.css'
 import {GetInvestRecord, GetShareholder, GetStockChart, SetAuth, Suggest} from "../../wailsjs/go/aiqicha/Bridge";
+import {copy} from "@/util/util";
 import InvestRecord = aiqicha.InvestRecord;
 import Shareholder = aiqicha.Shareholder;
-import {copy} from "@/util/util";
 
-interface Options<T1, T2=T1> {
+interface Options<T1, T2 = T1> {
     width: any
     height: any
     nodeGapX: number
@@ -31,12 +31,12 @@ interface Options<T1, T2=T1> {
     filterForShow?: (node: T1 | T2) => boolean
     linkText?: (node: T1 | T2) => string | number
     onNodeClick?: (node: T1 | T2) => void,
-    nodeTopLeftText?: (node: T1 | T2)=>{
+    nodeTopLeftText?: (node: T1 | T2) => {
         text: string | number,
         color: string,
         backgroundColor: string,
     } | undefined,
-    nodeTopRightText?: (node: T1 | T2) => {text:string | number, backgroundColor:string},
+    nodeTopRightText?: (node: T1 | T2) => { text: string | number, backgroundColor: string },
 }
 
 type BaseNodeType = {
@@ -51,7 +51,7 @@ type NodeType<T1, T2 = T1> = BaseNodeType & {
 }
 
 //https://juejin.cn/post/7359203560167178250
-class StockTreeVertical<T1,T2=T1> {
+class StockTreeVertical<T1, T2 = T1> {
     private ref: any;
     private clonedSvgBoxInfo: any;
     private svg: any;
@@ -64,7 +64,8 @@ class StockTreeVertical<T1,T2=T1> {
     private zoomHandler: any
     private opts: Options<T1, T2>
     private treeData: NodeType<T1, T2>
-    constructor(ref: any, data:NodeType<T1, T2>, options: Options<T1,T2>) {
+
+    constructor(ref: any, data: NodeType<T1, T2>, options: Options<T1, T2>) {
         this.opts = options
         this.ref = ref // 宿主元素选择器,是个ref对象
         this.treeData = data
@@ -99,7 +100,7 @@ class StockTreeVertical<T1,T2=T1> {
         this.update(null)
     }
 
-    private drawBottom(source:any){
+    private drawBottom(source: any) {
         const transition = this.svg.transition().duration(500).ease(d3.easeCubicOut)
         let nodesOfDown = this.rootOfDown.descendants().reverse()
         let linksOfDown = this.rootOfDown.links()
@@ -240,14 +241,14 @@ class StockTreeVertical<T1,T2=T1> {
                 return d.data.nodeName
             })
 
-        if (this.opts.nodeTopLeftText){
+        if (this.opts.nodeTopLeftText) {
             const t = this.opts.nodeTopLeftText
             node1Enter
                 .append('foreignObject')
                 .attr('width', '50')
                 .attr('height', '20')
                 .attr('x', (d: any) => {
-                    return - this.opts.nodeWidth / 2 - 0.5;
+                    return -this.opts.nodeWidth / 2 - 0.5;
                 })
                 .attr('y', (d: any) => {
                     return -this.opts.nodeHeight / 2 - 10;
@@ -272,7 +273,7 @@ class StockTreeVertical<T1,T2=T1> {
                 .style('line-height', '12px')
                 .style('border-radius', '3px')
                 .text(function (this: SVGGElement, d: any) {
-                    if (d.depth === 0)return
+                    if (d.depth === 0) return
                     const result = t(d.data);
                     if (!result) return
                     const element = d3.select(this);
@@ -317,8 +318,8 @@ class StockTreeVertical<T1,T2=T1> {
             .attr('class', 'linkOfDownItem')
             .attr('d', (d: any) => {
                 // 初始路径，从 source 自身到自身
-                const o = { x: source.x0, y: source.y0 };
-                return this.drawLink("down", { source: o, target: o });
+                const o = {x: source.x0, y: source.y0};
+                return this.drawLink("down", {source: o, target: o});
             })
             .attr('fill', 'none')
             .attr('stroke', '#9DA8BA')
@@ -335,14 +336,14 @@ class StockTreeVertical<T1,T2=T1> {
             .transition(transition)
             .attr('d', (d: any) => {
                 // 终止路径，模拟收缩回 source
-                const o = { x: d.source.x, y: d.source.y };
-                return this.drawLink("down", { source: o, target: o });
+                const o = {x: d.source.x, y: d.source.y};
+                return this.drawLink("down", {source: o, target: o});
             })
             .style('opacity', 0)
             .remove();
 
         const t = this.opts?.linkText
-        if(t){
+        if (t) {
             const linkLabels = this.gLinks
                 .selectAll('text.linkLabel')
                 .data(linksOfDown, (d: any) => {
@@ -390,7 +391,7 @@ class StockTreeVertical<T1,T2=T1> {
                 // if (!d._children) {
                 //     return 'none'
                 // }
-                if (this.opts.showLoadBtn){
+                if (this.opts.showLoadBtn) {
                     return !this.opts.showLoadBtn(d.data) && 'none'
                 }
             })
@@ -437,7 +438,7 @@ class StockTreeVertical<T1,T2=T1> {
                         if (!tt || tt.length === 0) {
                             d3.select(d3.select(e.target).node().parentNode).style("display", "none");
                             d.children = null
-                        }else {
+                        } else {
                             d.children = tt;
                         }
                     }
@@ -468,7 +469,7 @@ class StockTreeVertical<T1,T2=T1> {
             })
     }
 
-    private drawTop(source: any){
+    private drawTop(source: any) {
         const transition = this.svg.transition().duration(500).ease(d3.easeCubicOut)
         let nodesOfUp = this.rootOfUp.descendants().reverse()
         let linksOfUp = this.rootOfUp.links()
@@ -652,8 +653,8 @@ class StockTreeVertical<T1,T2=T1> {
             .attr('class', 'linkOfUpItem')
             .attr('d', (d: any) => {
                 // 初始路径，从 source 自身到自身
-                const o = { x: source.x0, y: source.y0 };
-                return this.drawLink("up", { source: o, target: o });
+                const o = {x: source.x0, y: source.y0};
+                return this.drawLink("up", {source: o, target: o});
             })
             .attr('fill', 'none')
             .attr('stroke', '#9DA8BA')
@@ -670,14 +671,14 @@ class StockTreeVertical<T1,T2=T1> {
             .transition(transition)
             .attr('d', (d: any) => {
                 // 终止路径，模拟收缩回 source
-                const o = { x: d.source.x, y: d.source.y };
-                return this.drawLink("up", { source: o, target: o });
+                const o = {x: d.source.x, y: d.source.y};
+                return this.drawLink("up", {source: o, target: o});
             })
             .style('opacity', 0)
             .remove();
 
         const t = this.opts.linkText
-        if(t){
+        if (t) {
             const linkLabels2 = this.gLinks
                 .selectAll('text.linkLabel2')
                 .data(linksOfUp, (d: any) => {
@@ -724,7 +725,7 @@ class StockTreeVertical<T1,T2=T1> {
                 // if (!d._children) {
                 //     return 'none'
                 // }
-                if (this.opts.showLoadBtn){
+                if (this.opts.showLoadBtn) {
                     return !this.opts.showLoadBtn(d.data) && 'none'
                 }
             })
@@ -783,7 +784,7 @@ class StockTreeVertical<T1,T2=T1> {
 
     private process() {
         // 投资公司树的根节点
-        const t = { ...this.treeData }
+        const t = {...this.treeData}
         t.children = t.children?.filter(child => {
             if (this.opts.filterForShow) {
                 return this.opts.filterForShow(child)
@@ -919,7 +920,7 @@ class StockTreeVertical<T1,T2=T1> {
             this.rootOfUp.x0 = 0
             this.rootOfUp.y0 = 0
         }
-        console.log(this.tree,this.rootOfDown)
+        console.log(this.tree, this.rootOfDown)
         this.tree(this.rootOfDown)
         this.tree(this.rootOfUp)
 
@@ -964,7 +965,7 @@ class StockTreeVertical<T1,T2=T1> {
     }
 
     // 直角连接线 by wushengyuan
-    private drawLink(direction: any, { source, target }: { source: any, target: any }) {
+    private drawLink(direction: any, {source, target}: { source: any, target: any }) {
         if (direction === "up") {
             const bottom = target.y + this.opts.nodeHeight / 2
             return `M${source.x},${source.y} 
@@ -1003,7 +1004,7 @@ const AuthSetting: React.FC = () => {
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, AiQiCha: { ...cfg.AiQiCha, Cookie: key } } as config.Config;
+                const t = {...cfg, AiQiCha: {...cfg.AiQiCha, Cookie: key}} as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -1024,7 +1025,7 @@ const AuthSetting: React.FC = () => {
 
     return <>
         <Tooltip title="设置" placement={"right"}>
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
+            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
         <Modal
             open={open}
@@ -1043,7 +1044,7 @@ const AuthSetting: React.FC = () => {
                         if (!editable) return
                         setKey(e.target.value)
                     }
-                } />
+                }/>
                 <Flex gap={10} justify={"end"}>
                     {
                         !editable ?
@@ -1051,10 +1052,10 @@ const AuthSetting: React.FC = () => {
                             :
                             <>
                                 <Button {...buttonProps} htmlType="submit"
-                                    onClick={save}
+                                        onClick={save}
                                 >保存</Button>
                                 <Button {...buttonProps} htmlType="submit"
-                                    onClick={cancel}
+                                        onClick={cancel}
                                 >取消</Button>
                             </>
                     }
@@ -1071,8 +1072,8 @@ const SharedOptions: CascaderProps<any> = {
     maxTagCount: 'responsive',
     maxTagPlaceholder: (omittedValues) => (
         <Tooltip
-            overlayStyle={{ pointerEvents: 'none' }}
-            title={omittedValues.map(({ label }) => label).join('\n')}
+            overlayStyle={{pointerEvents: 'none'}}
+            title={omittedValues.map(({label}) => label).join('\n')}
         >
             {omittedValues.length}
         </Tooltip>
@@ -1081,12 +1082,12 @@ const SharedOptions: CascaderProps<any> = {
 };
 
 const TabContent: React.FC = () => {
-    const [treeInstance, setTreeInstance] = useState<StockTreeVertical<aiqicha.InvestRecord,aiqicha.Shareholder>>();
+    const [treeInstance, setTreeInstance] = useState<StockTreeVertical<aiqicha.InvestRecord, aiqicha.Shareholder>>();
     const graphRef = useRef<HTMLDivElement | null>(null); // 用于绑定 SVG 容器
     const filterRef = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);
-    const [currentCompany, setCurrentCompany] = React.useState<{ name: string, id: string }>({ id: "", name: "" });
+    const [currentCompany, setCurrentCompany] = React.useState<{ name: string, id: string }>({id: "", name: ""});
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [containerHeight, setContainerHeight] = useState(0)
     const [ratioMin, setRatioMin] = useState(0)
@@ -1097,18 +1098,18 @@ const TabContent: React.FC = () => {
 
     const query = async (name: string, id: string) => {
         treeInstance?.clear()
-        setCurrentCompany({ name: name, id: id })
+        setCurrentCompany({name: name, id: id})
         setOpen(true)
         setLoading(true)
         try {
             const t: aiqicha.Penetration = await GetStockChart(id)
-            setTreeInstance(new StockTreeVertical<InvestRecord,Shareholder>(
+            setTreeInstance(new StockTreeVertical<InvestRecord, Shareholder>(
                 graphRef.current,
                 {
-                    nodeName:name,
-                    nodeId:id,
-                    children: t.investRecords.map(item=>({...item, nodeId: item.pid, nodeName: item.entName})),
-                    parents: t.shareholders.map(item=>({...item, nodeId: item.pid, nodeName: item.name})),
+                    nodeName: name,
+                    nodeId: id,
+                    children: t.investRecords.map(item => ({...item, nodeId: item.pid, nodeName: item.entName})),
+                    parents: t.shareholders.map(item => ({...item, nodeId: item.pid, nodeName: item.name})),
                 },
                 {
                     width: "100%",
@@ -1121,27 +1122,27 @@ const TabContent: React.FC = () => {
                     addChildren: add,
                     filterForShow: filterForShow,
                     onNodeClick: (data) => {
-                        if('name' in data) {
+                        if ('name' in data) {
                             copy(data.name)
                             return
                         }
-                        if('entName' in data ) {
+                        if ('entName' in data) {
                             copy(data.entName)
                             return
                         }
-                        if('nodeName' in data ) {
+                        if ('nodeName' in data) {
                             copy(data["nodeName"])
                             return
                         }
                     },
-                    showLoadBtn:(item)=>{
-                        if('investment' in item){
+                    showLoadBtn: (item) => {
+                        if ('investment' in item) {
                             return item.investment
                         }
                         return item.shareholder
                     },
-                    linkText:(data)=>{
-                        if('regRate' in data){
+                    linkText: (data) => {
+                        if ('regRate' in data) {
                             return data.regRate
                         }
                         return data.subRate
@@ -1159,9 +1160,13 @@ const TabContent: React.FC = () => {
         try {
             setLoading(true)
             if (direction === "IN") {
-                return (await GetShareholder(item.pid)).map(item=>({...item, nodeId: item.pid, nodeName: item.name}))
+                return (await GetShareholder(item.pid)).map(item => ({...item, nodeId: item.pid, nodeName: item.name}))
             } else if (direction === "OUT") {
-                return (await GetInvestRecord(item.pid)).map(item=>({...item, nodeId: item.pid, nodeName: item.entName}))
+                return (await GetInvestRecord(item.pid)).map(item => ({
+                    ...item,
+                    nodeId: item.pid,
+                    nodeName: item.entName
+                }))
             }
 
         } catch (e) {
@@ -1175,7 +1180,7 @@ const TabContent: React.FC = () => {
         const t: CheckboxOptionType[] = []
         TYC.regStatus.items.forEach(item => {
             item.childList.forEach(i => {
-                t.push({ label: i.name, value: i.value })
+                t.push({label: i.name, value: i.value})
             })
         })
         return t
@@ -1186,9 +1191,9 @@ const TabContent: React.FC = () => {
     }
 
     const filterForShow = (item: aiqicha.Shareholder | aiqicha.InvestRecord) => {
-        if ('regRate' in item){
+        if ('regRate' in item) {
             if (item.regRate === '-') return true // 注销状态
-            const t =  parseFloat(item.regRate.replace('%', ''));
+            const t = parseFloat(item.regRate.replace('%', ''));
             return t >= ratioMinRef.current && t <= ratioMaxRef.current;
         }
         return true
@@ -1203,17 +1208,21 @@ const TabContent: React.FC = () => {
                 <Flex vertical gap={10}>
                     <Flex justify={'center'}>
                         <Candidate<aiqicha.SuggestItem>
-                            style={{ width: 400 }}
+                            style={{width: 400}}
                             size={"small"}
                             backFillDataOnSelectItem={false}
                             items={[
                                 {
-                                    fetchOnOpen: (items) => { return items.length === 0 },
+                                    fetchOnOpen: (items) => {
+                                        return items.length === 0
+                                    },
                                     onSelectItem: (item) => {
                                         query(item.data.name, item.data.pid)
                                     },
                                     title: '相关企业',
-                                    filter: (v) => { return !!(v && v.toString().length >= 4) },
+                                    filter: (v) => {
+                                        return !!(v && v.toString().length >= 4)
+                                    },
                                     fetch: async (v) => {
                                         try {
                                             const response = await Suggest(v.toString());
@@ -1357,16 +1366,17 @@ const TabContent: React.FC = () => {
                     }
                 }}
                 placement="right"
-            // drawerRender={(dom)=>{
-            //     return <div style={{height:"100%"}}>{dom}</div>
-            // }}
+                // drawerRender={(dom)=>{
+                //     return <div style={{height:"100%"}}>{dom}</div>
+                // }}
             >
-                <Flex vertical style={{ height: "100%", position: 'relative' }}>
+                <Flex vertical style={{height: "100%", position: 'relative'}}>
                     {/*<Spin spinning={loading} style={{position: "absolute", height: "100%", width: "100%"}}>*/}
                     {/*    */}
                     {/*</Spin>*/}
-                    <Flex gap={20} style={{ zIndex: 10, position: "absolute", backgroundColor: "#ffffff", right: "0" }}>
-                        <Tag bordered={false} color="#108ee9" style={{ fontSize: "14px", fontWeight: "bold" }}>{currentCompany.name}</Tag>
+                    <Flex gap={20} style={{zIndex: 10, position: "absolute", backgroundColor: "#ffffff", right: "0"}}>
+                        <Tag bordered={false} color="#108ee9"
+                             style={{fontSize: "14px", fontWeight: "bold"}}>{currentCompany.name}</Tag>
                         {/*<span>*/}
                         {/*    <Tag bordered={false} color="cyan" style={{fontSize:"14px"}}>经营状态</Tag>*/}
                         {/*    <Radio.Group size={"small"} onChange={e=>{}} defaultValue={"存续/在业"}>*/}
@@ -1376,25 +1386,27 @@ const TabContent: React.FC = () => {
                         {/*</span>*/}
 
                         <Flex>
-                            <Tag bordered={false} color="cyan" style={{ fontSize: "14px" }}>控股比例</Tag>
+                            <Tag bordered={false} color="cyan" style={{fontSize: "14px"}}>控股比例</Tag>
                             <InputNumber value={ratioMin} size={"small"} max={100} min={0} suffix={"%"}
-                                onChange={(v) => {
-                                    ratioMinRef.current = v === null ? 0 : v
-                                    setRatioMin(ratioMinRef.current)
-                                    treeInstance?.reset()
-                                }}
+                                         onChange={(v) => {
+                                             ratioMinRef.current = v === null ? 0 : v
+                                             setRatioMin(ratioMinRef.current)
+                                             treeInstance?.reset()
+                                         }}
                             />-<InputNumber value={ratioMax} size={"small"} max={100} min={0} suffix={"%"}
-                                onChange={(v) => {
-                                    ratioMaxRef.current = v === null ? 100 : v
-                                    setRatioMax(ratioMaxRef.current)
-                                    treeInstance?.reset()
-                                }}
-                            />
+                                            onChange={(v) => {
+                                                ratioMaxRef.current = v === null ? 100 : v
+                                                setRatioMax(ratioMaxRef.current)
+                                                treeInstance?.reset()
+                                            }}
+                        />
                         </Flex>
-                        <Button color="danger" variant="filled" size={"small"} onClick={() => { setOpen(false) }}>返回</Button>
+                        <Button color="danger" variant="filled" size={"small"} onClick={() => {
+                            setOpen(false)
+                        }}>返回</Button>
                     </Flex>
-                    <Spin spinning={loading} style={{ height: "100%" }} wrapperClassName={"wrapper"} >
-                        <div ref={graphRef} style={{ height: "100%", width: "100%" }}>
+                    <Spin spinning={loading} style={{height: "100%"}} wrapperClassName={"wrapper"}>
+                        <div ref={graphRef} style={{height: "100%", width: "100%"}}>
                             {/* 动态生成内容由 D3.js 完成 */}
                         </div>
                     </Spin>
@@ -1405,15 +1417,15 @@ const TabContent: React.FC = () => {
 };
 
 const Aiqicha = () => {
-    return <TabsV2 defaultTabContent={<TabContent />} tabBarExtraContent={{
+    return <TabsV2 defaultTabContent={<TabContent/>} tabBarExtraContent={{
         left: <div style={{
             width: "auto",
             height: "23px",
             display: "flex",
             alignItems: "center",
             backgroundColor: "#f1f3f4"
-        }}><AuthSetting /></div>
-    }} />
+        }}><AuthSetting/></div>
+    }}/>
 }
 
 export default Aiqicha;

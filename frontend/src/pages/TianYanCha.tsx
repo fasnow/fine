@@ -1,6 +1,6 @@
 import React, {CSSProperties, useEffect, useRef, useState} from 'react';
 import * as d3 from 'd3';
-import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, TableColumnsType, Tag, Tooltip} from "antd";
+import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, Tag, Tooltip} from "antd";
 import TabsV2 from "@/component/TabsV2";
 import {errorNotification} from '@/component/Notification';
 import {appActions, RootState} from '@/store/store';
@@ -23,12 +23,12 @@ interface BaseNodeType {
     nodeId: string | number
 }
 
-interface NodeType<T1, T2 = T1> extends BaseNodeType{
+interface NodeType<T1, T2 = T1> extends BaseNodeType {
     children?: (T1 & BaseNodeType) []
     parents?: (T2 & BaseNodeType)[]
 }
 
-interface Options<T1, T2=T1> {
+interface Options<T1, T2 = T1> {
     width: any
     height: any
     nodeGapX: number
@@ -41,12 +41,12 @@ interface Options<T1, T2=T1> {
     filterForShow?: (node: T1 | T2) => boolean
     linkText?: (node: T1 | T2) => string | number
     onNodeClick?: (node: T1 | T2) => void,
-    nodeTopLeftText?: (node: T1 | T2)=>{
+    nodeTopLeftText?: (node: T1 | T2) => {
         text: string | number,
         color: string,
         backgroundColor: string,
     } | undefined,
-    nodeTopRightText?: (node: T1 | T2) => {text:string | number, backgroundColor:string},
+    nodeTopRightText?: (node: T1 | T2) => { text: string | number, backgroundColor: string },
 }
 
 type PageDataType = WithIndex<tianyancha.SearchCompanyV4Item>
@@ -54,7 +54,7 @@ type PageDataType = WithIndex<tianyancha.SearchCompanyV4Item>
 const pageSizeOptions = [50, 100, 150, 200, 500]
 
 //https://juejin.cn/post/7359203560167178250
-class StockTreeVertical<T1,T2=T1> {
+class StockTreeVertical<T1, T2 = T1> {
     private ref: any;
     private clonedSvgBoxInfo: any;
     private svg: any;
@@ -67,7 +67,8 @@ class StockTreeVertical<T1,T2=T1> {
     private zoomHandler: any
     private opts: Options<T1, T2>
     private treeData: NodeType<T1, T2>
-    constructor(ref: any, data:NodeType<T1, T2>, options: Options<T1,T2>) {
+
+    constructor(ref: any, data: NodeType<T1, T2>, options: Options<T1, T2>) {
         this.opts = options
         this.ref = ref // 宿主元素选择器,是个ref对象
         this.treeData = data
@@ -102,7 +103,7 @@ class StockTreeVertical<T1,T2=T1> {
         this.update(null)
     }
 
-    private drawBottom(source:any){
+    private drawBottom(source: any) {
         const transition = this.svg.transition().duration(500).ease(d3.easeCubicOut)
         let nodesOfDown = this.rootOfDown.descendants().reverse()
         let linksOfDown = this.rootOfDown.links()
@@ -243,14 +244,14 @@ class StockTreeVertical<T1,T2=T1> {
                 return d.data.nodeName
             })
 
-        if (this.opts.nodeTopLeftText){
+        if (this.opts.nodeTopLeftText) {
             const t = this.opts.nodeTopLeftText
             node1Enter
                 .append('foreignObject')
                 .attr('width', '50')
                 .attr('height', '20')
                 .attr('x', (d: any) => {
-                    return - this.opts.nodeWidth / 2 - 0.5;
+                    return -this.opts.nodeWidth / 2 - 0.5;
                 })
                 .attr('y', (d: any) => {
                     return -this.opts.nodeHeight / 2 - 10;
@@ -275,7 +276,7 @@ class StockTreeVertical<T1,T2=T1> {
                 .style('line-height', '12px')
                 .style('border-radius', '3px')
                 .text(function (this: SVGGElement, d: any) {
-                    if (d.depth === 0)return
+                    if (d.depth === 0) return
                     const result = t(d.data);
                     if (!result) return
                     const element = d3.select(this);
@@ -320,8 +321,8 @@ class StockTreeVertical<T1,T2=T1> {
             .attr('class', 'linkOfDownItem')
             .attr('d', (d: any) => {
                 // 初始路径，从 source 自身到自身
-                const o = { x: source.x0, y: source.y0 };
-                return this.drawLink("down", { source: o, target: o });
+                const o = {x: source.x0, y: source.y0};
+                return this.drawLink("down", {source: o, target: o});
             })
             .attr('fill', 'none')
             .attr('stroke', '#9DA8BA')
@@ -338,14 +339,14 @@ class StockTreeVertical<T1,T2=T1> {
             .transition(transition)
             .attr('d', (d: any) => {
                 // 终止路径，模拟收缩回 source
-                const o = { x: d.source.x, y: d.source.y };
-                return this.drawLink("down", { source: o, target: o });
+                const o = {x: d.source.x, y: d.source.y};
+                return this.drawLink("down", {source: o, target: o});
             })
             .style('opacity', 0)
             .remove();
 
         const t = this.opts?.linkText
-        if(t){
+        if (t) {
             const linkLabels = this.gLinks
                 .selectAll('text.linkLabel')
                 .data(linksOfDown, (d: any) => {
@@ -393,7 +394,7 @@ class StockTreeVertical<T1,T2=T1> {
                 // if (!d._children) {
                 //     return 'none'
                 // }
-                if (this.opts.showLoadBtn){
+                if (this.opts.showLoadBtn) {
                     return !this.opts.showLoadBtn(d.data) && 'none'
                 }
             })
@@ -440,7 +441,7 @@ class StockTreeVertical<T1,T2=T1> {
                         if (!tt || tt.length === 0) {
                             d3.select(d3.select(e.target).node().parentNode).style("display", "none");
                             d.children = null;
-                        }else {
+                        } else {
                             d.children = tt;
                         }
                     }
@@ -471,7 +472,7 @@ class StockTreeVertical<T1,T2=T1> {
             })
     }
 
-    private drawTop(source: any){
+    private drawTop(source: any) {
         const transition = this.svg.transition().duration(500).ease(d3.easeCubicOut)
         let nodesOfUp = this.rootOfUp.descendants().reverse()
         let linksOfUp = this.rootOfUp.links()
@@ -655,8 +656,8 @@ class StockTreeVertical<T1,T2=T1> {
             .attr('class', 'linkOfUpItem')
             .attr('d', (d: any) => {
                 // 初始路径，从 source 自身到自身
-                const o = { x: source.x0, y: source.y0 };
-                return this.drawLink("up", { source: o, target: o });
+                const o = {x: source.x0, y: source.y0};
+                return this.drawLink("up", {source: o, target: o});
             })
             .attr('fill', 'none')
             .attr('stroke', '#9DA8BA')
@@ -673,14 +674,14 @@ class StockTreeVertical<T1,T2=T1> {
             .transition(transition)
             .attr('d', (d: any) => {
                 // 终止路径，模拟收缩回 source
-                const o = { x: d.source.x, y: d.source.y };
-                return this.drawLink("up", { source: o, target: o });
+                const o = {x: d.source.x, y: d.source.y};
+                return this.drawLink("up", {source: o, target: o});
             })
             .style('opacity', 0)
             .remove();
 
         const t = this.opts.linkText
-        if(t){
+        if (t) {
             const linkLabels2 = this.gLinks
                 .selectAll('text.linkLabel2')
                 .data(linksOfUp, (d: any) => {
@@ -727,7 +728,7 @@ class StockTreeVertical<T1,T2=T1> {
                 // if (!d._children) {
                 //     return 'none'
                 // }
-                if (this.opts.showLoadBtn){
+                if (this.opts.showLoadBtn) {
                     return !this.opts.showLoadBtn(d.data) && 'none'
                 }
             })
@@ -786,7 +787,7 @@ class StockTreeVertical<T1,T2=T1> {
 
     private process() {
         // 投资公司树的根节点
-        const t = { ...this.treeData }
+        const t = {...this.treeData}
         t.children = t.children?.filter(child => {
             if (this.opts.filterForShow) {
                 return this.opts.filterForShow(child)
@@ -967,7 +968,7 @@ class StockTreeVertical<T1,T2=T1> {
     }
 
     // 直角连接线 by wushengyuan
-    private drawLink(direction: any, { source, target }: { source: any, target: any }) {
+    private drawLink(direction: any, {source, target}: { source: any, target: any }) {
         if (direction === "up") {
             const bottom = target.y + this.opts.nodeHeight / 2
             return `M${source.x},${source.y} 
@@ -1064,7 +1065,7 @@ const AuthSetting: React.FC = () => {
     const save = () => {
         SetAuth(key).then(
             () => {
-                const t = { ...cfg, TianYanCha: { ...cfg.TianYanCha, Token: key } } as config.Config;
+                const t = {...cfg, TianYanCha: {...cfg.TianYanCha, Token: key}} as config.Config;
                 dispatch(appActions.setConfig(t))
                 setOpen(false)
                 setEditable(false)
@@ -1085,7 +1086,7 @@ const AuthSetting: React.FC = () => {
 
     return <>
         <Tooltip title="设置" placement={"right"}>
-            <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
+            <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
         </Tooltip>
         <Modal
             open={open}
@@ -1104,7 +1105,7 @@ const AuthSetting: React.FC = () => {
                         if (!editable) return
                         setKey(e.target.value)
                     }
-                } />
+                }/>
                 <Flex gap={10} justify={"end"}>
                     {
                         !editable ?
@@ -1112,10 +1113,10 @@ const AuthSetting: React.FC = () => {
                             :
                             <>
                                 <Button {...buttonProps} htmlType="submit"
-                                    onClick={save}
+                                        onClick={save}
                                 >保存</Button>
                                 <Button {...buttonProps} htmlType="submit"
-                                    onClick={cancel}
+                                        onClick={cancel}
                                 >取消</Button>
                             </>
                     }
@@ -1132,8 +1133,8 @@ const SharedOptions: CascaderProps<any> = {
     maxTagCount: 'responsive',
     maxTagPlaceholder: (omittedValues) => (
         <Tooltip
-            overlayStyle={{ pointerEvents: 'none' }}
-            title={omittedValues.map(({ label }) => label).join('\n')}
+            overlayStyle={{pointerEvents: 'none'}}
+            title={omittedValues.map(({label}) => label).join('\n')}
         >
             {omittedValues.length}
         </Tooltip>
@@ -1143,7 +1144,7 @@ const SharedOptions: CascaderProps<any> = {
 
 
 const TabContent: React.FC = () => {
-    const [treeInstance, setTreeInstance] = useState<StockTreeVertical<PenetrationItem,PenetrationItem>>();
+    const [treeInstance, setTreeInstance] = useState<StockTreeVertical<PenetrationItem, PenetrationItem>>();
     const graphRef = useRef<HTMLDivElement | null>(null); // 用于绑定 SVG 容器
     const filterRef = useRef<HTMLDivElement | null>(null);
     const [total, setTotal] = useState<number>(0)
@@ -1152,7 +1153,7 @@ const TabContent: React.FC = () => {
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const [open, setOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);
-    const [currentCompany, setCurrentCompany] = React.useState<{ name: string, id: string }>({ id: "", name: "" });
+    const [currentCompany, setCurrentCompany] = React.useState<{ name: string, id: string }>({id: "", name: ""});
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [containerHeight, setContainerHeight] = useState(0)
     const [, setTableHeight] = useState(0)
@@ -1181,7 +1182,7 @@ const TabContent: React.FC = () => {
 
     const query = async (name: string, id: string) => {
         treeInstance?.clear()
-        setCurrentCompany({ name: name, id: id })
+        setCurrentCompany({name: name, id: id})
         setOpen(true)
         setLoading(true)
         try {
@@ -1192,8 +1193,16 @@ const TabContent: React.FC = () => {
                 {
                     nodeId: id,
                     nodeName: name,
-                    children:t.map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType))),
-                    parents:tt.map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType))),
+                    children: t.map(item => ({
+                        ...item,
+                        nodeId: item.id,
+                        nodeName: item.name
+                    } as (PenetrationItem & BaseNodeType))),
+                    parents: tt.map(item => ({
+                        ...item,
+                        nodeId: item.id,
+                        nodeName: item.name
+                    } as (PenetrationItem & BaseNodeType))),
                 },
                 {
                     width: "100%",
@@ -1204,23 +1213,23 @@ const TabContent: React.FC = () => {
                     nodeWidth: 200,
                     rootNodeHeight: 45,
                     addChildren: add,
-                    showLoadBtn:(data)=>{
+                    showLoadBtn: (data) => {
                         return data.hasInvestor || data.hasHolder
                     },
                     filterForShow: filterForShow,
-                    linkText:(data)=>{
-                        return (data.ratio * 100).toString()+"%"
+                    linkText: (data) => {
+                        return (data.ratio * 100).toString() + "%"
                     },
                     onNodeClick: (node) => {
-                        if('nodeName' in node ) {
+                        if ('nodeName' in node) {
                             copy(node["nodeName"])
                             return
                         }
                         copy(node.name)
                     },
-                    nodeTopLeftText:(node)=>{
-                        if (node.statusTag.name === "注销"){
-                            return {text: node.statusTag.name, backgroundColor:"#fcf1ef", color: "#eb4e3e"}
+                    nodeTopLeftText: (node) => {
+                        if (node.statusTag.name === "注销") {
+                            return {text: node.statusTag.name, backgroundColor: "#fcf1ef", color: "#eb4e3e"}
                         }
                     }
                 }
@@ -1236,9 +1245,17 @@ const TabContent: React.FC = () => {
         try {
             setLoading(true)
             if (direction === "IN") {
-                return (await GetHolder(item.id)).map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType)))
+                return (await GetHolder(item.id)).map(item => ({
+                    ...item,
+                    nodeId: item.id,
+                    nodeName: item.name
+                } as (PenetrationItem & BaseNodeType)))
             } else if (direction === "OUT") {
-                return (await GetInvestee(item.id)).map(item=>({...item, nodeId: item.id, nodeName: item.name} as (PenetrationItem & BaseNodeType)))
+                return (await GetInvestee(item.id)).map(item => ({
+                    ...item,
+                    nodeId: item.id,
+                    nodeName: item.name
+                } as (PenetrationItem & BaseNodeType)))
             }
 
         } catch (e) {
@@ -1252,7 +1269,7 @@ const TabContent: React.FC = () => {
         const t: CheckboxOptionType[] = []
         TYC.regStatus.items.forEach(item => {
             item.childList.forEach(i => {
-                t.push({ label: i.name, value: i.value })
+                t.push({label: i.name, value: i.value})
             })
         })
         return t
@@ -1288,17 +1305,21 @@ const TabContent: React.FC = () => {
                         {/*    />*/}
                         {/*</Dropdown>*/}
                         <Candidate<tianyancha.SuggestItem>
-                            style={{ width: 400 }}
+                            style={{width: 400}}
                             size={"small"}
                             backFillDataOnSelectItem={false}
                             items={[
                                 {
-                                    fetchOnOpen: (items) => { return items.length === 0 },
+                                    fetchOnOpen: (items) => {
+                                        return items.length === 0
+                                    },
                                     onSelectItem: (item) => {
                                         query(item.label as string, item.data.graphId.toString())
                                     },
                                     title: '相关企业',
-                                    filter: (v) => { return !!(v && v.toString().length > 1) },
+                                    filter: (v) => {
+                                        return !!(v && v.toString().length > 1)
+                                    },
                                     fetch: async (v) => {
                                         try {
                                             const response = await Suggest(v.toString()); // 等待Suggest函数执行完成获取原始数据
@@ -1434,29 +1455,32 @@ const TabContent: React.FC = () => {
                 }}
                 placement="right"
             >
-                <Flex vertical style={{ height: "100%", position: 'relative' }}>
-                    <Flex gap={20} style={{ zIndex: 10, position: "absolute", backgroundColor: "#ffffff", right: "0" }}>
-                        <Tag bordered={false} color="#108ee9" style={{ fontSize: "14px", fontWeight: "bold" }}>{currentCompany.name}</Tag>
+                <Flex vertical style={{height: "100%", position: 'relative'}}>
+                    <Flex gap={20} style={{zIndex: 10, position: "absolute", backgroundColor: "#ffffff", right: "0"}}>
+                        <Tag bordered={false} color="#108ee9"
+                             style={{fontSize: "14px", fontWeight: "bold"}}>{currentCompany.name}</Tag>
                         <Flex>
-                            <Tag bordered={false} color="cyan" style={{ fontSize: "14px" }}>控股比例</Tag>
+                            <Tag bordered={false} color="cyan" style={{fontSize: "14px"}}>控股比例</Tag>
                             <InputNumber value={ratioMin} size={"small"} max={100} min={0} suffix={"%"}
-                                onChange={(v) => {
-                                    ratioMinRef.current = v === null ? 0 : v
-                                    setRatioMin(ratioMinRef.current)
-                                    treeInstance?.reset()
-                                }}
+                                         onChange={(v) => {
+                                             ratioMinRef.current = v === null ? 0 : v
+                                             setRatioMin(ratioMinRef.current)
+                                             treeInstance?.reset()
+                                         }}
                             />-<InputNumber value={ratioMax} size={"small"} max={100} min={0} suffix={"%"}
-                                onChange={(v) => {
-                                    ratioMaxRef.current = v === null ? 100 : v
-                                    setRatioMax(ratioMaxRef.current)
-                                    treeInstance?.reset()
-                                }}
-                            />
+                                            onChange={(v) => {
+                                                ratioMaxRef.current = v === null ? 100 : v
+                                                setRatioMax(ratioMaxRef.current)
+                                                treeInstance?.reset()
+                                            }}
+                        />
                         </Flex>
-                        <Button color="danger" variant="filled" size={"small"} onClick={() => { setOpen(false) }}>返回</Button>
+                        <Button color="danger" variant="filled" size={"small"} onClick={() => {
+                            setOpen(false)
+                        }}>返回</Button>
                     </Flex>
-                    <Spin spinning={loading} style={{ height: "100%" }} wrapperClassName={"wrapper"} >
-                        <div ref={graphRef} style={{ height: "100%", width: "100%" }}>
+                    <Spin spinning={loading} style={{height: "100%"}} wrapperClassName={"wrapper"}>
+                        <div ref={graphRef} style={{height: "100%", width: "100%"}}>
                             {/* 动态生成内容由 D3.js 完成 */}
                         </div>
                     </Spin>
@@ -1467,15 +1491,15 @@ const TabContent: React.FC = () => {
 };
 
 const TianYanCha = () => {
-    return <TabsV2 defaultTabContent={<TabContent />} tabBarExtraContent={{
+    return <TabsV2 defaultTabContent={<TabContent/>} tabBarExtraContent={{
         left: <div style={{
             width: "auto",
             height: "23px",
             display: "flex",
             alignItems: "center",
             backgroundColor: "#f1f3f4"
-        }}><AuthSetting /></div>
-    }} />
+        }}><AuthSetting/></div>
+    }}/>
 }
 
 export default TianYanCha;

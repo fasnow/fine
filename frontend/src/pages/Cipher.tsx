@@ -1,22 +1,13 @@
-import {
-    Button,
-    Col, ConfigProvider,
-    Flex, Input, List, Row,
-    Select,
-    Space,
-    Splitter,
-    Tree,
-    TreeDataNode
-} from "antd";
-import { CssConfig } from "@/pages/Constants";
-import React, { CSSProperties, useRef, useState } from "react";
+import {Button, Col, ConfigProvider, Flex, Input, List, Row, Select, Space, Splitter, Tree, TreeDataNode} from "antd";
+import {CssConfig} from "@/pages/Constants";
+import React, {CSSProperties, useRef, useState} from "react";
 import './Cipher.css'
 import locale from "antd/locale/zh_CN";
 import TextArea from "antd/es/input/TextArea";
 import CryptoJS from "crypto-js"
-import { isBase64 } from "@/util/util";
-import { SM2 } from 'gm-crypto';
-import { Buffer } from "buffer";
+import {isBase64} from "@/util/util";
+import {SM2} from 'gm-crypto';
+import {Buffer} from "buffer";
 
 namespace DataType {
     export const Base64 = "Base64"
@@ -81,7 +72,7 @@ export const Cipher = () => {
         item = {
             key: index,
             tab: t,
-            tabContent: <DataView ref={tabContentRef} key={index} />,
+            tabContent: <DataView ref={tabContentRef} key={index}/>,
             tabContentRef: tabContentRef,
         }
         setItems(prevState => [...prevState, item]);
@@ -117,14 +108,14 @@ export const Cipher = () => {
         locale={locale}
         theme={{
             components: {
-                Tree: { nodeSelectedBg: "#ffffff" }
+                Tree: {nodeSelectedBg: "#ffffff"}
             },
         }}
     >
-        <Splitter style={{ height: `calc(100vh - ${CssConfig.title.height} - ${CssConfig.tab.height})` }}>
+        <Splitter style={{height: `calc(100vh - ${CssConfig.title.height} - ${CssConfig.tab.height})`}}>
             <Splitter.Panel defaultSize={'15%'}>
                 <Tree
-                    style={{ height: "100%" }}
+                    style={{height: "100%"}}
                     defaultExpandAll
                     treeData={treeData}
                 />
@@ -144,7 +135,12 @@ export const Cipher = () => {
                                             target = target.closest('button') as HTMLElement;
                                             if (target && target.id === 'close') {
                                                 if (item.key === selectedItem.key) {
-                                                    setSelectedItem({ key: -1, tab: null, tabContent: null, tabContentRef: null })
+                                                    setSelectedItem({
+                                                        key: -1,
+                                                        tab: null,
+                                                        tabContent: null,
+                                                        tabContentRef: null
+                                                    })
                                                     selectedItemRef.current = undefined
                                                 }
                                                 return;
@@ -166,7 +162,8 @@ export const Cipher = () => {
                     <Splitter.Panel>
                         {
                             items.map((item) => (
-                                <div style={{ display: selectedItem.key === item.key ? "block" : "none", height: '100%' }} key={item.key}>
+                                <div style={{display: selectedItem.key === item.key ? "block" : "none", height: '100%'}}
+                                     key={item.key}>
                                     {item.tabContent}
                                 </div>
 
@@ -194,15 +191,15 @@ const DataView = React.forwardRef((props, ref) => {
         <TextArea
             value={input}
             onChange={e => setInput(e.target.value)}
-            style={{ height: "100%" }}
-            placeholder={"输入"} />
+            style={{height: "100%"}}
+            placeholder={"输入"}/>
     </Splitter.Panel>
         <Splitter.Panel>
             <TextArea
                 value={output}
                 onChange={e => setOutput(e.target.value)}
-                style={{ height: "100%" }}
-                placeholder={"输出"} />
+                style={{height: "100%"}}
+                placeholder={"输出"}/>
         </Splitter.Panel>
     </Splitter>
 })
@@ -380,8 +377,8 @@ export const AES: React.FC<Props> = (props: Props) => {
         }
     }
 
-    return <Flex vertical gap={2} style={{ width: "100%", paddingBottom: "10px" }}>
-        <Flex justify={"space-between"} style={{ alignItems: 'center', height: "24px" }}>
+    return <Flex vertical gap={2} style={{width: "100%", paddingBottom: "10px"}}>
+        <Flex justify={"space-between"} style={{alignItems: 'center', height: "24px"}}>
             {props.title}
             <Space.Compact>
                 <Button size={"small"} onClick={encrypt}>加密</Button>
@@ -394,56 +391,64 @@ export const AES: React.FC<Props> = (props: Props) => {
                 }}>关闭</Button>
             </Space.Compact>
         </Flex>
-        <Flex vertical gap={1} style={{ width: "100%" }}>
+        <Flex vertical gap={1} style={{width: "100%"}}>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>key</Col>
-                <Col span={21}><Input onChange={(e) => { setKey(e.target.value) }} size={"small"} placeholder="128/192/256位,即16/24/32字节" /></Col>
+                <Col span={21}><Input onChange={(e) => {
+                    setKey(e.target.value)
+                }} size={"small"} placeholder="128/192/256位,即16/24/32字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>iv</Col>
-                <Col span={21}><Input onChange={(e) => { setIV(e.target.value) }} size={"small"} placeholder="16字节" /></Col>
+                <Col span={21}><Input onChange={(e) => {
+                    setIV(e.target.value)
+                }} size={"small"} placeholder="16字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>mode</Col>
-                <Col span={8}><Select style={{ width: "100%" }} size={"small"} defaultValue={"CBC"} onChange={handleModeChange} options={
+                <Col span={8}><Select style={{width: "100%"}} size={"small"} defaultValue={"CBC"}
+                                      onChange={handleModeChange} options={
                     [
-                        { title: "CBC", value: "CBC" },
-                        { title: "ECB", value: "ECB" },
-                        { title: "OFB", value: "OFB" },
-                        { title: "CFB", value: "CFB" },
-                        { title: "CTR", value: "CTR" },
-                        { title: "CTRGladman", value: "CTRGladman" },
+                        {title: "CBC", value: "CBC"},
+                        {title: "ECB", value: "ECB"},
+                        {title: "OFB", value: "OFB"},
+                        {title: "CFB", value: "CFB"},
+                        {title: "CTR", value: "CTR"},
+                        {title: "CTRGladman", value: "CTRGladman"},
                     ]
-                } /></Col>
+                }/></Col>
                 <Col span={4} offset={2} style={ColCssProps}>padding</Col>
-                <Col span={7} ><Select style={{ width: "100%" }} size={"small"} defaultValue={"Pkcs7"} onChange={handlePaddingChange} options={
+                <Col span={7}><Select style={{width: "100%"}} size={"small"} defaultValue={"Pkcs7"}
+                                      onChange={handlePaddingChange} options={
                     [
-                        { title: "Pkcs7", value: 'Pkcs7' },
-                        { title: "ZeroPadding", value: "ZeroPadding" },
-                        { title: "NoPadding", value: "NoPadding" },
-                        { title: "AnsiX923", value: "AnsiX923" },
-                        { title: "Iso10126", value: "Iso10126" },
-                        { title: "Iso97971", value: "Iso97971" },
+                        {title: "Pkcs7", value: 'Pkcs7'},
+                        {title: "ZeroPadding", value: "ZeroPadding"},
+                        {title: "NoPadding", value: "NoPadding"},
+                        {title: "AnsiX923", value: "AnsiX923"},
+                        {title: "Iso10126", value: "Iso10126"},
+                        {title: "Iso97971", value: "Iso97971"},
                     ]
-                } /></Col>
+                }/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>输入</Col>
-                <Col span={8}><Select style={{ width: "100%" }} size={"small"} defaultValue={inputDataType} onSelect={setInputDataType} options={
+                <Col span={8}><Select style={{width: "100%"}} size={"small"} defaultValue={inputDataType}
+                                      onSelect={setInputDataType} options={
                     [
-                        { title: "Base64", value: DataType.Base64 },
-                        { title: "UTF-8", value: DataType.UTF_8 },
-                        { title: "Hex", value: DataType.Hex },
+                        {title: "Base64", value: DataType.Base64},
+                        {title: "UTF-8", value: DataType.UTF_8},
+                        {title: "Hex", value: DataType.Hex},
                     ]
-                } /></Col>
+                }/></Col>
                 <Col span={4} offset={2} style={ColCssProps}>输出</Col>
-                <Col span={7}><Select style={{ width: "100%" }} size={"small"} defaultValue={outputDataType} onSelect={setOutputDataType} options={
+                <Col span={7}><Select style={{width: "100%"}} size={"small"} defaultValue={outputDataType}
+                                      onSelect={setOutputDataType} options={
                     [
-                        { title: "Base64", value: DataType.Base64 },
-                        { title: "UTF-8", value: DataType.UTF_8 },
-                        { title: "Hex", value: DataType.Hex },
+                        {title: "Base64", value: DataType.Base64},
+                        {title: "UTF-8", value: DataType.UTF_8},
+                        {title: "Hex", value: DataType.Hex},
                     ]
-                } /></Col>
+                }/></Col>
             </Row>
         </Flex>
     </Flex>
@@ -562,8 +567,8 @@ export const SM2V: React.FC<Props> = (props: Props) => {
     }
 
 
-    return <Flex vertical gap={2} style={{ width: "100%", paddingBottom: "10px" }}>
-        <Flex justify={"space-between"} style={{ alignItems: 'center', height: "24px" }}>
+    return <Flex vertical gap={2} style={{width: "100%", paddingBottom: "10px"}}>
+        <Flex justify={"space-between"} style={{alignItems: 'center', height: "24px"}}>
             {props.title}
             <Space.Compact>
                 <Button size={"small"} onClick={encrypt}>加密</Button>
@@ -576,42 +581,49 @@ export const SM2V: React.FC<Props> = (props: Props) => {
                 }}>关闭</Button>
             </Space.Compact>
         </Flex>
-        <Flex vertical gap={1} style={{ width: "100%" }}>
+        <Flex vertical gap={1} style={{width: "100%"}}>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>公钥</Col>
-                <Col span={21}><Input value={publicKey} onChange={(e) => { setPublicKey(e.target.value) }} size={"small"} placeholder="04开头的16进制,共130字节" /></Col>
+                <Col span={21}><Input value={publicKey} onChange={(e) => {
+                    setPublicKey(e.target.value)
+                }} size={"small"} placeholder="04开头的16进制,共130字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>私钥</Col>
-                <Col span={21}><Input value={privateKey} onChange={(e) => { setPrivateKey(e.target.value) }} size={"small"} placeholder="16进制,共64字节" /></Col>
+                <Col span={21}><Input value={privateKey} onChange={(e) => {
+                    setPrivateKey(e.target.value)
+                }} size={"small"} placeholder="16进制,共64字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>mode</Col>
-                <Col span={8}><Select style={{ width: "100%" }} size={"small"} defaultValue={"C1C3C2"} onChange={handleModeChange} options={
+                <Col span={8}><Select style={{width: "100%"}} size={"small"} defaultValue={"C1C3C2"}
+                                      onChange={handleModeChange} options={
                     [
-                        { value: "C1C2C3" },
-                        { value: "C1C3C2" },
+                        {value: "C1C2C3"},
+                        {value: "C1C3C2"},
                     ]
-                } /></Col>
+                }/></Col>
                 <Col span={7} offset={6}><Button size={"small"} onClick={genKeyPair}>公私钥生成</Button></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>输入</Col>
-                <Col span={8}><Select style={{ width: "100%" }} size={"small"} defaultValue={inputDataType} onSelect={setInputDataType} options={
+                <Col span={8}><Select style={{width: "100%"}} size={"small"} defaultValue={inputDataType}
+                                      onSelect={setInputDataType} options={
                     [
-                        { value: DataType.Base64 },
-                        { value: DataType.UTF_8 },
-                        { value: DataType.Hex },
+                        {value: DataType.Base64},
+                        {value: DataType.UTF_8},
+                        {value: DataType.Hex},
                     ]
-                } /></Col>
+                }/></Col>
                 <Col span={4} offset={2} style={ColCssProps}>输出</Col>
-                <Col span={7}><Select style={{ width: "100%" }} size={"small"} defaultValue={outputDataType} onSelect={setOutputDataType} options={
+                <Col span={7}><Select style={{width: "100%"}} size={"small"} defaultValue={outputDataType}
+                                      onSelect={setOutputDataType} options={
                     [
-                        { value: DataType.Base64 },
-                        { value: DataType.UTF_8 },
-                        { value: DataType.Hex },
+                        {value: DataType.Base64},
+                        {value: DataType.UTF_8},
+                        {value: DataType.Hex},
                     ]
-                } /></Col>
+                }/></Col>
             </Row>
         </Flex>
     </Flex>
@@ -776,8 +788,8 @@ export const DES: React.FC<Props> = (props: Props) => {
         }
     }
 
-    return <Flex vertical gap={2} style={{ width: "100%", paddingBottom: "10px" }}>
-        <Flex justify={"space-between"} style={{ alignItems: 'center', height: "24px" }}>
+    return <Flex vertical gap={2} style={{width: "100%", paddingBottom: "10px"}}>
+        <Flex justify={"space-between"} style={{alignItems: 'center', height: "24px"}}>
             {props.title}
             <Space.Compact>
                 <Button size={"small"} onClick={encrypt}>加密</Button>
@@ -790,56 +802,64 @@ export const DES: React.FC<Props> = (props: Props) => {
                 }}>关闭</Button>
             </Space.Compact>
         </Flex>
-        <Flex vertical gap={1} style={{ width: "100%" }}>
+        <Flex vertical gap={1} style={{width: "100%"}}>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>key</Col>
-                <Col span={21}><Input onChange={(e) => { setKey(e.target.value) }} size={"small"} placeholder="8字节" /></Col>
+                <Col span={21}><Input onChange={(e) => {
+                    setKey(e.target.value)
+                }} size={"small"} placeholder="8字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>iv</Col>
-                <Col span={21}><Input onChange={(e) => { setIV(e.target.value) }} size={"small"} placeholder="8字节" /></Col>
+                <Col span={21}><Input onChange={(e) => {
+                    setIV(e.target.value)
+                }} size={"small"} placeholder="8字节"/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>mode</Col>
-                <Col span={8}><Select style={{ width: "100%" }} size={"small"} defaultValue={"CBC"} onChange={handleModeChange} options={
+                <Col span={8}><Select style={{width: "100%"}} size={"small"} defaultValue={"CBC"}
+                                      onChange={handleModeChange} options={
                     [
-                        { title: "CBC", value: "CBC" },
-                        { title: "ECB", value: "ECB" },
-                        { title: "OFB", value: "OFB" },
-                        { title: "CFB", value: "CFB" },
-                        { title: "CTR", value: "CTR" },
-                        { title: "CTRGladman", value: "CTRGladman" },
+                        {title: "CBC", value: "CBC"},
+                        {title: "ECB", value: "ECB"},
+                        {title: "OFB", value: "OFB"},
+                        {title: "CFB", value: "CFB"},
+                        {title: "CTR", value: "CTR"},
+                        {title: "CTRGladman", value: "CTRGladman"},
                     ]
-                } /></Col>
+                }/></Col>
                 <Col span={4} offset={2} style={ColCssProps}>padding</Col>
-                <Col span={7} ><Select style={{ width: "100%" }} size={"small"} defaultValue={"Pkcs7"} onChange={handlePaddingChange} options={
+                <Col span={7}><Select style={{width: "100%"}} size={"small"} defaultValue={"Pkcs7"}
+                                      onChange={handlePaddingChange} options={
                     [
-                        { title: "Pkcs7", value: 'Pkcs7' },
-                        { title: "ZeroPadding", value: "ZeroPadding" },
-                        { title: "NoPadding", value: "NoPadding" },
-                        { title: "AnsiX923", value: "AnsiX923" },
-                        { title: "Iso10126", value: "Iso10126" },
-                        { title: "Iso97971", value: "Iso97971" },
+                        {title: "Pkcs7", value: 'Pkcs7'},
+                        {title: "ZeroPadding", value: "ZeroPadding"},
+                        {title: "NoPadding", value: "NoPadding"},
+                        {title: "AnsiX923", value: "AnsiX923"},
+                        {title: "Iso10126", value: "Iso10126"},
+                        {title: "Iso97971", value: "Iso97971"},
                     ]
-                } /></Col>
+                }/></Col>
             </Row>
             <Row style={RowCssProps}>
                 <Col span={3} style={ColCssProps}>输入</Col>
-                <Col span={8}><Select style={{ width: "100%" }} size={"small"} defaultValue={inputDataType} onSelect={setInputDataType} options={
+                <Col span={8}><Select style={{width: "100%"}} size={"small"} defaultValue={inputDataType}
+                                      onSelect={setInputDataType} options={
                     [
-                        { title: "Base64", value: DataType.Base64 },
-                        { title: "UTF-8", value: DataType.UTF_8 },
-                        { title: "Hex", value: DataType.Hex },
+                        {title: "Base64", value: DataType.Base64},
+                        {title: "UTF-8", value: DataType.UTF_8},
+                        {title: "Hex", value: DataType.Hex},
                     ]
-                } /></Col>
+                }/></Col>
                 <Col span={4} offset={2} style={ColCssProps}>输出</Col>
-                <Col span={7}><Select style={{ width: "100%" }} size={"small"} defaultValue={outputDataType} onSelect={setOutputDataType} options={
+                <Col span={7}><Select style={{width: "100%"}} size={"small"} defaultValue={outputDataType}
+                                      onSelect={setOutputDataType} options={
                     [
-                        { title: "Base64", value: DataType.Base64 },
-                        { title: "UTF-8", value: DataType.UTF_8 },
-                        { title: "Hex", value: DataType.Hex },
+                        {title: "Base64", value: DataType.Base64},
+                        {title: "UTF-8", value: DataType.UTF_8},
+                        {title: "Hex", value: DataType.Hex},
                     ]
-                } /></Col>
+                }/></Col>
             </Row>
         </Flex>
     </Flex>

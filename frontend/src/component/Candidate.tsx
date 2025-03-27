@@ -39,7 +39,7 @@ interface BasePanelProps<T> {
     onSelectItem?: (item: ItemType<T>) => void;
 }
 
-const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
+const Panel = <T,>() => React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
     const [selectedKey, setSelectedKey] = useState<string | number | null>(null);
     const [loading, setLoading] = useState(false);
     const [candidates, setCandidates] = useState<ItemType<T>[]>([]);
@@ -83,7 +83,7 @@ const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
     };
 
     return (
-        <div onMouseLeave={()=>setSelectedKey(null)}>
+        <div onMouseLeave={() => setSelectedKey(null)}>
             {
                 props.title &&
                 <Tag bordered={false} color="cyan">{props.title}</Tag>
@@ -91,7 +91,7 @@ const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
             {
                 loading ? (
                     <Spin spinning={true}
-                          style={{display: "flex", justifyContent: 'center', alignItems: 'center'}}/>
+                        style={{ display: "flex", justifyContent: 'center', alignItems: 'center' }} />
                 ) : (
                     <ConfigProvider
                         theme={{
@@ -106,10 +106,10 @@ const Panel = <T,>()=>React.forwardRef<any, BasePanelProps<T>>((props, ref) => {
                             dataSource={candidates}
                             size={"small"}
                             split={false}
-                            style={{maxHeight: 200}}
+                            style={{ maxHeight: 200 }}
                             renderItem={(item, index) => {
                                 const isSelected = item.value === selectedKey;
-                                return <List.Item key={index} style={{overflow: 'hidden'}}>
+                                return <List.Item key={index} style={{ overflow: 'hidden' }}>
                                     <span
                                         onMouseOver={() => handleMouseOver(item.value)}
                                         onClick={(e) => {
@@ -154,7 +154,7 @@ export interface CandidateProps<T> {
     backFillDataOnSelectItem?: boolean
 }
 
-const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
+const Candidate = React.memo(<T,>(props: CandidateProps<T>) => {
     const [localValue, setLocalValue] = useState<string | number>(props.value || "");
     const valueRef = useRef<string | number>("")
     const [isComposing, setIsComposing] = useState(false);
@@ -166,7 +166,7 @@ const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
     const refs = useRef<any[]>([])
     const index = useRef(0)
     const [value, setValue] = useState(localValue)
-    const f = useRef(backFillDataOnSelectItem === undefined?true:backFillDataOnSelectItem)
+    const f = useRef(backFillDataOnSelectItem === undefined ? true : backFillDataOnSelectItem)
     useEffect(() => {
         const handleClick = (event: MouseEvent) => {
             const rootDiv = rootDivRef.current;
@@ -247,9 +247,9 @@ const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
             refs.current.push(r)
             const A = Panel<T>()
             return <A key={index.current++} ref={r} title={item.title} value={value} fetch={item.fetch}
-                onSelectItem={(t:ItemType<T>) => {
+                onSelectItem={(t: ItemType<T>) => {
                     setOpen(false)
-                    if (f.current){
+                    if (f.current) {
                         setLocalValue(t.value || "")
                         setValue(t.value.toString() || "")
                     }
@@ -264,7 +264,7 @@ const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
     }, [value])
 
     return (
-        <div ref={rootDivRef} style={{ position: "relative"}}>
+        <div ref={rootDivRef} style={{ position: "relative" }}>
             <Flex justify={'center'} align={'center'}>
                 {
                     onSearch ? <Space.Compact>
@@ -293,7 +293,7 @@ const Candidate = React.memo(<T,>(props:CandidateProps<T>) => {
                 overflowY: 'auto',
                 overflowX: 'hidden',
                 display: open ? 'block' : 'none',
-                boxSizing:'border-box'
+                boxSizing: 'border-box'
             }}>
                 {panels}
             </div>

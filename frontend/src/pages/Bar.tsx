@@ -3,24 +3,26 @@ import {
     CloseOutlined,
     CompressOutlined,
     DeleteOutlined,
-    DownloadOutlined, ExclamationCircleOutlined,
+    DownloadOutlined,
+    ExclamationCircleOutlined,
     ExpandOutlined,
     FolderOpenOutlined,
     GithubOutlined,
-    LineOutlined, LoadingOutlined,
+    LineOutlined,
+    LoadingOutlined,
     SendOutlined,
-    SyncOutlined,
+    SyncOutlined
 } from "@ant-design/icons";
-import { Badge, Button, ConfigProvider, Divider, Flex, List, Modal, Popover, Space, Spin, Tag, Tooltip, } from "antd";
-import React, { useEffect, useRef, useState } from "react";
+import {Badge, Button, ConfigProvider, Divider, Flex, List, Modal, Popover, Space, Spin, Tag, Tooltip,} from "antd";
+import React, {useEffect, useRef, useState} from "react";
 import "./Bar.css";
 import {useDispatch, useSelector} from "react-redux";
-import { GITHUB_URL, ISSUE_URL } from "@/component/type";
+import {GITHUB_URL, ISSUE_URL} from "@/component/type";
 import wailsJson from '../../../wails.json';
 import favicon from "../assets/images/appicon.png"
-import { genshinLaunch } from "./op";
+import {genshinLaunch} from "./op";
 import {appActions, RootState} from "@/store/store";
-import { Proxy as ProxyComp } from "./Setting"
+import {Proxy as ProxyComp} from "./Setting"
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
     BrowserOpenURL,
@@ -31,14 +33,14 @@ import {
     WindowToggleMaximise,
     WindowUnmaximise
 } from "../../wailsjs/runtime";
-import { errorNotification, infoNotification } from "@/component/Notification";
+import {errorNotification, infoNotification} from "@/component/Notification";
 import semver from "semver/preload";
-import { Title } from "@/component/Title";
+import {Title} from "@/component/Title";
 import {GetPlatform, OpenFile, OpenFolder, ShowItemInFolder} from "../../wailsjs/go/osoperation/Runtime";
 import {CheckUpdate, SaveProxy} from "../../wailsjs/go/application/Application";
 import {config, exportlog} from "../../wailsjs/go/models";
-import Item = exportlog.Item;
 import {GetByOffset, MarkAllAsDeleted, MarkAsDeleted} from "../../wailsjs/go/exportlog/Bridge";
+import Item = exportlog.Item;
 
 const buttonStyle: React.CSSProperties = {
     borderRadius: "0",
@@ -51,9 +53,9 @@ const buttonStyle: React.CSSProperties = {
 const appIcon = (platform: string) => {
     if (platform === "windows") {
         return <span
-            style={{ fontSize: "24px", display: 'flex', alignItems: "center", marginLeft: "5px" }}>
+            style={{fontSize: "24px", display: 'flex', alignItems: "center", marginLeft: "5px"}}>
             <img
-                style={{ height: "24px" }}
+                style={{height: "24px"}}
                 src={favicon}
                 draggable="false"
                 id="appIcon"
@@ -83,7 +85,7 @@ class TitleBarOverlay extends React.Component {
                 <Button
                     type="text"
                     style={buttonStyle}
-                    icon={<LineOutlined />}
+                    icon={<LineOutlined/>}
                     size="small"
                     onClick={WindowMinimise}
                 />
@@ -91,29 +93,29 @@ class TitleBarOverlay extends React.Component {
                     <Button
                         type="text"
                         style={buttonStyle}
-                        icon={<CompressOutlined />}
+                        icon={<CompressOutlined/>}
                         size="small"
                         onClick={() => {
                             WindowUnmaximise();
-                            this.setState({ fullScreen: false });
+                            this.setState({fullScreen: false});
                         }}
                     />
                 ) : (
                     <Button
                         type="text"
                         style={buttonStyle}
-                        icon={<ExpandOutlined />}
+                        icon={<ExpandOutlined/>}
                         size="small"
                         onClick={() => {
                             WindowMaximise();
-                            this.setState({ fullScreen: true });
+                            this.setState({fullScreen: true});
                         }}
                     />
                 )}
                 <Button
                     type="text"
                     style={buttonStyle}
-                    icon={<CloseOutlined />}
+                    icon={<CloseOutlined/>}
                     size="small"
                     className="exit-button"
                     onClick={Quit}
@@ -201,23 +203,23 @@ const DownloadViewContent: React.FC = () => {
                 <span>下载</span>
                 <span>
                     <Title text="打开下载列表">
-                        <Button type="text" size="large" icon={<FolderOpenOutlined />} onClick={openDataFolder} />
+                        <Button type="text" size="large" icon={<FolderOpenOutlined/>} onClick={openDataFolder}/>
                     </Title>
                     <Title text="文件仍存在">
-                        <Button type="text" size="large" icon={<DeleteOutlined />} onClick={clearDownloadLog}>
+                        <Button type="text" size="large" icon={<DeleteOutlined/>} onClick={clearDownloadLog}>
                             清空记录
                         </Button>
                     </Title>
                 </span>
             </div>
-            <Divider />
-            <div style={{ width: "280px" }}>
+            <Divider/>
+            <div style={{width: "280px"}}>
                 <InfiniteScroll
                     dataLength={data.length}
                     next={loadMoreData}
                     hasMore={data.length < total}
-                    loader={<span style={{ display: 'flex', justifyContent: "center", alignItems: 'center' }}><Spin
-                        spinning={true} size="small" /></span>}
+                    loader={<span style={{display: 'flex', justifyContent: "center", alignItems: 'center'}}><Spin
+                        spinning={true} size="small"/></span>}
                     scrollableTarget="scrollableDiv"
                     height={400}
                 >
@@ -273,7 +275,7 @@ const DownloadViewContent: React.FC = () => {
                                                     paddingTop: "0px",
                                                     height: "22px",
                                                     fontSize: "12px",
-                                                }}>导出失败<Title text={item.error}><ExclamationCircleOutlined /></Title></label></Flex>}
+                                                }}>导出失败<Title text={item.error}><ExclamationCircleOutlined/></Title></label></Flex>}
                                             {item.status === status.Running &&
                                                 <label style={{
                                                     paddingLeft: "0px",
@@ -281,15 +283,15 @@ const DownloadViewContent: React.FC = () => {
                                                     height: "22px",
                                                     fontSize: "12px",
                                                     color: "#1677ff"
-                                                }}>正在导出<LoadingOutlined /></label>}
+                                                }}>正在导出<LoadingOutlined/></label>}
                                             {item.status === status.Stopped && <Button style={{
-                                                    paddingLeft: "0px",
-                                                    paddingTop: "0px",
-                                                    height: "22px",
-                                                    fontSize: "12px"
-                                                }} type="link"
-                                                        onClick={() => openFile(item.dir, item.filename)}
-                                                >打开文件</Button>}
+                                                paddingLeft: "0px",
+                                                paddingTop: "0px",
+                                                height: "22px",
+                                                fontSize: "12px"
+                                            }} type="link"
+                                                                                       onClick={() => openFile(item.dir, item.filename)}
+                                            >打开文件</Button>}
 
                                         </span>
                                         {item.status === status.Stopped && <span
@@ -300,18 +302,19 @@ const DownloadViewContent: React.FC = () => {
                                             }}
                                         >
                                                 <Title text="打开文件夹">
-                                                    <Button size="large" type="text" icon={<FolderOpenOutlined />}
-                                                            onClick={() => showFileInFolder(item.dir, item.filename)} />
+                                                    <Button size="large" type="text" icon={<FolderOpenOutlined/>}
+                                                            onClick={() => showFileInFolder(item.dir, item.filename)}/>
                                                 </Title>
                                                 <Title text="删除文件">
-                                                    <Button title={"删除文件"} size="large" type="text" icon={<DeleteOutlined />}
-                                                            onClick={() => deleteFile(item.exportID)} />
+                                                    <Button title={"删除文件"} size="large" type="text"
+                                                            icon={<DeleteOutlined/>}
+                                                            onClick={() => deleteFile(item.exportID)}/>
                                                 </Title>
                                             </span>}
 
                                     </span>
                                 </List.Item>
-                            )} />
+                            )}/>
                     </ConfigProvider>
                 </InfiniteScroll>
             </div>
@@ -349,10 +352,10 @@ const Update: React.FC = () => {
         )
         const intervalId = setInterval(() => {
             const newDate = new Date().getDate().toString()
-            if (!showToday.current && today.current === newDate){
+            if (!showToday.current && today.current === newDate) {
                 return
             }
-            if (today.current !== newDate){
+            if (today.current !== newDate) {
                 today.current = newDate
                 showToday.current = true
             }
@@ -400,11 +403,11 @@ const Update: React.FC = () => {
         <Tooltip placement="bottom" title="检查更新">
             <Button
                 icon={<Badge dot={releaseUrl !== ""} offset={[0, 0]}>
-                    <SyncOutlined spin={loading} />
+                    <SyncOutlined spin={loading}/>
                 </Badge>}
                 type="text"
                 style={buttonStyle}
-                onClick={checkUpdate} />
+                onClick={checkUpdate}/>
         </Tooltip>
         <Modal
             maskClosable={false}
@@ -412,28 +415,28 @@ const Update: React.FC = () => {
             footer={<>
                 <Flex justify={"right"} gap={10}>
                     <Button size={"small"} type={"default"}
-                    onClick={
-                        () => {
-                            setOpen(false)
-                            showToday.current = false
-                        }
-                    }
+                            onClick={
+                                () => {
+                                    setOpen(false)
+                                    showToday.current = false
+                                }
+                            }
                     >今日不再提示</Button>
                     <Button size={"small"} type={"default"}
-                    onClick={
-                        () => setOpen(false)
-                    }
+                            onClick={
+                                () => setOpen(false)
+                            }
                     >取消</Button>
                     <Button size={"small"} type={"primary"}
-                    onClick={()=>{
-                        setOpen(false)
-                        BrowserOpenURL(releaseUrl);
-                    }}
+                            onClick={() => {
+                                setOpen(false)
+                                BrowserOpenURL(releaseUrl);
+                            }}
                     >下载更新</Button>
                 </Flex>
             </>}
-            cancelButtonProps={{ size: "small" }}
-            okButtonProps={{ size: "small" }}
+            cancelButtonProps={{size: "small"}}
+            okButtonProps={{size: "small"}}
             open={open}
             onOk={() => {
                 setOpen(false)
@@ -443,18 +446,18 @@ const Update: React.FC = () => {
             okText={"下载更新"}
         >
             <Flex vertical gap={10}>
-                <Flex >
+                <Flex>
                     <span>
                         最新版本:
                     </span>
-                    <Tag style={{ fontSize: "14px" }} bordered={false} color="green">{releaseVersion}</Tag>
+                    <Tag style={{fontSize: "14px"}} bordered={false} color="green">{releaseVersion}</Tag>
                 </Flex>
                 <Flex vertical>
                     <span>更新内容:</span>
                     {
                         releaseDescription && releaseDescription.replace(/\n(?!\n?$)/g, '\n')
                             .split("\n").map((item, i) => {
-                                return <span key={i} style={{ whiteSpace: "pre", marginLeft: "10px" }}>{item}</span>
+                                return <span key={i} style={{whiteSpace: "pre", marginLeft: "10px"}}>{item}</span>
                             })
                     }
                 </Flex>
@@ -462,11 +465,11 @@ const Update: React.FC = () => {
                     <span>
                         下载地址:
                     </span>
-                    <span style={{ whiteSpace: "pre", marginLeft: "10px" }}>
+                    <span style={{whiteSpace: "pre", marginLeft: "10px"}}>
                         {
                             releaseUrl &&
                             <Tag
-                                style={{ fontSize: "14px" }}
+                                style={{fontSize: "14px"}}
                                 bordered={false}
                                 color="green">
                                 {releaseUrl.replace(/\n(?!\n?$)/g, "")}
@@ -480,8 +483,8 @@ const Update: React.FC = () => {
 
 export const Proxy: React.FC = () => {
     const dispatch = useDispatch()
-    const cfg = useSelector((state:RootState) => state.app.global.config)
-    const proxy = useSelector((state:RootState) => state.app.global.config.Proxy)
+    const cfg = useSelector((state: RootState) => state.app.global.config)
+    const proxy = useSelector((state: RootState) => state.app.global.config.Proxy)
     const [url, setUrl] = useState<string>("")
     const [open, setOpen] = useState<boolean>(false)
 
@@ -489,9 +492,9 @@ export const Proxy: React.FC = () => {
         setUrl(`${proxy?.Type}://${proxy?.Host}:${proxy?.Port}`)
     }, [proxy])
 
-    const updateProxy = (p:config.Proxy) =>{
+    const updateProxy = (p: config.Proxy) => {
         SaveProxy(p).then(() => {
-            const tt = { ...cfg, Proxy: p } as config.Config;
+            const tt = {...cfg, Proxy: p} as config.Config;
             dispatch(appActions.setConfig(tt))
         }).catch(
             err => {
@@ -524,8 +527,8 @@ export const Proxy: React.FC = () => {
                             {
                                 proxy?.Enable ?
                                     <>
-                                        <span style={{ display: "flex", marginBottom: "5px" }}>
-                                            <SendOutlined rotate={315} style={{ color: proxy?.Enable ? "red" : "" }} />
+                                        <span style={{display: "flex", marginBottom: "5px"}}>
+                                            <SendOutlined rotate={315} style={{color: proxy?.Enable ? "red" : ""}}/>
                                         </span>
                                         {/* <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
                                             {url}
@@ -533,8 +536,8 @@ export const Proxy: React.FC = () => {
 
                                     </>
                                     :
-                                    <span style={{ display: "flex", marginBottom: "5px" }}>
-                                        <SendOutlined rotate={315} style={{ color: proxy?.Enable ? "red" : "" }} />
+                                    <span style={{display: "flex", marginBottom: "5px"}}>
+                                        <SendOutlined rotate={315} style={{color: proxy?.Enable ? "red" : ""}}/>
                                     </span>
                             }
                         </Flex>
@@ -544,7 +547,7 @@ export const Proxy: React.FC = () => {
 
                     {
                         proxy?.Enable &&
-                        <Tag bordered={false} style={{ lineHeight: "20px", fontSize: "14px", marginRight: "0px" }}>
+                        <Tag bordered={false} style={{lineHeight: "20px", fontSize: "14px", marginRight: "0px"}}>
                             {url}
                         </Tag>
                     }
@@ -566,7 +569,7 @@ const DownloadHistory: React.FC = () => {
         })
     }, [])
     return <>
-        <Proxy />
+        <Proxy/>
         <ConfigProvider
             theme={{
                 components: {
@@ -584,7 +587,7 @@ const DownloadHistory: React.FC = () => {
                 title="导出记录"
             >
                 <Popover
-                    content={<DownloadViewContent />}
+                    content={<DownloadViewContent/>}
                     trigger={"click"}
                     destroyTooltipOnHide
                     open={open}
@@ -593,7 +596,7 @@ const DownloadHistory: React.FC = () => {
                     <Button
                         type="text"
                         style={buttonStyle}
-                        icon={<DownloadOutlined />}
+                        icon={<DownloadOutlined/>}
                         size="small"
                     />
                 </Popover>
@@ -643,14 +646,14 @@ const Bar: React.FC = () => {
             <div className="right" onDoubleClick={(e) => e.stopPropagation()}>
                 <Space size={1}>
                     <span onClick={genshinLaunch}
-                        style={{ color: "#4676c3", margin: "0px 10px 0px 10px" }}> v{version.current}</span>
-                    <DownloadHistory />
-                    <Update />
+                          style={{color: "#4676c3", margin: "0px 10px 0px 10px"}}> v{version.current}</span>
+                    <DownloadHistory/>
+                    <Update/>
                     <Tooltip placement="bottom" title="Github">
                         <Button
                             type="text"
                             style={buttonStyle}
-                            icon={<GithubOutlined />}
+                            icon={<GithubOutlined/>}
                             size="small"
                             onClick={() => {
                                 BrowserOpenURL(GITHUB_URL)
@@ -661,7 +664,7 @@ const Bar: React.FC = () => {
                         <Button
                             type="text"
                             style={buttonStyle}
-                            icon={<BugOutlined />}
+                            icon={<BugOutlined/>}
                             size="small"
                             onClick={() => {
                                 BrowserOpenURL(ISSUE_URL)
@@ -673,7 +676,7 @@ const Bar: React.FC = () => {
                             <Button
                                 type="text"
                                 style={buttonStyle}
-                                icon={<LineOutlined />}
+                                icon={<LineOutlined/>}
                                 size="small"
                                 onClick={WindowMinimise}
                             />
@@ -681,7 +684,7 @@ const Bar: React.FC = () => {
                                 <Button
                                     type="text"
                                     style={buttonStyle}
-                                    icon={<CompressOutlined />}
+                                    icon={<CompressOutlined/>}
                                     size="small"
                                     onClick={() => {
                                         WindowToggleMaximise();
@@ -693,7 +696,7 @@ const Bar: React.FC = () => {
                                 <Button
                                     type="text"
                                     style={buttonStyle}
-                                    icon={<ExpandOutlined />}
+                                    icon={<ExpandOutlined/>}
                                     size="small"
                                     onClick={(e) => {
                                         WindowToggleMaximise();
@@ -705,7 +708,7 @@ const Bar: React.FC = () => {
                             <Button
                                 type="text"
                                 style={buttonStyle}
-                                icon={<CloseOutlined />}
+                                icon={<CloseOutlined/>}
                                 size="small"
                                 className="exit-button"
                                 onClick={Quit}

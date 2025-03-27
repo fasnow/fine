@@ -4,6 +4,7 @@ import NotFound from "@/component/Notfound";
 import Loading from "@/component/Loading";
 import {ColDef} from "ag-grid-community";
 import {AgGridReact} from "ag-grid-react";
+import {AGGridCommonOptions} from "@/pages/Props";
 
 export interface Column {
     value?: string;
@@ -26,18 +27,6 @@ const LineSplit: React.FC<Column> = (props) => {
         return w + 10
     })
     const widthRef = useRef<number>(width)
-    const defaultColDef = useMemo<ColDef>(() => {
-        return {
-            enableValue: true,
-            enableRowGroup: true,
-            enablePivot: true,
-            filter: true,
-            suppressHeaderMenuButton: true,
-            suppressHeaderFilterButton: true,
-            tooltipShowDelay:0,
-            tooltipHideDelay:0,
-        }
-    }, [])
 
     const handleMouseDown = (e: React.MouseEvent) => {
         startX.current = e.pageX;
@@ -91,14 +80,10 @@ const LineSplit: React.FC<Column> = (props) => {
                     </div>
                 </Flex>
                 <AgGridReact
+                    {...AGGridCommonOptions}
                     loading={props.loading}
                     sideBar={false}
-                    headerHeight={32}
-                    rowHeight={32}
-                    defaultColDef={defaultColDef}
                     autoSizeStrategy={{type: "fitGridWidth"}}
-                    noRowsOverlayComponent={() => <NotFound />}
-                    loadingOverlayComponent={() => <Loading />}
                     rowData={props.data}
                     columnDefs={props.columnDefs}
                     cellSelection={true}

@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     Button,
     Col,
     DatePicker,
-    Divider,
     Flex,
     Input,
     InputNumber,
@@ -12,53 +11,45 @@ import {
     Popover,
     Row,
     Select,
-    Space,
     Spin,
     Switch,
-    Tabs, Tag,
+    Tabs,
+    Tag,
     Tooltip,
     Upload
 } from 'antd';
-import {
-    CloudDownloadOutlined,
-    ExclamationCircleOutlined,
-    InboxOutlined,
-    LoadingOutlined,
-    SearchOutlined,
-    UserOutlined
-} from '@ant-design/icons';
-import { errorNotification } from '@/component/Notification';
-import { RootState, appActions, userActions } from '@/store/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { ExportDataPanelProps } from './Props';
-import { buttonProps } from './Setting';
+import {CloudDownloadOutlined, InboxOutlined, LoadingOutlined, SearchOutlined, UserOutlined} from '@ant-design/icons';
+import {errorNotification} from '@/component/Notification';
+import {appActions, RootState, userActions} from '@/store/store';
+import {useDispatch, useSelector} from 'react-redux';
+import {ExportDataPanelProps} from './Props';
 import {copy, getAllDisplayedColumnKeys, getSortedData, RangePresets} from '@/util/util';
 import {config, event, hunter} from "../../wailsjs/go/models";
 import {Export, GetUserInfo, Query, SetAuth} from "../../wailsjs/go/hunter/Bridge";
-import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
-import type { Tab } from 'rc-tabs/lib/interface';
+import {BrowserOpenURL, EventsOn} from "../../wailsjs/runtime";
+import type {Tab} from 'rc-tabs/lib/interface';
 import {Coin1, Dots} from "@/component/Icon";
-import { md5 } from "js-md5"
-import { toUint8Array } from "js-base64";
-import { WithIndex } from "@/component/Interface";
+import {md5} from "js-md5"
+import {toUint8Array} from "js-base64";
+import {WithIndex} from "@/component/Interface";
 import TabLabel from "@/component/TabLabel";
-import { TargetKey } from "@/pages/Constants";
-import Candidate, { ItemType } from "@/component/Candidate";
-import { FindByPartialKey } from "../../wailsjs/go/history/Bridge";
-import { AgGridReact } from "ag-grid-react";
-import NotFound from "@/component/Notfound";
-import Loading from "@/component/Loading";
+import {TargetKey} from "@/pages/Constants";
+import Candidate, {ItemType} from "@/component/Candidate";
+import {FindByPartialKey} from "../../wailsjs/go/history/Bridge";
+import {AgGridReact} from "ag-grid-react";
 import {
     ColDef,
     GetContextMenuItemsParams,
-    ICellRendererParams,
+    ITooltipParams,
     ProcessCellForExportParams,
-    SideBarDef, ValueGetterParams
+    SideBarDef,
+    ValueGetterParams
 } from "ag-grid-community";
 import Help from "@/pages/HunterUsage";
 import {Fetch} from "../../wailsjs/go/application/Application";
 import Password from "@/component/Password";
 import Label from "@/component/Label";
+import {AGGridCommonOptions} from "@/pages/Props";
 
 const pageSizeOptions = [10, 20, 50, 100]
 
@@ -101,20 +92,20 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
     const exportID = useRef(0)
 
     useEffect(() => {
-        EventsOn(event.HunterExport,  (eventDetail:event.EventDetail)=> {
-            if (eventDetail.ID !== exportID.current){
+        EventsOn(event.HunterExport, (eventDetail: event.EventDetail) => {
+            if (eventDetail.ID !== exportID.current) {
                 return
             }
             setIsExporting(false)
             setDisable(false)
-            if (eventDetail.Status === stat.Stopped){
+            if (eventDetail.Status === stat.Stopped) {
                 GetUserInfo().then(
                     result => {
-                        dispatch(userActions.setHunterUser({ restToken: result }))
+                        dispatch(userActions.setHunterUser({restToken: result}))
                     }
                 )
-            }else if (eventDetail.Status === stat.Error){
-                errorNotification("错误",eventDetail.Error)
+            } else if (eventDetail.Status === stat.Error) {
+                errorNotification("错误", eventDetail.Error)
             }
         })
     }, []);
@@ -133,21 +124,21 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
         setIsExporting(true)
         setDisable(true)
         Export(props.id, pageNum, pageSize)
-            .then(r=>exportID.current = r)
+            .then(r => exportID.current = r)
             .catch(
-            err => {
-                errorNotification("错误", err)
-                setIsExporting(false)
-                setDisable(false)
-            }
-        )
+                err => {
+                    errorNotification("错误", err)
+                    setIsExporting(false)
+                    setDisable(false)
+                }
+            )
     }
     return <>
         <Button
             disabled={disable}
             size="small"
             onClick={() => setExportable(true)}
-            icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}
+            icon={isExporting ? <LoadingOutlined/> : <CloudDownloadOutlined/>}
         >
             {isExporting ? "正在导出" : "导出结果"}
         </Button>
@@ -170,7 +161,7 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
                 setStatus("")
             }}
         >
-            <span style={{ display: 'grid', gap: "3px" }}>
+            <span style={{display: 'grid', gap: "3px"}}>
                 <Row>
                     <span style={{
                         display: 'flex',
@@ -178,7 +169,7 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
                         gap: "10px",
                         backgroundColor: '#f3f3f3',
                         width: "100%"
-                    }}>当前积分: <span style={{ color: "red" }}>{user.RestQuota || 0}</span></span>
+                    }}>当前积分: <span style={{color: "red"}}>{user.RestQuota || 0}</span></span>
                 </Row>
                 <Row>
                     <Col span={10}>
@@ -187,9 +178,9 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
                     <Col span={14}>
                         <Select
                             size='small'
-                            style={{ width: '80px' }}
+                            style={{width: '80px'}}
                             defaultValue={pageSize}
-                            options={pageSizeOptions.map(size => ({ label: size.toString(), value: size }))}
+                            options={pageSizeOptions.map(size => ({label: size.toString(), value: size}))}
                             onChange={(size) => {
                                 setPageSize(size)
                             }}
@@ -198,7 +189,7 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
                 </Row>
                 <Row>
                     <Col span={10}>
-                        <span style={{ display: 'flex', whiteSpace: 'nowrap' }}>导出页数(max:{maxPage})</span>
+                        <span style={{display: 'flex', whiteSpace: 'nowrap'}}>导出页数(max:{maxPage})</span>
                     </Col>
                     <Col span={14}>
                         <InputNumber
@@ -220,7 +211,7 @@ const ExportDataPanel = (props: { id: number, total: number, currentPageSize: nu
                             keyboard={true}
                         />=
                         <Input
-                            style={{ width: '100px' }}
+                            style={{width: '100px'}}
                             size='small'
                             value={cost}
                             suffix={"积分"}
@@ -252,33 +243,33 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const status = useSelector((state: RootState) => state.app.global.status)
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
-        { headerName: '序号', field: "index", width: 80, pinned: 'left' },
-        { headerName: 'URL', field: "url", width: 250, hide: true },
-        { headerName: '域名', field: "domain", width: 200, pinned: 'left' },
-        { headerName: 'IP', field: "ip", width: 150, },
-        { headerName: '端口', field: "port", width: 80, },
-        { headerName: '协议', field: "protocol", width: 80, },
-        { headerName: '网站标题', field: "web_title", width: 200, },
-        { headerName: '备案号', field: "number", width: 180, },
-        { headerName: '备案单位', field: "company", width: 100, },
-        { headerName: '响应码', field: "status_code", width: 80, },
+        {headerName: '序号', field: "index", width: 80, pinned: 'left', tooltipField: 'index'},
+        {headerName: 'URL', field: "url", width: 250, hide: true, tooltipField: 'url'},
+        {headerName: '域名', field: "domain", width: 200, pinned: 'left', tooltipField: 'domain'},
+        {headerName: 'IP', field: "ip", width: 150, tooltipField: 'ip'},
+        {headerName: '端口', field: "port", width: 80, tooltipField: 'port',},
+        {headerName: '协议', field: "protocol", width: 80, tooltipField: 'protocol',},
+        {headerName: '网站标题', field: "web_title", width: 200, tooltipField: 'web_title',},
+        {headerName: '备案号', field: "number", width: 180, tooltipField: 'number',},
+        {headerName: '备案单位', field: "company", width: 100, tooltipField: 'company',},
+        {headerName: '响应码', field: "status_code", width: 80, tooltipField: 'status_code',},
         {
-            headerName: '组件', field: "component", width: 100, valueGetter: (params: ValueGetterParams)  => {
-                if(!params.data) return <></>
-                const tmp = params.data.component?.map((component: hunter.Component) => {
-                    return component.name + component.version
-                })
-                return tmp?.join(" | ") || ""
-            }
+            headerName: '组件', field: "component", width: 100,
+            tooltipValueGetter: (params: ITooltipParams) => params.data?.component?.map((component: hunter.Component) => {
+                return component.name + component.version
+            })?.join(" | "),
+            valueGetter: (params: ValueGetterParams) => params.data?.component?.map((component: hunter.Component) => {
+                return component.name + component.version
+            })?.join(" | ")
         },
-        { headerName: '操作系统', field: "os", width: 100, hide: true },
-        { headerName: '城市', field: "city", width: 100, hide: true },
-        { headerName: '更新时间', field: "updated_at", width: 100, },
-        { headerName: 'web应用', field: "is_web", width: 100, hide: true },
-        { headerName: 'Banner', field: "banner", width: 100, hide: true },
-        { headerName: '风险资产', field: "is_risk", width: 100, hide: true },
-        { headerName: '注册机构', field: "as_org", width: 100, hide: true },
-        { headerName: '运营商', field: "isp", width: 100, hide: true },
+        {headerName: '操作系统', field: "os", width: 100, hide: true, tooltipField: 'os'},
+        {headerName: '城市', field: "city", width: 100, hide: true, tooltipField: 'city'},
+        {headerName: '更新时间', field: "updated_at", width: 100, tooltipField: 'updated_at',},
+        {headerName: 'web应用', field: "is_web", width: 100, hide: true, tooltipField: 'is_web'},
+        {headerName: 'Banner', field: "banner", width: 100, hide: true, tooltipField: 'banner'},
+        {headerName: '风险资产', field: "is_risk", width: 100, hide: true, tooltipField: 'is_risk'},
+        {headerName: '注册机构', field: "as_org", width: 100, hide: true, tooltipField: 'as_org'},
+        {headerName: '运营商', field: "isp", width: 100, hide: true, tooltipField: 'isp'},
     ]);
     const defaultSideBarDef = useMemo<SideBarDef>(() => {
         return {
@@ -302,24 +293,12 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             ],
         }
     }, [])
-    const defaultColDef = useMemo<ColDef>(() => {
-        return {
-            // allow every column to be aggregated
-            enableValue: true,
-            // allow every column to be grouped
-            enableRowGroup: true,
-            // allow every column to be pivoted
-            enablePivot: true,
-            filter: true,
-            suppressHeaderMenuButton: true,
-            suppressHeaderFilterButton: true,
-        }
-    }, [])
+
     const processCellForClipboard = useCallback((params: ProcessCellForExportParams) => {
-            return formattedValueForCopy(params.column?.getColId(), params.node?.data)
-        }, []);
+        return formattedValueForCopy(params.column?.getColId(), params.node?.data)
+    }, []);
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): any => {
-        if(!pageData || pageData.length === 0 || !params.node)return []
+        if (!pageData || pageData.length === 0 || !params.node) return []
         const cellValue = formattedValueForCopy(params.column?.getColId(), params.node?.data)
         return [
             {
@@ -361,9 +340,9 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             {
                 name: "复制该行",
                 action: () => {
-                    const data:PageDataType = params.node?.data
-                    const values:any[] = [];
-                    getAllDisplayedColumnKeys(gridRef.current?.api, columnDefs).forEach(key=>{
+                    const data: PageDataType = params.node?.data
+                    const values: any[] = [];
+                    getAllDisplayedColumnKeys(gridRef.current?.api, columnDefs).forEach(key => {
                         values.push(formattedValueForCopy(key, data));
                     })
                     copy(values.join(gridRef.current?.api.getGridOption("clipboardDelimiter")))
@@ -373,7 +352,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 name: "复制该列",
                 action: () => {
                     const colValues = getSortedData<PageDataType>(gridRef.current?.api).map(item => {
-                        return formattedValueForCopy(params.column?.getColId(),item)
+                        return formattedValueForCopy(params.column?.getColId(), item)
                     })
                     copy(colValues.join('\n'))
                 },
@@ -392,20 +371,20 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     }, [pageData, queryOption]);
 
     useEffect(() => {
-        EventsOn(event.HunterQuery, function (eventDetail:event.EventDetail) {
+        EventsOn(event.HunterQuery, function (eventDetail: event.EventDetail) {
             if (eventDetail.Status === status.Stopped)
-            GetUserInfo().then(
-                result => {
-                    dispatch(userActions.setHunterUser({ restToken: result }))
-                }
-            )
+                GetUserInfo().then(
+                    result => {
+                        dispatch(userActions.setHunterUser({restToken: result}))
+                    }
+                )
         })
         if (props.input) {
             handleNewQuery(input, currentPageSize)
         }
     }, [])
 
-    const formattedValueForCopy = (colId:string | undefined, item:PageDataType)=>{
+    const formattedValueForCopy = (colId: string | undefined, item: PageDataType) => {
         switch (colId) {
             case "component": {
                 const tmp = item.component?.map((component: hunter.Component) => {
@@ -442,8 +421,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 let index = 0
                 setPageData(result.items?.map((item) => {
                     const instance = new hunter.Item(item)
-                    const { convertValues, ...reset } = instance
-                    return { index: ++index, ...item, convertValues, ...reset }
+                    const {convertValues, ...reset} = instance
+                    return {index: ++index, ...item, convertValues, ...reset}
                 }))
                 setTotal(result.total)
                 setLoading(false)
@@ -470,8 +449,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     let index = (newPage - 1) * currentPageSize
                     setPageData(result.items.map(item => {
                         const instance = new hunter.Item(item)
-                        const { convertValues, ...rest } = instance
-                        return { index: ++index, ...rest, convertValues }
+                        const {convertValues, ...rest} = instance
+                        return {index: ++index, ...rest, convertValues}
                     }))
                     setCurrentPage(newPage)
                     setTotal(result.total)
@@ -521,8 +500,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             .catch(error => {
                 errorNotification("获取favicon出现错误", error);
             }).finally(() => {
-                setLoading2(false)
-            })
+            setLoading2(false)
+        })
 
     }
 
@@ -538,9 +517,9 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const iconSearchView = (
         <Popover
             placement={"bottom"}
-            style={{ width: 500 }}
+            style={{width: 500}}
             content={<Button size={"small"} type={"text"}
-                onClick={() => handleClickChange(true)}>icon查询</Button>}
+                             onClick={() => handleClickChange(true)}>icon查询</Button>}
             trigger="hover"
             open={hovered}
             onOpenChange={handleHoverChange}
@@ -550,19 +529,19 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 title={"填入Icon URL或上传文件"}
                 content={
                     <Spin spinning={loading2}>
-                        <Flex vertical gap={5} style={{ width: "600px" }}>
+                        <Flex vertical gap={5} style={{width: "600px"}}>
                             <Input
                                 onChange={e => setFaviconUrl(e.target.value)}
                                 size={"small"}
                                 placeholder={"icon地址"}
-                                suffix={<Button type='text' size="small" icon={<SearchOutlined />}
-                                    onClick={getFaviconFromUrl} />}
+                                suffix={<Button type='text' size="small" icon={<SearchOutlined/>}
+                                                onClick={getFaviconFromUrl}/>}
                             />
                             <Upload.Dragger
                                 showUploadList={false}
                                 multiple={false}
                                 customRequest={(options) => {
-                                    const { file, onError } = options;
+                                    const {file, onError} = options;
                                     ;
                                     if (file instanceof Blob) {
                                         const reader = new FileReader();
@@ -576,7 +555,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                                 }
                             >
                                 <p className="ant-upload-drag-icon">
-                                    <InboxOutlined />
+                                    <InboxOutlined/>
                                 </p>
                                 <p className="ant-upload-hint">
                                     点击或拖拽文件
@@ -589,12 +568,12 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 open={clicked}
                 onOpenChange={handleClickChange}
             >
-                <Button size={"small"} type={"text"} icon={<Dots />} />
+                <Button size={"small"} type={"text"} icon={<Dots/>}/>
             </Popover>
         </Popover>
     )
 
-    const footer = <Flex justify={"space-between"} align={'center'} style={{ padding: '5px' }}>
+    const footer = <Flex justify={"space-between"} align={'center'} style={{padding: '5px'}}>
         <Pagination
             showQuickJumper
             showSizeChanger
@@ -608,15 +587,15 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             onChange={(page, size) => handlePaginationChange(page, size)}
         />
         <ExportDataPanel id={pageIDMap.current[1]} total={total}
-            currentPageSize={currentPageSize} />
+                         currentPageSize={currentPageSize}/>
     </Flex>
 
-    return <Flex vertical gap={5} style={{ height: '100%' }}>
+    return <Flex vertical gap={5} style={{height: '100%'}}>
         <Flex vertical gap={5}>
             <Flex justify={"center"} align={'center'}>
                 <Candidate<string>
                     size={"small"}
-                    style={{ width: 600 }}
+                    style={{width: 600}}
                     placeholder='Search...'
                     allowClear
                     value={input}
@@ -652,37 +631,45 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     ]}
                 />
                 {iconSearchView}
-                <Help />
+                <Help/>
             </Flex>
             <Flex justify={"center"} align={'center'} gap={10}>
                 <Flex gap={5} align={'center'}>
                     资产类型
                     <Select size="small"
-                        style={{ width: "110px" }}
-                        defaultValue={3 as 1 | 2 | 3}
-                        options={[{ label: "web资产", value: 1 }, { label: "非web资产", value: 2 }, { label: "全部", value: 3 }]}
-                        onChange={(value) => setQueryOption(prevState => ({ ...prevState, isWeb: value }))} />
+                            style={{width: "110px"}}
+                            defaultValue={3 as 1 | 2 | 3}
+                            options={[{label: "web资产", value: 1}, {label: "非web资产", value: 2}, {
+                                label: "全部",
+                                value: 3
+                            }]}
+                            onChange={(value) => setQueryOption(prevState => ({...prevState, isWeb: value}))}/>
                 </Flex>
                 <DatePicker.RangePicker
                     presets={[
                         ...RangePresets,
                     ]}
-                    style={{ width: "230px" }}
+                    style={{width: "230px"}}
                     size="small"
-                    onChange={(_dates, dateStrings) => setQueryOption(prevState => ({ ...prevState, dateRange: dateStrings }))}
+                    onChange={(_dates, dateStrings) => setQueryOption(prevState => ({
+                        ...prevState,
+                        dateRange: dateStrings
+                    }))}
                     allowEmpty={[true, true]}
                     showNow
                 />
-                <Input style={{ width: "300px" }} size="small" placeholder='状态码列表，以逗号分隔，如”200,401“'
-                    onChange={(e) => setQueryOption(prevState => ({ ...prevState, statusCode: e.target.value }))} />
+                <Input style={{width: "300px"}} size="small" placeholder='状态码列表，以逗号分隔，如”200,401“'
+                       onChange={(e) => setQueryOption(prevState => ({...prevState, statusCode: e.target.value}))}/>
                 <Flex gap={5} align={'center'}>
                     数据过滤
-                    <Switch size="small" checkedChildren="开启" unCheckedChildren="关闭" onChange={(value) => setQueryOption(prevState => ({ ...prevState, portFilter: value }))} />
+                    <Switch size="small" checkedChildren="开启" unCheckedChildren="关闭"
+                            onChange={(value) => setQueryOption(prevState => ({...prevState, portFilter: value}))}/>
                 </Flex>
             </Flex>
         </Flex>
-        <div style={{ width: "100%", height: "100%" }}>
+        <div style={{width: "100%", height: "100%"}}>
             <AgGridReact
+                {...AGGridCommonOptions}
                 ref={gridRef}
                 loading={loading}
                 embedFullWidthRows
@@ -690,13 +677,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 columnDefs={columnDefs}
                 getContextMenuItems={getContextMenuItems}
                 sideBar={defaultSideBarDef}
-                headerHeight={32}
-                rowHeight={32}
-                defaultColDef={defaultColDef}
-                noRowsOverlayComponent={() => <NotFound />}
-                loadingOverlayComponent={() => <Loading />}
                 processCellForClipboard={processCellForClipboard}
-                cellSelection={true}
             />
         </div>
         {footer}
@@ -731,7 +712,7 @@ const UserPanel = () => {
     }}>
         <Flex align={"center"}>
             <Tooltip title="设置" placement={"bottom"}>
-                <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
+                <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
             </Tooltip>
             <Flex gap={10}>
                 <Tooltip title="剩余总积分,查询后自动获取" placement={"bottom"}>
@@ -740,7 +721,7 @@ const UserPanel = () => {
                         alignItems: "center",
                         color: "#f5222d"
                     }}>
-                        <Coin1 />
+                        <Coin1/>
                         {user.RestQuota || 0}
                     </div>
                 </Tooltip>
@@ -777,9 +758,9 @@ const Hunter = () => {
     useEffect(() => {
         const key = `${indexRef.current}`;
         setItems([{
-            label: <TabLabel label={key} />,
+            label: <TabLabel label={key}/>,
             key: key,
-            children: <TabContent newTab={addTab} />,
+            children: <TabContent newTab={addTab}/>,
         }])
         setActiveKey(key)
     }, [])
@@ -794,9 +775,9 @@ const Hunter = () => {
         setItems(prevState => [
             ...prevState,
             {
-                label: <TabLabel label={newActiveKey} />,
+                label: <TabLabel label={newActiveKey}/>,
                 key: newActiveKey,
-                children: <TabContent input={input} colDefs={colDefs} newTab={addTab} queryOption={opts} />,
+                children: <TabContent input={input} colDefs={colDefs} newTab={addTab} queryOption={opts}/>,
             },
         ])
     };
@@ -821,10 +802,10 @@ const Hunter = () => {
 
     return (
         <Tabs
-            style={{ height: '100%', width: '100%' }}
+            style={{height: '100%', width: '100%'}}
             size="small"
             tabBarExtraContent={{
-                left: <UserPanel />
+                left: <UserPanel/>
             }}
             type="editable-card"
             onChange={onTabChange}

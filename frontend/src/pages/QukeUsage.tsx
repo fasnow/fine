@@ -1,11 +1,9 @@
-import React, { useState } from "react";
-import { Button, Modal, Tabs, TabsProps, Tooltip } from "antd";
-import { QuestionOutlined } from "@ant-design/icons";
-import { ColDef } from "ag-grid-community";
-import NotFound from "@/component/Notfound";
-import Loading from "@/component/Loading";
-import { AgGridReact } from "ag-grid-react";
-import {GridOptions} from "ag-grid-community/dist/types/src/entities/gridOptions";
+import React, {useState} from "react";
+import {Button, Modal, Tabs, TabsProps, Tooltip} from "antd";
+import {QuestionOutlined} from "@ant-design/icons";
+import {ColDef} from "ag-grid-community";
+import {AgGridReact} from "ag-grid-react";
+import {AGGridCommonOptionsNoCopy} from "@/pages/Props";
 
 interface ExampleHelpDataType {
     index: number;
@@ -16,45 +14,27 @@ interface ExampleHelpDataType {
     example: any;
 }
 
-const gridOptions:GridOptions = {
-    defaultColDef:{
-        // allow every column to be aggregated
-        enableValue: true,
-        // allow every column to be grouped
-        enableRowGroup: true,
-        // allow every column to be pivoted
-        enablePivot: true,
-        filter: true,
-        suppressHeaderMenuButton: true,
-        suppressHeaderFilterButton: true,
-    },
-    headerHeight:32,
-    rowHeight:32,
-    noRowsOverlayComponent:() => <NotFound />,
-    loadingOverlayComponent:() => <Loading />,
-}
-
 const exampleHelpColumns1: ColDef<ExampleHelpDataType>[] = [
-    { headerName: '序号', field: "index", maxWidth: 80 },
-    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true, flex: 0.5},
-    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true, flex: 0.5 },
-    { headerName: '支持的数据模式', field: "mode", width: 150, autoHeight: true, wrapText: true, flex: 0.7 },
-    { headerName: '解释说明', field: "description", width: 250 , autoHeight: true, wrapText: true, flex: 1},
-    { headerName: '范例', field: "example", autoHeight: true, wrapText: true, flex: 1 },
+    {headerName: '序号', field: "index", maxWidth: 80},
+    {headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true, flex: 0.5},
+    {headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true, flex: 0.5},
+    {headerName: '支持的数据模式', field: "mode", width: 150, autoHeight: true, wrapText: true, flex: 0.7},
+    {headerName: '解释说明', field: "description", width: 250, autoHeight: true, wrapText: true, flex: 1},
+    {headerName: '范例', field: "example", autoHeight: true, wrapText: true, flex: 1},
 ];
 
 const exampleHelpColumns2: ColDef<ExampleHelpDataType>[] = [
-    { headerName: '序号', field: "index", maxWidth: 80 },
-    { headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true, flex: 1 },
-    { headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true, flex: 1 },
-    { headerName: '解释说明', field: "description", width: 250, autoHeight: true, wrapText: true, flex: 4 },
-    { headerName: '范例', field: "example", autoHeight: true, wrapText: true, flex: 2 },
+    {headerName: '序号', field: "index", maxWidth: 80},
+    {headerName: '检索语法', field: "field", width: 100, autoHeight: true, wrapText: true, flex: 1},
+    {headerName: '字段名称', field: "fieldDescription", width: 100, autoHeight: true, wrapText: true, flex: 1},
+    {headerName: '解释说明', field: "description", width: 250, autoHeight: true, wrapText: true, flex: 4},
+    {headerName: '范例', field: "example", autoHeight: true, wrapText: true, flex: 2},
 ];
 
 const exampleHelpDataTabs: TabsProps['items'] = [
     {
         key: "1", label: "基本信息部分", children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             rowData={[
                 {
                     index: 1,
@@ -120,7 +100,7 @@ const exampleHelpDataTabs: TabsProps['items'] = [
         key: "2",
         label: "ASN网络自治域相关部分",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns1}
             rowData={[
                 {
@@ -144,7 +124,7 @@ const exampleHelpDataTabs: TabsProps['items'] = [
         key: "3",
         label: "主机名与操作系统部分",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns1}
             rowData={[
                 {
@@ -167,7 +147,7 @@ const exampleHelpDataTabs: TabsProps['items'] = [
     },
     {
         key: "4", label: "服务数据部分", children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns1}
             rowData={[
                 {
@@ -209,7 +189,7 @@ const exampleHelpDataTabs: TabsProps['items'] = [
                     mode: "服务数据",
                     description: `这里是包含端口信息最丰富的地方`,
                     example: <>
-                        response:"奇虎科技"：端口原生返回数据中包含"奇虎科技"的主机<br />
+                        response:"奇虎科技"：端口原生返回数据中包含"奇虎科技"的主机<br/>
                         response:"220 ProFTPD 1.3.5a
                         Server"：端口原生返回数据中包含"220 ProFTPD 1.3.5a
                         Server"字符串的主机`
@@ -230,7 +210,7 @@ const exampleHelpDataTabs: TabsProps['items'] = [
         key: "5",
         label: "精细化应用识别部分",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns1}
             rowData={[
                 {
@@ -260,7 +240,7 @@ const exampleHelpDataTabs: TabsProps['items'] = [
         key: "6",
         label: "IP归属与定位部分",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns1}
             rowData={[
                 {
@@ -323,7 +303,7 @@ const exampleHelpDataTabs: TabsProps['items'] = [
         key: "7",
         label: "图像数据与应用场景部分",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns2}
             rowData={[
                 {
@@ -356,10 +336,10 @@ const Help: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     return <>
         <Tooltip title='帮助信息' placement='bottom'>
-            <Button type='text' size="small" icon={<QuestionOutlined />} onClick={() => setOpen(true)} />
+            <Button type='text' size="small" icon={<QuestionOutlined/>} onClick={() => setOpen(true)}/>
         </Tooltip>
         <Modal
-            style={{ top: "10%" }}
+            style={{top: "10%"}}
             width={'80%'}
             mask={false}
             maskClosable={true}
@@ -368,9 +348,9 @@ const Help: React.FC = () => {
             footer={null}
             onCancel={() => setOpen(false)}
             destroyOnClose={true}
-            styles={{ body: { height: window.innerHeight - 200, overflowY: "scroll" } }}
+            styles={{body: {height: window.innerHeight - 200, overflowY: "scroll"}}}
         >
-            <Tabs items={exampleHelpDataTabs} size='small' style={{ height: '100%' }} />
+            <Tabs items={exampleHelpDataTabs} size='small' style={{height: '100%'}}/>
         </Modal></>
 }
 

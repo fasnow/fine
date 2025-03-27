@@ -335,6 +335,18 @@ const Update: React.FC = () => {
     const today = useRef<string>()
     const showToday = useRef<boolean>(false)
     useEffect(() => {
+        CheckUpdate().then(
+            result => {
+                const newVersion = result["version"]
+                console.log(newVersion)
+                if (newVersion && semver.gt(newVersion, version.current)) {
+                    setReleaseUrl(result["url"])
+                    setReleaseDescription(result["description"])
+                    setReleaseVersion(newVersion)
+                    setOpen(true)
+                }
+            }
+        )
         const intervalId = setInterval(() => {
             const newDate = new Date().getDate().toString()
             if (!showToday.current && today.current === newDate){

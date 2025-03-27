@@ -439,8 +439,10 @@ class StockTreeVertical<T1,T2=T1> {
                             })
                         if (!tt || tt.length === 0) {
                             d3.select(d3.select(e.target).node().parentNode).style("display", "none");
+                            d.children = null;
+                        }else {
+                            d.children = tt;
                         }
-                        d.children = tt;
                     }
                 }
                 this.update(d)

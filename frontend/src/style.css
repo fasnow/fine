@@ -5,6 +5,7 @@
     margin: 0;
     -webkit-overflow-scrolling: touch;
 }
+
 html {
     position: absolute;
     top: 0;
@@ -12,6 +13,7 @@ html {
     padding: 0;
     overflow: hidden;
 }
+
 body {
     padding: 0;
     /*overflow: hidden;*/
@@ -28,9 +30,10 @@ body {
     height: 100% !important;
 }
 
-.ant-spin-nested-loading{
+.ant-spin-nested-loading {
     height: 100% !important;
 }
+
 /*!*.ant-drawer-mask {*!*/
 /*!*    top: 30px !important;*!*/
 /*!*}*!*/
@@ -46,7 +49,7 @@ body {
 /*!*    top: 30px !important;*!*/
 /*!*}*!*/
 
-.ant-tabs-tab{
+.ant-tabs-tab {
     -webkit-user-select: none;
     cursor: default;
 }

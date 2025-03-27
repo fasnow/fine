@@ -1,26 +1,20 @@
-import {Button, Flex, Tag} from "antd";
-import React, {CSSProperties, useCallback, useEffect, useImperativeHandle, useMemo, useState} from "react";
+import {Flex, Tag} from "antd";
+import React, {CSSProperties, useCallback, useImperativeHandle, useMemo, useState} from "react";
 import {fofa} from "../../wailsjs/go/models";
-import HostAggsResult = fofa.HostAggsResult;
 import {HostAggs} from "../../wailsjs/go/fofa/Bridge";
 import {errorNotification} from "@/component/Notification";
 import {AgGridReact} from "ag-grid-react";
-import NotFound from "@/component/Notfound";
-import Loading from "@/component/Loading";
-import {
-    ColDef,
-    ICellRendererParams, ProcessCellForExportParams,
-    SideBarDef
-} from "ag-grid-community";
+import {ColDef, ITooltipParams, ProcessCellForExportParams, SideBarDef, ValueGetterParams} from "ag-grid-community";
 import {WithIndex} from "@/component/Interface";
+import {AGGridCommonOptions} from "@/pages/Props";
 import Port = fofa.Port;
 import Product = fofa.Product;
 
-const SpanCssProperties:CSSProperties={
+const SpanCssProperties: CSSProperties = {
     display: "inline-block",
 }
 
-const LabelCssProperties:CSSProperties={
+const LabelCssProperties: CSSProperties = {
     minWidth: "100px",
     display: "inline-block"
 }
@@ -30,7 +24,7 @@ interface FofaHostAggsProps {
 }
 
 export interface FofaHostAggsRef {
-    query: (value:string)=>void;
+    query: (value: string) => void;
 }
 
 type PageDataType = WithIndex<Port>
@@ -48,19 +42,19 @@ const FofaHostAggs = React.forwardRef<FofaHostAggsRef, FofaHostAggsProps>((props
     const [domain, setDomain] = useState<string[]>([])
     const [loading, setLoading] = useState<boolean>(false)
     const [columnDefs] = useState<ColDef[]>([
-        {headerName:"序号", field: 'index', width: 80},
-        {headerName:"端口", field: 'port', width: 120},
-        {headerName:"协议", field: 'protocol', width: 120},
-        {headerName:"更新时间", field: 'update_time', width: 200},
-        {headerName:"产品", field: 'products', cellRenderer:(params:ICellRendererParams)=>{
-                return <>
-                    {params.value?.map((i: Product, index: number) => {
-                        return <Tag key={index} bordered={false} color="cyan">
-                            {i.product}
-                        </Tag>
-                    })}
-                </>
-            }, flex: 1},
+        {headerName: "序号", field: 'index', width: 80, tooltipField: 'index'},
+        {headerName: "端口", field: 'port', width: 120, tooltipField: 'port'},
+        {headerName: "协议", field: 'protocol', width: 120, tooltipField: 'protocol'},
+        {headerName: "更新时间", field: 'update_time', width: 200, tooltipField: 'update_time'},
+        {
+            headerName: "产品", field: 'products', flex: 1,
+            tooltipValueGetter: (params: ITooltipParams) => params.data?.products?.map((i: Product) => {
+                return i.product
+            })?.join(" | "),
+            valueGetter: (params: ValueGetterParams) => params.data?.products?.map((i: Product) => {
+                return i.product
+            })?.join(" | ")
+        },
     ])
     const defaultSideBarDef = useMemo<SideBarDef>(() => {
         return {
@@ -84,31 +78,19 @@ const FofaHostAggs = React.forwardRef<FofaHostAggsRef, FofaHostAggsProps>((props
             ],
         }
     }, [])
-    const defaultColDef = useMemo<ColDef>(() => {
-        return {
-            // allow every column to be aggregated
-            enableValue: true,
-            // allow every column to be grouped
-            enableRowGroup: true,
-            // allow every column to be pivoted
-            enablePivot: true,
-            filter: true,
-            suppressHeaderMenuButton: true,
-            suppressHeaderFilterButton: true,
-        }
-    }, [])
+
     const processCellForClipboard = useCallback((params: ProcessCellForExportParams) => {
         if (typeof params.value === 'object') {
             return JSON.stringify(params.value);
         }
-        return params.value === null ? "":params.value;
+        return params.value === null ? "" : params.value;
     }, []);
 
-    useImperativeHandle(ref,()=>({
+    useImperativeHandle(ref, () => ({
         query: (host: string) => query(host),
     }))
 
-    const query = (host:string)=>{
+    const query = (host: string) => {
         setPageData([])
         setUniqueProtocol([])
         setPorts([])
@@ -119,22 +101,22 @@ const FofaHostAggs = React.forwardRef<FofaHostAggsRef, FofaHostAggsProps>((props
         setUpdateTime("")
         setDomain([])
         host = host.trim()
-        if (!host)return
+        if (!host) return
         setHost(host)
         setLoading(true)
         HostAggs(host)
-            .then(r=>{
+            .then(r => {
 
-                const t:string[] = []
-                const tt:number[] = []
-                r.ports.forEach(port=>{
+                const t: string[] = []
+                const tt: number[] = []
+                r.ports.forEach(port => {
                     t.push(port.protocol)
                     tt.push(port.port)
                 })
                 setUniqueProtocol(Array.from(new Set(t)))
                 setPorts(tt)
-                const ttt = r.ports.map((i, index)=>{
-                    return {index:index+1, ...i} as PageDataType
+                const ttt = r.ports.map((i, index) => {
+                    return {index: index + 1, ...i} as PageDataType
                 }) as PageDataType[]
                 setPageData(ttt)
                 setDomain(r.domain)
@@ -144,43 +126,52 @@ const FofaHostAggs = React.forwardRef<FofaHostAggsRef, FofaHostAggsProps>((props
                 setUpdateTime(r.update_time)
                 setOrg(r.org)
             })
-            .catch(e=>{
+            .catch(e => {
                 errorNotification("错误", e)
             })
-            .finally(()=>setLoading(false))
+            .finally(() => setLoading(false))
     }
 
     return <Flex vertical gap={10} align={"center"} style={{height: '100%', width: '100%'}}>
-        <Flex vertical gap={5} justify={"center"} style={{padding:'0 6px'}}>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>Host:</label><Tag bordered={false} color="cyan">
+        <Flex vertical gap={5} justify={"center"} style={{padding: '0 6px'}}>
+            <span style={SpanCssProperties}><label style={LabelCssProperties}>Host:</label><Tag bordered={false}
+                                                                                                color="cyan">
                     {host || ''}
                 </Tag></span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>国家/地区:</label><Tag bordered={false} color="cyan">
+            <span style={SpanCssProperties}><label style={LabelCssProperties}>国家/地区:</label><Tag bordered={false}
+                                                                                                     color="cyan">
                     {countryName || ''}
                 </Tag></span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>国家/地区代码:</label><Tag bordered={false} color="cyan">
+            <span style={SpanCssProperties}><label style={LabelCssProperties}>国家/地区代码:</label><Tag
+                bordered={false} color="cyan">
                     {countryCode || ''}
                 </Tag></span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>组织:</label><Tag bordered={false} color="cyan">
+            <span style={SpanCssProperties}><label style={LabelCssProperties}>组织:</label><Tag bordered={false}
+                                                                                                color="cyan">
                     {org || ''}
                 </Tag></span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>ASN:</label><Tag bordered={false} color="cyan">
+            <span style={SpanCssProperties}><label style={LabelCssProperties}>ASN:</label><Tag bordered={false}
+                                                                                               color="cyan">
                     {asn === null ? '' : asn}
                 </Tag></span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>最后更新时间:</label><Tag bordered={false} color="cyan">
+            <span style={SpanCssProperties}><label style={LabelCssProperties}>最后更新时间:</label><Tag bordered={false}
+                                                                                                        color="cyan">
                     {updateTime || ''}
                 </Tag></span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>协议({uniqueProtocol?.length || 0}):</label>{uniqueProtocol?.map((i,index)=>{
+            <span style={SpanCssProperties}><label
+                style={LabelCssProperties}>协议({uniqueProtocol?.length || 0}):</label>{uniqueProtocol?.map((i, index) => {
                 return <Tag key={index} bordered={false} color="cyan">
                     {i}
                 </Tag>
             })}</span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>域名({domain?.length || 0}):</label>{domain?.map((i,index)=>{
+            <span style={SpanCssProperties}><label
+                style={LabelCssProperties}>域名({domain?.length || 0}):</label>{domain?.map((i, index) => {
                 return <Tag key={index} bordered={false} color="cyan">
                     {i}
                 </Tag>
             })}</span>
-            <span style={SpanCssProperties}><label style={LabelCssProperties}>端口({ports?.length || 0}):</label>{ports?.map((i,index)=>{
+            <span style={SpanCssProperties}><label
+                style={LabelCssProperties}>端口({ports?.length || 0}):</label>{ports?.map((i, index) => {
                 return <Tag key={index} bordered={false} color="cyan">
                     {i}
                 </Tag>
@@ -188,16 +179,11 @@ const FofaHostAggs = React.forwardRef<FofaHostAggsRef, FofaHostAggsProps>((props
         </Flex>
         <div style={{height: '100%', width: '100%', flex: 1}}>
             <AgGridReact
+                {...AGGridCommonOptions}
                 loading={loading}
-                embedFullWidthRows
                 rowData={pageData}
                 columnDefs={columnDefs}
                 sideBar={defaultSideBarDef}
-                headerHeight={32}
-                rowHeight={32}
-                defaultColDef={defaultColDef}
-                noRowsOverlayComponent={() => <NotFound />}
-                loadingOverlayComponent={() => <Loading />}
                 processCellForClipboard={processCellForClipboard}
             />
         </div>

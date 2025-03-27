@@ -1,6 +1,5 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Button, ConfigProvider, Flex, Layout as Lay, Modal, Spin, Tabs} from 'antd';
-import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import locale from 'antd/locale/zh_CN';
 import {errorNotification} from "@/component/Notification";
@@ -21,28 +20,28 @@ import {CssConfig} from "@/pages/Constants";
 import TianYanCha from "@/pages/TianYanCha";
 import Test from "@/pages/Test";
 import type {Tab} from 'rc-tabs/lib/interface'
-import {themeQuartz} from "ag-grid-community";
-import { ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
-import { AllEnterpriseModule, LicenseManager } from 'ag-grid-enterprise';
+import {ModuleRegistry, provideGlobalGridOptions, themeQuartz} from "ag-grid-community";
+import {AllEnterpriseModule, LicenseManager} from 'ag-grid-enterprise';
 import Aiqicha from "@/pages/Aiqicha";
 import {Exit, GetAllConstants} from "../wailsjs/go/application/Application";
 import {GetRunningTaskNum} from "../wailsjs/go/icp/Bridge";
 import {css, cx} from "antd-style";
-import type { DraggableData, DraggableEvent } from 'react-draggable';
+import type {DraggableData, DraggableEvent} from 'react-draggable';
 import Draggable from "react-draggable";
 import AppIcon from "@/assets/images/appicon.png"
 import Shodan from "@/pages/Shodan";
+import dayjs from 'dayjs';
 
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
-provideGlobalGridOptions({ theme: themeQuartz.withParams({ rowBorder: true, columnBorder: true }) }); // Mark all grids as using legacy themes
+provideGlobalGridOptions({theme: themeQuartz.withParams({rowBorder: true, columnBorder: true})}); // Mark all grids as using legacy themes
 
 const App: React.FC = () => {
     const [disabled, setDisabled] = useState(true);
-    const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
+    const [bounds, setBounds] = useState({left: 0, top: 0, bottom: 0, right: 0});
     const draggleRef = useRef<HTMLDivElement>(null!);
     const dispatch = useDispatch()
-    const [loading,setLoading] = useState(true)
+    const [loading, setLoading] = useState(true)
     const [tabs, setTabs] = useState<Tab[]>([
         {
             key: '设置',
@@ -55,13 +54,13 @@ const App: React.FC = () => {
             children: <Tabs
                 style={{height: '100%', width: '100%'}}
                 items={[
-                    {key: 'Fofa',label: 'Fofa',children: <Fofa/>,},
-                    {key: 'Hunter',label: 'Hunter',children: <Hunter/>,},
-                    {key: 'Quake',label: 'Quake',children: <Quake/>,},
-                    {key: 'Shodan',label: 'Shodan',children: <Shodan/>,},
+                    {key: 'Fofa', label: 'Fofa', children: <Fofa/>,},
+                    {key: 'Hunter', label: 'Hunter', children: <Hunter/>,},
+                    {key: 'Quake', label: 'Quake', children: <Quake/>,},
+                    {key: 'Shodan', label: 'Shodan', children: <Shodan/>,},
                     // {key: '0.zone',label: '0.zone',children: <Zone/>,}
                 ]}
-                tabBarStyle={{backgroundColor: '#F2F2F2FF', padding : "0 10px",}}
+                tabBarStyle={{backgroundColor: '#F2F2F2FF', padding: "0 10px",}}
             />,
         },
         {
@@ -105,18 +104,18 @@ const App: React.FC = () => {
     useEffect(() => {
         (async () => {
             Environment().then(
-                r=>{
-                    if (r.buildType === 'dev'){
+                r => {
+                    if (r.buildType === 'dev') {
                         setTabs(prevState => [...prevState, {key: 'TEST', label: 'TEST', children: <Test/>}])
                     }
                 }
             )
             try {
                 const constant = await GetAllConstants()
-                EventsOn(constant.event.AppExit,()=>{
+                EventsOn(constant.event.AppExit, () => {
                     setOpen(true)
                     GetRunningTaskNum().then(
-                        r=>console.log(r)
+                        r => console.log(r)
                     )
                 })
                 console.log(constant)
@@ -125,13 +124,13 @@ const App: React.FC = () => {
             } catch (e) {
                 errorNotification("错误", "初始化失败: " + e)
             }
-            window.onerror = function(message, source, lineno, colno, error) {
+            window.onerror = function (message, source, lineno, colno, error) {
                 //   message：错误信息（字符串）。可用于HTML onerror=""处理程序中的event。
                 //   source：发生错误的脚本URL（字符串）
                 //   lineno：发生错误的行号（数字）
                 //   colno：发生错误的列号（数字）
                 //   error：Error对象
-                console.error(message,source,lineno,colno,error)
+                console.error(message, source, lineno, colno, error)
             }
             const currentDate = new Date();
             const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
@@ -143,7 +142,7 @@ const App: React.FC = () => {
     }, []);
 
     const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
-        const { clientWidth, clientHeight } = window.document.documentElement;
+        const {clientWidth, clientHeight} = window.document.documentElement;
         const targetRect = draggleRef.current?.getBoundingClientRect();
         if (!targetRect) {
             return;
@@ -182,15 +181,15 @@ const App: React.FC = () => {
                     borderRadiusLG: 0,
                     borderRadius: 0,
                     horizontalItemPadding: "0px 0px 0px 0px",
-                    horizontalMargin:"0 0 0 0",
-                    inkBarColor:"#ffa940",
+                    horizontalMargin: "0 0 0 0",
+                    inkBarColor: "#ffa940",
                 },
                 Table: {
                     cellPaddingBlockSM: 4,
                 },
                 Splitter: {
-                    splitBarSize:5,
-                    splitBarDraggableSize:0
+                    splitBarSize: 5,
+                    splitBarDraggableSize: 0
                 },
 
             },
@@ -201,14 +200,14 @@ const App: React.FC = () => {
             flexDirection: 'column',
             backgroundColor: '#ffffff',
             margin: '0',
-            padding:'0',
+            padding: '0',
             height: '100%',
             width: '100%',
         }}>
             <ConfigProvider
                 theme={{
-                    components:{
-                        Modal:{
+                    components: {
+                        Modal: {
                             motionDurationMid: '0',
                             motionDurationSlow: '0',
                             motionEaseInOutCirc: '',
@@ -223,7 +222,7 @@ const App: React.FC = () => {
                     mask={false}
                     open={open}
                     styles={{
-                        content:{
+                        content: {
                             backgroundColor: 'rgba(255, 255, 255, 0)', /* 设置背景颜色和透明度 */
                             padding: 0
                         },
@@ -256,15 +255,18 @@ const App: React.FC = () => {
                     <Flex align={"center"} justify={"center"} vertical gap={20}
                           onMouseOver={() => {
                               if (disabled) {
-                                  setDisabled(false);}}
+                                  setDisabled(false);
+                              }
                           }
-                          style={{padding:10}}
+                          }
+                          style={{padding: 10}}
                     >
-                        <img style={{height:'70px'}} draggable={false} src={AppIcon} alt={""}/>
+                        <img style={{height: '70px'}} draggable={false} src={AppIcon} alt={""}/>
                         <span style={{fontWeight: 'bold', fontSize: '12px'}}>确定退出吗？</span>
                         <Flex justify={"space-between"} style={{width: '100%'}} gap={10}>
-                            <Button size={"small"} style={{width: "100%"}} onClick={()=>setOpen(false)}>取消</Button>
-                            <Button size={"small"} style={{width: "100%"}} type={"primary"} onClick={()=>Exit()}>确认</Button>
+                            <Button size={"small"} style={{width: "100%"}} onClick={() => setOpen(false)}>取消</Button>
+                            <Button size={"small"} style={{width: "100%"}} type={"primary"}
+                                    onClick={() => Exit()}>确认</Button>
                         </Flex>
                     </Flex>
                 </Modal>
@@ -276,18 +278,18 @@ const App: React.FC = () => {
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        height:'100%',
-                    }}><Spin spinning={true} /></div>
+                        height: '100%',
+                    }}><Spin spinning={true}/></div>
                     :
                     <>
-                        <Lay.Header style={CssConfig.title}><Bar /></Lay.Header>
+                        <Lay.Header style={CssConfig.title}><Bar/></Lay.Header>
                         <Tabs
-                            style={{width:"100%",height:'100%', overflow:'hidden'}}
+                            style={{width: "100%", height: '100%', overflow: 'hidden'}}
                             items={tabs}
                             tabBarStyle={{
-                                backgroundColor:'rgba(242, 242, 242,1)',
+                                backgroundColor: 'rgba(242, 242, 242,1)',
                                 padding: "0 10px",
-                                borderBottom:"solid 1px #eaecf2"
+                                borderBottom: "solid 1px #eaecf2"
                             }}
                         />
                     </>
@@ -297,6 +299,6 @@ const App: React.FC = () => {
     </ConfigProvider>
 }
 
-export default  App
+export default App
 
 

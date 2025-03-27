@@ -1,72 +1,43 @@
 import React, {CSSProperties, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Button, Flex, Modal, Pagination, Space, Tabs, Tag, Tooltip} from 'antd';
 import {
-    Button,
-    Divider,
-    Flex,
-    Form,
-    Input,
-    InputNumber,
-    Modal,
-    Pagination,
-    Popover,
-    Select,
-    Space,
-    Spin,
-    Switch,
-    Tabs,
-    Tooltip,
-    Upload,
-    Radio, Tag
-} from 'antd';
-import {
-    GlobalOutlined,
-    DiffOutlined,
     BugOutlined,
     CloudDownloadOutlined,
-    InboxOutlined,
+    FileTextOutlined,
+    GlobalOutlined,
     LoadingOutlined,
-    SearchOutlined, SyncOutlined,
-    UserOutlined, FileTextOutlined
+    SyncOutlined,
+    UserOutlined
 } from '@ant-design/icons';
-import {errorNotification, errorNotification1} from '@/component/Notification';
-import { QUERY_FIRST } from '@/component/type';
-import { RootState, appActions, userActions } from '@/store/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { ExportDataPanelProps } from './Props';
-import {config, event, properties} from "../../wailsjs/go/models";
-import { BrowserOpenURL, EventsOn } from "../../wailsjs/runtime";
-import {Coin1, Coin2, Dots} from "@/component/Icon";
-import MurmurHash3 from "murmurhash3js"
-import { Buffer } from "buffer"
-import { toUint8Array } from "js-base64";
-import {
-    copy,
-    getAllDisplayedColumnKeys,
-    getAllDisplayedColumnKeysNoIndex,
-    getSortedData,
-    truncateString
-} from "@/util/util";
-import { WithIndex } from "@/component/Interface";
-import { TargetKey } from "@/pages/Constants";
+import {errorNotification} from '@/component/Notification';
+import {QUERY_FIRST} from '@/component/type';
+import {appActions, RootState, userActions} from '@/store/store';
+import {useDispatch, useSelector} from 'react-redux';
+import {ExportDataPanelProps} from './Props';
+import {config, properties} from "../../wailsjs/go/models";
+import {EventsOn} from "../../wailsjs/runtime";
+import {Coin1, Coin2} from "@/component/Icon";
+import {WithIndex} from "@/component/Interface";
+import {TargetKey} from "@/pages/Constants";
 import TabLabel from "@/component/TabLabel";
-import type { Tab } from "rc-tabs/lib/interface"
-import Candidate, { ItemType } from "@/component/Candidate";
-import { FindByPartialKey } from "../../wailsjs/go/history/Bridge";
-import {AgGridReact, CustomCellRendererProps, CustomTooltipProps} from "ag-grid-react";
+import type {Tab} from "rc-tabs/lib/interface"
+import Candidate, {ItemType} from "@/component/Candidate";
+import {FindByPartialKey} from "../../wailsjs/go/history/Bridge";
+import {AgGridReact, CustomTooltipProps} from "ag-grid-react";
 import "ag-grid-enterprise";
-import NotFound from "@/component/Notfound";
-import Loading from "@/component/Loading";
 import {
     ColDef,
     GetContextMenuItemsParams,
     ICellRendererComp,
-    ICellRendererParams, ITooltipParams,
+    ICellRendererParams,
+    ITooltipParams,
     SideBarDef,
     ValueFormatterParams
 } from "ag-grid-community";
 import {GetUserInfo, HostSearch, SetAuth} from "../../wailsjs/go/shodan/Bridge";
 import Label from "@/component/Label";
 import Password from "@/component/Password";
+import {AGGridCommonOptions} from "@/pages/Props";
 
 const UserPanel: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
@@ -109,7 +80,7 @@ const UserPanel: React.FC = () => {
     }}>
         <Flex align={"center"}>
             <Tooltip title="设置" placement={"bottom"}>
-                <Button type='link' onClick={() => setOpen(true)}><UserOutlined /></Button>
+                <Button type='link' onClick={() => setOpen(true)}><UserOutlined/></Button>
             </Tooltip>
             <Flex gap={10}>
                 <Tooltip title="剩余查询积分" placement={"bottom"}>
@@ -118,7 +89,7 @@ const UserPanel: React.FC = () => {
                         alignItems: "center",
                         color: "#f5222d"
                     }}>
-                        <Coin1 />
+                        <Coin1/>
                         {user.query_credits || 0}
                     </div>
                 </Tooltip>
@@ -161,13 +132,16 @@ const UserPanel: React.FC = () => {
                 <Tag bordered={false} color="processing">
                     API信息
                 </Tag>
-                <Password labelWidth={100} value={cfg.Shodan.Token} label={"API key"} onSubmit={save} />
+                <Password labelWidth={100} value={cfg.Shodan.Token} label={"API key"} onSubmit={save}/>
                 <Flex vertical gap={5}>
                     <Label labelWidth={100} label="订阅计划" value={user.plan}/>
-                    <Label labelWidth={100} label="剩余查询积分" value={`${user.query_credits||0}/${user.usage_limits?.query_credits||0}`}/>
-                    <Label labelWidth={100} label="剩余扫描积分" value={`${user.scan_credits||0}/${user.usage_limits?.scan_credits||0}`}/>
-                    <Label labelWidth={100} label="已监控IP数" value={`${user.monitored_ips||0}/${user.usage_limits?.monitored_ips||0}`}/>
-                    <Label labelWidth={100} label="已锁定" value={user.unlocked?"否":"是"}/>
+                    <Label labelWidth={100} label="剩余查询积分"
+                           value={`${user.query_credits || 0}/${user.usage_limits?.query_credits || 0}`}/>
+                    <Label labelWidth={100} label="剩余扫描积分"
+                           value={`${user.scan_credits || 0}/${user.usage_limits?.scan_credits || 0}`}/>
+                    <Label labelWidth={100} label="已监控IP数"
+                           value={`${user.monitored_ips || 0}/${user.usage_limits?.monitored_ips || 0}`}/>
+                    <Label labelWidth={100} label="已锁定" value={user.unlocked ? "否" : "是"}/>
                 </Flex>
             </Flex>
         </Modal>
@@ -189,16 +163,16 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
     const exportID = useRef(0)
 
     useEffect(() => {
-        EventsOn(event.FOFAExport, (eventDetail:any) => {
-            if (eventDetail.ID !== exportID.current){
+        EventsOn(event.FOFAExport, (eventDetail: any) => {
+            if (eventDetail.ID !== exportID.current) {
                 return
             }
-            if (eventDetail.Status === stat.Stopped){
+            if (eventDetail.Status === stat.Stopped) {
                 setIsExporting(false)
                 setDisable(false)
                 updateRestToken()
-            } else if (eventDetail.Status === stat.Error){
-                errorNotification("错误",eventDetail.Error)
+            } else if (eventDetail.Status === stat.Error) {
+                errorNotification("错误", eventDetail.Error)
             }
         })
     }, []);
@@ -250,7 +224,7 @@ const ExportDataPanel = (props: { id: number; total: number; currentPageSize: nu
             disabled={disable}
             size="small"
             onClick={() => setExportable(true)}
-            icon={isExporting ? <LoadingOutlined /> : <CloudDownloadOutlined />}
+            icon={isExporting ? <LoadingOutlined/> : <CloudDownloadOutlined/>}
         >
             {isExporting ? "正在导出" : "导出结果"}
         </Button>
@@ -347,18 +321,18 @@ class CountryCellRenderer implements ICellRendererComp {
     }
 }
 
-const HTTPDetailView = (props:{http:properties.HTTP})=>{
-    const LabelCss:CSSProperties = {
-        display:'inline-block',
+const HTTPDetailView = (props: { http: properties.HTTP }) => {
+    const LabelCss: CSSProperties = {
+        display: 'inline-block',
         whiteSpace: 'nowrap',
         marginRight: '5px',
         width: '100px',
     }
     const title_hash = props.http?.title_hash
-    const headers_hash =props.http?.headers_hash
-    const dom_hash =props.http?.dom_hash
-    const favicon_data =props.http?.favicon?.data
-    const favicon_hash =props.http?.favicon?.hash
+    const headers_hash = props.http?.headers_hash
+    const dom_hash = props.http?.dom_hash
+    const favicon_data = props.http?.favicon?.data
+    const favicon_hash = props.http?.favicon?.hash
     return <table style={{
         padding: "10px",
         borderRadius: '10px',
@@ -370,22 +344,28 @@ const HTTPDetailView = (props:{http:properties.HTTP})=>{
     }}>
         <tbody>
         <tr>
-            <td>Title</td><td>{props.http?.title}</td>
+            <td>Title</td>
+            <td>{props.http?.title}</td>
         </tr>
         <tr>
-            <td>TitleHash</td><td>{title_hash}</td>
+            <td>TitleHash</td>
+            <td>{title_hash}</td>
         </tr>
         <tr>
-            <td>HeadersHash</td><td>{headers_hash}</td>
+            <td>HeadersHash</td>
+            <td>{headers_hash}</td>
         </tr>
         <tr>
-            <td>DOMHash</td><td>{dom_hash}</td>
+            <td>DOMHash</td>
+            <td>{dom_hash}</td>
         </tr>
         <tr>
-            <td>FaviconHash</td><td>{favicon_hash}</td>
+            <td>FaviconHash</td>
+            <td>{favicon_hash}</td>
         </tr>
         <tr>
-            <td>Components</td><td>{props.http?.components && Object.keys(props.http.components).join(" | ")}</td>
+            <td>Components</td>
+            <td>{props.http?.components && Object.keys(props.http.components).join(" | ")}</td>
         </tr>
         </tbody>
     </table>
@@ -408,22 +388,24 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const history = useSelector((state: RootState) => state.app.global.history)
     const [pageData, setPageData] = useState<PageDataType[]>([]);
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
-        { headerName: '序号', field: "index", width: 80,pinned: "left"},
-        { headerName: 'IP', field: "ip_str", width: 150,pinned: "left", tooltipField: 'ip_str',},
-        { headerName: '端口', field: "port", width: 80,pinned: "left", tooltipField: 'port',},
-        { headerName: '标题', field: "http", width: 200,
-            valueFormatter:(params:ValueFormatterParams)=> params.value?.title,
+        {headerName: '序号', field: "index", width: 80, pinned: "left", tooltipField: 'index'},
+        {headerName: 'IP', field: "ip_str", width: 150, pinned: "left", tooltipField: 'ip_str',},
+        {headerName: '端口', field: "port", width: 80, pinned: "left", tooltipField: 'port',},
+        {
+            headerName: '标题', field: "http", width: 200,
+            valueFormatter: (params: ValueFormatterParams) => params.value?.title,
             tooltipField: "http",
-            tooltipComponent: (params: CustomTooltipProps ) =>{
-                if (params.value){
+            tooltipComponent: (params: CustomTooltipProps) => {
+                if (params.value) {
                     return <HTTPDetailView http={params.value}/>
                 }
             },
-            cellRenderer:(params:ICellRendererParams)=><>{params.value?.title}</>,
+            cellRenderer: (params: ICellRendererParams) => <>{params.value?.title}</>,
         },
-        { headerName: '响应体Hash', field: "hash", width: 150,tooltipField: "data",
-            tooltipComponent: (params: CustomTooltipProps ) =>{
-                if (params.value){
+        {
+            headerName: '响应体Hash', field: "hash", width: 150, tooltipField: "data",
+            tooltipComponent: (params: CustomTooltipProps) => {
+                if (params.value) {
                     return <pre style={{
                         padding: "10px",
                         borderRadius: '10px',
@@ -437,12 +419,13 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     </pre>
                 }
             },
-            cellRenderer:(params:ICellRendererParams)=><Space size={5}><FileTextOutlined />{params.value}</Space>,
+            cellRenderer: (params: ICellRendererParams) => <Space size={5}><FileTextOutlined/>{params.value}</Space>,
         },
-        { headerName: '子域名', field: "hostnames", width: 80,
-            valueFormatter:(params:ValueFormatterParams)=>params.value && Object.keys(params.value).join(","),
+        {
+            headerName: '子域名', field: "hostnames", width: 80,
+            valueFormatter: (params: ValueFormatterParams) => params.value && Object.keys(params.value).join(","),
             tooltipField: "hostnames",
-            tooltipComponent: (params: CustomTooltipProps ) =>{
+            tooltipComponent: (params: CustomTooltipProps) => {
                 return <Flex vertical style={{
                     padding: "10px",
                     borderRadius: '10px',
@@ -452,17 +435,19 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     maxWidth: '600px',
                     overflow: 'auto'
                 }} gap={5}>
-                    {params.value?.map((name:string)=>{
+                    {params.value?.map((name: string) => {
                         return <span key={name}>{name}</span>
                     })}
                 </Flex>
             },
-            cellRenderer:(params:ICellRendererParams)=>params.value?.length > 0 && <Space size={5}><GlobalOutlined />{params.value.length}</Space>,
+            cellRenderer: (params: ICellRendererParams) => params.value?.length > 0 &&
+                <Space size={5}><GlobalOutlined/>{params.value.length}</Space>,
         },
-        { headerName: '域名', field: "domains", width: 80,
-            valueFormatter:(params:ValueFormatterParams)=>params.value && Object.keys(params.value).join(","),
+        {
+            headerName: '域名', field: "domains", width: 80,
+            valueFormatter: (params: ValueFormatterParams) => params.value && Object.keys(params.value).join(","),
             tooltipField: "domains",
-            tooltipComponent: (params: CustomTooltipProps ) =>{
+            tooltipComponent: (params: CustomTooltipProps) => {
                 return <Flex vertical style={{
                     padding: "10px",
                     borderRadius: '10px',
@@ -472,20 +457,22 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                     maxWidth: '600px',
                     overflow: 'auto'
                 }} gap={5}>
-                    {params.value?.map((name:string)=>{
+                    {params.value?.map((name: string) => {
                         return <span key={name}>{name}</span>
                     })}
                 </Flex>
             },
-            cellRenderer:(params:ICellRendererParams)=>params.value?.length > 0 && <Space size={5}><GlobalOutlined />{params.value.length}</Space>,
+            cellRenderer: (params: ICellRendererParams) => params.value?.length > 0 &&
+                <Space size={5}><GlobalOutlined/>{params.value.length}</Space>,
         },
-        { headerName: '漏洞', field: "vulns", width: 80,
-            valueFormatter:(params:ValueFormatterParams)=>params.value && Object.keys(params.value).join(" "),
+        {
+            headerName: '漏洞', field: "vulns", width: 80,
+            valueFormatter: (params: ValueFormatterParams) => params.value && Object.keys(params.value).join(" "),
             tooltipField: "vulns",
-            tooltipComponent: (params: CustomTooltipProps ) =>{
-                if (params.value){
+            tooltipComponent: (params: CustomTooltipProps) => {
+                if (params.value) {
                     const keys = Object.keys(params.value)
-                    return <div  style={{
+                    return <div style={{
                         display: 'flex',
                         flexDirection: 'column',
                         padding: "5px",
@@ -496,38 +483,28 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                         maxHeight: '200px',
                         maxWidth: '600px',
                         overflow: 'auto'
-                    }} >
-                        {keys.map(name=>{
+                    }}>
+                        {keys.map(name => {
                             return <span style={{whiteSpace: 'nowrap'}} key={name}>{name}</span>
                         })}
                     </div>
                 }
             },
-            cellRenderer:(params:ICellRendererParams)=>params.value && Object.keys(params.value).length > 0 && <Space size={5}><BugOutlined />{Object.keys(params.value).length}</Space>,
+            cellRenderer: (params: ICellRendererParams) => params.value && Object.keys(params.value).length > 0 &&
+                <Space size={5}><BugOutlined/>{Object.keys(params.value).length}</Space>,
         },
-        { headerName: '标签', field: "tags", width: 80, tooltipField: 'tags',},
-        { headerName: '地理位置', field: "location", width: 100,
-            valueFormatter:(params:ValueFormatterParams)=> params.value && `${params.value?.country_code} ${params.value?.city}`,
-            tooltipValueGetter:(params:ITooltipParams)=> params.value && `${params.value?.country_name} ${params.value?.city}`,
+        {headerName: '标签', field: "tags", width: 80, tooltipField: 'tags',},
+        {
+            headerName: '地理位置', field: "location", width: 100,
+            valueFormatter: (params: ValueFormatterParams) => params.value && `${params.value?.country_code} ${params.value?.city}`,
+            tooltipValueGetter: (params: ITooltipParams) => params.value && `${params.value?.country_name} ${params.value?.city}`,
         },
-        { headerName: 'ASN', field: "asn", width: 110, tooltipField: 'asn',},
-        { headerName: '运营商', field: "isp", width: 120, tooltipField: 'isp',},
-        { headerName: '组织', field: "org", width: 120, tooltipField: 'org',},
-        { headerName: '更新时间', field: "timestamp", width: 200, pinned: "right", tooltipField: 'timestamp',},
+        {headerName: 'ASN', field: "asn", width: 110, tooltipField: 'asn',},
+        {headerName: '运营商', field: "isp", width: 120, tooltipField: 'isp',},
+        {headerName: '组织', field: "org", width: 120, tooltipField: 'org',},
+        {headerName: '更新时间', field: "timestamp", width: 200, pinned: "right", tooltipField: 'timestamp',},
     ]);
-    const defaultColDef = useMemo<ColDef>(() => {
-        return {
-            // allow every column to be aggregated
-            enableValue: true,
-            // allow every column to be grouped
-            enableRowGroup: true,
-            // allow every column to be pivoted
-            enablePivot: true,
-            filter: true,
-            suppressHeaderMenuButton: true,
-            suppressHeaderFilterButton: true,
-        }
-    }, [])
+
     const defaultSideBarDef = useMemo<SideBarDef>(() => {
         return {
             toolPanels: [
@@ -552,8 +529,8 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         }
     }, [])
     const gridRef = useRef<AgGridReact>(null)
-    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams):any => {
-        if(!pageData || pageData.length === 0 || !params.node)return []
+    const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): any => {
+        if (!pageData || pageData.length === 0 || !params.node) return []
         // return [
         //     {
         //         name: "浏览器打开URL",
@@ -623,7 +600,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         //         },
         //     },
         // ];
-    },[pageData]);
+    }, [pageData]);
 
     useEffect(() => {
         if (props.input) {
@@ -653,14 +630,14 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         setTotal(0)
         setCurrentPage(1)
         pageIDMap.current = {}
-        HostSearch(0, t, "", 1,false).then(
+        HostSearch(0, t, "", 1, false).then(
             (result) => {
                 console.log(result)
                 GetUserInfo().then(
-                    r=>dispatch(userActions.setShodanUser(r))
+                    r => dispatch(userActions.setShodanUser(r))
                 )
                 let index = 0
-                setPageData(result.matches.map(item => ({ index: ++index, ...item } as PageDataType)))
+                setPageData(result.matches.map(item => ({index: ++index, ...item} as PageDataType)))
                 setTotal(result.total)
                 setLoading(false)
                 pageIDMap.current[1] = result.pageID
@@ -681,13 +658,13 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             setLoading(true)
             let pageID = pageIDMap.current[newPage]
             pageID = pageID ? pageID : 0
-            HostSearch(pageID, inputCache, "", newPage,false).then(
+            HostSearch(pageID, inputCache, "", newPage, false).then(
                 (result) => {
                     GetUserInfo().then(
-                        r=>dispatch(userActions.setShodanUser(r))
+                        r => dispatch(userActions.setShodanUser(r))
                     )
                     let index = (newPage - 1) * currentPageSize
-                    setPageData(result.matches.map(item => ({ index: ++index, ...item } as PageDataType)))
+                    setPageData(result.matches.map(item => ({index: ++index, ...item} as PageDataType)))
                     setTotal(result.total)
                     setCurrentPage(newPage)
                     setLoading(false)
@@ -711,7 +688,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
 
 
     const footer = (
-        <Flex justify={"space-between"} align={'center'} style={{ padding: '5px' }}>
+        <Flex justify={"space-between"} align={'center'} style={{padding: '5px'}}>
             <Pagination
                 showQuickJumper
                 showSizeChanger
@@ -727,11 +704,11 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             {/*<ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize} />*/}
         </Flex>)
 
-    return <Flex vertical gap={5} style={{ height: '100%' }}>
+    return <Flex vertical gap={5} style={{height: '100%'}}>
         <Flex justify={"center"} align={'center'}>
             <Candidate<string>
                 size={"small"}
-                style={{ width: 600 }}
+                style={{width: 600}}
                 placeholder='Search...'
                 allowClear
                 value={input}
@@ -770,27 +747,13 @@ const TabContent: React.FC<TabContentProps> = (props) => {
         <div style={{width: "100%", height: "100%"}}>
             <Flex vertical style={{width: "100%", height: "100%"}}>
                 <AgGridReact
+                    {...AGGridCommonOptions}
                     ref={gridRef}
-                    embedFullWidthRows
                     loading={loading}
                     rowData={pageData}
                     columnDefs={columnDefs}
                     getContextMenuItems={getContextMenuItems}
                     sideBar={defaultSideBarDef}
-                    headerHeight={32}
-                    rowHeight={40}
-                    defaultColDef={defaultColDef}
-                    noRowsOverlayComponent={() => <NotFound />}
-                    loadingOverlayComponent={() => <Loading />}
-                    cellSelection={true}
-                    tooltipInteraction={true}
-                    tooltipShowDelay={0}
-                    // isFullWidthRow={()=>true}
-                    // fullWidthCellRenderer={fullWidthCellRenderer}
-                    // getRowHeight={()=>200}
-                    // autoSizeStrategy={{
-                    //     type:'fitGridWidth'
-                    // }}
                 />
                 {footer}
             </Flex>
@@ -807,9 +770,9 @@ const Shodan = () => {
     useEffect(() => {
         const key = `${indexRef.current}`;
         setItems([{
-            label: <TabLabel label={key} />,
+            label: <TabLabel label={key}/>,
             key: key,
-            children: <TabContent newTab={addTab} />,
+            children: <TabContent newTab={addTab}/>,
             // children:<GridExample></GridExample>
         }])
         setActiveKey(key)
@@ -825,7 +788,7 @@ const Shodan = () => {
         setItems(prevState => [
             ...prevState,
             {
-                label: <TabLabel label={newActiveKey} />,
+                label: <TabLabel label={newActiveKey}/>,
                 key: newActiveKey,
                 children: <TabContent
                     colDefs={colDef}
@@ -856,10 +819,10 @@ const Shodan = () => {
 
     return (
         <Tabs
-            style={{ height: '100%', width: '100%' }}
+            style={{height: '100%', width: '100%'}}
             size="small"
             tabBarExtraContent={{
-                left: <UserPanel />
+                left: <UserPanel/>
             }}
             type="editable-card"
             onChange={onTabChange}

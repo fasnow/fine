@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
 import { Checkbox, Button, Divider, Popover, ConfigProvider, Tag } from "antd";
-import {CheckboxOptionType} from "antd/es/checkbox/Group";
+import { CheckboxOptionType } from "antd/es/checkbox/Group";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import ScrollBar from "./ScrollBar";
 import { SettingOutlined } from "@ant-design/icons";
@@ -9,7 +9,7 @@ export type DataSourceItemType = { label: string, value: string, comment?: strin
 
 export type CheckboxValueType = string | number | boolean;
 
-interface ColumnsFilterProps <T = any> {
+interface ColumnsFilterProps<T = any> {
     dataSource: DataSourceItemType[];
     checkedSource: string[]
     onChange: (checkedItems: T[]) => void;

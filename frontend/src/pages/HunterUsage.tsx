@@ -1,12 +1,10 @@
-import { Button, Collapse, Divider, List, Modal, Popover, Tabs, Tooltip } from "antd";
+import {Button, Collapse, Divider, List, Modal, Popover, Tabs, Tooltip} from "antd";
 import React, {useState} from "react";
-import { QuestionOutlined } from "@ant-design/icons";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import type { Tab } from 'rc-tabs/es/interface'
-import NotFound from "@/component/Notfound";
-import Loading from "@/component/Loading";
-import { AgGridReact } from "ag-grid-react";
-import {GridOptions} from "ag-grid-community/dist/types/src/entities/gridOptions";
+import {QuestionOutlined} from "@ant-design/icons";
+import {ColDef, ICellRendererParams} from "ag-grid-community";
+import type {Tab} from 'rc-tabs/es/interface'
+import {AgGridReact} from "ag-grid-react";
+import {AGGridCommonOptionsNoCopy} from "@/pages/Props";
 
 interface AdvancedHelpDataType {
     index: number;
@@ -15,9 +13,9 @@ interface AdvancedHelpDataType {
 }
 
 const advancedHelpColumns: ColDef<AdvancedHelpDataType>[] = [
-    { headerName: '序号', field: "index", maxWidth: 80 },
-    { headerName: '连接符', field: "connector", width: 100 },
-    { headerName: '查询含义', field: "description", autoHeight: true, wrapText: true, flex: 1 },
+    {headerName: '序号', field: "index", maxWidth: 80},
+    {headerName: '连接符', field: "connector", width: 100},
+    {headerName: '查询含义', field: "description", autoHeight: true, wrapText: true, flex: 1},
 ];
 
 const advancedHelpData: AdvancedHelpDataType[] = [
@@ -59,35 +57,17 @@ type ExampleHelpDataType = {
     description: any;
 }
 
-const gridOptions:GridOptions = {
-    defaultColDef:{
-        // allow every column to be aggregated
-        enableValue: true,
-        // allow every column to be grouped
-        enableRowGroup: true,
-        // allow every column to be pivoted
-        enablePivot: true,
-        filter: true,
-        suppressHeaderMenuButton: true,
-        suppressHeaderFilterButton: true,
-    },
-    headerHeight:32,
-    rowHeight:32,
-    noRowsOverlayComponent:() => <NotFound />,
-    loadingOverlayComponent:() => <Loading />,
-}
-
 const exampleHelpColumns: ColDef<ExampleHelpDataType>[] = [
-    { headerName: '序号', field: "index", maxWidth: 80 },
+    {headerName: '序号', field: "index", maxWidth: 80},
     {
         headerName: '语法内容', field: "example", width: 300, cellRenderer: (params: ICellRendererParams) => {
             return params.value
-        }, autoHeight: true, wrapText: true,flex: 1
+        }, autoHeight: true, wrapText: true, flex: 1
     },
     {
         headerName: '语法说明', field: "description", cellRenderer: (params: ICellRendererParams) => {
             return params.value
-        }, autoHeight: true, wrapText: true, width: 300,flex: 1
+        }, autoHeight: true, wrapText: true, width: 300, flex: 1
     },
 ];
 
@@ -96,22 +76,22 @@ const exampleHelpDataTabs: Tab[] = [
         key: "1",
         label: "hot热门语法",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
                     index: 1, example: <>ip.tag="CDN"</>,
                     description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small'
-                            split={false}
-                            dataSource={["云厂商", "CDN", "蜜罐"]}
-                            renderItem={(item) => (
-                                <List.Item>
-                                    {item}
-                                </List.Item>
-                            )}
-                        />}
-                        trigger="hover">
+                                                                     content={<List size='small'
+                                                                                    split={false}
+                                                                                    dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                    renderItem={(item) => (
+                                                                                        <List.Item>
+                                                                                            {item}
+                                                                                        </List.Item>
+                                                                                    )}
+                                                                     />}
+                                                                     trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
                     </Popover>
                     </>
@@ -132,22 +112,22 @@ const exampleHelpDataTabs: Tab[] = [
                     index: 5, example: <>web.tag="登录页面"</>,
                     description:
                         <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                            content={<List size='small'
-                                split={false} style={{
-                                    maxHeight: "200px",
-                                    overflowY: "scroll"
-                                }} renderItem={(item) => (
-                                    <List.Item>{item}</List.Item>)}
-                                dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                                footer={<span><Divider
-                                    style={{ margin: "0px 0 10px 0" }} /><span
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            color: "#bfbfbf"
-                                        }}>最多展示top30</span></span>}
-                            />}
-                            trigger="hover">
+                                                                   content={<List size='small'
+                                                                                  split={false} style={{
+                                                                       maxHeight: "200px",
+                                                                       overflowY: "scroll"
+                                                                   }} renderItem={(item) => (
+                                                                       <List.Item>{item}</List.Item>)}
+                                                                                  dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                  footer={<span><Divider
+                                                                                      style={{margin: "0px 0 10px 0"}}/><span
+                                                                                      style={{
+                                                                                          display: "flex",
+                                                                                          justifyContent: "center",
+                                                                                          color: "#bfbfbf"
+                                                                                      }}>最多展示top30</span></span>}
+                                                                   />}
+                                                                   trigger="hover">
                             <Button size='small' type='link'>(查看枚举值)</Button>
                         </Popover>
                         </>
@@ -179,7 +159,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "2",
         label: "new新上语法",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -195,9 +175,9 @@ const exampleHelpDataTabs: Tab[] = [
                     description: <>搜索域名状态为"client Delete Prohibited"的网站<Popover
                         destroyTooltipOnHide
                         content={<List size='small' split={false}
-                            style={{ maxHeight: "200px", overflowY: "scroll" }}
-                            renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
+                                       style={{maxHeight: "200px", overflowY: "scroll"}}
+                                       renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                       dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
                         />}
                         trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
@@ -233,17 +213,17 @@ const exampleHelpDataTabs: Tab[] = [
                     description: <>搜索ICP备案行业为“软件和信息技术服务业”的资产<Popover
                         destroyTooltipOnHide
                         content={<List size='small' split={false}
-                            style={{ maxHeight: "200px", overflowY: "scroll" }}
-                            renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={
-                                ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
-                            }
-                            footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    color: "#bfbfbf"
-                                }}>最多展示top30</span></span>}
+                                       style={{maxHeight: "200px", overflowY: "scroll"}}
+                                       renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                       dataSource={
+                                           ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
+                                       }
+                                       footer={<span><Divider style={{margin: "0px 0 10px 0"}}/><span
+                                           style={{
+                                               display: "flex",
+                                               justifyContent: "center",
+                                               color: "#bfbfbf"
+                                           }}>最多展示top30</span></span>}
                         />}
                         trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
@@ -253,16 +233,16 @@ const exampleHelpDataTabs: Tab[] = [
                 {
                     index: 11, example: "ip.tag=\"CDN\"",
                     description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small'
-                            split={false}
-                            dataSource={["云厂商", "CDN", "蜜罐"]}
-                            renderItem={(item) => (
-                                <List.Item>
-                                    {item}
-                                </List.Item>
-                            )}
-                        />}
-                        trigger="hover">
+                                                                     content={<List size='small'
+                                                                                    split={false}
+                                                                                    dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                    renderItem={(item) => (
+                                                                                        <List.Item>
+                                                                                            {item}
+                                                                                        </List.Item>
+                                                                                    )}
+                                                                     />}
+                                                                     trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
                     </Popover>
                     </>
@@ -284,25 +264,25 @@ const exampleHelpDataTabs: Tab[] = [
                 {
                     index: 15, example: "web.tag=\"登录页面\"",
                     description: <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small'
-                            split={false}
-                            style={{
-                                maxHeight: "200px",
-                                overflowY: "scroll"
-                            }}
-                            renderItem={(item) => (
-                                <List.Item>{item}</List.Item>)}
-                            dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                            footer={
-                                <span><Divider
-                                    style={{ margin: "0px 0 10px 0" }} /><span
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            color: "#bfbfbf"
-                                        }}>最多展示top30</span></span>}
-                        />}
-                        trigger="hover">
+                                                                            content={<List size='small'
+                                                                                           split={false}
+                                                                                           style={{
+                                                                                               maxHeight: "200px",
+                                                                                               overflowY: "scroll"
+                                                                                           }}
+                                                                                           renderItem={(item) => (
+                                                                                               <List.Item>{item}</List.Item>)}
+                                                                                           dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                           footer={
+                                                                                               <span><Divider
+                                                                                                   style={{margin: "0px 0 10px 0"}}/><span
+                                                                                                   style={{
+                                                                                                       display: "flex",
+                                                                                                       justifyContent: "center",
+                                                                                                       color: "#bfbfbf"
+                                                                                                   }}>最多展示top30</span></span>}
+                                                                            />}
+                                                                            trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
                     </Popover>
                     </>
@@ -318,7 +298,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "3",
         label: "char特色语法",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -337,22 +317,22 @@ const exampleHelpDataTabs: Tab[] = [
                     index: 4, example: "web.tag=\"登录页面\"",
                     description:
                         <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                            content={<List size='small'
-                                split={false} style={{
-                                    maxHeight: "200px",
-                                    overflowY: "scroll"
-                                }} renderItem={(item) => (
-                                    <List.Item>{item}</List.Item>)}
-                                dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                                footer={<span><Divider
-                                    style={{ margin: "0px 0 10px 0" }} /><span
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            color: "#bfbfbf"
-                                        }}>最多展示top30</span></span>}
-                            />}
-                            trigger="hover">
+                                                                   content={<List size='small'
+                                                                                  split={false} style={{
+                                                                       maxHeight: "200px",
+                                                                       overflowY: "scroll"
+                                                                   }} renderItem={(item) => (
+                                                                       <List.Item>{item}</List.Item>)}
+                                                                                  dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                  footer={<span><Divider
+                                                                                      style={{margin: "0px 0 10px 0"}}/><span
+                                                                                      style={{
+                                                                                          display: "flex",
+                                                                                          justifyContent: "center",
+                                                                                          color: "#bfbfbf"
+                                                                                      }}>最多展示top30</span></span>}
+                                                                   />}
+                                                                   trigger="hover">
                             <Button size='small' type='link'>(查看枚举值)</Button>
                         </Popover>
                         </>
@@ -360,16 +340,16 @@ const exampleHelpDataTabs: Tab[] = [
                 {
                     index: 5, example: "ip.tag=\"CDN\"",
                     description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small'
-                            split={false}
-                            dataSource={["云厂商", "CDN", "蜜罐"]}
-                            renderItem={(item) => (
-                                <List.Item>
-                                    {item}
-                                </List.Item>
-                            )}
-                        />}
-                        trigger="hover">
+                                                                     content={<List size='small'
+                                                                                    split={false}
+                                                                                    dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                    renderItem={(item) => (
+                                                                                        <List.Item>
+                                                                                            {item}
+                                                                                        </List.Item>
+                                                                                    )}
+                                                                     />}
+                                                                     trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
                     </Popover>
                     </>
@@ -381,7 +361,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "4",
         label: "IP",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -411,16 +391,16 @@ const exampleHelpDataTabs: Tab[] = [
                 {
                     index: 7, example: "ip.tag=\"CDN\"",
                     description: <>查询包含IP标签"CDN"的资产<Popover destroyTooltipOnHide
-                        content={<List size='small'
-                            split={false}
-                            dataSource={["云厂商", "CDN", "蜜罐"]}
-                            renderItem={(item) => (
-                                <List.Item>
-                                    {item}
-                                </List.Item>
-                            )}
-                        />}
-                        trigger="hover">
+                                                                     content={<List size='small'
+                                                                                    split={false}
+                                                                                    dataSource={["云厂商", "CDN", "蜜罐"]}
+                                                                                    renderItem={(item) => (
+                                                                                        <List.Item>
+                                                                                            {item}
+                                                                                        </List.Item>
+                                                                                    )}
+                                                                     />}
+                                                                     trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
                     </Popover>
                     </>
@@ -432,7 +412,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "5",
         label: "domain域名",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -452,9 +432,9 @@ const exampleHelpDataTabs: Tab[] = [
                     description: <>搜索域名状态为"client Delete Prohibited"的网站<Popover
                         destroyTooltipOnHide
                         content={<List size='small' split={false}
-                            style={{ maxHeight: "200px", overflowY: "scroll" }}
-                            renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
+                                       style={{maxHeight: "200px", overflowY: "scroll"}}
+                                       renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                       dataSource={["clientDeleteProhibited", "clientTransferProhibited", "clientUpdateProhibited", "serverDeleteProhibited", "serverTransferProhibited", "serverUpdateProhibited"]}
                         />}
                         trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
@@ -496,7 +476,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "6",
         label: "header请求头",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -522,7 +502,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "7",
         label: "web网站信息",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -565,22 +545,22 @@ const exampleHelpDataTabs: Tab[] = [
                     index: 9, example: "web.tag=\"登录页面\"",
                     description:
                         <>查询包含资产标签"登录页面"的资产<Popover destroyTooltipOnHide
-                            content={<List size='small'
-                                split={false} style={{
-                                    maxHeight: "200px",
-                                    overflowY: "scroll"
-                                }} renderItem={(item) => (
-                                    <List.Item>{item}</List.Item>)}
-                                dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
-                                footer={<span><Divider
-                                    style={{ margin: "0px 0 10px 0" }} /><span
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            color: "#bfbfbf"
-                                        }}>最多展示top30</span></span>}
-                            />}
-                            trigger="hover">
+                                                                   content={<List size='small'
+                                                                                  split={false} style={{
+                                                                       maxHeight: "200px",
+                                                                       overflowY: "scroll"
+                                                                   }} renderItem={(item) => (
+                                                                       <List.Item>{item}</List.Item>)}
+                                                                                  dataSource={["登录页面", "主机面板", "CDN", "CMS", "网络摄像设备", "防火墙设备", "WAF", "信息页面", "OA", "数据库管理器", "版本管理仓库", "任务管理器", "VoIP", "API Manager", "SaaS", "Blogs", "IaaS", "航班跟踪系统", "人机界面", "Payment processors", "电力适配设备", "警卫追踪系统", "蜜罐", "RoIP", "Comment systems", "SEO", "Tag managers"]}
+                                                                                  footer={<span><Divider
+                                                                                      style={{margin: "0px 0 10px 0"}}/><span
+                                                                                      style={{
+                                                                                          display: "flex",
+                                                                                          justifyContent: "center",
+                                                                                          color: "#bfbfbf"
+                                                                                      }}>最多展示top30</span></span>}
+                                                                   />}
+                                                                   trigger="hover">
                             <Button size='small' type='link'>(查看枚举值)</Button>
                         </Popover>
                         </>
@@ -593,7 +573,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "8",
         label: "icp备案信息",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -618,17 +598,17 @@ const exampleHelpDataTabs: Tab[] = [
                     description: <>搜索ICP备案行业为“软件和信息技术服务业”的资产<Popover
                         destroyTooltipOnHide
                         content={<List size='small' split={false}
-                            style={{ maxHeight: "200px", overflowY: "scroll" }}
-                            renderItem={(item) => (<List.Item>{item}</List.Item>)}
-                            dataSource={
-                                ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
-                            }
-                            footer={<span><Divider style={{ margin: "0px 0 10px 0" }} /><span
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    color: "#bfbfbf"
-                                }}>最多展示top30</span></span>}
+                                       style={{maxHeight: "200px", overflowY: "scroll"}}
+                                       renderItem={(item) => (<List.Item>{item}</List.Item>)}
+                                       dataSource={
+                                           ["软件和信息技术服务业", "科技推广和应用服务业", "批发业", "建筑装饰、装修和其他建筑业", "商务服务业", "研究和试验发展", "互联网和相关服务", "零售业", "专业技术服务业", "土木工程建筑业", "航空运输业", "金属制品业", "计算机、通信和其他电子设备制造业", "通用设备制造业", "专用设备制造业", "电气机械和器材制造业", "文化艺术业", "货币金融服务", "卫生", "租赁业", "房地产业", "居民服务业", "道路运输业", "医药制造业", "汽车制造业", "新闻和出版业", "农业", "橡胶和塑料制品业", "广播、电视、电影和录音制作业", "非金属矿物制品业", "资本市场服务", "化学原料和化学制品制造业", "多式联运和运输代理业", "纺织服装、服饰业", "食品制造业", "其他服务业", "餐饮业", "娱乐业", "电信、广播电视和卫星传输服务", "仪器仪表制造业", "保险业", "家具制造业", "其他制造业", "机动车、电子产品和日用产品修理业", "房屋建筑业", "文教、工美、体育和娱乐用品制造业", "建筑安装业", "住宿业", "电力、热力生产和供应业", "体育", "装卸搬运和仓储业", "其他金融业", "印刷和记录媒介复制业", "纺织业", "畜牧业", "农副食品加工业", "农、林、牧、渔专业及辅助性活动", "皮革、毛皮、羽毛及其制品和制鞋业", "水的生产和供应业", "铁路、船舶、航空航天和其他运输设备制造业", "教育", "酒、饮料和精制茶制造业", "公共设施管理业", "木材加工和木、竹、藤、棕、草制品业", "水上运输业", "社会工作", "造纸和纸制品业", "黑色金属冶炼和压延加工业", "生态保护和环境治理业", "邮政业", "有色金属冶炼和压延加工业", "林业", "燃气生产和供应业", "废弃资源综合利用业", "金属制品、机械和设备修理业", "石油、煤炭及其他燃料加工业", "渔业", "有色金属矿采选业", "水利管理业", "煤炭开采和洗选业", "化学纤维制造业", "开采专业及辅助性活动", "烟草制品业", "非金属矿采选业"]
+                                       }
+                                       footer={<span><Divider style={{margin: "0px 0 10px 0"}}/><span
+                                           style={{
+                                               display: "flex",
+                                               justifyContent: "center",
+                                               color: "#bfbfbf"
+                                           }}>最多展示top30</span></span>}
                         />}
                         trigger="hover">
                         <Button size='small' type='link'>(查看枚举值)</Button>
@@ -642,7 +622,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "9",
         label: "protocol协议/端口响应",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -664,7 +644,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "10",
         label: "app组件信息",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -690,7 +670,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "11",
         label: "cert证书",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -749,7 +729,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "12",
         label: "vul漏洞信息",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -775,7 +755,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "13",
         label: "AS",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -797,7 +777,7 @@ const exampleHelpDataTabs: Tab[] = [
         key: "14",
         label: "tls-jarm",
         children: <AgGridReact
-            {...gridOptions}
+            {...AGGridCommonOptionsNoCopy}
             columnDefs={exampleHelpColumns}
             rowData={[
                 {
@@ -819,11 +799,11 @@ const Help: React.FC = () => {
     const [open, setOpen] = useState<boolean>(false)
     return <>
         <Tooltip title='帮助信息' placement='bottom'>
-            <Button type='text' size="small" icon={<QuestionOutlined />} onClick={() => setOpen(true)} />
+            <Button type='text' size="small" icon={<QuestionOutlined/>} onClick={() => setOpen(true)}/>
         </Tooltip>
         <Modal
-            style={{ top: "10%" }}
-            styles={{ body: { overflowY: 'scroll', height: window.innerHeight - 160 } }}
+            style={{top: "10%"}}
+            styles={{body: {overflowY: 'scroll', height: window.innerHeight - 160}}}
             width={'80%'}
             mask={false}
             maskClosable={true}
@@ -836,15 +816,15 @@ const Help: React.FC = () => {
             <Collapse expandIconPosition={"end"} items={[{
                 key: "1", label: "搜索技巧",
                 children: <AgGridReact
-                    {...gridOptions}
+                    {...AGGridCommonOptionsNoCopy}
                     domLayout={'autoHeight'}
                     columnDefs={advancedHelpColumns}
                     rowData={advancedHelpData}
                 />
             }]} defaultActiveKey={['1']}
             />
-            <Divider style={{ marginTop: "20px", marginBottom: "20px" }} />
-            <Tabs items={exampleHelpDataTabs} size='small' tabPosition={'left'} style={{ height: "100%" }} />
+            <Divider style={{marginTop: "20px", marginBottom: "20px"}}/>
+            <Tabs items={exampleHelpDataTabs} size='small' tabPosition={'left'} style={{height: "100%"}}/>
         </Modal></>
 }
 

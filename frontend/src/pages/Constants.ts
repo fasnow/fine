@@ -1,6 +1,4 @@
 import React from "react";
-import { tianyancha } from "../../wailsjs/go/models";
-import SearchCompanyV4Item = tianyancha.SearchCompanyV4Item;
 
 const titleHeight = '30px'
 const tabHeight = 24
@@ -19,9 +17,7 @@ export const CssConfig = {
     },
 }
 
-export const TabStyle = {
-
-}
+export const TabStyle = {}
 
 export type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
@@ -24227,80 +24223,80 @@ export const IndustryList = [
                         value: "011",
                         label: "谷物种植",
                         children: [
-                            { value: "0111", label: "稻谷种植" },
-                            { value: "0112", label: "小麦种植" },
-                            { value: "0113", label: "玉米种植" },
-                            { value: "0119", label: "其他谷物种植" }
+                            {value: "0111", label: "稻谷种植"},
+                            {value: "0112", label: "小麦种植"},
+                            {value: "0113", label: "玉米种植"},
+                            {value: "0119", label: "其他谷物种植"}
                         ]
                     },
                     {
                         value: "012",
                         label: "豆类、油料和薯类种植",
                         children: [
-                            { value: "0121", label: "豆类种植" },
-                            { value: "0122", label: "油料种植" },
-                            { value: "0123", label: "薯类种植" }
+                            {value: "0121", label: "豆类种植"},
+                            {value: "0122", label: "油料种植"},
+                            {value: "0123", label: "薯类种植"}
                         ]
                     },
                     {
                         value: "013",
                         label: "棉、麻、糖、烟草种植",
                         children: [
-                            { value: "0131", label: "棉花种植" },
-                            { value: "0132", label: "麻类种植" },
-                            { value: "0133", label: "糖料种植" },
-                            { value: "0134", label: "烟草种植" }
+                            {value: "0131", label: "棉花种植"},
+                            {value: "0132", label: "麻类种植"},
+                            {value: "0133", label: "糖料种植"},
+                            {value: "0134", label: "烟草种植"}
                         ]
                     },
                     {
                         value: "014",
                         label: "蔬菜、食用菌及园艺作物种植",
                         children: [
-                            { value: "0141", label: "蔬菜种植" },
-                            { value: "0142", label: "食用菌种植" },
-                            { value: "0143", label: "花卉种植" },
-                            { value: "0149", label: "其他园艺作物种植" }
+                            {value: "0141", label: "蔬菜种植"},
+                            {value: "0142", label: "食用菌种植"},
+                            {value: "0143", label: "花卉种植"},
+                            {value: "0149", label: "其他园艺作物种植"}
                         ]
                     },
                     {
                         value: "015",
                         label: "水果种植",
                         children: [
-                            { value: "0151", label: "仁果类和核果类水果种植" },
-                            { value: "0152", label: "葡萄种植" },
-                            { value: "0153", label: "柑橘类种植" },
-                            { value: "0154", label: "香蕉等亚热带水果种植" },
-                            { value: "0159", label: "其他水果种植" }
+                            {value: "0151", label: "仁果类和核果类水果种植"},
+                            {value: "0152", label: "葡萄种植"},
+                            {value: "0153", label: "柑橘类种植"},
+                            {value: "0154", label: "香蕉等亚热带水果种植"},
+                            {value: "0159", label: "其他水果种植"}
                         ]
                     },
                     {
                         value: "016",
                         label: "坚果、含油果、香料和饮料作物种植",
                         children: [
-                            { value: "0161", label: "坚果种植" },
-                            { value: "0162", label: "含油果种植" },
-                            { value: "0163", label: "香料作物种植" },
-                            { value: "0164", label: "茶叶种植" },
-                            { value: "0169", label: "其他饮料作物种植" }
+                            {value: "0161", label: "坚果种植"},
+                            {value: "0162", label: "含油果种植"},
+                            {value: "0163", label: "香料作物种植"},
+                            {value: "0164", label: "茶叶种植"},
+                            {value: "0169", label: "其他饮料作物种植"}
                         ]
                     },
                     {
                         value: "017",
                         label: "中药材种植",
                         children: [
-                            { value: "0171", label: "中草药种植" },
-                            { value: "0179", label: "其他中药材种植" }
+                            {value: "0171", label: "中草药种植"},
+                            {value: "0179", label: "其他中药材种植"}
                         ]
                     },
                     {
                         value: "018",
                         label: "草种植及割草",
                         children: [
-                            { value: "0181", label: "草种植" },
-                            { value: "0182", label: "天然草原割草" }
+                            {value: "0181", label: "草种植"},
+                            {value: "0182", label: "天然草原割草"}
                         ]
                     },
-                    { value: "019", label: "其他农业" }
+                    {value: "019", label: "其他农业"}
                 ]
             },
             {
@@ -24311,33 +24307,33 @@ export const IndustryList = [
                         value: "021",
                         label: "林木育种和育苗",
                         children: [
-                            { value: "0211", label: "林木育种" },
-                            { value: "0212", label: "林木育苗" }
+                            {value: "0211", label: "林木育种"},
+                            {value: "0212", label: "林木育苗"}
                         ]
                     },
-                    { value: "022", label: "造林和更新" },
+                    {value: "022", label: "造林和更新"},
                     {
                         value: "023",
                         label: "森林经营、管护和改培",
                         children: [
-                            { value: "0231", label: "森林经营和管护" },
-                            { value: "0232", label: "森林改培" }
+                            {value: "0231", label: "森林经营和管护"},
+                            {value: "0232", label: "森林改培"}
                         ]
                     },
                     {
                         value: "024",
                         label: "木材和竹材采运",
                         children: [
-                            { value: "0241", label: "木材采运" },
-                            { value: "0242", label: "竹材采运" }
+                            {value: "0241", label: "木材采运"},
+                            {value: "0242", label: "竹材采运"}
                         ]
                     },
                     {
                         value: "025",
                         label: "林产品采集",
                         children: [
-                            { value: "0251", label: "木竹材林产品采集" },
-                            { value: "0252", label: "非木竹材林产品采集" }
+                            {value: "0251", label: "木竹材林产品采集"},
+                            {value: "0252", label: "非木竹材林产品采集"}
                         ]
                     }
                 ]
@@ -24350,32 +24346,32 @@ export const IndustryList = [
                         value: "031",
                         label: "牲畜饲养",
                         children: [
-                            { value: "0311", label: "牛的饲养" },
-                            { value: "0312", label: "马的饲养" },
-                            { value: "0313", label: "猪的饲养" },
-                            { value: "0314", label: "羊的饲养" },
-                            { value: "0315", label: "骆驼饲养" },
-                            { value: "0319", label: "其他牲畜饲养" }
+                            {value: "0311", label: "牛的饲养"},
+                            {value: "0312", label: "马的饲养"},
+                            {value: "0313", label: "猪的饲养"},
+                            {value: "0314", label: "羊的饲养"},
+                            {value: "0315", label: "骆驼饲养"},
+                            {value: "0319", label: "其他牲畜饲养"}
                         ]
                     },
                     {
                         value: "032",
                         label: "家禽饲养",
                         children: [
-                            { value: "0321", label: "鸡的饲养" },
-                            { value: "0322", label: "鸭的饲养" },
-                            { value: "0323", label: "鹅的饲养" },
-                            { value: "0329", label: "其他家禽饲养" }
+                            {value: "0321", label: "鸡的饲养"},
+                            {value: "0322", label: "鸭的饲养"},
+                            {value: "0323", label: "鹅的饲养"},
+                            {value: "0329", label: "其他家禽饲养"}
                         ]
                     },
-                    { value: "033", label: "狩猎和捕捉动物" },
+                    {value: "033", label: "狩猎和捕捉动物"},
                     {
                         value: "039",
                         label: "其他畜牧业",
                         children: [
-                            { value: "0391", label: "兔的饲养" },
-                            { value: "0392", label: "蜜蜂饲养" },
-                            { value: "0399", label: "其他未列明畜牧业" }
+                            {value: "0391", label: "兔的饲养"},
+                            {value: "0392", label: "蜜蜂饲养"},
+                            {value: "0399", label: "其他未列明畜牧业"}
                         ]
                     }
                 ]
@@ -24388,16 +24384,16 @@ export const IndustryList = [
                         value: "041",
                         label: "水产养殖",
                         children: [
-                            { value: "0411", label: "海水养殖" },
-                            { value: "0412", label: "内陆养殖" }
+                            {value: "0411", label: "海水养殖"},
+                            {value: "0412", label: "内陆养殖"}
                         ]
                     },
                     {
                         value: "042",
                         label: "水产捕捞",
                         children: [
-                            { value: "0421", label: "海水捕捞" },
-                            { value: "0422", label: "内陆捕捞" }
+                            {value: "0421", label: "海水捕捞"},
+                            {value: "0422", label: "内陆捕捞"}
                         ]
                     }
                 ]
@@ -24410,39 +24406,39 @@ export const IndustryList = [
                         value: "051",
                         label: "农业专业及辅助性活动",
                         children: [
-                            { value: "0511", label: "种子种苗培育活动" },
-                            { value: "0512", label: "农业机械活动" },
-                            { value: "0513", label: "灌溉活动" },
-                            { value: "0514", label: "农产品初加工活动" },
-                            { value: "0515", label: "农作物病虫害防治活动" },
-                            { value: "0519", label: "其他农业专业及辅助性活动" }
+                            {value: "0511", label: "种子种苗培育活动"},
+                            {value: "0512", label: "农业机械活动"},
+                            {value: "0513", label: "灌溉活动"},
+                            {value: "0514", label: "农产品初加工活动"},
+                            {value: "0515", label: "农作物病虫害防治活动"},
+                            {value: "0519", label: "其他农业专业及辅助性活动"}
                         ]
                     },
                     {
                         value: "052",
                         label: "林业专业及辅助性活动",
                         children: [
-                            { value: "0521", label: "林业有害生物防治活动" },
-                            { value: "0522", label: "森林防火活动" },
-                            { value: "0523", label: "林产品初级加工活动" },
-                            { value: "0529", label: "其他林业专业及辅助性活动" }
+                            {value: "0521", label: "林业有害生物防治活动"},
+                            {value: "0522", label: "森林防火活动"},
+                            {value: "0523", label: "林产品初级加工活动"},
+                            {value: "0529", label: "其他林业专业及辅助性活动"}
                         ]
                     },
                     {
                         value: "053",
                         label: "畜牧专业及辅助性活动",
                         children: [
-                            { value: "0531", label: "畜牧良种繁殖活动" },
-                            { value: "0532", label: "畜禽粪污处理活动" },
-                            { value: "0539", label: "其他畜牧专业及辅助性活动" }
+                            {value: "0531", label: "畜牧良种繁殖活动"},
+                            {value: "0532", label: "畜禽粪污处理活动"},
+                            {value: "0539", label: "其他畜牧专业及辅助性活动"}
                         ]
                     },
                     {
                         value: "054",
                         label: "渔业专业及辅助性活动",
                         children: [
-                            { value: "0541", label: "鱼苗及鱼种场活动" },
-                            { value: "0549", label: "其他渔业专业及辅助性活动" }
+                            {value: "0541", label: "鱼苗及鱼种场活动"},
+                            {value: "0549", label: "其他渔业专业及辅助性活动"}
                         ]
                     }
                 ]
@@ -24457,9 +24453,9 @@ export const IndustryList = [
                 value: "06",
                 label: "煤炭开采和洗选业",
                 children: [
-                    { value: "061", label: "烟煤和无烟煤开采洗选" },
-                    { value: "062", label: "褐煤开采洗选" },
-                    { value: "069", label: "其他煤炭采选" }
+                    {value: "061", label: "烟煤和无烟煤开采洗选"},
+                    {value: "062", label: "褐煤开采洗选"},
+                    {value: "069", label: "其他煤炭采选"}
                 ]
             },
             {
@@ -24470,16 +24466,16 @@ export const IndustryList = [
                         value: "071",
                         label: "石油开采",
                         children: [
-                            { value: "0711", label: "陆地石油开采" },
-                            { value: "0712", label: "海洋石油开采" }
+                            {value: "0711", label: "陆地石油开采"},
+                            {value: "0712", label: "海洋石油开采"}
                         ]
                     },
                     {
                         value: "072",
                         label: "天然气开采",
                         children: [
-                            { value: "0721", label: "陆地天然气开采" },
-                            { value: "0722", label: "海洋天然气及可燃冰开采" }
+                            {value: "0721", label: "陆地天然气开采"},
+                            {value: "0722", label: "海洋天然气及可燃冰开采"}
                         ]
                     }
                 ]
@@ -24488,9 +24484,9 @@ export const IndustryList = [
                 value: "08",
                 label: "黑色金属矿采选业",
                 children: [
-                    { value: "081", label: "铁矿采选" },
-                    { value: "082", label: "锰矿、铬矿采选" },
-                    { value: "089", label: "其他黑色金属矿采选" }
+                    {value: "081", label: "铁矿采选"},
+                    {value: "082", label: "锰矿、铬矿采选"},
+                    {value: "089", label: "其他黑色金属矿采选"}
                 ]
             },
             {
@@ -24501,33 +24497,33 @@ export const IndustryList = [
                         value: "091",
                         label: "常用有色金属矿采选",
                         children: [
-                            { value: "0911", label: "铜矿采选" },
-                            { value: "0912", label: "铅锌矿采选" },
-                            { value: "0913", label: "镍钴矿采选" },
-                            { value: "0914", label: "锡矿采选" },
-                            { value: "0915", label: "锑矿采选" },
-                            { value: "0916", label: "铝矿采选" },
-                            { value: "0917", label: "镁矿采选" },
-                            { value: "0919", label: "其他常用有色金属矿采选" }
+                            {value: "0911", label: "铜矿采选"},
+                            {value: "0912", label: "铅锌矿采选"},
+                            {value: "0913", label: "镍钴矿采选"},
+                            {value: "0914", label: "锡矿采选"},
+                            {value: "0915", label: "锑矿采选"},
+                            {value: "0916", label: "铝矿采选"},
+                            {value: "0917", label: "镁矿采选"},
+                            {value: "0919", label: "其他常用有色金属矿采选"}
                         ]
                     },
                     {
                         value: "092",
                         label: "贵金属矿采选",
                         children: [
-                            { value: "0921", label: "金矿采选" },
-                            { value: "0922", label: "银矿采选" },
-                            { value: "0929", label: "其他贵金属矿采选" }
+                            {value: "0921", label: "金矿采选"},
+                            {value: "0922", label: "银矿采选"},
+                            {value: "0929", label: "其他贵金属矿采选"}
                         ]
                     },
                     {
                         value: "093",
                         label: "稀有稀土金属矿采选",
                         children: [
-                            { value: "0931", label: "钨钼矿采选" },
-                            { value: "0932", label: "稀土金属矿采选" },
-                            { value: "0933", label: "放射性金属矿采选" },
-                            { value: "0939", label: "其他稀有金属矿采选" }
+                            {value: "0931", label: "钨钼矿采选"},
+                            {value: "0932", label: "稀土金属矿采选"},
+                            {value: "0933", label: "放射性金属矿采选"},
+                            {value: "0939", label: "其他稀有金属矿采选"}
                         ]
                     }
                 ]
@@ -24540,22 +24536,22 @@ export const IndustryList = [
                         value: "101",
                         label: "土砂石开采",
                         children: [
-                            { value: "1011", label: "石灰石、石膏开采" },
-                            { value: "1012", label: "建筑装饰用石开采" },
-                            { value: "1013", label: "耐火土石开采" },
-                            { value: "1019", label: "粘土及其他土砂石开采" }
+                            {value: "1011", label: "石灰石、石膏开采"},
+                            {value: "1012", label: "建筑装饰用石开采"},
+                            {value: "1013", label: "耐火土石开采"},
+                            {value: "1019", label: "粘土及其他土砂石开采"}
                         ]
                     },
-                    { value: "102", label: "化学矿开采" },
-                    { value: "103", label: "采盐" },
+                    {value: "102", label: "化学矿开采"},
+                    {value: "103", label: "采盐"},
                     {
                         value: "109",
                         label: "石棉及其他非金属矿采选",
                         children: [
-                            { value: "1091", label: "石棉、云母矿采选" },
-                            { value: "1092", label: "石墨、滑石采选" },
-                            { value: "1093", label: "宝石、玉石采选" },
-                            { value: "1099", label: "其他未列明非金属矿采选" }
+                            {value: "1091", label: "石棉、云母矿采选"},
+                            {value: "1092", label: "石墨、滑石采选"},
+                            {value: "1093", label: "宝石、玉石采选"},
+                            {value: "1099", label: "其他未列明非金属矿采选"}
                         ]
                     }
                 ]
@@ -24564,15 +24560,15 @@ export const IndustryList = [
                 value: "11",
                 label: "开采专业及辅助性活动",
                 children: [
-                    { value: "111", label: "煤炭开采和洗选专业及辅助性活动" },
-                    { value: "112", label: "石油和天然气开采专业及辅助性活动" },
-                    { value: "119", label: "其他开采专业及辅助性活动" }
+                    {value: "111", label: "煤炭开采和洗选专业及辅助性活动"},
+                    {value: "112", label: "石油和天然气开采专业及辅助性活动"},
+                    {value: "119", label: "其他开采专业及辅助性活动"}
                 ]
             },
             {
                 value: "12",
                 label: "其他采矿业",
-                children: [{ value: "120", label: "其他采矿业" }]
+                children: [{value: "120", label: "其他采矿业"}]
             }
         ]
     },
@@ -24588,66 +24584,66 @@ export const IndustryList = [
                         value: "131",
                         label: "谷物磨制",
                         children: [
-                            { value: "1311", label: "稻谷加工" },
-                            { value: "1312", label: "小麦加工" },
-                            { value: "1313", label: "玉米加工" },
-                            { value: "1314", label: "杂粮加工" },
-                            { value: "1319", label: "其他谷物磨制" }
+                            {value: "1311", label: "稻谷加工"},
+                            {value: "1312", label: "小麦加工"},
+                            {value: "1313", label: "玉米加工"},
+                            {value: "1314", label: "杂粮加工"},
+                            {value: "1319", label: "其他谷物磨制"}
                         ]
                     },
                     {
                         value: "132",
                         label: "饲料加工",
                         children: [
-                            { value: "1321", label: "宠物饲料加工" },
-                            { value: "1329", label: "其他饲料加工" }
+                            {value: "1321", label: "宠物饲料加工"},
+                            {value: "1329", label: "其他饲料加工"}
                         ]
                     },
                     {
                         value: "133",
                         label: "植物油加工",
                         children: [
-                            { value: "1331", label: "食用植物油加工" },
-                            { value: "1332", label: "非食用植物油加工" }
+                            {value: "1331", label: "食用植物油加工"},
+                            {value: "1332", label: "非食用植物油加工"}
                         ]
                     },
-                    { value: "134", label: "制糖业" },
+                    {value: "134", label: "制糖业"},
                     {
                         value: "135",
                         label: "屠宰及肉类加工",
                         children: [
-                            { value: "1351", label: "牲畜屠宰" },
-                            { value: "1352", label: "禽类屠宰" },
-                            { value: "1353", label: "肉制品及副产品加工" }
+                            {value: "1351", label: "牲畜屠宰"},
+                            {value: "1352", label: "禽类屠宰"},
+                            {value: "1353", label: "肉制品及副产品加工"}
                         ]
                     },
                     {
                         value: "136",
                         label: "水产品加工",
                         children: [
-                            { value: "1361", label: "水产品冷冻加工" },
-                            { value: "1362", label: "鱼糜制品及水产品干腌制加工" },
-                            { value: "1363", label: "鱼油提取及制品制造" },
-                            { value: "1369", label: "其他水产品加工" }
+                            {value: "1361", label: "水产品冷冻加工"},
+                            {value: "1362", label: "鱼糜制品及水产品干腌制加工"},
+                            {value: "1363", label: "鱼油提取及制品制造"},
+                            {value: "1369", label: "其他水产品加工"}
                         ]
                     },
                     {
                         value: "137",
                         label: "蔬菜、菌类、水果和坚果加工",
                         children: [
-                            { value: "1371", label: "蔬菜加工" },
-                            { value: "1372", label: "食用菌加工" },
-                            { value: "1373", label: "水果和坚果加工" }
+                            {value: "1371", label: "蔬菜加工"},
+                            {value: "1372", label: "食用菌加工"},
+                            {value: "1373", label: "水果和坚果加工"}
                         ]
                     },
                     {
                         value: "139",
                         label: "其他农副食品加工",
                         children: [
-                            { value: "1391", label: "淀粉及淀粉制品制造" },
-                            { value: "1392", label: "豆制品制造" },
-                            { value: "1393", label: "蛋品加工" },
-                            { value: "1399", label: "其他未列明农副食品加工" }
+                            {value: "1391", label: "淀粉及淀粉制品制造"},
+                            {value: "1392", label: "豆制品制造"},
+                            {value: "1393", label: "蛋品加工"},
+                            {value: "1399", label: "其他未列明农副食品加工"}
                         ]
                     }
                 ]
@@ -24660,66 +24656,66 @@ export const IndustryList = [
                         value: "141",
                         label: "焙烤食品制造",
                         children: [
-                            { value: "1411", label: "糕点、面包制造" },
-                            { value: "1419", label: "饼干及其他焙烤食品制造" }
+                            {value: "1411", label: "糕点、面包制造"},
+                            {value: "1419", label: "饼干及其他焙烤食品制造"}
                         ]
                     },
                     {
                         value: "142",
                         label: "糖果、巧克力及蜜饯制造",
                         children: [
-                            { value: "1421", label: "糖果、巧克力制造" },
-                            { value: "1422", label: "蜜饯制作" }
+                            {value: "1421", label: "糖果、巧克力制造"},
+                            {value: "1422", label: "蜜饯制作"}
                         ]
                     },
                     {
                         value: "143",
                         label: "方便食品制造",
                         children: [
-                            { value: "1431", label: "米、面制品制造" },
-                            { value: "1432", label: "速冻食品制造" },
-                            { value: "1433", label: "方便面制造" },
-                            { value: "1439", label: "其他方便食品制造" }
+                            {value: "1431", label: "米、面制品制造"},
+                            {value: "1432", label: "速冻食品制造"},
+                            {value: "1433", label: "方便面制造"},
+                            {value: "1439", label: "其他方便食品制造"}
                         ]
                     },
                     {
                         value: "144",
                         label: "乳制品制造",
                         children: [
-                            { value: "1441", label: "液体乳制造" },
-                            { value: "1442", label: "乳粉制造" },
-                            { value: "1449", label: "其他乳制品制造" }
+                            {value: "1441", label: "液体乳制造"},
+                            {value: "1442", label: "乳粉制造"},
+                            {value: "1449", label: "其他乳制品制造"}
                         ]
                     },
                     {
                         value: "145",
                         label: "罐头食品制造",
                         children: [
-                            { value: "1451", label: "肉、禽类罐头制造" },
-                            { value: "1452", label: "水产品罐头制造" },
-                            { value: "1453", label: "蔬菜、水果罐头制造" },
-                            { value: "1459", label: "其他罐头食品制造" }
+                            {value: "1451", label: "肉、禽类罐头制造"},
+                            {value: "1452", label: "水产品罐头制造"},
+                            {value: "1453", label: "蔬菜、水果罐头制造"},
+                            {value: "1459", label: "其他罐头食品制造"}
                         ]
                     },
                     {
                         value: "146",
                         label: "调味品、发酵制品制造",
                         children: [
-                            { value: "1461", label: "味精制造" },
-                            { value: "1462", label: "酱油、食醋及类似制品制造" },
-                            { value: "1469", label: "其他调味品、发酵制品制造" }
+                            {value: "1461", label: "味精制造"},
+                            {value: "1462", label: "酱油、食醋及类似制品制造"},
+                            {value: "1469", label: "其他调味品、发酵制品制造"}
                         ]
                     },
                     {
                         value: "149",
                         label: "其他食品制造",
                         children: [
-                            { value: "1491", label: "营养食品制造" },
-                            { value: "1492", label: "保健食品制造" },
-                            { value: "1493", label: "冷冻饮品及食用冰制造" },
-                            { value: "1494", label: "盐加工" },
-                            { value: "1495", label: "食品及饲料添加剂制造" },
-                            { value: "1499", label: "其他未列明食品制造" }
+                            {value: "1491", label: "营养食品制造"},
+                            {value: "1492", label: "保健食品制造"},
+                            {value: "1493", label: "冷冻饮品及食用冰制造"},
+                            {value: "1494", label: "盐加工"},
+                            {value: "1495", label: "食品及饲料添加剂制造"},
+                            {value: "1499", label: "其他未列明食品制造"}
                         ]
                     }
                 ]
@@ -24732,36 +24728,36 @@ export const IndustryList = [
                         value: "151",
                         label: "酒的制造",
                         children: [
-                            { value: "1511", label: "酒精制造" },
-                            { value: "1512", label: "白酒制造" },
-                            { value: "1513", label: "啤酒制造" },
-                            { value: "1514", label: "黄酒制造" },
-                            { value: "1515", label: "葡萄酒制造" },
-                            { value: "1519", label: "其他酒制造" }
+                            {value: "1511", label: "酒精制造"},
+                            {value: "1512", label: "白酒制造"},
+                            {value: "1513", label: "啤酒制造"},
+                            {value: "1514", label: "黄酒制造"},
+                            {value: "1515", label: "葡萄酒制造"},
+                            {value: "1519", label: "其他酒制造"}
                         ]
                     },
                     {
                         value: "152",
                         label: "饮料制造",
                         children: [
-                            { value: "1521", label: "碳酸饮料制造" },
-                            { value: "1522", label: "瓶（罐）装饮用水制造" },
-                            { value: "1523", label: "果菜汁及果菜汁饮料制造" },
-                            { value: "1524", label: "含乳饮料和植物蛋白饮料制造" },
-                            { value: "1525", label: "固体饮料制造" },
-                            { value: "1529", label: "茶饮料及其他饮料制造" }
+                            {value: "1521", label: "碳酸饮料制造"},
+                            {value: "1522", label: "瓶（罐）装饮用水制造"},
+                            {value: "1523", label: "果菜汁及果菜汁饮料制造"},
+                            {value: "1524", label: "含乳饮料和植物蛋白饮料制造"},
+                            {value: "1525", label: "固体饮料制造"},
+                            {value: "1529", label: "茶饮料及其他饮料制造"}
                         ]
                     },
-                    { value: "153", label: "精制茶加工" }
+                    {value: "153", label: "精制茶加工"}
                 ]
             },
             {
                 value: "16",
                 label: "烟草制品业",
                 children: [
-                    { value: "161", label: "烟叶复烤" },
-                    { value: "162", label: "卷烟制造" },
-                    { value: "169", label: "其他烟草制品制造" }
+                    {value: "161", label: "烟叶复烤"},
+                    {value: "162", label: "卷烟制造"},
+                    {value: "169", label: "其他烟草制品制造"}
                 ]
             },
             {
@@ -24772,74 +24768,74 @@ export const IndustryList = [
                         value: "171",
                         label: "棉纺织及印染精加工",
                         children: [
-                            { value: "1711", label: "棉纺纱加工" },
-                            { value: "1712", label: "棉织造加工" },
-                            { value: "1713", label: "棉印染精加工" }
+                            {value: "1711", label: "棉纺纱加工"},
+                            {value: "1712", label: "棉织造加工"},
+                            {value: "1713", label: "棉印染精加工"}
                         ]
                     },
                     {
                         value: "172",
                         label: "毛纺织及染整精加工",
                         children: [
-                            { value: "1721", label: "毛条和毛纱线加工" },
-                            { value: "1722", label: "毛织造加工" },
-                            { value: "1723", label: "毛染整精加工" }
+                            {value: "1721", label: "毛条和毛纱线加工"},
+                            {value: "1722", label: "毛织造加工"},
+                            {value: "1723", label: "毛染整精加工"}
                         ]
                     },
                     {
                         value: "173",
                         label: "麻纺织及染整精加工",
                         children: [
-                            { value: "1731", label: "麻纤维纺前加工和纺纱" },
-                            { value: "1732", label: "麻织造加工" },
-                            { value: "1733", label: "麻染整精加工" }
+                            {value: "1731", label: "麻纤维纺前加工和纺纱"},
+                            {value: "1732", label: "麻织造加工"},
+                            {value: "1733", label: "麻染整精加工"}
                         ]
                     },
                     {
                         value: "174",
                         label: "丝绢纺织及印染精加工",
                         children: [
-                            { value: "1741", label: "缫丝加工" },
-                            { value: "1742", label: "绢纺和丝织加工" },
-                            { value: "1743", label: "丝印染精加工" }
+                            {value: "1741", label: "缫丝加工"},
+                            {value: "1742", label: "绢纺和丝织加工"},
+                            {value: "1743", label: "丝印染精加工"}
                         ]
                     },
                     {
                         value: "175",
                         label: "化纤织造及印染精加工",
                         children: [
-                            { value: "1751", label: "化纤织造加工" },
-                            { value: "1752", label: "化纤织物染整精加工" }
+                            {value: "1751", label: "化纤织造加工"},
+                            {value: "1752", label: "化纤织物染整精加工"}
                         ]
                     },
                     {
                         value: "176",
                         label: "针织或钩针编织物及其制品制造",
                         children: [
-                            { value: "1761", label: "针织或钩针编织物织造" },
-                            { value: "1762", label: "针织或钩针编织物印染精加工" },
-                            { value: "1763", label: "针织或钩针编织品制造" }
+                            {value: "1761", label: "针织或钩针编织物织造"},
+                            {value: "1762", label: "针织或钩针编织物印染精加工"},
+                            {value: "1763", label: "针织或钩针编织品制造"}
                         ]
                     },
                     {
                         value: "177",
                         label: "家用纺织制成品制造",
                         children: [
-                            { value: "1771", label: "床上用品制造" },
-                            { value: "1772", label: "毛巾类制品制造" },
-                            { value: "1773", label: "窗帘、布艺类产品制造" },
-                            { value: "1779", label: "其他家用纺织制成品制造" }
+                            {value: "1771", label: "床上用品制造"},
+                            {value: "1772", label: "毛巾类制品制造"},
+                            {value: "1773", label: "窗帘、布艺类产品制造"},
+                            {value: "1779", label: "其他家用纺织制成品制造"}
                         ]
                     },
                     {
                         value: "178",
                         label: "产业用纺织制成品制造",
                         children: [
-                            { value: "1781", label: "非织造布制造" },
-                            { value: "1782", label: "绳、索、缆制造" },
-                            { value: "1783", label: "纺织带和帘子布制造" },
-                            { value: "1784", label: "篷、帆布制造" },
-                            { value: "1789", label: "其他产业用纺织制成品制造" }
+                            {value: "1781", label: "非织造布制造"},
+                            {value: "1782", label: "绳、索、缆制造"},
+                            {value: "1783", label: "纺织带和帘子布制造"},
+                            {value: "1784", label: "篷、帆布制造"},
+                            {value: "1789", label: "其他产业用纺织制成品制造"}
                         ]
                     }
                 ]
@@ -24852,62 +24848,62 @@ export const IndustryList = [
                         value: "181",
                         label: "机织服装制造",
                         children: [
-                            { value: "1811", label: "运动机织服装制造" },
-                            { value: "1819", label: "其他机织服装制造" }
+                            {value: "1811", label: "运动机织服装制造"},
+                            {value: "1819", label: "其他机织服装制造"}
                         ]
                     },
                     {
                         value: "182",
                         label: "针织或钩针编织服装制造",
                         children: [
-                            { value: "1821", label: "运动休闲针织服装制造" },
-                            { value: "1829", label: "其他针织或钩针编织服装制造" }
+                            {value: "1821", label: "运动休闲针织服装制造"},
+                            {value: "1829", label: "其他针织或钩针编织服装制造"}
                         ]
                     },
-                    { value: "183", label: "服饰制造" }
+                    {value: "183", label: "服饰制造"}
                 ]
             },
             {
                 value: "19",
                 label: "皮革、毛皮、羽毛及其制品和制鞋业",
                 children: [
-                    { value: "191", label: "皮革鞣制加工" },
+                    {value: "191", label: "皮革鞣制加工"},
                     {
                         value: "192",
                         label: "皮革制品制造",
                         children: [
-                            { value: "1921", label: "皮革服装制造" },
-                            { value: "1922", label: "皮箱、包（袋）制造" },
-                            { value: "1923", label: "皮手套及皮装饰制品制造" },
-                            { value: "1929", label: "其他皮革制品制造" }
+                            {value: "1921", label: "皮革服装制造"},
+                            {value: "1922", label: "皮箱、包（袋）制造"},
+                            {value: "1923", label: "皮手套及皮装饰制品制造"},
+                            {value: "1929", label: "其他皮革制品制造"}
                         ]
                     },
                     {
                         value: "193",
                         label: "毛皮鞣制及制品加工",
                         children: [
-                            { value: "1931", label: "毛皮鞣制加工" },
-                            { value: "1932", label: "毛皮服装加工" },
-                            { value: "1939", label: "其他毛皮制品加工" }
+                            {value: "1931", label: "毛皮鞣制加工"},
+                            {value: "1932", label: "毛皮服装加工"},
+                            {value: "1939", label: "其他毛皮制品加工"}
                         ]
                     },
                     {
                         value: "194",
                         label: "羽毛(绒)加工及制品制造",
                         children: [
-                            { value: "1941", label: "羽毛（绒）加工" },
-                            { value: "1942", label: "羽毛（绒）制品加工" }
+                            {value: "1941", label: "羽毛（绒）加工"},
+                            {value: "1942", label: "羽毛（绒）制品加工"}
                         ]
                     },
                     {
                         value: "195",
                         label: "制鞋业",
                         children: [
-                            { value: "1951", label: "纺织面料鞋制造" },
-                            { value: "1952", label: "皮鞋制造" },
-                            { value: "1953", label: "塑料鞋制造" },
-                            { value: "1954", label: "橡胶鞋制造" },
-                            { value: "1959", label: "其他制鞋业" }
+                            {value: "1951", label: "纺织面料鞋制造"},
+                            {value: "1952", label: "皮鞋制造"},
+                            {value: "1953", label: "塑料鞋制造"},
+                            {value: "1954", label: "橡胶鞋制造"},
+                            {value: "1959", label: "其他制鞋业"}
                         ]
                     }
                 ]
@@ -24920,42 +24916,42 @@ export const IndustryList = [
                         value: "201",
                         label: "木材加工",
                         children: [
-                            { value: "2011", label: "锯材加工" },
-                            { value: "2012", label: "木片加工" },
-                            { value: "2013", label: "单板加工" },
-                            { value: "2019", label: "其他木材加工" }
+                            {value: "2011", label: "锯材加工"},
+                            {value: "2012", label: "木片加工"},
+                            {value: "2013", label: "单板加工"},
+                            {value: "2019", label: "其他木材加工"}
                         ]
                     },
                     {
                         value: "202",
                         label: "人造板制造",
                         children: [
-                            { value: "2021", label: "胶合板制造" },
-                            { value: "2022", label: "纤维板制造" },
-                            { value: "2023", label: "刨花板制造" },
-                            { value: "2029", label: "其他人造板制造" }
+                            {value: "2021", label: "胶合板制造"},
+                            {value: "2022", label: "纤维板制造"},
+                            {value: "2023", label: "刨花板制造"},
+                            {value: "2029", label: "其他人造板制造"}
                         ]
                     },
                     {
                         value: "203",
                         label: "木质制品制造",
                         children: [
-                            { value: "2031", label: "建筑用木料及木材组件加工" },
-                            { value: "2032", label: "木门窗制造" },
-                            { value: "2033", label: "木楼梯制造" },
-                            { value: "2034", label: "木地板制造" },
-                            { value: "2035", label: "木制容器制造" },
-                            { value: "2039", label: "软木制品及其他木制品制造" }
+                            {value: "2031", label: "建筑用木料及木材组件加工"},
+                            {value: "2032", label: "木门窗制造"},
+                            {value: "2033", label: "木楼梯制造"},
+                            {value: "2034", label: "木地板制造"},
+                            {value: "2035", label: "木制容器制造"},
+                            {value: "2039", label: "软木制品及其他木制品制造"}
                         ]
                     },
                     {
                         value: "204",
                         label: "竹、藤、棕、草等制品制造",
                         children: [
-                            { value: "2041", label: "竹制品制造" },
-                            { value: "2042", label: "藤制品制造" },
-                            { value: "2043", label: "棕制品制造" },
-                            { value: "2049", label: "草及其他制品制造" }
+                            {value: "2041", label: "竹制品制造"},
+                            {value: "2042", label: "藤制品制造"},
+                            {value: "2043", label: "棕制品制造"},
+                            {value: "2049", label: "草及其他制品制造"}
                         ]
                     }
                 ]
@@ -24964,11 +24960,11 @@ export const IndustryList = [
                 value: "21",
                 label: "家具制造业",
                 children: [
-                    { value: "211", label: "木质家具制造" },
-                    { value: "212", label: "竹、藤家具制造" },
-                    { value: "213", label: "金属家具制造" },
-                    { value: "214", label: "塑料家具制造" },
-                    { value: "219", label: "其他家具制造" }
+                    {value: "211", label: "木质家具制造"},
+                    {value: "212", label: "竹、藤家具制造"},
+                    {value: "213", label: "金属家具制造"},
+                    {value: "214", label: "塑料家具制造"},
+                    {value: "219", label: "其他家具制造"}
                 ]
             },
             {
@@ -24979,25 +24975,25 @@ export const IndustryList = [
                         value: "221",
                         label: "纸浆制造",
                         children: [
-                            { value: "2211", label: "木竹浆制造" },
-                            { value: "2212", label: "非木竹浆制造" }
+                            {value: "2211", label: "木竹浆制造"},
+                            {value: "2212", label: "非木竹浆制造"}
                         ]
                     },
                     {
                         value: "222",
                         label: "造纸",
                         children: [
-                            { value: "2221", label: "机制纸及纸板制造" },
-                            { value: "2222", label: "手工纸制造" },
-                            { value: "2223", label: "加工纸制造" }
+                            {value: "2221", label: "机制纸及纸板制造"},
+                            {value: "2222", label: "手工纸制造"},
+                            {value: "2223", label: "加工纸制造"}
                         ]
                     },
                     {
                         value: "223",
                         label: "纸制品制造",
                         children: [
-                            { value: "2231", label: "纸和纸板容器制造" },
-                            { value: "2239", label: "其他纸制品制造" }
+                            {value: "2231", label: "纸和纸板容器制造"},
+                            {value: "2239", label: "其他纸制品制造"}
                         ]
                     }
                 ]
@@ -25010,13 +25006,13 @@ export const IndustryList = [
                         value: "231",
                         label: "印刷",
                         children: [
-                            { value: "2311", label: "书、报刊印刷" },
-                            { value: "2312", label: "本册印制" },
-                            { value: "2319", label: "包装装潢及其他印刷" }
+                            {value: "2311", label: "书、报刊印刷"},
+                            {value: "2312", label: "本册印制"},
+                            {value: "2319", label: "包装装潢及其他印刷"}
                         ]
                     },
-                    { value: "232", label: "装订及印刷相关服务" },
-                    { value: "233", label: "记录媒介复制" }
+                    {value: "232", label: "装订及印刷相关服务"},
+                    {value: "233", label: "记录媒介复制"}
                 ]
             },
             {
@@ -25027,69 +25023,69 @@ export const IndustryList = [
                         value: "241",
                         label: "文教办公用品制造",
                         children: [
-                            { value: "2411", label: "文具制造" },
-                            { value: "2412", label: "笔的制造" },
-                            { value: "2413", label: "教学用模型及教具制造" },
-                            { value: "2414", label: "墨水、墨汁制造" },
-                            { value: "2419", label: "其他文教办公用品制造" }
+                            {value: "2411", label: "文具制造"},
+                            {value: "2412", label: "笔的制造"},
+                            {value: "2413", label: "教学用模型及教具制造"},
+                            {value: "2414", label: "墨水、墨汁制造"},
+                            {value: "2419", label: "其他文教办公用品制造"}
                         ]
                     },
                     {
                         value: "242",
                         label: "乐器制造",
                         children: [
-                            { value: "2421", label: "中乐器制造" },
-                            { value: "2422", label: "西乐器制造" },
-                            { value: "2423", label: "电子乐器制造" },
-                            { value: "2429", label: "其他乐器及零件制造" }
+                            {value: "2421", label: "中乐器制造"},
+                            {value: "2422", label: "西乐器制造"},
+                            {value: "2423", label: "电子乐器制造"},
+                            {value: "2429", label: "其他乐器及零件制造"}
                         ]
                     },
                     {
                         value: "243",
                         label: "工艺美术及礼仪用品制造",
                         children: [
-                            { value: "2431", label: "雕塑工艺品制造" },
-                            { value: "2432", label: "金属工艺品制造" },
-                            { value: "2433", label: "漆器工艺品制造" },
-                            { value: "2434", label: "花画工艺品制造" },
-                            { value: "2435", label: "天然植物纤维编织工艺品制造" },
-                            { value: "2436", label: "抽纱刺绣工艺品制造" },
-                            { value: "2437", label: "地毯、挂毯制造" },
-                            { value: "2438", label: "珠宝首饰及有关物品制造" },
-                            { value: "2439", label: "其他工艺美术及礼仪用品制造" }
+                            {value: "2431", label: "雕塑工艺品制造"},
+                            {value: "2432", label: "金属工艺品制造"},
+                            {value: "2433", label: "漆器工艺品制造"},
+                            {value: "2434", label: "花画工艺品制造"},
+                            {value: "2435", label: "天然植物纤维编织工艺品制造"},
+                            {value: "2436", label: "抽纱刺绣工艺品制造"},
+                            {value: "2437", label: "地毯、挂毯制造"},
+                            {value: "2438", label: "珠宝首饰及有关物品制造"},
+                            {value: "2439", label: "其他工艺美术及礼仪用品制造"}
                         ]
                     },
                     {
                         value: "244",
                         label: "体育用品制造",
                         children: [
-                            { value: "2441", label: "球类制造" },
-                            { value: "2442", label: "专项运动器材及配件制造" },
-                            { value: "2443", label: "健身器材制造" },
-                            { value: "2444", label: "运动防护用具制造" },
-                            { value: "2449", label: "其他体育用品制造" }
+                            {value: "2441", label: "球类制造"},
+                            {value: "2442", label: "专项运动器材及配件制造"},
+                            {value: "2443", label: "健身器材制造"},
+                            {value: "2444", label: "运动防护用具制造"},
+                            {value: "2449", label: "其他体育用品制造"}
                         ]
                     },
                     {
                         value: "245",
                         label: "玩具制造",
                         children: [
-                            { value: "2451", label: "电玩具制造" },
-                            { value: "2452", label: "塑胶玩具制造" },
-                            { value: "2453", label: "金属玩具制造" },
-                            { value: "2454", label: "弹射玩具制造" },
-                            { value: "2455", label: "娃娃玩具制造" },
-                            { value: "2456", label: "儿童乘骑玩耍的童车类产品制造" },
-                            { value: "2459", label: "其他玩具制造" }
+                            {value: "2451", label: "电玩具制造"},
+                            {value: "2452", label: "塑胶玩具制造"},
+                            {value: "2453", label: "金属玩具制造"},
+                            {value: "2454", label: "弹射玩具制造"},
+                            {value: "2455", label: "娃娃玩具制造"},
+                            {value: "2456", label: "儿童乘骑玩耍的童车类产品制造"},
+                            {value: "2459", label: "其他玩具制造"}
                         ]
                     },
                     {
                         value: "246",
                         label: "游艺器材及娱乐用品制造",
                         children: [
-                            { value: "2461", label: "露天游乐场所游乐设备制造" },
-                            { value: "2462", label: "游艺用品及室内游艺器材制造" },
-                            { value: "2469", label: "其他娱乐用品制造" }
+                            {value: "2461", label: "露天游乐场所游乐设备制造"},
+                            {value: "2462", label: "游艺用品及室内游艺器材制造"},
+                            {value: "2469", label: "其他娱乐用品制造"}
                         ]
                     }
                 ]
@@ -25102,28 +25098,28 @@ export const IndustryList = [
                         value: "251",
                         label: "精炼石油产品制造",
                         children: [
-                            { value: "2511", label: "原油加工及石油制品制造" },
-                            { value: "2519", label: "其他原油制造" }
+                            {value: "2511", label: "原油加工及石油制品制造"},
+                            {value: "2519", label: "其他原油制造"}
                         ]
                     },
                     {
                         value: "252",
                         label: "煤炭加工",
                         children: [
-                            { value: "2521", label: "炼焦" },
-                            { value: "2522", label: "煤制合成气生产" },
-                            { value: "2523", label: "煤制液体燃料生产" },
-                            { value: "2524", label: "煤制品制造" },
-                            { value: "2529", label: "其他煤炭加工" }
+                            {value: "2521", label: "炼焦"},
+                            {value: "2522", label: "煤制合成气生产"},
+                            {value: "2523", label: "煤制液体燃料生产"},
+                            {value: "2524", label: "煤制品制造"},
+                            {value: "2529", label: "其他煤炭加工"}
                         ]
                     },
-                    { value: "253", label: "核燃料加工" },
+                    {value: "253", label: "核燃料加工"},
                     {
                         value: "254",
                         label: "生物质燃料加工",
                         children: [
-                            { value: "2541", label: "生物质液体燃料生产" },
-                            { value: "2542", label: "生物质致密成型燃料加工" }
+                            {value: "2541", label: "生物质液体燃料生产"},
+                            {value: "2542", label: "生物质致密成型燃料加工"}
                         ]
                     }
                 ]
@@ -25136,86 +25132,86 @@ export const IndustryList = [
                         value: "261",
                         label: "基础化学原料制造",
                         children: [
-                            { value: "2611", label: "无机酸制造" },
-                            { value: "2612", label: "无机碱制造" },
-                            { value: "2613", label: "无机盐制造" },
-                            { value: "2614", label: "有机化学原料制造" },
-                            { value: "2619", label: "其他基础化学原料制造" }
+                            {value: "2611", label: "无机酸制造"},
+                            {value: "2612", label: "无机碱制造"},
+                            {value: "2613", label: "无机盐制造"},
+                            {value: "2614", label: "有机化学原料制造"},
+                            {value: "2619", label: "其他基础化学原料制造"}
                         ]
                     },
                     {
                         value: "262",
                         label: "肥料制造",
                         children: [
-                            { value: "2621", label: "氮肥制造" },
-                            { value: "2622", label: "磷肥制造" },
-                            { value: "2623", label: "钾肥制造" },
-                            { value: "2624", label: "复混肥料制造" },
-                            { value: "2625", label: "有机肥料及微生物肥料制造" },
-                            { value: "2629", label: "其他肥料制造" }
+                            {value: "2621", label: "氮肥制造"},
+                            {value: "2622", label: "磷肥制造"},
+                            {value: "2623", label: "钾肥制造"},
+                            {value: "2624", label: "复混肥料制造"},
+                            {value: "2625", label: "有机肥料及微生物肥料制造"},
+                            {value: "2629", label: "其他肥料制造"}
                         ]
                     },
                     {
                         value: "263",
                         label: "农药制造",
                         children: [
-                            { value: "2631", label: "化学农药制造" },
-                            { value: "2632", label: "生物化学农药及微生物农药制造" }
+                            {value: "2631", label: "化学农药制造"},
+                            {value: "2632", label: "生物化学农药及微生物农药制造"}
                         ]
                     },
                     {
                         value: "264",
                         label: "涂料、油墨、颜料及类似产品制造",
                         children: [
-                            { value: "2641", label: "涂料制造" },
-                            { value: "2642", label: "油墨及类似产品制造" },
-                            { value: "2643", label: "工业颜料制造" },
-                            { value: "2644", label: "工艺美术颜料制造" },
-                            { value: "2645", label: "染料制造" },
-                            { value: "2646", label: "密封用填料及类似品制造" }
+                            {value: "2641", label: "涂料制造"},
+                            {value: "2642", label: "油墨及类似产品制造"},
+                            {value: "2643", label: "工业颜料制造"},
+                            {value: "2644", label: "工艺美术颜料制造"},
+                            {value: "2645", label: "染料制造"},
+                            {value: "2646", label: "密封用填料及类似品制造"}
                         ]
                     },
                     {
                         value: "265",
                         label: "合成材料制造",
                         children: [
-                            { value: "2651", label: "初级形态塑料及合成树脂制造" },
-                            { value: "2652", label: "合成橡胶制造" },
-                            { value: "2653", label: "合成纤维单（聚合）体制造" },
-                            { value: "2659", label: "其他合成材料制造" }
+                            {value: "2651", label: "初级形态塑料及合成树脂制造"},
+                            {value: "2652", label: "合成橡胶制造"},
+                            {value: "2653", label: "合成纤维单（聚合）体制造"},
+                            {value: "2659", label: "其他合成材料制造"}
                         ]
                     },
                     {
                         value: "266",
                         label: "专用化学产品制造",
                         children: [
-                            { value: "2661", label: "化学试剂和助剂制造" },
-                            { value: "2662", label: "专项化学用品制造" },
-                            { value: "2663", label: "林产化学产品制造" },
-                            { value: "2664", label: "文化用信息化学品制造" },
-                            { value: "2665", label: "医学生产用信息化学品制造" },
-                            { value: "2666", label: "环境污染处理专用药剂材料制造" },
-                            { value: "2667", label: "动物胶制造" },
-                            { value: "2669", label: "其他专用化学产品制造" }
+                            {value: "2661", label: "化学试剂和助剂制造"},
+                            {value: "2662", label: "专项化学用品制造"},
+                            {value: "2663", label: "林产化学产品制造"},
+                            {value: "2664", label: "文化用信息化学品制造"},
+                            {value: "2665", label: "医学生产用信息化学品制造"},
+                            {value: "2666", label: "环境污染处理专用药剂材料制造"},
+                            {value: "2667", label: "动物胶制造"},
+                            {value: "2669", label: "其他专用化学产品制造"}
                         ]
                     },
                     {
                         value: "267",
                         label: "炸药、火工及焰火产品制造",
                         children: [
-                            { value: "2671", label: "炸药及火工产品制造" },
-                            { value: "2672", label: "焰火、鞭炮产品制造" }
+                            {value: "2671", label: "炸药及火工产品制造"},
+                            {value: "2672", label: "焰火、鞭炮产品制造"}
                         ]
                     },
                     {
                         value: "268",
                         label: "日用化学产品制造",
                         children: [
-                            { value: "2681", label: "肥皂及洗涤剂制造" },
-                            { value: "2682", label: "化妆品制造" },
-                            { value: "2683", label: "口腔清洁用品制造" },
-                            { value: "2684", label: "香料、香精制造" },
-                            { value: "2689", label: "其他日用化学产品制造" }
+                            {value: "2681", label: "肥皂及洗涤剂制造"},
+                            {value: "2682", label: "化妆品制造"},
+                            {value: "2683", label: "口腔清洁用品制造"},
+                            {value: "2684", label: "香料、香精制造"},
+                            {value: "2689", label: "其他日用化学产品制造"}
                         ]
                     }
                 ]
@@ -25224,21 +25220,21 @@ export const IndustryList = [
                 value: "27",
                 label: "医药制造业",
                 children: [
-                    { value: "271", label: "化学药品原料药制造" },
-                    { value: "272", label: "化学药品制剂制造" },
-                    { value: "273", label: "中药饮片加工" },
-                    { value: "274", label: "中成药生产" },
-                    { value: "275", label: "兽用药品制造" },
+                    {value: "271", label: "化学药品原料药制造"},
+                    {value: "272", label: "化学药品制剂制造"},
+                    {value: "273", label: "中药饮片加工"},
+                    {value: "274", label: "中成药生产"},
+                    {value: "275", label: "兽用药品制造"},
                     {
                         value: "276",
                         label: "生物药品制品制造",
                         children: [
-                            { value: "2761", label: "生物药品制造" },
-                            { value: "2762", label: "基因工程药物和疫苗制造" }
+                            {value: "2761", label: "生物药品制造"},
+                            {value: "2762", label: "基因工程药物和疫苗制造"}
                         ]
                     },
-                    { value: "277", label: "卫生材料及医药用品制造" },
-                    { value: "278", label: "药用辅料及包装材料" }
+                    {value: "277", label: "卫生材料及医药用品制造"},
+                    {value: "278", label: "药用辅料及包装材料"}
                 ]
             },
             {
@@ -25249,29 +25245,29 @@ export const IndustryList = [
                         value: "281",
                         label: "纤维素纤维原料及纤维制造",
                         children: [
-                            { value: "2811", label: "化纤浆粕制造" },
-                            { value: "2812", label: "人造纤维（纤维素纤维）制造" }
+                            {value: "2811", label: "化纤浆粕制造"},
+                            {value: "2812", label: "人造纤维（纤维素纤维）制造"}
                         ]
                     },
                     {
                         value: "282",
                         label: "合成纤维制造",
                         children: [
-                            { value: "2821", label: "锦纶纤维制造" },
-                            { value: "2822", label: "涤纶纤维制造" },
-                            { value: "2823", label: "腈纶纤维制造" },
-                            { value: "2824", label: "维纶纤维制造" },
-                            { value: "2825", label: "丙纶纤维制造" },
-                            { value: "2826", label: "氨纶纤维制造" },
-                            { value: "2829", label: "其他合成纤维制造" }
+                            {value: "2821", label: "锦纶纤维制造"},
+                            {value: "2822", label: "涤纶纤维制造"},
+                            {value: "2823", label: "腈纶纤维制造"},
+                            {value: "2824", label: "维纶纤维制造"},
+                            {value: "2825", label: "丙纶纤维制造"},
+                            {value: "2826", label: "氨纶纤维制造"},
+                            {value: "2829", label: "其他合成纤维制造"}
                         ]
                     },
                     {
                         value: "283",
                         label: "生物基材料制造",
                         children: [
-                            { value: "2831", label: "生物基化学纤维制造" },
-                            { value: "2832", label: "生物基、淀粉基新材料制造" }
+                            {value: "2831", label: "生物基化学纤维制造"},
+                            {value: "2832", label: "生物基、淀粉基新材料制造"}
                         ]
                     }
                 ]
@@ -25284,28 +25280,28 @@ export const IndustryList = [
                         value: "291",
                         label: "橡胶制品业",
                         children: [
-                            { value: "2911", label: "轮胎制造" },
-                            { value: "2912", label: "橡胶板、管、带制造" },
-                            { value: "2913", label: "橡胶零件制造" },
-                            { value: "2914", label: "再生橡胶制造" },
-                            { value: "2915", label: "日用及医用橡胶制品制造" },
-                            { value: "2916", label: "运动场地用塑胶制造" },
-                            { value: "2919", label: "其他橡胶制品制造" }
+                            {value: "2911", label: "轮胎制造"},
+                            {value: "2912", label: "橡胶板、管、带制造"},
+                            {value: "2913", label: "橡胶零件制造"},
+                            {value: "2914", label: "再生橡胶制造"},
+                            {value: "2915", label: "日用及医用橡胶制品制造"},
+                            {value: "2916", label: "运动场地用塑胶制造"},
+                            {value: "2919", label: "其他橡胶制品制造"}
                         ]
                     },
                     {
                         value: "292",
                         label: "塑料制品业",
                         children: [
-                            { value: "2921", label: "塑料薄膜制造" },
-                            { value: "2922", label: "塑料板、管、型材制造" },
-                            { value: "2923", label: "塑料丝、绳及编织品制造" },
-                            { value: "2924", label: "泡沫塑料制造" },
-                            { value: "2925", label: "塑料人造革、合成革制造" },
-                            { value: "2926", label: "塑料包装箱及容器制造" },
-                            { value: "2927", label: "日用塑料制品制造" },
-                            { value: "2928", label: "人造草坪制造" },
-                            { value: "2929", label: "塑料零件及其他塑料制品制造" }
+                            {value: "2921", label: "塑料薄膜制造"},
+                            {value: "2922", label: "塑料板、管、型材制造"},
+                            {value: "2923", label: "塑料丝、绳及编织品制造"},
+                            {value: "2924", label: "泡沫塑料制造"},
+                            {value: "2925", label: "塑料人造革、合成革制造"},
+                            {value: "2926", label: "塑料包装箱及容器制造"},
+                            {value: "2927", label: "日用塑料制品制造"},
+                            {value: "2928", label: "人造草坪制造"},
+                            {value: "2929", label: "塑料零件及其他塑料制品制造"}
                         ]
                     }
                 ]
@@ -25318,91 +25314,91 @@ export const IndustryList = [
                         value: "301",
                         label: "水泥、石灰和石膏制造",
                         children: [
-                            { value: "3011", label: "水泥制造" },
-                            { value: "3012", label: "石灰和石膏制造" }
+                            {value: "3011", label: "水泥制造"},
+                            {value: "3012", label: "石灰和石膏制造"}
                         ]
                     },
                     {
                         value: "302",
                         label: "石膏、水泥制品及类似制品制造",
                         children: [
-                            { value: "3021", label: "水泥制品制造" },
-                            { value: "3022", label: "砼结构构件制造" },
-                            { value: "3023", label: "石棉水泥制品制造" },
-                            { value: "3024", label: "轻质建筑材料制造" },
-                            { value: "3029", label: "其他水泥类似制品制造" }
+                            {value: "3021", label: "水泥制品制造"},
+                            {value: "3022", label: "砼结构构件制造"},
+                            {value: "3023", label: "石棉水泥制品制造"},
+                            {value: "3024", label: "轻质建筑材料制造"},
+                            {value: "3029", label: "其他水泥类似制品制造"}
                         ]
                     },
                     {
                         value: "303",
                         label: "砖瓦、石材等建筑材料制造",
                         children: [
-                            { value: "3031", label: "粘土砖瓦及建筑砌块制造" },
-                            { value: "3032", label: "建筑用石加工" },
-                            { value: "3033", label: "防水建筑材料制造" },
-                            { value: "3034", label: "隔热和隔音材料制造" },
-                            { value: "3039", label: "其他建筑材料制造" }
+                            {value: "3031", label: "粘土砖瓦及建筑砌块制造"},
+                            {value: "3032", label: "建筑用石加工"},
+                            {value: "3033", label: "防水建筑材料制造"},
+                            {value: "3034", label: "隔热和隔音材料制造"},
+                            {value: "3039", label: "其他建筑材料制造"}
                         ]
                     },
                     {
                         value: "304",
                         label: "玻璃制造",
                         children: [
-                            { value: "3041", label: "平板玻璃制造" },
-                            { value: "3042", label: "特种玻璃制造" },
-                            { value: "3049", label: "其他玻璃制造" }
+                            {value: "3041", label: "平板玻璃制造"},
+                            {value: "3042", label: "特种玻璃制造"},
+                            {value: "3049", label: "其他玻璃制造"}
                         ]
                     },
                     {
                         value: "305",
                         label: "玻璃制品制造",
                         children: [
-                            { value: "3051", label: "技术玻璃制品制造" },
-                            { value: "3052", label: "光学玻璃制造" },
-                            { value: "3053", label: "玻璃仪器制造" },
-                            { value: "3054", label: "日用玻璃制品制造" },
-                            { value: "3055", label: "玻璃包装容器制造" },
-                            { value: "3056", label: "玻璃保温容器制造" },
-                            { value: "3057", label: "制镜及类似品加工" },
-                            { value: "3059", label: "其他玻璃制品制造" }
+                            {value: "3051", label: "技术玻璃制品制造"},
+                            {value: "3052", label: "光学玻璃制造"},
+                            {value: "3053", label: "玻璃仪器制造"},
+                            {value: "3054", label: "日用玻璃制品制造"},
+                            {value: "3055", label: "玻璃包装容器制造"},
+                            {value: "3056", label: "玻璃保温容器制造"},
+                            {value: "3057", label: "制镜及类似品加工"},
+                            {value: "3059", label: "其他玻璃制品制造"}
                         ]
                     },
                     {
                         value: "306",
                         label: "玻璃纤维和玻璃纤维增强塑料制品制造",
                         children: [
-                            { value: "3061", label: "玻璃纤维及制品制造" },
-                            { value: "3062", label: "玻璃纤维增强塑料制品制造" }
+                            {value: "3061", label: "玻璃纤维及制品制造"},
+                            {value: "3062", label: "玻璃纤维增强塑料制品制造"}
                         ]
                     },
                     {
                         value: "307",
                         label: "陶瓷制品制造",
                         children: [
-                            { value: "3071", label: "建筑陶瓷制品制造" },
-                            { value: "3072", label: "卫生陶瓷制品制造" },
-                            { value: "3073", label: "特种陶瓷制品制造" },
-                            { value: "3074", label: "日用陶瓷制品制造" },
-                            { value: "3075", label: "陈设艺术陶瓷制造" },
-                            { value: "3076", label: "园艺陶瓷制造" },
-                            { value: "3079", label: "其他陶瓷制品制造" }
+                            {value: "3071", label: "建筑陶瓷制品制造"},
+                            {value: "3072", label: "卫生陶瓷制品制造"},
+                            {value: "3073", label: "特种陶瓷制品制造"},
+                            {value: "3074", label: "日用陶瓷制品制造"},
+                            {value: "3075", label: "陈设艺术陶瓷制造"},
+                            {value: "3076", label: "园艺陶瓷制造"},
+                            {value: "3079", label: "其他陶瓷制品制造"}
                         ]
                     },
                     {
                         value: "308",
                         label: "耐火材料制品制造",
                         children: [
-                            { value: "3081", label: "石棉制品制造" },
-                            { value: "3082", label: "云母制品制造" },
-                            { value: "3089", label: "耐火陶瓷制品及其他耐火材料制造" }
+                            {value: "3081", label: "石棉制品制造"},
+                            {value: "3082", label: "云母制品制造"},
+                            {value: "3089", label: "耐火陶瓷制品及其他耐火材料制造"}
                         ]
                     },
                     {
                         value: "309",
                         label: "石墨及其他非金属矿物制品制造",
                         children: [
-                            { value: "3091", label: "石墨及碳素制品制造" },
-                            { value: "3099", label: "其他非金属矿物制品制造" }
+                            {value: "3091", label: "石墨及碳素制品制造"},
+                            {value: "3099", label: "其他非金属矿物制品制造"}
                         ]
                     }
                 ]
@@ -25411,10 +25407,10 @@ export const IndustryList = [
                 value: "31",
                 label: "黑色金属冶炼和压延加工业",
                 children: [
-                    { value: "311", label: "炼铁" },
-                    { value: "312", label: "炼钢" },
-                    { value: "313", label: "钢压延加工" },
-                    { value: "314", label: "铁合金冶炼" }
+                    {value: "311", label: "炼铁"},
+                    {value: "312", label: "炼钢"},
+                    {value: "313", label: "钢压延加工"},
+                    {value: "314", label: "铁合金冶炼"}
                 ]
             },
             {
@@ -25425,45 +25421,45 @@ export const IndustryList = [
                         value: "321",
                         label: "常用有色金属冶炼",
                         children: [
-                            { value: "3211", label: "铜冶炼" },
-                            { value: "3212", label: "铅锌冶炼" },
-                            { value: "3213", label: "镍钴冶炼" },
-                            { value: "3214", label: "锡冶炼" },
-                            { value: "3215", label: "锑冶炼" },
-                            { value: "3216", label: "铝冶炼" },
-                            { value: "3217", label: "镁冶炼" },
-                            { value: "3218", label: "硅冶炼" },
-                            { value: "3219", label: "其他常用有色金属冶炼" }
+                            {value: "3211", label: "铜冶炼"},
+                            {value: "3212", label: "铅锌冶炼"},
+                            {value: "3213", label: "镍钴冶炼"},
+                            {value: "3214", label: "锡冶炼"},
+                            {value: "3215", label: "锑冶炼"},
+                            {value: "3216", label: "铝冶炼"},
+                            {value: "3217", label: "镁冶炼"},
+                            {value: "3218", label: "硅冶炼"},
+                            {value: "3219", label: "其他常用有色金属冶炼"}
                         ]
                     },
                     {
                         value: "322",
                         label: "贵金属冶炼",
                         children: [
-                            { value: "3221", label: "金冶炼" },
-                            { value: "3222", label: "银冶炼" },
-                            { value: "3229", label: "其他贵金属冶炼" }
+                            {value: "3221", label: "金冶炼"},
+                            {value: "3222", label: "银冶炼"},
+                            {value: "3229", label: "其他贵金属冶炼"}
                         ]
                     },
                     {
                         value: "323",
                         label: "稀有稀土金属冶炼",
                         children: [
-                            { value: "3231", label: "钨钼冶炼" },
-                            { value: "3232", label: "稀土金属冶炼" },
-                            { value: "3239", label: "其他稀有金属冶炼" }
+                            {value: "3231", label: "钨钼冶炼"},
+                            {value: "3232", label: "稀土金属冶炼"},
+                            {value: "3239", label: "其他稀有金属冶炼"}
                         ]
                     },
-                    { value: "324", label: "有色金属合金制造" },
+                    {value: "324", label: "有色金属合金制造"},
                     {
                         value: "325",
                         label: "有色金属压延加工",
                         children: [
-                            { value: "3251", label: "铜压延加工" },
-                            { value: "3252", label: "铝压延加工" },
-                            { value: "3253", label: "贵金属压延加工" },
-                            { value: "3254", label: "稀有稀土金属压延加工" },
-                            { value: "3259", label: "其他有色金属压延加工" }
+                            {value: "3251", label: "铜压延加工"},
+                            {value: "3252", label: "铝压延加工"},
+                            {value: "3253", label: "贵金属压延加工"},
+                            {value: "3254", label: "稀有稀土金属压延加工"},
+                            {value: "3259", label: "其他有色金属压延加工"}
                         ]
                     }
                 ]
@@ -25476,71 +25472,71 @@ export const IndustryList = [
                         value: "331",
                         label: "结构性金属制品制造",
                         children: [
-                            { value: "3311", label: "金属结构制造" },
-                            { value: "3312", label: "金属门窗制造" }
+                            {value: "3311", label: "金属结构制造"},
+                            {value: "3312", label: "金属门窗制造"}
                         ]
                     },
                     {
                         value: "332",
                         label: "金属工具制造",
                         children: [
-                            { value: "3321", label: "切削工具制造" },
-                            { value: "3322", label: "手工具制造" },
-                            { value: "3323", label: "农用及园林用金属工具制造" },
-                            { value: "3324", label: "刀剪及类似日用金属工具制造" },
-                            { value: "3329", label: "其他金属工具制造" }
+                            {value: "3321", label: "切削工具制造"},
+                            {value: "3322", label: "手工具制造"},
+                            {value: "3323", label: "农用及园林用金属工具制造"},
+                            {value: "3324", label: "刀剪及类似日用金属工具制造"},
+                            {value: "3329", label: "其他金属工具制造"}
                         ]
                     },
                     {
                         value: "333",
                         label: "集装箱及金属包装容器制造",
                         children: [
-                            { value: "3331", label: "集装箱制造" },
-                            { value: "3332", label: "金属压力容器制造" },
-                            { value: "3333", label: "金属包装容器及材料制造" }
+                            {value: "3331", label: "集装箱制造"},
+                            {value: "3332", label: "金属压力容器制造"},
+                            {value: "3333", label: "金属包装容器及材料制造"}
                         ]
                     },
-                    { value: "334", label: "金属丝绳及其制品制造" },
+                    {value: "334", label: "金属丝绳及其制品制造"},
                     {
                         value: "335",
                         label: "建筑、安全用金属制品制造",
                         children: [
-                            { value: "3351", label: "建筑、家具用金属配件制造" },
-                            { value: "3352", label: "建筑装饰及水暖管道零件制造" },
-                            { value: "3353", label: "安全、消防用金属制品制造" },
-                            { value: "3359", label: "其他建筑、安全用金属制品制造" }
+                            {value: "3351", label: "建筑、家具用金属配件制造"},
+                            {value: "3352", label: "建筑装饰及水暖管道零件制造"},
+                            {value: "3353", label: "安全、消防用金属制品制造"},
+                            {value: "3359", label: "其他建筑、安全用金属制品制造"}
                         ]
                     },
-                    { value: "336", label: "金属表面处理及热处理加工" },
+                    {value: "336", label: "金属表面处理及热处理加工"},
                     {
                         value: "337",
                         label: "搪瓷制品制造",
                         children: [
-                            { value: "3371", label: "生产专用搪瓷制品制造" },
-                            { value: "3372", label: "建筑装饰搪瓷制品制造" },
-                            { value: "3373", label: "搪瓷卫生洁具制造" },
-                            { value: "3379", label: "搪瓷日用品及其他搪瓷制品制造" }
+                            {value: "3371", label: "生产专用搪瓷制品制造"},
+                            {value: "3372", label: "建筑装饰搪瓷制品制造"},
+                            {value: "3373", label: "搪瓷卫生洁具制造"},
+                            {value: "3379", label: "搪瓷日用品及其他搪瓷制品制造"}
                         ]
                     },
                     {
                         value: "338",
                         label: "金属制日用品制造",
                         children: [
-                            { value: "3381", label: "金属制厨房用器具制造" },
-                            { value: "3382", label: "金属制餐具和器皿制造" },
-                            { value: "3383", label: "金属制卫生器具制造" },
-                            { value: "3389", label: "其他金属制日用品制造" }
+                            {value: "3381", label: "金属制厨房用器具制造"},
+                            {value: "3382", label: "金属制餐具和器皿制造"},
+                            {value: "3383", label: "金属制卫生器具制造"},
+                            {value: "3389", label: "其他金属制日用品制造"}
                         ]
                     },
                     {
                         value: "339",
                         label: "铸造及其他金属制品制造",
                         children: [
-                            { value: "3391", label: "黑色金属铸造" },
-                            { value: "3392", label: "有色金属铸造" },
-                            { value: "3393", label: "锻件及粉末冶金制品制造" },
-                            { value: "3394", label: "交通及公共管理用金属标牌制造" },
-                            { value: "3399", label: "其他未列明金属制品制造" }
+                            {value: "3391", label: "黑色金属铸造"},
+                            {value: "3392", label: "有色金属铸造"},
+                            {value: "3393", label: "锻件及粉末冶金制品制造"},
+                            {value: "3394", label: "交通及公共管理用金属标牌制造"},
+                            {value: "3399", label: "其他未列明金属制品制造"}
                         ]
                     }
                 ]
@@ -25553,106 +25549,106 @@ export const IndustryList = [
                         value: "341",
                         label: "锅炉及原动设备制造",
                         children: [
-                            { value: "3411", label: "锅炉及辅助设备制造" },
-                            { value: "3412", label: "内燃机及配件制造" },
-                            { value: "3413", label: "汽轮机及辅机制造" },
-                            { value: "3414", label: "水轮机及辅机制造" },
-                            { value: "3415", label: "风能原动设备制造" },
-                            { value: "3419", label: "其他原动设备制造" }
+                            {value: "3411", label: "锅炉及辅助设备制造"},
+                            {value: "3412", label: "内燃机及配件制造"},
+                            {value: "3413", label: "汽轮机及辅机制造"},
+                            {value: "3414", label: "水轮机及辅机制造"},
+                            {value: "3415", label: "风能原动设备制造"},
+                            {value: "3419", label: "其他原动设备制造"}
                         ]
                     },
                     {
                         value: "342",
                         label: "金属加工机械制造",
                         children: [
-                            { value: "3421", label: "金属切削机床制造" },
-                            { value: "3422", label: "金属成形机床制造" },
-                            { value: "3423", label: "铸造机械制造" },
-                            { value: "3424", label: "金属切割及焊接设备制造" },
-                            { value: "3425", label: "机床功能部件及附件制造" },
-                            { value: "3429", label: "其他金属加工机械制造" }
+                            {value: "3421", label: "金属切削机床制造"},
+                            {value: "3422", label: "金属成形机床制造"},
+                            {value: "3423", label: "铸造机械制造"},
+                            {value: "3424", label: "金属切割及焊接设备制造"},
+                            {value: "3425", label: "机床功能部件及附件制造"},
+                            {value: "3429", label: "其他金属加工机械制造"}
                         ]
                     },
                     {
                         value: "343",
                         label: "物料搬运设备制造",
                         children: [
-                            { value: "3431", label: "轻小型起重设备制造" },
-                            { value: "3432", label: "生产专用起重机制造" },
-                            { value: "3433", label: "生产专用车辆制造" },
-                            { value: "3434", label: "连续搬运设备制造" },
-                            { value: "3435", label: "电梯、自动扶梯及升降机制造" },
-                            { value: "3436", label: "客运索道制造" },
-                            { value: "3437", label: "机械式停车设备制造" },
-                            { value: "3439", label: "其他物料搬运设备制造" }
+                            {value: "3431", label: "轻小型起重设备制造"},
+                            {value: "3432", label: "生产专用起重机制造"},
+                            {value: "3433", label: "生产专用车辆制造"},
+                            {value: "3434", label: "连续搬运设备制造"},
+                            {value: "3435", label: "电梯、自动扶梯及升降机制造"},
+                            {value: "3436", label: "客运索道制造"},
+                            {value: "3437", label: "机械式停车设备制造"},
+                            {value: "3439", label: "其他物料搬运设备制造"}
                         ]
                     },
                     {
                         value: "344",
                         label: "泵、阀门、压缩机及类似机械制造",
                         children: [
-                            { value: "3441", label: "泵及真空设备制造" },
-                            { value: "3442", label: "气体压缩机械制造" },
-                            { value: "3443", label: "阀门和旋塞制造" },
-                            { value: "3444", label: "液压动力机械及元件制造" },
-                            { value: "3445", label: "液力动力机械元件制造" },
-                            { value: "3446", label: "气压动力机械及元件制造" }
+                            {value: "3441", label: "泵及真空设备制造"},
+                            {value: "3442", label: "气体压缩机械制造"},
+                            {value: "3443", label: "阀门和旋塞制造"},
+                            {value: "3444", label: "液压动力机械及元件制造"},
+                            {value: "3445", label: "液力动力机械元件制造"},
+                            {value: "3446", label: "气压动力机械及元件制造"}
                         ]
                     },
                     {
                         value: "345",
                         label: "轴承、齿轮和传动部件制造",
                         children: [
-                            { value: "3451", label: "滚动轴承制造" },
-                            { value: "3452", label: "滑动轴承制造" },
-                            { value: "3453", label: "齿轮及齿轮减、变速箱制造" },
-                            { value: "3459", label: "其他传动部件制造" }
+                            {value: "3451", label: "滚动轴承制造"},
+                            {value: "3452", label: "滑动轴承制造"},
+                            {value: "3453", label: "齿轮及齿轮减、变速箱制造"},
+                            {value: "3459", label: "其他传动部件制造"}
                         ]
                     },
                     {
                         value: "346",
                         label: "烘炉、风机、包装等设备制造",
                         children: [
-                            { value: "3461", label: "烘炉、熔炉及电炉制造" },
-                            { value: "3462", label: "风机、风扇制造" },
-                            { value: "3463", label: "气体、液体分离及纯净设备制造" },
-                            { value: "3464", label: "制冷、空调设备制造" },
-                            { value: "3465", label: "风动和电动工具制造" },
-                            { value: "3466", label: "喷枪及类似器具制造" },
-                            { value: "3467", label: "包装专用设备制造" }
+                            {value: "3461", label: "烘炉、熔炉及电炉制造"},
+                            {value: "3462", label: "风机、风扇制造"},
+                            {value: "3463", label: "气体、液体分离及纯净设备制造"},
+                            {value: "3464", label: "制冷、空调设备制造"},
+                            {value: "3465", label: "风动和电动工具制造"},
+                            {value: "3466", label: "喷枪及类似器具制造"},
+                            {value: "3467", label: "包装专用设备制造"}
                         ]
                     },
                     {
                         value: "347",
                         label: "文化、办公用机械制造",
                         children: [
-                            { value: "3471", label: "电影机械制造" },
-                            { value: "3472", label: "幻灯及投影设备制造" },
-                            { value: "3473", label: "照相机及器材制造" },
-                            { value: "3474", label: "复印和胶印设备制造" },
-                            { value: "3475", label: "计算器及货币专用设备制造" },
-                            { value: "3479", label: "其他文化、办公用机械制造" }
+                            {value: "3471", label: "电影机械制造"},
+                            {value: "3472", label: "幻灯及投影设备制造"},
+                            {value: "3473", label: "照相机及器材制造"},
+                            {value: "3474", label: "复印和胶印设备制造"},
+                            {value: "3475", label: "计算器及货币专用设备制造"},
+                            {value: "3479", label: "其他文化、办公用机械制造"}
                         ]
                     },
                     {
                         value: "348",
                         label: "通用零部件制造",
                         children: [
-                            { value: "3481", label: "金属密封件制造" },
-                            { value: "3482", label: "紧固件制造" },
-                            { value: "3483", label: "弹簧制造" },
-                            { value: "3484", label: "机械零部件加工" },
-                            { value: "3489", label: "其他通用零部件制造" }
+                            {value: "3481", label: "金属密封件制造"},
+                            {value: "3482", label: "紧固件制造"},
+                            {value: "3483", label: "弹簧制造"},
+                            {value: "3484", label: "机械零部件加工"},
+                            {value: "3489", label: "其他通用零部件制造"}
                         ]
                     },
                     {
                         value: "349",
                         label: "其他通用设备制造业",
                         children: [
-                            { value: "3491", label: "工业机器人制造" },
-                            { value: "3492", label: "特殊作业机器人制造" },
-                            { value: "3493", label: "增材制造装备制造" },
-                            { value: "3499", label: "其他未列明通用设备制造业" }
+                            {value: "3491", label: "工业机器人制造"},
+                            {value: "3492", label: "特殊作业机器人制造"},
+                            {value: "3493", label: "增材制造装备制造"},
+                            {value: "3499", label: "其他未列明通用设备制造业"}
                         ]
                     }
                 ]
@@ -25665,119 +25661,119 @@ export const IndustryList = [
                         value: "351",
                         label: "采矿、冶金、建筑专用设备制造",
                         children: [
-                            { value: "3511", label: "矿山机械制造" },
-                            { value: "3512", label: "石油钻采专用设备制造" },
-                            { value: "3513", label: "深海石油钻探设备制造" },
-                            { value: "3514", label: "建筑工程用机械制造" },
-                            { value: "3515", label: "建筑材料生产专用机械制造" },
-                            { value: "3516", label: "冶金专用设备制造" },
-                            { value: "3517", label: "隧道施工专用机械制造" }
+                            {value: "3511", label: "矿山机械制造"},
+                            {value: "3512", label: "石油钻采专用设备制造"},
+                            {value: "3513", label: "深海石油钻探设备制造"},
+                            {value: "3514", label: "建筑工程用机械制造"},
+                            {value: "3515", label: "建筑材料生产专用机械制造"},
+                            {value: "3516", label: "冶金专用设备制造"},
+                            {value: "3517", label: "隧道施工专用机械制造"}
                         ]
                     },
                     {
                         value: "352",
                         label: "化工、木材、非金属加工专用设备制造",
                         children: [
-                            { value: "3521", label: "炼油、化工生产专用设备制造" },
-                            { value: "3522", label: "橡胶加工专用设备制造" },
-                            { value: "3523", label: "塑料加工专用设备制造" },
-                            { value: "3524", label: "木竹材加工机械制造" },
-                            { value: "3525", label: "模具制造" },
-                            { value: "3529", label: "其他非金属加工专用设备制造" }
+                            {value: "3521", label: "炼油、化工生产专用设备制造"},
+                            {value: "3522", label: "橡胶加工专用设备制造"},
+                            {value: "3523", label: "塑料加工专用设备制造"},
+                            {value: "3524", label: "木竹材加工机械制造"},
+                            {value: "3525", label: "模具制造"},
+                            {value: "3529", label: "其他非金属加工专用设备制造"}
                         ]
                     },
                     {
                         value: "353",
                         label: "食品、饮料、烟草及饲料生产专用设备制造",
                         children: [
-                            { value: "3531", label: "食品、酒、饮料及茶生产专用设备制" },
-                            { value: "3532", label: "农副食品加工专用设备制造" },
-                            { value: "3533", label: "烟草生产专用设备制造" },
-                            { value: "3534", label: "饲料生产专用设备制造" }
+                            {value: "3531", label: "食品、酒、饮料及茶生产专用设备制"},
+                            {value: "3532", label: "农副食品加工专用设备制造"},
+                            {value: "3533", label: "烟草生产专用设备制造"},
+                            {value: "3534", label: "饲料生产专用设备制造"}
                         ]
                     },
                     {
                         value: "354",
                         label: "印刷、制药、日化及日用品生产专用设备制造",
                         children: [
-                            { value: "3541", label: "制浆和造纸专用设备制造" },
-                            { value: "3542", label: "印刷专用设备制造" },
-                            { value: "3543", label: "日用化工专用设备制造" },
-                            { value: "3544", label: "制药专用设备制造" },
-                            { value: "3545", label: "照明器具生产专用设备制造" },
+                            {value: "3541", label: "制浆和造纸专用设备制造"},
+                            {value: "3542", label: "印刷专用设备制造"},
+                            {value: "3543", label: "日用化工专用设备制造"},
+                            {value: "3544", label: "制药专用设备制造"},
+                            {value: "3545", label: "照明器具生产专用设备制造"},
                             {
                                 value: "3546",
                                 label: "玻璃、陶瓷和搪瓷制品生产专用设备制造"
                             },
-                            { value: "3549", label: "其他日用品生产专用设备制造" }
+                            {value: "3549", label: "其他日用品生产专用设备制造"}
                         ]
                     },
                     {
                         value: "355",
                         label: "纺织、服装和皮革加工专用设备制造",
                         children: [
-                            { value: "3551", label: "纺织专用设备制造" },
+                            {value: "3551", label: "纺织专用设备制造"},
                             {
                                 value: "3552",
                                 label: "皮革、毛皮及其制品加工专用设备制造"
                             },
-                            { value: "3553", label: "缝制机械制造" },
-                            { value: "3554", label: "洗涤机械制造" }
+                            {value: "3553", label: "缝制机械制造"},
+                            {value: "3554", label: "洗涤机械制造"}
                         ]
                     },
                     {
                         value: "356",
                         label: "电子和电工机械专用设备制造",
                         children: [
-                            { value: "3561", label: "电工机械专用设备制造" },
-                            { value: "3562", label: "半导体器件专用设备制造" },
-                            { value: "3563", label: "电子元器件与机电组件设备制造" },
-                            { value: "3569", label: "其他电子专用设备制造" }
+                            {value: "3561", label: "电工机械专用设备制造"},
+                            {value: "3562", label: "半导体器件专用设备制造"},
+                            {value: "3563", label: "电子元器件与机电组件设备制造"},
+                            {value: "3569", label: "其他电子专用设备制造"}
                         ]
                     },
                     {
                         value: "357",
                         label: "农、林、牧、渔专用机械制造",
                         children: [
-                            { value: "3571", label: "拖拉机制造" },
-                            { value: "3572", label: "机械化农业及园艺机具制造" },
-                            { value: "3573", label: "营林及木竹采伐机械制造" },
-                            { value: "3574", label: "畜牧机械制造" },
-                            { value: "3575", label: "渔业机械制造" },
-                            { value: "3576", label: "农林牧渔机械配件制造" },
-                            { value: "3577", label: "棉花加工机械制造" },
-                            { value: "3579", label: "其他农、林、牧、渔业机械制造" }
+                            {value: "3571", label: "拖拉机制造"},
+                            {value: "3572", label: "机械化农业及园艺机具制造"},
+                            {value: "3573", label: "营林及木竹采伐机械制造"},
+                            {value: "3574", label: "畜牧机械制造"},
+                            {value: "3575", label: "渔业机械制造"},
+                            {value: "3576", label: "农林牧渔机械配件制造"},
+                            {value: "3577", label: "棉花加工机械制造"},
+                            {value: "3579", label: "其他农、林、牧、渔业机械制造"}
                         ]
                     },
                     {
                         value: "358",
                         label: "医疗仪器设备及器械制造",
                         children: [
-                            { value: "3581", label: "医疗诊断、监护及治疗设备制造" },
-                            { value: "3582", label: "口腔科用设备及器具制造" },
+                            {value: "3581", label: "医疗诊断、监护及治疗设备制造"},
+                            {value: "3582", label: "口腔科用设备及器具制造"},
                             {
                                 value: "3583",
                                 label: "医疗实验室及医用消毒设备和器具制造"
                             },
-                            { value: "3584", label: "医疗、外科及兽医用器械制造" },
-                            { value: "3585", label: "机械治疗及病房护理设备制造" },
-                            { value: "3586", label: "康复辅具制造" },
-                            { value: "3587", label: "眼镜制造" },
-                            { value: "3589", label: "其他医疗设备及器械制造" }
+                            {value: "3584", label: "医疗、外科及兽医用器械制造"},
+                            {value: "3585", label: "机械治疗及病房护理设备制造"},
+                            {value: "3586", label: "康复辅具制造"},
+                            {value: "3587", label: "眼镜制造"},
+                            {value: "3589", label: "其他医疗设备及器械制造"}
                         ]
                     },
                     {
                         value: "359",
                         label: "环保、邮政、社会公共服务及其他专用设备制造",
                         children: [
-                            { value: "3591", label: "环境保护专用设备制造" },
-                            { value: "3592", label: "地质勘查专用设备制造" },
-                            { value: "3593", label: "邮政专用机械及器材制造" },
-                            { value: "3594", label: "商业、饮食、服务专用设备制造" },
-                            { value: "3595", label: "社会公共安全设备及器材制造" },
-                            { value: "3596", label: "交通安全、管制及类似专用设备制造" },
-                            { value: "3597", label: "水资源专用机械制造" },
-                            { value: "3599", label: "其他专用设备制造" }
+                            {value: "3591", label: "环境保护专用设备制造"},
+                            {value: "3592", label: "地质勘查专用设备制造"},
+                            {value: "3593", label: "邮政专用机械及器材制造"},
+                            {value: "3594", label: "商业、饮食、服务专用设备制造"},
+                            {value: "3595", label: "社会公共安全设备及器材制造"},
+                            {value: "3596", label: "交通安全、管制及类似专用设备制造"},
+                            {value: "3597", label: "水资源专用机械制造"},
+                            {value: "3599", label: "其他专用设备制造"}
                         ]
                     }
                 ]
@@ -25790,16 +25786,16 @@ export const IndustryList = [
                         value: "361",
                         label: "汽车整车制造",
                         children: [
-                            { value: "3611", label: "汽柴油车整车制造" },
-                            { value: "3612", label: "新能源车整车制造" }
+                            {value: "3611", label: "汽柴油车整车制造"},
+                            {value: "3612", label: "新能源车整车制造"}
                         ]
                     },
-                    { value: "362", label: "汽车用发动机制造" },
-                    { value: "363", label: "改装汽车制造" },
-                    { value: "364", label: "低速汽车制造" },
-                    { value: "365", label: "电车制造" },
-                    { value: "366", label: "汽车车身、挂车制造" },
-                    { value: "367", label: "汽车零部件及配件制造" }
+                    {value: "362", label: "汽车用发动机制造"},
+                    {value: "363", label: "改装汽车制造"},
+                    {value: "364", label: "低速汽车制造"},
+                    {value: "365", label: "电车制造"},
+                    {value: "366", label: "汽车车身、挂车制造"},
+                    {value: "367", label: "汽车零部件及配件制造"}
                 ]
             },
             {
@@ -25810,66 +25806,66 @@ export const IndustryList = [
                         value: "371",
                         label: "铁路运输设备制造",
                         children: [
-                            { value: "3711", label: "高铁车组制造" },
-                            { value: "3712", label: "铁路机车车辆制造" },
-                            { value: "3713", label: "窄轨机车车辆制造" },
-                            { value: "3714", label: "高铁设备、配件制造" },
-                            { value: "3715", label: "铁路机车车辆配件制造" },
-                            { value: "3716", label: "铁路专用设备及器材、配件制造" },
-                            { value: "3719", label: "其他铁路运输设备制造" }
+                            {value: "3711", label: "高铁车组制造"},
+                            {value: "3712", label: "铁路机车车辆制造"},
+                            {value: "3713", label: "窄轨机车车辆制造"},
+                            {value: "3714", label: "高铁设备、配件制造"},
+                            {value: "3715", label: "铁路机车车辆配件制造"},
+                            {value: "3716", label: "铁路专用设备及器材、配件制造"},
+                            {value: "3719", label: "其他铁路运输设备制造"}
                         ]
                     },
-                    { value: "372", label: "城市轨道交通设备制造" },
+                    {value: "372", label: "城市轨道交通设备制造"},
                     {
                         value: "373",
                         label: "船舶及相关装置制造",
                         children: [
-                            { value: "3731", label: "金属船舶制造" },
-                            { value: "3732", label: "非金属船舶制造" },
-                            { value: "3733", label: "娱乐船和运动船制造" },
-                            { value: "3734", label: "船用配套设备制造" },
-                            { value: "3735", label: "船舶改装" },
-                            { value: "3736", label: "船舶拆除" },
-                            { value: "3737", label: "海洋工程装备制造" },
-                            { value: "3739", label: "航标器材及其他相关装置制造" }
+                            {value: "3731", label: "金属船舶制造"},
+                            {value: "3732", label: "非金属船舶制造"},
+                            {value: "3733", label: "娱乐船和运动船制造"},
+                            {value: "3734", label: "船用配套设备制造"},
+                            {value: "3735", label: "船舶改装"},
+                            {value: "3736", label: "船舶拆除"},
+                            {value: "3737", label: "海洋工程装备制造"},
+                            {value: "3739", label: "航标器材及其他相关装置制造"}
                         ]
                     },
                     {
                         value: "374",
                         label: "航空、航天器及设备制造",
                         children: [
-                            { value: "3741", label: "飞机制造" },
-                            { value: "3742", label: "航天器及运载火箭制造" },
-                            { value: "3743", label: "航天相关设备制造" },
-                            { value: "3744", label: "航空相关设备制造" },
-                            { value: "3749", label: "其他航空航天器制造" }
+                            {value: "3741", label: "飞机制造"},
+                            {value: "3742", label: "航天器及运载火箭制造"},
+                            {value: "3743", label: "航天相关设备制造"},
+                            {value: "3744", label: "航空相关设备制造"},
+                            {value: "3749", label: "其他航空航天器制造"}
                         ]
                     },
                     {
                         value: "375",
                         label: "摩托车制造",
                         children: [
-                            { value: "3751", label: "摩托车整车制造" },
-                            { value: "3752", label: "摩托车零部件及配件制造" }
+                            {value: "3751", label: "摩托车整车制造"},
+                            {value: "3752", label: "摩托车零部件及配件制造"}
                         ]
                     },
                     {
                         value: "376",
                         label: "自行车和残疾人座车制造",
                         children: [
-                            { value: "3761", label: "自行车制造" },
-                            { value: "3762", label: "残疾人座车制造" }
+                            {value: "3761", label: "自行车制造"},
+                            {value: "3762", label: "残疾人座车制造"}
                         ]
                     },
-                    { value: "377", label: "助动车制造" },
-                    { value: "378", label: "非公路休闲车及零配件制造" },
+                    {value: "377", label: "助动车制造"},
+                    {value: "378", label: "非公路休闲车及零配件制造"},
                     {
                         value: "379",
                         label: "潜水救捞及其他未列明运输设备制造",
                         children: [
-                            { value: "3791", label: "潜水装备制造" },
-                            { value: "3792", label: "水下救捞装备制造" },
-                            { value: "3799", label: "其他未列明运输设备制造" }
+                            {value: "3791", label: "潜水装备制造"},
+                            {value: "3792", label: "水下救捞装备制造"},
+                            {value: "3799", label: "其他未列明运输设备制造"}
                         ]
                     }
                 ]
@@ -25882,85 +25878,85 @@ export const IndustryList = [
                         value: "381",
                         label: "电机制造",
                         children: [
-                            { value: "3811", label: "发电机及发电机组制造" },
-                            { value: "3812", label: "电动机制造" },
-                            { value: "3813", label: "微特电机及组件制造" },
-                            { value: "3819", label: "其他电机制造" }
+                            {value: "3811", label: "发电机及发电机组制造"},
+                            {value: "3812", label: "电动机制造"},
+                            {value: "3813", label: "微特电机及组件制造"},
+                            {value: "3819", label: "其他电机制造"}
                         ]
                     },
                     {
                         value: "382",
                         label: "输配电及控制设备制造",
                         children: [
-                            { value: "3821", label: "变压器、整流器和电感器制造" },
-                            { value: "3822", label: "电容器及其配套设备制造" },
-                            { value: "3823", label: "配电开关控制设备制造" },
-                            { value: "3824", label: "电力电子元器件制造" },
-                            { value: "3825", label: "光伏设备及元器件制造" },
-                            { value: "3829", label: "其他输配电及控制设备制造" }
+                            {value: "3821", label: "变压器、整流器和电感器制造"},
+                            {value: "3822", label: "电容器及其配套设备制造"},
+                            {value: "3823", label: "配电开关控制设备制造"},
+                            {value: "3824", label: "电力电子元器件制造"},
+                            {value: "3825", label: "光伏设备及元器件制造"},
+                            {value: "3829", label: "其他输配电及控制设备制造"}
                         ]
                     },
                     {
                         value: "383",
                         label: "电线、电缆、光缆及电工器材制造",
                         children: [
-                            { value: "3831", label: "电线、电缆制造" },
-                            { value: "3832", label: "光纤制造" },
-                            { value: "3833", label: "光缆制造" },
-                            { value: "3834", label: "绝缘制品制造" },
-                            { value: "3839", label: "其他电工器材制造" }
+                            {value: "3831", label: "电线、电缆制造"},
+                            {value: "3832", label: "光纤制造"},
+                            {value: "3833", label: "光缆制造"},
+                            {value: "3834", label: "绝缘制品制造"},
+                            {value: "3839", label: "其他电工器材制造"}
                         ]
                     },
                     {
                         value: "384",
                         label: "电池制造",
                         children: [
-                            { value: "3841", label: "锂离子电池制造" },
-                            { value: "3842", label: "镍氢电池制造" },
-                            { value: "3843", label: "铅蓄电池制造" },
-                            { value: "3844", label: "锌锰电池制造" },
-                            { value: "3849", label: "其他电池制造" }
+                            {value: "3841", label: "锂离子电池制造"},
+                            {value: "3842", label: "镍氢电池制造"},
+                            {value: "3843", label: "铅蓄电池制造"},
+                            {value: "3844", label: "锌锰电池制造"},
+                            {value: "3849", label: "其他电池制造"}
                         ]
                     },
                     {
                         value: "385",
                         label: "家用电力器具制造",
                         children: [
-                            { value: "3851", label: "家用制冷电器具制造" },
-                            { value: "3853", label: "家用通风电器具制造" },
-                            { value: "3854", label: "家用厨房电器具制造" },
-                            { value: "3855", label: "家用清洁卫生电器具制造" },
-                            { value: "3856", label: "家用美容、保健护理电器具制造" },
-                            { value: "3857", label: "家用电力器具专用配件制造" },
-                            { value: "3859", label: "其他家用电力器具制造" }
+                            {value: "3851", label: "家用制冷电器具制造"},
+                            {value: "3853", label: "家用通风电器具制造"},
+                            {value: "3854", label: "家用厨房电器具制造"},
+                            {value: "3855", label: "家用清洁卫生电器具制造"},
+                            {value: "3856", label: "家用美容、保健护理电器具制造"},
+                            {value: "3857", label: "家用电力器具专用配件制造"},
+                            {value: "3859", label: "其他家用电力器具制造"}
                         ]
                     },
                     {
                         value: "386",
                         label: "非电力家用器具制造",
                         children: [
-                            { value: "3861", label: "燃气及类似能源家用器具制造" },
-                            { value: "3862", label: "太阳能器具制造" },
-                            { value: "3869", label: "其他非电力家用器具制造" }
+                            {value: "3861", label: "燃气及类似能源家用器具制造"},
+                            {value: "3862", label: "太阳能器具制造"},
+                            {value: "3869", label: "其他非电力家用器具制造"}
                         ]
                     },
                     {
                         value: "387",
                         label: "照明器具制造",
                         children: [
-                            { value: "3871", label: "电光源制造" },
-                            { value: "3872", label: "照明灯具制造" },
-                            { value: "3873", label: "舞台及场地用灯制造" },
-                            { value: "3874", label: "智能照明器具制造" },
-                            { value: "3879", label: "灯用电器附件及其他照明器具制造" }
+                            {value: "3871", label: "电光源制造"},
+                            {value: "3872", label: "照明灯具制造"},
+                            {value: "3873", label: "舞台及场地用灯制造"},
+                            {value: "3874", label: "智能照明器具制造"},
+                            {value: "3879", label: "灯用电器附件及其他照明器具制造"}
                         ]
                     },
                     {
                         value: "389",
                         label: "其他电气机械及器材制造",
                         children: [
-                            { value: "3891", label: "电气信号设备装置制造" },
-                            { value: "3899", label: "其他未列明电气机械及器材制造" }
+                            {value: "3891", label: "电气信号设备装置制造"},
+                            {value: "3899", label: "其他未列明电气机械及器材制造"}
                         ]
                     }
                 ]
@@ -25973,82 +25969,82 @@ export const IndustryList = [
                         value: "391",
                         label: "计算机制造",
                         children: [
-                            { value: "3911", label: "计算机整机制造" },
-                            { value: "3912", label: "计算机零部件制造" },
-                            { value: "3913", label: "计算机外围设备制造" },
-                            { value: "3914", label: "工业控制计算机及系统制造" },
-                            { value: "3915", label: "信息安全设备制造" }
+                            {value: "3911", label: "计算机整机制造"},
+                            {value: "3912", label: "计算机零部件制造"},
+                            {value: "3913", label: "计算机外围设备制造"},
+                            {value: "3914", label: "工业控制计算机及系统制造"},
+                            {value: "3915", label: "信息安全设备制造"}
                         ]
                     },
                     {
                         value: "392",
                         label: "通信设备制造",
                         children: [
-                            { value: "3921", label: "通信系统设备制造" },
-                            { value: "3922", label: "通信终端设备制造" }
+                            {value: "3921", label: "通信系统设备制造"},
+                            {value: "3922", label: "通信终端设备制造"}
                         ]
                     },
                     {
                         value: "393",
                         label: "广播电视设备制造",
                         children: [
-                            { value: "3931", label: "广播电视节目制作及发射设备制造" },
-                            { value: "3932", label: "广播电视接收设备制造" },
-                            { value: "3933", label: "广播电视专用配件制造" },
-                            { value: "3934", label: "专业音响设备制造" },
+                            {value: "3931", label: "广播电视节目制作及发射设备制造"},
+                            {value: "3932", label: "广播电视接收设备制造"},
+                            {value: "3933", label: "广播电视专用配件制造"},
+                            {value: "3934", label: "专业音响设备制造"},
                             {
                                 value: "3939",
                                 label: "应用电视设备及其他广播电视设备制造"
                             }
                         ]
                     },
-                    { value: "394", label: "雷达及配套设备制造" },
+                    {value: "394", label: "雷达及配套设备制造"},
                     {
                         value: "395",
                         label: "非专业视听设备制造",
                         children: [
-                            { value: "3951", label: "电视机制造" },
-                            { value: "3952", label: "音响设备制造" },
-                            { value: "3953", label: "影视录放设备制造" }
+                            {value: "3951", label: "电视机制造"},
+                            {value: "3952", label: "音响设备制造"},
+                            {value: "3953", label: "影视录放设备制造"}
                         ]
                     },
                     {
                         value: "396",
                         label: "智能消费设备制造",
                         children: [
-                            { value: "3961", label: "可穿戴智能设备制造" },
-                            { value: "3962", label: "智能车载设备制造" },
-                            { value: "3963", label: "智能无人飞行器制造" },
-                            { value: "3964", label: "服务消费机器人制造" },
-                            { value: "3969", label: "其他智能消费设备制造" }
+                            {value: "3961", label: "可穿戴智能设备制造"},
+                            {value: "3962", label: "智能车载设备制造"},
+                            {value: "3963", label: "智能无人飞行器制造"},
+                            {value: "3964", label: "服务消费机器人制造"},
+                            {value: "3969", label: "其他智能消费设备制造"}
                         ]
                     },
                     {
                         value: "397",
                         label: "电子器件制造",
                         children: [
-                            { value: "3971", label: "电子真空器件制造" },
-                            { value: "3972", label: "半导体分立器件制造" },
-                            { value: "3973", label: "集成电路制造" },
-                            { value: "3974", label: "显示器件制造" },
-                            { value: "3975", label: "半导体照明器件制造" },
-                            { value: "3976", label: "光电子器件制造" },
-                            { value: "3979", label: "其他电子器件制造" }
+                            {value: "3971", label: "电子真空器件制造"},
+                            {value: "3972", label: "半导体分立器件制造"},
+                            {value: "3973", label: "集成电路制造"},
+                            {value: "3974", label: "显示器件制造"},
+                            {value: "3975", label: "半导体照明器件制造"},
+                            {value: "3976", label: "光电子器件制造"},
+                            {value: "3979", label: "其他电子器件制造"}
                         ]
                     },
                     {
                         value: "398",
                         label: "电子元件及电子专用材料制造",
                         children: [
-                            { value: "3981", label: "电阻电容电感元件制造" },
-                            { value: "3982", label: "电子电路制造" },
-                            { value: "3983", label: "敏感元件及传感器制造" },
-                            { value: "3984", label: "电声器件及零件制造" },
-                            { value: "3985", label: "电子专用材料制造" },
-                            { value: "3989", label: "其他电子元件制造" }
+                            {value: "3981", label: "电阻电容电感元件制造"},
+                            {value: "3982", label: "电子电路制造"},
+                            {value: "3983", label: "敏感元件及传感器制造"},
+                            {value: "3984", label: "电声器件及零件制造"},
+                            {value: "3985", label: "电子专用材料制造"},
+                            {value: "3989", label: "其他电子元件制造"}
                         ]
                     },
-                    { value: "399", label: "其他电子设备制造" }
+                    {value: "399", label: "其他电子设备制造"}
                 ]
             },
             {
@@ -26059,37 +26055,37 @@ export const IndustryList = [
                         value: "401",
                         label: "通用仪器仪表制造",
                         children: [
-                            { value: "4011", label: "工业自动控制系统装置制造" },
-                            { value: "4012", label: "电工仪器仪表制造" },
-                            { value: "4013", label: "绘图、计算及测量仪器制造" },
-                            { value: "4014", label: "实验分析仪器制造" },
-                            { value: "4015", label: "试验机制造" },
-                            { value: "4016", label: "供应用仪器仪表制造" },
-                            { value: "4019", label: "其他通用仪器制造" }
+                            {value: "4011", label: "工业自动控制系统装置制造"},
+                            {value: "4012", label: "电工仪器仪表制造"},
+                            {value: "4013", label: "绘图、计算及测量仪器制造"},
+                            {value: "4014", label: "实验分析仪器制造"},
+                            {value: "4015", label: "试验机制造"},
+                            {value: "4016", label: "供应用仪器仪表制造"},
+                            {value: "4019", label: "其他通用仪器制造"}
                         ]
                     },
                     {
                         value: "402",
                         label: "专用仪器仪表制造",
                         children: [
-                            { value: "4021", label: "环境监测专用仪器仪表制造" },
-                            { value: "4022", label: "运输设备及生产用计数仪表制造" },
+                            {value: "4021", label: "环境监测专用仪器仪表制造"},
+                            {value: "4022", label: "运输设备及生产用计数仪表制造"},
                             {
                                 value: "4023",
                                 label: "导航、测绘、气象及海洋专用仪器制造"
                             },
-                            { value: "4024", label: "农林牧渔专用仪器仪表制造" },
-                            { value: "4025", label: "地质勘探和地震专用仪器制造" },
-                            { value: "4026", label: "教学专用仪器制造" },
-                            { value: "4027", label: "核子及核辐射测量仪器制造" },
-                            { value: "4028", label: "电子测量仪器制造" },
-                            { value: "4029", label: "其他专用仪器制造" }
+                            {value: "4024", label: "农林牧渔专用仪器仪表制造"},
+                            {value: "4025", label: "地质勘探和地震专用仪器制造"},
+                            {value: "4026", label: "教学专用仪器制造"},
+                            {value: "4027", label: "核子及核辐射测量仪器制造"},
+                            {value: "4028", label: "电子测量仪器制造"},
+                            {value: "4029", label: "其他专用仪器制造"}
                         ]
                     },
-                    { value: "403", label: "钟表与计时仪器制造" },
-                    { value: "404", label: "光学仪器制造" },
-                    { value: "405", label: "衡器制造" },
-                    { value: "409", label: "其他仪器仪表制造业" }
+                    {value: "403", label: "钟表与计时仪器制造"},
+                    {value: "404", label: "光学仪器制造"},
+                    {value: "405", label: "衡器制造"},
+                    {value: "409", label: "其他仪器仪表制造业"}
                 ]
             },
             {
@@ -26100,42 +26096,42 @@ export const IndustryList = [
                         value: "411",
                         label: "日用杂品制造",
                         children: [
-                            { value: "4111", label: "鬃毛加工、制刷及清扫工具制造" },
-                            { value: "4119", label: "其他日用杂品制造" }
+                            {value: "4111", label: "鬃毛加工、制刷及清扫工具制造"},
+                            {value: "4119", label: "其他日用杂品制造"}
                         ]
                     },
-                    { value: "412", label: "核辐射加工" },
-                    { value: "419", label: "其他未列明制造业" }
+                    {value: "412", label: "核辐射加工"},
+                    {value: "419", label: "其他未列明制造业"}
                 ]
             },
             {
                 value: "42",
                 label: "废弃资源综合利用业",
                 children: [
-                    { value: "421", label: "金属废料和碎屑加工处理" },
-                    { value: "422", label: "非金属废料和碎屑加工处理" }
+                    {value: "421", label: "金属废料和碎屑加工处理"},
+                    {value: "422", label: "非金属废料和碎屑加工处理"}
                 ]
             },
             {
                 value: "43",
                 label: "金属制品、机械和设备修理业",
                 children: [
-                    { value: "431", label: "金属制品修理" },
-                    { value: "432", label: "通用设备修理" },
-                    { value: "433", label: "专用设备修理" },
+                    {value: "431", label: "金属制品修理"},
+                    {value: "432", label: "通用设备修理"},
+                    {value: "433", label: "专用设备修理"},
                     {
                         value: "434",
                         label: "铁路、船舶、航空航天等运输设备修理",
                         children: [
-                            { value: "4341", label: "铁路运输设备修理" },
-                            { value: "4342", label: "船舶修理" },
-                            { value: "4343", label: "航空航天器修理" },
-                            { value: "4349", label: "其他运输设备修理" }
+                            {value: "4341", label: "铁路运输设备修理"},
+                            {value: "4342", label: "船舶修理"},
+                            {value: "4343", label: "航空航天器修理"},
+                            {value: "4349", label: "其他运输设备修理"}
                         ]
                     },
-                    { value: "435", label: "电气设备修理" },
-                    { value: "436", label: "仪器仪表修理" },
-                    { value: "439", label: "其他机械和设备修理业" }
+                    {value: "435", label: "电气设备修理"},
+                    {value: "436", label: "仪器仪表修理"},
+                    {value: "439", label: "其他机械和设备修理业"}
                 ]
             }
         ]
@@ -26152,18 +26148,18 @@ export const IndustryList = [
                         value: "441",
                         label: "电力生产",
                         children: [
-                            { value: "4411", label: "火力发电" },
-                            { value: "4412", label: "热电联产" },
-                            { value: "4413", label: "水力发电" },
-                            { value: "4414", label: "核力发电" },
-                            { value: "4415", label: "风力发电" },
-                            { value: "4416", label: "太阳能发电" },
-                            { value: "4417", label: "生物质能发电" },
-                            { value: "4419", label: "其他电力生产" }
+                            {value: "4411", label: "火力发电"},
+                            {value: "4412", label: "热电联产"},
+                            {value: "4413", label: "水力发电"},
+                            {value: "4414", label: "核力发电"},
+                            {value: "4415", label: "风力发电"},
+                            {value: "4416", label: "太阳能发电"},
+                            {value: "4417", label: "生物质能发电"},
+                            {value: "4419", label: "其他电力生产"}
                         ]
                     },
-                    { value: "442", label: "电力供应" },
-                    { value: "443", label: "热力生产和供应" }
+                    {value: "442", label: "电力供应"},
+                    {value: "443", label: "热力生产和供应"}
                 ]
             },
             {
@@ -26174,22 +26170,22 @@ export const IndustryList = [
                         value: "451",
                         label: "燃气生产和供应业",
                         children: [
-                            { value: "4511", label: "天然气生产和供应业" },
-                            { value: "4512", label: "液化石油气生产和供应业" },
-                            { value: "4513", label: "煤气生产和供应业" }
+                            {value: "4511", label: "天然气生产和供应业"},
+                            {value: "4512", label: "液化石油气生产和供应业"},
+                            {value: "4513", label: "煤气生产和供应业"}
                         ]
                     },
-                    { value: "452", label: "生物质燃气生产和供应业" }
+                    {value: "452", label: "生物质燃气生产和供应业"}
                 ]
             },
             {
                 value: "46",
                 label: "水的生产和供应业",
                 children: [
-                    { value: "461", label: "自来水生产和供应" },
-                    { value: "462", label: "污水处理及其再生利用" },
-                    { value: "463", label: "海水淡化处理" },
-                    { value: "469", label: "其他水的处理、利用与分配" }
+                    {value: "461", label: "自来水生产和供应"},
+                    {value: "462", label: "污水处理及其再生利用"},
+                    {value: "463", label: "海水淡化处理"},
+                    {value: "469", label: "其他水的处理、利用与分配"}
                 ]
             }
         ]
@@ -26202,9 +26198,9 @@ export const IndustryList = [
                 value: "47",
                 label: "房屋建筑业",
                 children: [
-                    { value: "471", label: "住宅房屋建筑" },
-                    { value: "472", label: "体育场馆建筑" },
-                    { value: "479", label: "其他房屋建筑业" }
+                    {value: "471", label: "住宅房屋建筑"},
+                    {value: "472", label: "体育场馆建筑"},
+                    {value: "479", label: "其他房屋建筑业"}
                 ]
             },
             {
@@ -26215,72 +26211,72 @@ export const IndustryList = [
                         value: "481",
                         label: "铁路、道路、隧道和桥梁工程建筑",
                         children: [
-                            { value: "4811", label: "铁路工程建筑" },
-                            { value: "4812", label: "公路工程建筑" },
-                            { value: "4813", label: "市政道路工程建筑" },
-                            { value: "4814", label: "城市轨道交通工程建筑" },
-                            { value: "4819", label: "其他道路、隧道和桥梁工程建筑" }
+                            {value: "4811", label: "铁路工程建筑"},
+                            {value: "4812", label: "公路工程建筑"},
+                            {value: "4813", label: "市政道路工程建筑"},
+                            {value: "4814", label: "城市轨道交通工程建筑"},
+                            {value: "4819", label: "其他道路、隧道和桥梁工程建筑"}
                         ]
                     },
                     {
                         value: "482",
                         label: "水利和水运工程建筑",
                         children: [
-                            { value: "4821", label: "水源及供水设施工程建筑" },
-                            { value: "4822", label: "河湖治理及防洪设施工程建筑" },
-                            { value: "4823", label: "港口及航运设施工程建筑" }
+                            {value: "4821", label: "水源及供水设施工程建筑"},
+                            {value: "4822", label: "河湖治理及防洪设施工程建筑"},
+                            {value: "4823", label: "港口及航运设施工程建筑"}
                         ]
                     },
                     {
                         value: "483",
                         label: "海洋工程建筑",
                         children: [
-                            { value: "4831", label: "海洋油气资源开发利用工程建筑" },
-                            { value: "4832", label: "海洋能源开发利用工程建筑" },
-                            { value: "4833", label: "海底隧道工程建筑" },
-                            { value: "4834", label: "海底设施铺设工程建筑" },
-                            { value: "4839", label: "其他海洋工程建筑" }
+                            {value: "4831", label: "海洋油气资源开发利用工程建筑"},
+                            {value: "4832", label: "海洋能源开发利用工程建筑"},
+                            {value: "4833", label: "海底隧道工程建筑"},
+                            {value: "4834", label: "海底设施铺设工程建筑"},
+                            {value: "4839", label: "其他海洋工程建筑"}
                         ]
                     },
-                    { value: "484", label: "工矿工程建筑" },
+                    {value: "484", label: "工矿工程建筑"},
                     {
                         value: "485",
                         label: "架线和管道工程建筑",
                         children: [
-                            { value: "4851", label: "架线及设备工程建筑" },
-                            { value: "4852", label: "管道工程建筑" },
-                            { value: "4853", label: "地下综合管廊工程建筑" }
+                            {value: "4851", label: "架线及设备工程建筑"},
+                            {value: "4852", label: "管道工程建筑"},
+                            {value: "4853", label: "地下综合管廊工程建筑"}
                         ]
                     },
                     {
                         value: "486",
                         label: "节能环保工程施工",
                         children: [
-                            { value: "4861", label: "节能工程施工" },
-                            { value: "4862", label: "环保工程施工" },
-                            { value: "4863", label: "生态保护工程施工" }
+                            {value: "4861", label: "节能工程施工"},
+                            {value: "4862", label: "环保工程施工"},
+                            {value: "4863", label: "生态保护工程施工"}
                         ]
                     },
                     {
                         value: "487",
                         label: "电力工程施工",
                         children: [
-                            { value: "4871", label: "火力发电工程施工" },
-                            { value: "4872", label: "水力发电工程施工" },
-                            { value: "4873", label: "核电工程施工" },
-                            { value: "4874", label: "风能发电工程施工" },
-                            { value: "4875", label: "太阳能发电工程施工" },
-                            { value: "4879", label: "其他电力工程施工" }
+                            {value: "4871", label: "火力发电工程施工"},
+                            {value: "4872", label: "水力发电工程施工"},
+                            {value: "4873", label: "核电工程施工"},
+                            {value: "4874", label: "风能发电工程施工"},
+                            {value: "4875", label: "太阳能发电工程施工"},
+                            {value: "4879", label: "其他电力工程施工"}
                         ]
                     },
                     {
                         value: "489",
                         label: "其他土木工程建筑",
                         children: [
-                            { value: "4891", label: "园林绿化工程施工" },
-                            { value: "4892", label: "体育场地设施工程施工" },
-                            { value: "4893", label: "游乐设施工程施工" },
-                            { value: "4899", label: "其他土木工程建筑施工" }
+                            {value: "4891", label: "园林绿化工程施工"},
+                            {value: "4892", label: "体育场地设施工程施工"},
+                            {value: "4893", label: "游乐设施工程施工"},
+                            {value: "4899", label: "其他土木工程建筑施工"}
                         ]
                     }
                 ]
@@ -26289,14 +26285,14 @@ export const IndustryList = [
                 value: "49",
                 label: "建筑安装业",
                 children: [
-                    { value: "491", label: "电气安装" },
-                    { value: "492", label: "管道和设备安装" },
+                    {value: "491", label: "电气安装"},
+                    {value: "492", label: "管道和设备安装"},
                     {
                         value: "499",
                         label: "其他建筑安装业",
                         children: [
-                            { value: "4991", label: "体育场地设施安装" },
-                            { value: "4999", label: "其他建筑安装" }
+                            {value: "4991", label: "体育场地设施安装"},
+                            {value: "4999", label: "其他建筑安装"}
                         ]
                     }
                 ]
@@ -26309,21 +26305,21 @@ export const IndustryList = [
                         value: "501",
                         label: "建筑装饰和装修业",
                         children: [
-                            { value: "5011", label: "公共建筑装饰和装修" },
-                            { value: "5012", label: "住宅装饰和装修" },
-                            { value: "5013", label: "建筑幕墙装饰和装修" }
+                            {value: "5011", label: "公共建筑装饰和装修"},
+                            {value: "5012", label: "住宅装饰和装修"},
+                            {value: "5013", label: "建筑幕墙装饰和装修"}
                         ]
                     },
                     {
                         value: "502",
                         label: "建筑物拆除和场地准备活动",
                         children: [
-                            { value: "5021", label: "建筑物拆除活动" },
-                            { value: "5022", label: "场地准备活动" }
+                            {value: "5021", label: "建筑物拆除活动"},
+                            {value: "5022", label: "场地准备活动"}
                         ]
                     },
-                    { value: "503", label: "提供施工设备服务" },
-                    { value: "509", label: "其他未列明建筑业" }
+                    {value: "503", label: "提供施工设备服务"},
+                    {value: "509", label: "其他未列明建筑业"}
                 ]
             }
         ]
@@ -26340,119 +26336,119 @@ export const IndustryList = [
                         value: "511",
                         label: "农、林、牧、渔产品批发",
                         children: [
-                            { value: "5111", label: "谷物、豆及薯类批发" },
-                            { value: "5112", label: "种子批发" },
-                            { value: "5113", label: "畜牧渔业饲料批发" },
-                            { value: "5114", label: "棉、麻批发" },
-                            { value: "5115", label: "林业产品批发" },
-                            { value: "5116", label: "牲畜批发" },
-                            { value: "5117", label: "渔业产品批发" },
-                            { value: "5119", label: "其他农牧产品批发" }
+                            {value: "5111", label: "谷物、豆及薯类批发"},
+                            {value: "5112", label: "种子批发"},
+                            {value: "5113", label: "畜牧渔业饲料批发"},
+                            {value: "5114", label: "棉、麻批发"},
+                            {value: "5115", label: "林业产品批发"},
+                            {value: "5116", label: "牲畜批发"},
+                            {value: "5117", label: "渔业产品批发"},
+                            {value: "5119", label: "其他农牧产品批发"}
                         ]
                     },
                     {
                         value: "512",
                         label: "食品、饮料及烟草制品批发",
                         children: [
-                            { value: "5121", label: "米、面制品及食用油批发" },
-                            { value: "5122", label: "糕点、糖果及糖批发" },
-                            { value: "5123", label: "果品、蔬菜批发" },
-                            { value: "5124", label: "肉、禽、蛋、奶及水产品批发" },
-                            { value: "5125", label: "盐及调味品批发" },
-                            { value: "5126", label: "营养和保健品批发" },
-                            { value: "5127", label: "酒、饮料及茶叶批发" },
-                            { value: "5128", label: "烟草制品批发" },
-                            { value: "5129", label: "其他食品批发" }
+                            {value: "5121", label: "米、面制品及食用油批发"},
+                            {value: "5122", label: "糕点、糖果及糖批发"},
+                            {value: "5123", label: "果品、蔬菜批发"},
+                            {value: "5124", label: "肉、禽、蛋、奶及水产品批发"},
+                            {value: "5125", label: "盐及调味品批发"},
+                            {value: "5126", label: "营养和保健品批发"},
+                            {value: "5127", label: "酒、饮料及茶叶批发"},
+                            {value: "5128", label: "烟草制品批发"},
+                            {value: "5129", label: "其他食品批发"}
                         ]
                     },
                     {
                         value: "513",
                         label: "纺织、服装及家庭用品批发",
                         children: [
-                            { value: "5131", label: "纺织品、针织品及原料批发" },
-                            { value: "5132", label: "服装批发" },
-                            { value: "5133", label: "鞋帽批发" },
-                            { value: "5134", label: "化妆品及卫生用品批发" },
-                            { value: "5135", label: "厨具卫具及日用杂品批发" },
-                            { value: "5136", label: "灯具、装饰物品批发" },
-                            { value: "5137", label: "家用视听设备批发" },
-                            { value: "5138", label: "日用家电批发" },
-                            { value: "5139", label: "其他家庭用品批发" }
+                            {value: "5131", label: "纺织品、针织品及原料批发"},
+                            {value: "5132", label: "服装批发"},
+                            {value: "5133", label: "鞋帽批发"},
+                            {value: "5134", label: "化妆品及卫生用品批发"},
+                            {value: "5135", label: "厨具卫具及日用杂品批发"},
+                            {value: "5136", label: "灯具、装饰物品批发"},
+                            {value: "5137", label: "家用视听设备批发"},
+                            {value: "5138", label: "日用家电批发"},
+                            {value: "5139", label: "其他家庭用品批发"}
                         ]
                     },
                     {
                         value: "514",
                         label: "文化、体育用品及器材批发",
                         children: [
-                            { value: "5141", label: "文具用品批发" },
-                            { value: "5142", label: "体育用品及器材批发" },
-                            { value: "5143", label: "图书批发" },
-                            { value: "5144", label: "报刊批发" },
-                            { value: "5145", label: "音像制品、电子和数字出版物批发" },
-                            { value: "5146", label: "首饰、工艺品及收藏品批发" },
-                            { value: "5147", label: "乐器批发" },
-                            { value: "5149", label: "其他文化用品批发" }
+                            {value: "5141", label: "文具用品批发"},
+                            {value: "5142", label: "体育用品及器材批发"},
+                            {value: "5143", label: "图书批发"},
+                            {value: "5144", label: "报刊批发"},
+                            {value: "5145", label: "音像制品、电子和数字出版物批发"},
+                            {value: "5146", label: "首饰、工艺品及收藏品批发"},
+                            {value: "5147", label: "乐器批发"},
+                            {value: "5149", label: "其他文化用品批发"}
                         ]
                     },
                     {
                         value: "515",
                         label: "医药及医疗器材批发",
                         children: [
-                            { value: "5151", label: "西药批发" },
-                            { value: "5152", label: "中药批发" },
-                            { value: "5153", label: "动物用药品批发" },
-                            { value: "5154", label: "医疗用品及器材批发" }
+                            {value: "5151", label: "西药批发"},
+                            {value: "5152", label: "中药批发"},
+                            {value: "5153", label: "动物用药品批发"},
+                            {value: "5154", label: "医疗用品及器材批发"}
                         ]
                     },
                     {
                         value: "516",
                         label: "矿产品、建材及化工产品批发",
                         children: [
-                            { value: "5161", label: "煤炭及制品批发" },
-                            { value: "5162", label: "石油及制品批发" },
-                            { value: "5163", label: "非金属矿及制品批发" },
-                            { value: "5164", label: "金属及金属矿批发" },
-                            { value: "5165", label: "建材批发" },
-                            { value: "5166", label: "化肥批发" },
-                            { value: "5167", label: "农药批发" },
-                            { value: "5168", label: "农用薄膜批发" },
-                            { value: "5169", label: "其他化工产品批发" }
+                            {value: "5161", label: "煤炭及制品批发"},
+                            {value: "5162", label: "石油及制品批发"},
+                            {value: "5163", label: "非金属矿及制品批发"},
+                            {value: "5164", label: "金属及金属矿批发"},
+                            {value: "5165", label: "建材批发"},
+                            {value: "5166", label: "化肥批发"},
+                            {value: "5167", label: "农药批发"},
+                            {value: "5168", label: "农用薄膜批发"},
+                            {value: "5169", label: "其他化工产品批发"}
                         ]
                     },
                     {
                         value: "517",
                         label: "机械设备、五金产品及电子产品批发",
                         children: [
-                            { value: "5171", label: "农业机械批发" },
-                            { value: "5172", label: "汽车及零配件批发" },
-                            { value: "5173", label: "摩托车及零配件批发" },
-                            { value: "5174", label: "五金产品批发" },
-                            { value: "5175", label: "电气设备批发" },
-                            { value: "5176", label: "计算机、软件及辅助设备批发" },
-                            { value: "5177", label: "通讯设备批发" },
-                            { value: "5178", label: "广播影视设备批发" },
-                            { value: "5179", label: "其他机械设备及电子产品批发" }
+                            {value: "5171", label: "农业机械批发"},
+                            {value: "5172", label: "汽车及零配件批发"},
+                            {value: "5173", label: "摩托车及零配件批发"},
+                            {value: "5174", label: "五金产品批发"},
+                            {value: "5175", label: "电气设备批发"},
+                            {value: "5176", label: "计算机、软件及辅助设备批发"},
+                            {value: "5177", label: "通讯设备批发"},
+                            {value: "5178", label: "广播影视设备批发"},
+                            {value: "5179", label: "其他机械设备及电子产品批发"}
                         ]
                     },
                     {
                         value: "518",
                         label: "贸易经纪与代理",
                         children: [
-                            { value: "5181", label: "贸易代理" },
-                            { value: "5182", label: "一般物品拍卖" },
-                            { value: "5183", label: "艺术品、收藏品拍卖" },
-                            { value: "5184", label: "艺术品代理" },
-                            { value: "5189", label: "其他贸易经纪与代理" }
+                            {value: "5181", label: "贸易代理"},
+                            {value: "5182", label: "一般物品拍卖"},
+                            {value: "5183", label: "艺术品、收藏品拍卖"},
+                            {value: "5184", label: "艺术品代理"},
+                            {value: "5189", label: "其他贸易经纪与代理"}
                         ]
                     },
                     {
                         value: "519",
                         label: "其他批发业",
                         children: [
-                            { value: "5191", label: "再生物资回收与批发" },
-                            { value: "5192", label: "宠物食品用品批发" },
-                            { value: "5193", label: "互联网批发" },
-                            { value: "5199", label: "其他未列明批发业" }
+                            {value: "5191", label: "再生物资回收与批发"},
+                            {value: "5192", label: "宠物食品用品批发"},
+                            {value: "5193", label: "互联网批发"},
+                            {value: "5199", label: "其他未列明批发业"}
                         ]
                     }
                 ]
@@ -26465,117 +26461,117 @@ export const IndustryList = [
                         value: "521",
                         label: "综合零售",
                         children: [
-                            { value: "5211", label: "百货零售" },
-                            { value: "5212", label: "超级市场零售" },
-                            { value: "5213", label: "便利店零售" },
-                            { value: "5219", label: "其他综合零售" }
+                            {value: "5211", label: "百货零售"},
+                            {value: "5212", label: "超级市场零售"},
+                            {value: "5213", label: "便利店零售"},
+                            {value: "5219", label: "其他综合零售"}
                         ]
                     },
                     {
                         value: "522",
                         label: "食品、饮料及烟草制品专门零售",
                         children: [
-                            { value: "5221", label: "粮油零售" },
-                            { value: "5222", label: "糕点、面包零售" },
-                            { value: "5223", label: "果品、蔬菜零售" },
-                            { value: "5224", label: "肉、禽、蛋、奶及水产品零售" },
-                            { value: "5225", label: "营养和保健品零售" },
-                            { value: "5226", label: "酒、饮料及茶叶零售" },
-                            { value: "5227", label: "烟草制品零售" },
-                            { value: "5229", label: "其他食品零售" }
+                            {value: "5221", label: "粮油零售"},
+                            {value: "5222", label: "糕点、面包零售"},
+                            {value: "5223", label: "果品、蔬菜零售"},
+                            {value: "5224", label: "肉、禽、蛋、奶及水产品零售"},
+                            {value: "5225", label: "营养和保健品零售"},
+                            {value: "5226", label: "酒、饮料及茶叶零售"},
+                            {value: "5227", label: "烟草制品零售"},
+                            {value: "5229", label: "其他食品零售"}
                         ]
                     },
                     {
                         value: "523",
                         label: "纺织、服装及日用品专门零售",
                         children: [
-                            { value: "5231", label: "纺织品及针织品零售" },
-                            { value: "5232", label: "服装零售" },
-                            { value: "5233", label: "鞋帽零售" },
-                            { value: "5234", label: "化妆品及卫生用品零售" },
-                            { value: "5235", label: "厨具卫具及日用杂品零售" },
-                            { value: "5236", label: "钟表、眼镜零售" },
-                            { value: "5237", label: "箱包零售" },
-                            { value: "5238", label: "自行车等代步设备零售" },
-                            { value: "5239", label: "其他日用品零售" }
+                            {value: "5231", label: "纺织品及针织品零售"},
+                            {value: "5232", label: "服装零售"},
+                            {value: "5233", label: "鞋帽零售"},
+                            {value: "5234", label: "化妆品及卫生用品零售"},
+                            {value: "5235", label: "厨具卫具及日用杂品零售"},
+                            {value: "5236", label: "钟表、眼镜零售"},
+                            {value: "5237", label: "箱包零售"},
+                            {value: "5238", label: "自行车等代步设备零售"},
+                            {value: "5239", label: "其他日用品零售"}
                         ]
                     },
                     {
                         value: "524",
                         label: "文化、体育用品及器材专门零售",
                         children: [
-                            { value: "5241", label: "文具用品零售" },
-                            { value: "5242", label: "体育用品及器材零售" },
-                            { value: "5243", label: "图书、报刊零售" },
-                            { value: "5244", label: "音像制品、电子和数字出版物零售" },
-                            { value: "5245", label: "珠宝首饰零售" },
-                            { value: "5246", label: "工艺美术品及收藏品零售" },
-                            { value: "5247", label: "乐器零售" },
-                            { value: "5248", label: "照相器材零售" },
-                            { value: "5249", label: "其他文化用品零售" }
+                            {value: "5241", label: "文具用品零售"},
+                            {value: "5242", label: "体育用品及器材零售"},
+                            {value: "5243", label: "图书、报刊零售"},
+                            {value: "5244", label: "音像制品、电子和数字出版物零售"},
+                            {value: "5245", label: "珠宝首饰零售"},
+                            {value: "5246", label: "工艺美术品及收藏品零售"},
+                            {value: "5247", label: "乐器零售"},
+                            {value: "5248", label: "照相器材零售"},
+                            {value: "5249", label: "其他文化用品零售"}
                         ]
                     },
                     {
                         value: "525",
                         label: "医药及医疗器材专门零售",
                         children: [
-                            { value: "5251", label: "西药零售" },
-                            { value: "5252", label: "中药零售" },
-                            { value: "5253", label: "动物用药品零售" },
-                            { value: "5254", label: "医疗用品及器材零售" },
-                            { value: "5255", label: "保健辅助治疗器材零售" }
+                            {value: "5251", label: "西药零售"},
+                            {value: "5252", label: "中药零售"},
+                            {value: "5253", label: "动物用药品零售"},
+                            {value: "5254", label: "医疗用品及器材零售"},
+                            {value: "5255", label: "保健辅助治疗器材零售"}
                         ]
                     },
                     {
                         value: "526",
                         label: "汽车、摩托车、零配件和燃料及其他动力销售",
                         children: [
-                            { value: "5261", label: "汽车新车零售" },
-                            { value: "5262", label: "汽车旧车零售" },
-                            { value: "5263", label: "汽车零配件零售" },
-                            { value: "5264", label: "摩托车及零配件零售" },
-                            { value: "5265", label: "机动车燃油零售" },
-                            { value: "5266", label: "机动车燃气零售" },
-                            { value: "5267", label: "机动车充电销售" }
+                            {value: "5261", label: "汽车新车零售"},
+                            {value: "5262", label: "汽车旧车零售"},
+                            {value: "5263", label: "汽车零配件零售"},
+                            {value: "5264", label: "摩托车及零配件零售"},
+                            {value: "5265", label: "机动车燃油零售"},
+                            {value: "5266", label: "机动车燃气零售"},
+                            {value: "5267", label: "机动车充电销售"}
                         ]
                     },
                     {
                         value: "527",
                         label: "家用电器及电子产品专门零售",
                         children: [
-                            { value: "5271", label: "家用视听设备零售" },
-                            { value: "5272", label: "日用家电零售" },
-                            { value: "5273", label: "计算机、软件及辅助设备零售" },
-                            { value: "5274", label: "通信设备零售" },
-                            { value: "5279", label: "其他电子产品零售" }
+                            {value: "5271", label: "家用视听设备零售"},
+                            {value: "5272", label: "日用家电零售"},
+                            {value: "5273", label: "计算机、软件及辅助设备零售"},
+                            {value: "5274", label: "通信设备零售"},
+                            {value: "5279", label: "其他电子产品零售"}
                         ]
                     },
                     {
                         value: "528",
                         label: "五金、家具及室内装饰材料专门零售",
                         children: [
-                            { value: "5281", label: "五金零售" },
-                            { value: "5282", label: "灯具零售" },
-                            { value: "5283", label: "家具零售" },
-                            { value: "5284", label: "涂料零售" },
-                            { value: "5285", label: "卫生洁具零售" },
-                            { value: "5286", label: "木质装饰材料零售" },
-                            { value: "5287", label: "陶瓷、石材装饰材料零售" },
-                            { value: "5289", label: "其他室内装饰材料零售" }
+                            {value: "5281", label: "五金零售"},
+                            {value: "5282", label: "灯具零售"},
+                            {value: "5283", label: "家具零售"},
+                            {value: "5284", label: "涂料零售"},
+                            {value: "5285", label: "卫生洁具零售"},
+                            {value: "5286", label: "木质装饰材料零售"},
+                            {value: "5287", label: "陶瓷、石材装饰材料零售"},
+                            {value: "5289", label: "其他室内装饰材料零售"}
                         ]
                     },
                     {
                         value: "529",
                         label: "货摊、无店铺及其他零售业",
                         children: [
-                            { value: "5291", label: "流动货摊零售" },
-                            { value: "5292", label: "互联网零售" },
-                            { value: "5293", label: "邮购及电视、电话零售" },
-                            { value: "5294", label: "自动售货机零售" },
-                            { value: "5295", label: "旧货零售" },
-                            { value: "5296", label: "生活用燃料零售" },
-                            { value: "5297", label: "宠物食品用品零售" },
-                            { value: "5299", label: "其他未列明零售业" }
+                            {value: "5291", label: "流动货摊零售"},
+                            {value: "5292", label: "互联网零售"},
+                            {value: "5293", label: "邮购及电视、电话零售"},
+                            {value: "5294", label: "自动售货机零售"},
+                            {value: "5295", label: "旧货零售"},
+                            {value: "5296", label: "生活用燃料零售"},
+                            {value: "5297", label: "宠物食品用品零售"},
+                            {value: "5299", label: "其他未列明零售业"}
                         ]
                     }
                 ]
@@ -26594,20 +26590,20 @@ export const IndustryList = [
                         value: "531",
                         label: "铁路旅客运输",
                         children: [
-                            { value: "5311", label: "高速铁路旅客运输" },
-                            { value: "5312", label: "城际铁路旅客运输" },
-                            { value: "5313", label: "普通铁路旅客运输" }
+                            {value: "5311", label: "高速铁路旅客运输"},
+                            {value: "5312", label: "城际铁路旅客运输"},
+                            {value: "5313", label: "普通铁路旅客运输"}
                         ]
                     },
-                    { value: "532", label: "铁路货物运输" },
+                    {value: "532", label: "铁路货物运输"},
                     {
                         value: "533",
                         label: "铁路运输辅助活动",
                         children: [
-                            { value: "5331", label: "客运火车站" },
-                            { value: "5332", label: "货运火车站（场）" },
-                            { value: "5333", label: "铁路运输维护活动" },
-                            { value: "5339", label: "其他铁路运输辅助活动" }
+                            {value: "5331", label: "客运火车站"},
+                            {value: "5332", label: "货运火车站（场）"},
+                            {value: "5333", label: "铁路运输维护活动"},
+                            {value: "5339", label: "其他铁路运输辅助活动"}
                         ]
                     }
                 ]
@@ -26620,44 +26616,44 @@ export const IndustryList = [
                         value: "541",
                         label: "城市公共交通运输",
                         children: [
-                            { value: "5411", label: "公共电汽车客运" },
-                            { value: "5412", label: "城市轨道交通" },
-                            { value: "5413", label: "出租车客运" },
-                            { value: "5414", label: "公共自行车服务" },
-                            { value: "5419", label: "其他城市公共交通运输" }
+                            {value: "5411", label: "公共电汽车客运"},
+                            {value: "5412", label: "城市轨道交通"},
+                            {value: "5413", label: "出租车客运"},
+                            {value: "5414", label: "公共自行车服务"},
+                            {value: "5419", label: "其他城市公共交通运输"}
                         ]
                     },
                     {
                         value: "542",
                         label: "公路旅客运输",
                         children: [
-                            { value: "5421", label: "长途客运" },
-                            { value: "5422", label: "旅游客运" },
-                            { value: "5429", label: "其他公路客运" }
+                            {value: "5421", label: "长途客运"},
+                            {value: "5422", label: "旅游客运"},
+                            {value: "5429", label: "其他公路客运"}
                         ]
                     },
                     {
                         value: "543",
                         label: "道路货物运输",
                         children: [
-                            { value: "5431", label: "普通货物道路运输" },
-                            { value: "5432", label: "冷藏车道路运输" },
-                            { value: "5433", label: "集装箱道路运输" },
-                            { value: "5435", label: "危险货物道路运输" },
-                            { value: "5436", label: "邮件包裹道路运输" },
-                            { value: "5437", label: "城市配送" },
-                            { value: "5438", label: "搬家运输" },
-                            { value: "5439", label: "其他道路货物运输" }
+                            {value: "5431", label: "普通货物道路运输"},
+                            {value: "5432", label: "冷藏车道路运输"},
+                            {value: "5433", label: "集装箱道路运输"},
+                            {value: "5435", label: "危险货物道路运输"},
+                            {value: "5436", label: "邮件包裹道路运输"},
+                            {value: "5437", label: "城市配送"},
+                            {value: "5438", label: "搬家运输"},
+                            {value: "5439", label: "其他道路货物运输"}
                         ]
                     },
                     {
                         value: "544",
                         label: "道路运输辅助活动",
                         children: [
-                            { value: "5441", label: "客运汽车站" },
-                            { value: "5442", label: "货运枢纽（站）" },
-                            { value: "5443", label: "公路管理与养护" },
-                            { value: "5449", label: "其他道路运输辅助活动" }
+                            {value: "5441", label: "客运汽车站"},
+                            {value: "5442", label: "货运枢纽（站）"},
+                            {value: "5443", label: "公路管理与养护"},
+                            {value: "5449", label: "其他道路运输辅助活动"}
                         ]
                     }
                 ]
@@ -26670,27 +26666,27 @@ export const IndustryList = [
                         value: "551",
                         label: "水上旅客运输",
                         children: [
-                            { value: "5511", label: "海上旅客运输" },
-                            { value: "5512", label: "内河旅客运输" },
-                            { value: "5513", label: "客运轮渡运输" }
+                            {value: "5511", label: "海上旅客运输"},
+                            {value: "5512", label: "内河旅客运输"},
+                            {value: "5513", label: "客运轮渡运输"}
                         ]
                     },
                     {
                         value: "552",
                         label: "水上货物运输",
                         children: [
-                            { value: "5521", label: "远洋货物运输" },
-                            { value: "5522", label: "沿海货物运输" },
-                            { value: "5523", label: "内河货物运输" }
+                            {value: "5521", label: "远洋货物运输"},
+                            {value: "5522", label: "沿海货物运输"},
+                            {value: "5523", label: "内河货物运输"}
                         ]
                     },
                     {
                         value: "553",
                         label: "水上运输辅助活动",
                         children: [
-                            { value: "5531", label: "客运港口" },
-                            { value: "5532", label: "货运港口" },
-                            { value: "5539", label: "其他水上运输辅助活动" }
+                            {value: "5531", label: "客运港口"},
+                            {value: "5532", label: "货运港口"},
+                            {value: "5539", label: "其他水上运输辅助活动"}
                         ]
                     }
                 ]
@@ -26703,27 +26699,27 @@ export const IndustryList = [
                         value: "561",
                         label: "航空客货运输",
                         children: [
-                            { value: "5611", label: "航空旅客运输" },
-                            { value: "5612", label: "航空货物运输" }
+                            {value: "5611", label: "航空旅客运输"},
+                            {value: "5612", label: "航空货物运输"}
                         ]
                     },
                     {
                         value: "562",
                         label: "通用航空服务",
                         children: [
-                            { value: "5621", label: "通用航空生产服务" },
-                            { value: "5622", label: "观光游览航空服务" },
-                            { value: "5623", label: "体育航空运动服务" },
-                            { value: "5629", label: "其他通用航空服务" }
+                            {value: "5621", label: "通用航空生产服务"},
+                            {value: "5622", label: "观光游览航空服务"},
+                            {value: "5623", label: "体育航空运动服务"},
+                            {value: "5629", label: "其他通用航空服务"}
                         ]
                     },
                     {
                         value: "563",
                         label: "航空运输辅助活动",
                         children: [
-                            { value: "5631", label: "机场" },
-                            { value: "5632", label: "空中交通管理" },
-                            { value: "5639", label: "其他航空运输辅助活动" }
+                            {value: "5631", label: "机场"},
+                            {value: "5632", label: "空中交通管理"},
+                            {value: "5639", label: "其他航空运输辅助活动"}
                         ]
                     }
                 ]
@@ -26732,22 +26728,22 @@ export const IndustryList = [
                 value: "57",
                 label: "管道运输业",
                 children: [
-                    { value: "571", label: "海底管道运输" },
-                    { value: "572", label: "陆地管道运输" }
+                    {value: "571", label: "海底管道运输"},
+                    {value: "572", label: "陆地管道运输"}
                 ]
             },
             {
                 value: "58",
                 label: "多式联运和运输代理业",
                 children: [
-                    { value: "581", label: "多式联运" },
+                    {value: "581", label: "多式联运"},
                     {
                         value: "582",
                         label: "运输代理业",
                         children: [
-                            { value: "5821", label: "货物运输代理" },
-                            { value: "5822", label: "旅客票务代理" },
-                            { value: "5829", label: "其他运输代理业" }
+                            {value: "5821", label: "货物运输代理"},
+                            {value: "5822", label: "旅客票务代理"},
+                            {value: "5829", label: "其他运输代理业"}
                         ]
                     }
                 ]
@@ -26756,38 +26752,38 @@ export const IndustryList = [
                 value: "59",
                 label: "装卸搬运和仓储业",
                 children: [
-                    { value: "591", label: "装卸搬运" },
-                    { value: "592", label: "通用仓储" },
-                    { value: "593", label: "低温仓储" },
+                    {value: "591", label: "装卸搬运"},
+                    {value: "592", label: "通用仓储"},
+                    {value: "593", label: "低温仓储"},
                     {
                         value: "594",
                         label: "危险品仓储",
                         children: [
-                            { value: "5941", label: "油气仓储" },
-                            { value: "5942", label: "危险化学品仓储" },
-                            { value: "5949", label: "其他危险品仓储" }
+                            {value: "5941", label: "油气仓储"},
+                            {value: "5942", label: "危险化学品仓储"},
+                            {value: "5949", label: "其他危险品仓储"}
                         ]
                     },
                     {
                         value: "595",
                         label: "谷物、棉花等农产品仓储",
                         children: [
-                            { value: "5951", label: "谷物仓储" },
-                            { value: "5952", label: "棉花仓储" },
-                            { value: "5959", label: "其他农产品仓储" }
+                            {value: "5951", label: "谷物仓储"},
+                            {value: "5952", label: "棉花仓储"},
+                            {value: "5959", label: "其他农产品仓储"}
                         ]
                     },
-                    { value: "596", label: "中药材仓储" },
-                    { value: "599", label: "其他仓储业" }
+                    {value: "596", label: "中药材仓储"},
+                    {value: "599", label: "其他仓储业"}
                 ]
             },
             {
                 value: "60",
                 label: "邮政业",
                 children: [
-                    { value: "601", label: "邮政基本服务" },
-                    { value: "602", label: "快递服务" },
-                    { value: "609", label: "其他寄递服务" }
+                    {value: "601", label: "邮政基本服务"},
+                    {value: "602", label: "快递服务"},
+                    {value: "609", label: "其他寄递服务"}
                 ]
             }
         ]
@@ -26800,50 +26796,50 @@ export const IndustryList = [
                 value: "61",
                 label: "住宿业",
                 children: [
-                    { value: "611", label: "旅游饭店" },
+                    {value: "611", label: "旅游饭店"},
                     {
                         value: "612",
                         label: "一般旅馆",
                         children: [
-                            { value: "6121", label: "经济型连锁酒店" },
-                            { value: "6129", label: "其他一般旅馆" }
+                            {value: "6121", label: "经济型连锁酒店"},
+                            {value: "6129", label: "其他一般旅馆"}
                         ]
                     },
-                    { value: "613", label: "民宿服务" },
-                    { value: "614", label: "露营地服务" },
-                    { value: "619", label: "其他住宿业" }
+                    {value: "613", label: "民宿服务"},
+                    {value: "614", label: "露营地服务"},
+                    {value: "619", label: "其他住宿业"}
                 ]
             },
             {
                 value: "62",
                 label: "餐饮业",
                 children: [
-                    { value: "621", label: "正餐服务" },
-                    { value: "622", label: "快餐服务" },
+                    {value: "621", label: "正餐服务"},
+                    {value: "622", label: "快餐服务"},
                     {
                         value: "623",
                         label: "饮料及冷饮服务",
                         children: [
-                            { value: "6231", label: "茶馆服务" },
-                            { value: "6232", label: "咖啡馆服务" },
-                            { value: "6233", label: "酒吧服务" },
-                            { value: "6239", label: "其他饮料及冷饮服务" }
+                            {value: "6231", label: "茶馆服务"},
+                            {value: "6232", label: "咖啡馆服务"},
+                            {value: "6233", label: "酒吧服务"},
+                            {value: "6239", label: "其他饮料及冷饮服务"}
                         ]
                     },
                     {
                         value: "624",
                         label: "餐饮配送及外卖送餐服务",
                         children: [
-                            { value: "6241", label: "餐饮配送服务" },
-                            { value: "6242", label: "外卖送餐服务" }
+                            {value: "6241", label: "餐饮配送服务"},
+                            {value: "6242", label: "外卖送餐服务"}
                         ]
                     },
                     {
                         value: "629",
                         label: "其他餐饮业",
                         children: [
-                            { value: "6291", label: "小吃服务" },
-                            { value: "6299", label: "其他未列明餐饮业" }
+                            {value: "6291", label: "小吃服务"},
+                            {value: "6299", label: "其他未列明餐饮业"}
                         ]
                     }
                 ]
@@ -26862,25 +26858,25 @@ export const IndustryList = [
                         value: "631",
                         label: "电信",
                         children: [
-                            { value: "6311", label: "固定电信服务" },
-                            { value: "6312", label: "移动电信服务" },
-                            { value: "6319", label: "其他电信服务" }
+                            {value: "6311", label: "固定电信服务"},
+                            {value: "6312", label: "移动电信服务"},
+                            {value: "6319", label: "其他电信服务"}
                         ]
                     },
                     {
                         value: "632",
                         label: "广播电视传输服务",
                         children: [
-                            { value: "6321", label: "有线广播电视传输服务" },
-                            { value: "6322", label: "无线广播电视传输服务" }
+                            {value: "6321", label: "有线广播电视传输服务"},
+                            {value: "6322", label: "无线广播电视传输服务"}
                         ]
                     },
                     {
                         value: "633",
                         label: "卫星传输服务",
                         children: [
-                            { value: "6331", label: "广播电视卫星传输服务" },
-                            { value: "6339", label: "其他卫星传输服务" }
+                            {value: "6331", label: "广播电视卫星传输服务"},
+                            {value: "6339", label: "其他卫星传输服务"}
                         ]
                     }
                 ]
@@ -26889,30 +26885,30 @@ export const IndustryList = [
                 value: "64",
                 label: "互联网和相关服务",
                 children: [
-                    { value: "641", label: "互联网接入及相关服务" },
+                    {value: "641", label: "互联网接入及相关服务"},
                     {
                         value: "642",
                         label: "互联网信息服务",
                         children: [
-                            { value: "6421", label: "互联网搜索服务" },
-                            { value: "6422", label: "互联网游戏服务" },
-                            { value: "6429", label: "互联网其他信息服务" }
+                            {value: "6421", label: "互联网搜索服务"},
+                            {value: "6422", label: "互联网游戏服务"},
+                            {value: "6429", label: "互联网其他信息服务"}
                         ]
                     },
                     {
                         value: "643",
                         label: "互联网平台",
                         children: [
-                            { value: "6431", label: "互联网生产服务平台" },
-                            { value: "6432", label: "互联网生活服务平台" },
-                            { value: "6433", label: "互联网科技创新平台" },
-                            { value: "6434", label: "互联网公共服务平台" },
-                            { value: "6439", label: "其他互联网平台" }
+                            {value: "6431", label: "互联网生产服务平台"},
+                            {value: "6432", label: "互联网生活服务平台"},
+                            {value: "6433", label: "互联网科技创新平台"},
+                            {value: "6434", label: "互联网公共服务平台"},
+                            {value: "6439", label: "其他互联网平台"}
                         ]
                     },
-                    { value: "644", label: "互联网安全服务" },
-                    { value: "645", label: "互联网数据服务" },
-                    { value: "649", label: "其他互联网服务" }
+                    {value: "644", label: "互联网安全服务"},
+                    {value: "645", label: "互联网数据服务"},
+                    {value: "649", label: "其他互联网服务"}
                 ]
             },
             {
@@ -26923,39 +26919,39 @@ export const IndustryList = [
                         value: "651",
                         label: "软件开发",
                         children: [
-                            { value: "6511", label: "基础软件开发" },
-                            { value: "6512", label: "支撑软件开发" },
-                            { value: "6513", label: "应用软件开发" },
-                            { value: "6519", label: "其他软件开发" }
+                            {value: "6511", label: "基础软件开发"},
+                            {value: "6512", label: "支撑软件开发"},
+                            {value: "6513", label: "应用软件开发"},
+                            {value: "6519", label: "其他软件开发"}
                         ]
                     },
-                    { value: "652", label: "集成电路设计" },
+                    {value: "652", label: "集成电路设计"},
                     {
                         value: "653",
                         label: "信息系统集成和物联网技术服务",
                         children: [
-                            { value: "6531", label: "信息系统集成服务" },
-                            { value: "6532", label: "物联网技术服务" }
+                            {value: "6531", label: "信息系统集成服务"},
+                            {value: "6532", label: "物联网技术服务"}
                         ]
                     },
-                    { value: "654", label: "运行维护服务" },
-                    { value: "655", label: "信息处理和存储支持服务" },
-                    { value: "656", label: "信息技术咨询服务" },
+                    {value: "654", label: "运行维护服务"},
+                    {value: "655", label: "信息处理和存储支持服务"},
+                    {value: "656", label: "信息技术咨询服务"},
                     {
                         value: "657",
                         label: "数字内容服务",
                         children: [
-                            { value: "6571", label: "地理遥感信息服务" },
-                            { value: "6572", label: "动漫、游戏数字内容服务" },
-                            { value: "6579", label: "其他数字内容服务" }
+                            {value: "6571", label: "地理遥感信息服务"},
+                            {value: "6572", label: "动漫、游戏数字内容服务"},
+                            {value: "6579", label: "其他数字内容服务"}
                         ]
                     },
                     {
                         value: "659",
                         label: "其他信息技术服务业",
                         children: [
-                            { value: "6591", label: "呼叫中心" },
-                            { value: "6599", label: "其他未列明信息技术服务业" }
+                            {value: "6591", label: "呼叫中心"},
+                            {value: "6599", label: "其他未列明信息技术服务业"}
                         ]
                     }
                 ]
@@ -26970,34 +26966,34 @@ export const IndustryList = [
                 value: "66",
                 label: "货币金融服务",
                 children: [
-                    { value: "661", label: "中央银行服务" },
+                    {value: "661", label: "中央银行服务"},
                     {
                         value: "662",
                         label: "货币银行服务",
                         children: [
-                            { value: "6621", label: "商业银行服务" },
-                            { value: "6622", label: "政策性银行服务" },
-                            { value: "6623", label: "信用合作社服务" },
-                            { value: "6624", label: "农村资金互助社服务" },
-                            { value: "6629", label: "其他货币银行服务" }
+                            {value: "6621", label: "商业银行服务"},
+                            {value: "6622", label: "政策性银行服务"},
+                            {value: "6623", label: "信用合作社服务"},
+                            {value: "6624", label: "农村资金互助社服务"},
+                            {value: "6629", label: "其他货币银行服务"}
                         ]
                     },
                     {
                         value: "663",
                         label: "非货币银行服务",
                         children: [
-                            { value: "6631", label: "融资租赁服务" },
-                            { value: "6632", label: "财务公司服务" },
-                            { value: "6633", label: "典当" },
-                            { value: "6634", label: "汽车金融公司服务" },
-                            { value: "6635", label: "小额贷款公司服务" },
-                            { value: "6636", label: "消费金融公司服务" },
-                            { value: "6637", label: "网络借贷服务" },
-                            { value: "6639", label: "其他非货币银行服务" }
+                            {value: "6631", label: "融资租赁服务"},
+                            {value: "6632", label: "财务公司服务"},
+                            {value: "6633", label: "典当"},
+                            {value: "6634", label: "汽车金融公司服务"},
+                            {value: "6635", label: "小额贷款公司服务"},
+                            {value: "6636", label: "消费金融公司服务"},
+                            {value: "6637", label: "网络借贷服务"},
+                            {value: "6639", label: "其他非货币银行服务"}
                         ]
                     },
-                    { value: "664", label: "银行理财服务" },
-                    { value: "665", label: "银行监管服务" }
+                    {value: "664", label: "银行理财服务"},
+                    {value: "665", label: "银行监管服务"}
                 ]
             },
             {
@@ -27008,31 +27004,31 @@ export const IndustryList = [
                         value: "671",
                         label: "证券市场服务",
                         children: [
-                            { value: "6711", label: "证券市场管理服务" },
-                            { value: "6712", label: "证券经纪交易服务" }
+                            {value: "6711", label: "证券市场管理服务"},
+                            {value: "6712", label: "证券经纪交易服务"}
                         ]
                     },
-                    { value: "672", label: "公开募集证券投资基金" },
+                    {value: "672", label: "公开募集证券投资基金"},
                     {
                         value: "673",
                         label: "非公开募集证券投资基金",
                         children: [
-                            { value: "6731", label: "创业投资基金" },
-                            { value: "6732", label: "天使投资" },
-                            { value: "6739", label: "其他非公开募集证券投资基金" }
+                            {value: "6731", label: "创业投资基金"},
+                            {value: "6732", label: "天使投资"},
+                            {value: "6739", label: "其他非公开募集证券投资基金"}
                         ]
                     },
                     {
                         value: "674",
                         label: "期货市场服务",
                         children: [
-                            { value: "6741", label: "期货市场管理服务" },
-                            { value: "6749", label: "其他期货市场服务" }
+                            {value: "6741", label: "期货市场管理服务"},
+                            {value: "6749", label: "其他期货市场服务"}
                         ]
                     },
-                    { value: "675", label: "证券期货监管服务" },
-                    { value: "676", label: "资本投资服务" },
-                    { value: "679", label: "其他资本市场服务" }
+                    {value: "675", label: "证券期货监管服务"},
+                    {value: "676", label: "资本投资服务"},
+                    {value: "679", label: "其他资本市场服务"}
                 ]
             },
             {
@@ -27043,27 +27039,27 @@ export const IndustryList = [
                         value: "681",
                         label: "人身保险",
                         children: [
-                            { value: "6811", label: "人寿保险" },
-                            { value: "6812", label: "年金保险" },
-                            { value: "6813", label: "健康保险" },
-                            { value: "6814", label: "意外伤害保险" }
+                            {value: "6811", label: "人寿保险"},
+                            {value: "6812", label: "年金保险"},
+                            {value: "6813", label: "健康保险"},
+                            {value: "6814", label: "意外伤害保险"}
                         ]
                     },
-                    { value: "682", label: "财产保险" },
-                    { value: "683", label: "再保险" },
-                    { value: "684", label: "商业养老金" },
+                    {value: "682", label: "财产保险"},
+                    {value: "683", label: "再保险"},
+                    {value: "684", label: "商业养老金"},
                     {
                         value: "685",
                         label: "保险中介服务",
                         children: [
-                            { value: "6851", label: "保险经纪服务" },
-                            { value: "6852", label: "保险代理服务" },
-                            { value: "6853", label: "保险公估服务" }
+                            {value: "6851", label: "保险经纪服务"},
+                            {value: "6852", label: "保险代理服务"},
+                            {value: "6853", label: "保险公估服务"}
                         ]
                     },
-                    { value: "686", label: "保险资产管理" },
-                    { value: "687", label: "保险监管服务" },
-                    { value: "689", label: "其他保险活动" }
+                    {value: "686", label: "保险资产管理"},
+                    {value: "687", label: "保险监管服务"},
+                    {value: "689", label: "其他保险活动"}
                 ]
             },
             {
@@ -27074,20 +27070,20 @@ export const IndustryList = [
                         value: "691",
                         label: "金融信托与管理服务",
                         children: [
-                            { value: "6911", label: "信托公司" },
-                            { value: "6919", label: "其他金融信托与管理服务" }
+                            {value: "6911", label: "信托公司"},
+                            {value: "6919", label: "其他金融信托与管理服务"}
                         ]
                     },
-                    { value: "692", label: "控股公司服务" },
-                    { value: "693", label: "非金融机构支付服务" },
-                    { value: "694", label: "金融信息服务" },
-                    { value: "695", label: "金融资产管理公司" },
+                    {value: "692", label: "控股公司服务"},
+                    {value: "693", label: "非金融机构支付服务"},
+                    {value: "694", label: "金融信息服务"},
+                    {value: "695", label: "金融资产管理公司"},
                     {
                         value: "699",
                         label: "其他未列明金融业",
                         children: [
-                            { value: "6991", label: "货币经纪公司服务" },
-                            { value: "6999", label: "其他未包括金融业" }
+                            {value: "6991", label: "货币经纪公司服务"},
+                            {value: "6999", label: "其他未包括金融业"}
                         ]
                     }
                 ]
@@ -27102,11 +27098,11 @@ export const IndustryList = [
                 value: "70",
                 label: "房地产业",
                 children: [
-                    { value: "701", label: "房地产开发经营" },
-                    { value: "702", label: "物业管理" },
-                    { value: "703", label: "房地产中介服务" },
-                    { value: "704", label: "房地产租赁经营" },
-                    { value: "709", label: "其他房地产业" }
+                    {value: "701", label: "房地产开发经营"},
+                    {value: "702", label: "物业管理"},
+                    {value: "703", label: "房地产中介服务"},
+                    {value: "704", label: "房地产租赁经营"},
+                    {value: "709", label: "其他房地产业"}
                 ]
             }
         ]
@@ -27123,27 +27119,27 @@ export const IndustryList = [
                         value: "711",
                         label: "机械设备经营租赁",
                         children: [
-                            { value: "7111", label: "汽车租赁" },
-                            { value: "7112", label: "农业机械经营租赁" },
-                            { value: "7113", label: "建筑工程机械与设备经营租赁" },
-                            { value: "7114", label: "计算机及通讯设备经营租赁" },
-                            { value: "7115", label: "医疗设备经营租赁" },
-                            { value: "7119", label: "其他机械与设备经营租赁" }
+                            {value: "7111", label: "汽车租赁"},
+                            {value: "7112", label: "农业机械经营租赁"},
+                            {value: "7113", label: "建筑工程机械与设备经营租赁"},
+                            {value: "7114", label: "计算机及通讯设备经营租赁"},
+                            {value: "7115", label: "医疗设备经营租赁"},
+                            {value: "7119", label: "其他机械与设备经营租赁"}
                         ]
                     },
                     {
                         value: "712",
                         label: "文体设备和用品出租",
                         children: [
-                            { value: "7121", label: "休闲娱乐用品设备出租" },
-                            { value: "7122", label: "体育用品设备出租" },
-                            { value: "7123", label: "文化用品设备出租" },
-                            { value: "7124", label: "图书出租" },
-                            { value: "7125", label: "音像制品出租" },
-                            { value: "7129", label: "其他文体设备和用品出租" }
+                            {value: "7121", label: "休闲娱乐用品设备出租"},
+                            {value: "7122", label: "体育用品设备出租"},
+                            {value: "7123", label: "文化用品设备出租"},
+                            {value: "7124", label: "图书出租"},
+                            {value: "7125", label: "音像制品出租"},
+                            {value: "7129", label: "其他文体设备和用品出租"}
                         ]
                     },
-                    { value: "713", label: "日用品出租" }
+                    {value: "713", label: "日用品出租"}
                 ]
             },
             {
@@ -27154,99 +27150,99 @@ export const IndustryList = [
                         value: "721",
                         label: "组织管理服务",
                         children: [
-                            { value: "7211", label: "企业总部管理" },
-                            { value: "7212", label: "投资与资产管理" },
-                            { value: "7213", label: "资源与产权交易服务" },
-                            { value: "7214", label: "单位后勤管理服务" },
-                            { value: "7215", label: "农村集体经济组织管理" },
-                            { value: "7219", label: "其他组织管理服务" }
+                            {value: "7211", label: "企业总部管理"},
+                            {value: "7212", label: "投资与资产管理"},
+                            {value: "7213", label: "资源与产权交易服务"},
+                            {value: "7214", label: "单位后勤管理服务"},
+                            {value: "7215", label: "农村集体经济组织管理"},
+                            {value: "7219", label: "其他组织管理服务"}
                         ]
                     },
                     {
                         value: "722",
                         label: "综合管理服务",
                         children: [
-                            { value: "7221", label: "园区管理服务" },
-                            { value: "7222", label: "商业综合体管理服务" },
-                            { value: "7223", label: "市场管理服务" },
-                            { value: "7224", label: "供应链管理服务" },
-                            { value: "7229", label: "其他综合管理服务" }
+                            {value: "7221", label: "园区管理服务"},
+                            {value: "7222", label: "商业综合体管理服务"},
+                            {value: "7223", label: "市场管理服务"},
+                            {value: "7224", label: "供应链管理服务"},
+                            {value: "7229", label: "其他综合管理服务"}
                         ]
                     },
                     {
                         value: "723",
                         label: "法律服务",
                         children: [
-                            { value: "7231", label: "律师及相关法律服务" },
-                            { value: "7232", label: "公证服务" },
-                            { value: "7239", label: "其他法律服务" }
+                            {value: "7231", label: "律师及相关法律服务"},
+                            {value: "7232", label: "公证服务"},
+                            {value: "7239", label: "其他法律服务"}
                         ]
                     },
                     {
                         value: "724",
                         label: "咨询与调查",
                         children: [
-                            { value: "7241", label: "会计、审计及税务服务" },
-                            { value: "7242", label: "市场调查" },
-                            { value: "7243", label: "社会经济咨询" },
-                            { value: "7244", label: "健康咨询" },
-                            { value: "7245", label: "环保咨询" },
-                            { value: "7246", label: "体育咨询" },
-                            { value: "7249", label: "其他专业咨询与调查" }
+                            {value: "7241", label: "会计、审计及税务服务"},
+                            {value: "7242", label: "市场调查"},
+                            {value: "7243", label: "社会经济咨询"},
+                            {value: "7244", label: "健康咨询"},
+                            {value: "7245", label: "环保咨询"},
+                            {value: "7246", label: "体育咨询"},
+                            {value: "7249", label: "其他专业咨询与调查"}
                         ]
                     },
                     {
                         value: "725",
                         label: "广告业",
                         children: [
-                            { value: "7251", label: "互联网广告服务" },
-                            { value: "7259", label: "其他广告服务" }
+                            {value: "7251", label: "互联网广告服务"},
+                            {value: "7259", label: "其他广告服务"}
                         ]
                     },
                     {
                         value: "726",
                         label: "人力资源服务",
                         children: [
-                            { value: "7261", label: "公共就业服务" },
-                            { value: "7262", label: "职业中介服务" },
-                            { value: "7263", label: "劳务派遣服务" },
-                            { value: "7264", label: "创业指导服务" },
-                            { value: "7269", label: "其他人力资源服务" }
+                            {value: "7261", label: "公共就业服务"},
+                            {value: "7262", label: "职业中介服务"},
+                            {value: "7263", label: "劳务派遣服务"},
+                            {value: "7264", label: "创业指导服务"},
+                            {value: "7269", label: "其他人力资源服务"}
                         ]
                     },
                     {
                         value: "727",
                         label: "安全保护服务",
                         children: [
-                            { value: "7271", label: "安全服务" },
-                            { value: "7272", label: "安全系统监控服务" },
-                            { value: "7279", label: "其他安全保护服务" }
+                            {value: "7271", label: "安全服务"},
+                            {value: "7272", label: "安全系统监控服务"},
+                            {value: "7279", label: "其他安全保护服务"}
                         ]
                     },
                     {
                         value: "728",
                         label: "会议、展览及相关服务",
                         children: [
-                            { value: "7281", label: "科技会展服务" },
-                            { value: "7282", label: "旅游会展服务" },
-                            { value: "7283", label: "体育会展服务" },
-                            { value: "7284", label: "文化会展服务" },
-                            { value: "7289", label: "其他会议、会展及相关服务" }
+                            {value: "7281", label: "科技会展服务"},
+                            {value: "7282", label: "旅游会展服务"},
+                            {value: "7283", label: "体育会展服务"},
+                            {value: "7284", label: "文化会展服务"},
+                            {value: "7289", label: "其他会议、会展及相关服务"}
                         ]
                     },
                     {
                         value: "729",
                         label: "其他商务服务业",
                         children: [
-                            { value: "7291", label: "旅行社及相关服务" },
-                            { value: "7292", label: "包装服务" },
-                            { value: "7293", label: "办公服务" },
-                            { value: "7294", label: "翻译服务" },
-                            { value: "7295", label: "信用服务" },
-                            { value: "7296", label: "非融资担保服务" },
-                            { value: "7297", label: "商务代理代办服务" },
-                            { value: "7298", label: "票务代理服务" },
-                            { value: "7299", label: "其他未列明商务服务业" }
+                            {value: "7291", label: "旅行社及相关服务"},
+                            {value: "7292", label: "包装服务"},
+                            {value: "7293", label: "办公服务"},
+                            {value: "7294", label: "翻译服务"},
+                            {value: "7295", label: "信用服务"},
+                            {value: "7296", label: "非融资担保服务"},
+                            {value: "7297", label: "商务代理代办服务"},
+                            {value: "7298", label: "票务代理服务"},
+                            {value: "7299", label: "其他未列明商务服务业"}
                         ]
                     }
                 ]
@@ -27261,88 +27257,88 @@ export const IndustryList = [
                 value: "73",
                 label: "研究和试验发展",
                 children: [
-                    { value: "731", label: "自然科学研究和试验发展" },
-                    { value: "732", label: "工程和技术研究和试验发展" },
-                    { value: "733", label: "农业科学研究和试验发展" },
-                    { value: "734", label: "医学研究和试验发展" },
-                    { value: "735", label: "社会人文科学研究" }
+                    {value: "731", label: "自然科学研究和试验发展"},
+                    {value: "732", label: "工程和技术研究和试验发展"},
+                    {value: "733", label: "农业科学研究和试验发展"},
+                    {value: "734", label: "医学研究和试验发展"},
+                    {value: "735", label: "社会人文科学研究"}
                 ]
             },
             {
                 value: "74",
                 label: "专业技术服务业",
                 children: [
-                    { value: "741", label: "气象服务" },
-                    { value: "742", label: "地震服务" },
+                    {value: "741", label: "气象服务"},
+                    {value: "742", label: "地震服务"},
                     {
                         value: "743",
                         label: "海洋服务",
                         children: [
-                            { value: "7431", label: "海洋气象服务" },
-                            { value: "7432", label: "海洋环境服务" },
-                            { value: "7439", label: "其他海洋服务" }
+                            {value: "7431", label: "海洋气象服务"},
+                            {value: "7432", label: "海洋环境服务"},
+                            {value: "7439", label: "其他海洋服务"}
                         ]
                     },
                     {
                         value: "744",
                         label: "测绘地理信息服务",
                         children: [
-                            { value: "7441", label: "遥感测绘服务" },
-                            { value: "7449", label: "其他测绘地理信息服务" }
+                            {value: "7441", label: "遥感测绘服务"},
+                            {value: "7449", label: "其他测绘地理信息服务"}
                         ]
                     },
                     {
                         value: "745",
                         label: "质检技术服务",
                         children: [
-                            { value: "7451", label: "检验检疫服务" },
-                            { value: "7452", label: "检测服务" },
-                            { value: "7453", label: "计量服务" },
-                            { value: "7454", label: "标准化服务" },
-                            { value: "7455", label: "认证认可服务" },
-                            { value: "7459", label: "其他质检技术服务" }
+                            {value: "7451", label: "检验检疫服务"},
+                            {value: "7452", label: "检测服务"},
+                            {value: "7453", label: "计量服务"},
+                            {value: "7454", label: "标准化服务"},
+                            {value: "7455", label: "认证认可服务"},
+                            {value: "7459", label: "其他质检技术服务"}
                         ]
                     },
                     {
                         value: "746",
                         label: "环境与生态监测检测服务",
                         children: [
-                            { value: "7461", label: "环境保护监测" },
-                            { value: "7462", label: "生态资源监测" },
-                            { value: "7463", label: "野生动物疫源疫病防控监测" }
+                            {value: "7461", label: "环境保护监测"},
+                            {value: "7462", label: "生态资源监测"},
+                            {value: "7463", label: "野生动物疫源疫病防控监测"}
                         ]
                     },
                     {
                         value: "747",
                         label: "地质勘查",
                         children: [
-                            { value: "7471", label: "能源矿产地质勘查" },
-                            { value: "7472", label: "固体矿产地质勘查" },
-                            { value: "7473", label: "水、二氧化碳等矿产地质勘查" },
-                            { value: "7474", label: "基础地质勘查" },
-                            { value: "7475", label: "地质勘查技术服务" }
+                            {value: "7471", label: "能源矿产地质勘查"},
+                            {value: "7472", label: "固体矿产地质勘查"},
+                            {value: "7473", label: "水、二氧化碳等矿产地质勘查"},
+                            {value: "7474", label: "基础地质勘查"},
+                            {value: "7475", label: "地质勘查技术服务"}
                         ]
                     },
                     {
                         value: "748",
                         label: "工程技术与设计服务",
                         children: [
-                            { value: "7481", label: "工程管理服务" },
-                            { value: "7482", label: "工程监理服务" },
-                            { value: "7483", label: "工程勘察活动" },
-                            { value: "7484", label: "工程设计活动" },
-                            { value: "7485", label: "规划设计管理" },
-                            { value: "7486", label: "土地规划服务" }
+                            {value: "7481", label: "工程管理服务"},
+                            {value: "7482", label: "工程监理服务"},
+                            {value: "7483", label: "工程勘察活动"},
+                            {value: "7484", label: "工程设计活动"},
+                            {value: "7485", label: "规划设计管理"},
+                            {value: "7486", label: "土地规划服务"}
                         ]
                     },
                     {
                         value: "749",
                         label: "工业与专业设计及其他专业技术服务",
                         children: [
-                            { value: "7491", label: "工业设计服务" },
-                            { value: "7492", label: "专业设计服务" },
-                            { value: "7493", label: "兽医服务" },
-                            { value: "7499", label: "其他未列明专业技术服务业" }
+                            {value: "7491", label: "工业设计服务"},
+                            {value: "7492", label: "专业设计服务"},
+                            {value: "7493", label: "兽医服务"},
+                            {value: "7499", label: "其他未列明专业技术服务业"}
                         ]
                     }
                 ]
@@ -27355,20 +27351,20 @@ export const IndustryList = [
                         value: "751",
                         label: "技术推广服务",
                         children: [
-                            { value: "7511", label: "农林牧渔技术推广服务" },
-                            { value: "7512", label: "生物技术推广服务" },
-                            { value: "7513", label: "新材料技术推广服务" },
-                            { value: "7514", label: "节能技术推广服务" },
-                            { value: "7515", label: "新能源技术推广服务" },
-                            { value: "7516", label: "环保技术推广服务" },
-                            { value: "7517", label: "三维（3D)打印技术推广服务" },
-                            { value: "7519", label: "其他技术推广服务" }
+                            {value: "7511", label: "农林牧渔技术推广服务"},
+                            {value: "7512", label: "生物技术推广服务"},
+                            {value: "7513", label: "新材料技术推广服务"},
+                            {value: "7514", label: "节能技术推广服务"},
+                            {value: "7515", label: "新能源技术推广服务"},
+                            {value: "7516", label: "环保技术推广服务"},
+                            {value: "7517", label: "三维（3D)打印技术推广服务"},
+                            {value: "7519", label: "其他技术推广服务"}
                         ]
                     },
-                    { value: "752", label: "知识产权服务" },
-                    { value: "753", label: "科技中介服务" },
-                    { value: "754", label: "创业空间服务" },
-                    { value: "759", label: "其他科技推广服务业" }
+                    {value: "752", label: "知识产权服务"},
+                    {value: "753", label: "科技中介服务"},
+                    {value: "754", label: "创业空间服务"},
+                    {value: "759", label: "其他科技推广服务业"}
                 ]
             }
         ]
@@ -27381,11 +27377,11 @@ export const IndustryList = [
                 value: "76",
                 label: "水利管理业",
                 children: [
-                    { value: "761", label: "防洪除涝设施管理" },
-                    { value: "762", label: "水资源管理" },
-                    { value: "763", label: "天然水收集与分配" },
-                    { value: "764", label: "水文服务" },
-                    { value: "769", label: "其他水利管理业" }
+                    {value: "761", label: "防洪除涝设施管理"},
+                    {value: "762", label: "水资源管理"},
+                    {value: "763", label: "天然水收集与分配"},
+                    {value: "764", label: "水文服务"},
+                    {value: "769", label: "其他水利管理业"}
                 ]
             },
             {
@@ -27396,27 +27392,27 @@ export const IndustryList = [
                         value: "771",
                         label: "生态保护",
                         children: [
-                            { value: "7711", label: "自然生态系统保护管理" },
-                            { value: "7712", label: "自然遗迹保护管理" },
-                            { value: "7713", label: "野生动物保护" },
-                            { value: "7714", label: "野生植物保护" },
-                            { value: "7715", label: "动物园、水族馆管理服务" },
-                            { value: "7716", label: "植物园管理服务" },
-                            { value: "7719", label: "其他自然保护" }
+                            {value: "7711", label: "自然生态系统保护管理"},
+                            {value: "7712", label: "自然遗迹保护管理"},
+                            {value: "7713", label: "野生动物保护"},
+                            {value: "7714", label: "野生植物保护"},
+                            {value: "7715", label: "动物园、水族馆管理服务"},
+                            {value: "7716", label: "植物园管理服务"},
+                            {value: "7719", label: "其他自然保护"}
                         ]
                     },
                     {
                         value: "772",
                         label: "环境治理业",
                         children: [
-                            { value: "7721", label: "水污染治理" },
-                            { value: "7722", label: "大气污染治理" },
-                            { value: "7723", label: "固体废物治理" },
-                            { value: "7724", label: "危险废物治理" },
-                            { value: "7725", label: "放射性废物治理" },
-                            { value: "7726", label: "土壤污染治理与修复服务" },
-                            { value: "7727", label: "噪声与振动控制服务" },
-                            { value: "7729", label: "其他污染治理" }
+                            {value: "7721", label: "水污染治理"},
+                            {value: "7722", label: "大气污染治理"},
+                            {value: "7723", label: "固体废物治理"},
+                            {value: "7724", label: "危险废物治理"},
+                            {value: "7725", label: "放射性废物治理"},
+                            {value: "7726", label: "土壤污染治理与修复服务"},
+                            {value: "7727", label: "噪声与振动控制服务"},
+                            {value: "7729", label: "其他污染治理"}
                         ]
                     }
                 ]
@@ -27425,18 +27421,18 @@ export const IndustryList = [
                 value: "78",
                 label: "公共设施管理业",
                 children: [
-                    { value: "781", label: "市政设施管理" },
-                    { value: "782", label: "环境卫生管理" },
-                    { value: "783", label: "城乡市容管理" },
-                    { value: "784", label: "绿化管理" },
-                    { value: "785", label: "城市公园管理" },
+                    {value: "781", label: "市政设施管理"},
+                    {value: "782", label: "环境卫生管理"},
+                    {value: "783", label: "城乡市容管理"},
+                    {value: "784", label: "绿化管理"},
+                    {value: "785", label: "城市公园管理"},
                     {
                         value: "786",
                         label: "游览景区管理",
                         children: [
-                            { value: "7861", label: "名胜风景区管理" },
-                            { value: "7862", label: "森林公园管理" },
-                            { value: "7869", label: "其他游览景区管理" }
+                            {value: "7861", label: "名胜风景区管理"},
+                            {value: "7862", label: "森林公园管理"},
+                            {value: "7869", label: "其他游览景区管理"}
                         ]
                     }
                 ]
@@ -27445,11 +27441,11 @@ export const IndustryList = [
                 value: "79",
                 label: "土地管理业",
                 children: [
-                    { value: "791", label: "土地整治服务" },
-                    { value: "792", label: "土地调查评估服务" },
-                    { value: "793", label: "土地登记服务" },
-                    { value: "794", label: "土地登记代理服务" },
-                    { value: "799", label: "其他土地管理服务" }
+                    {value: "791", label: "土地整治服务"},
+                    {value: "792", label: "土地调查评估服务"},
+                    {value: "793", label: "土地登记服务"},
+                    {value: "794", label: "土地登记代理服务"},
+                    {value: "799", label: "其他土地管理服务"}
                 ]
             }
         ]
@@ -27462,23 +27458,23 @@ export const IndustryList = [
                 value: "80",
                 label: "居民服务业",
                 children: [
-                    { value: "801", label: "家庭服务" },
-                    { value: "802", label: "托儿所服务" },
-                    { value: "803", label: "洗染服务" },
-                    { value: "804", label: "理发及美容服务" },
+                    {value: "801", label: "家庭服务"},
+                    {value: "802", label: "托儿所服务"},
+                    {value: "803", label: "洗染服务"},
+                    {value: "804", label: "理发及美容服务"},
                     {
                         value: "805",
                         label: "洗浴和保健养生服务",
                         children: [
-                            { value: "8051", label: "洗浴服务" },
-                            { value: "8052", label: "足浴服务" },
-                            { value: "8053", label: "养生保健服务" }
+                            {value: "8051", label: "洗浴服务"},
+                            {value: "8052", label: "足浴服务"},
+                            {value: "8053", label: "养生保健服务"}
                         ]
                     },
-                    { value: "806", label: "摄影扩印服务" },
-                    { value: "807", label: "婚姻服务" },
-                    { value: "808", label: "殡葬服务" },
-                    { value: "809", label: "其他居民服务业" }
+                    {value: "806", label: "摄影扩印服务"},
+                    {value: "807", label: "婚姻服务"},
+                    {value: "808", label: "殡葬服务"},
+                    {value: "809", label: "其他居民服务业"}
                 ]
             },
             {
@@ -27489,37 +27485,37 @@ export const IndustryList = [
                         value: "811",
                         label: "汽车、摩托车等修理与维护",
                         children: [
-                            { value: "8111", label: "汽车修理与维护" },
-                            { value: "8112", label: "大型车辆装备修理与维护" },
-                            { value: "8113", label: "摩托车修理与维护" },
-                            { value: "8114", label: "助动车等修理与维护" }
+                            {value: "8111", label: "汽车修理与维护"},
+                            {value: "8112", label: "大型车辆装备修理与维护"},
+                            {value: "8113", label: "摩托车修理与维护"},
+                            {value: "8114", label: "助动车等修理与维护"}
                         ]
                     },
                     {
                         value: "812",
                         label: "计算机和办公设备维修",
                         children: [
-                            { value: "8121", label: "计算机和辅助设备修理" },
-                            { value: "8122", label: "通讯设备修理" },
-                            { value: "8129", label: "其他办公设备维修" }
+                            {value: "8121", label: "计算机和辅助设备修理"},
+                            {value: "8122", label: "通讯设备修理"},
+                            {value: "8129", label: "其他办公设备维修"}
                         ]
                     },
                     {
                         value: "813",
                         label: "家用电器修理",
                         children: [
-                            { value: "8131", label: "家用电子产品修理" },
-                            { value: "8132", label: "日用电器修理" }
+                            {value: "8131", label: "家用电子产品修理"},
+                            {value: "8132", label: "日用电器修理"}
                         ]
                     },
                     {
                         value: "819",
                         label: "其他日用产品修理业",
                         children: [
-                            { value: "8191", label: "自行车修理" },
-                            { value: "8192", label: "鞋和皮革修理" },
-                            { value: "8193", label: "家具和相关物品修理" },
-                            { value: "8199", label: "其他未列明日用产品修理业" }
+                            {value: "8191", label: "自行车修理"},
+                            {value: "8192", label: "鞋和皮革修理"},
+                            {value: "8193", label: "家具和相关物品修理"},
+                            {value: "8199", label: "其他未列明日用产品修理业"}
                         ]
                     }
                 ]
@@ -27532,22 +27528,22 @@ export const IndustryList = [
                         value: "821",
                         label: "清洁服务",
                         children: [
-                            { value: "8211", label: "建筑物清洁服务" },
-                            { value: "8219", label: "其他清洁服务" }
+                            {value: "8211", label: "建筑物清洁服务"},
+                            {value: "8219", label: "其他清洁服务"}
                         ]
                     },
                     {
                         value: "822",
                         label: "宠物服务",
                         children: [
-                            { value: "8221", label: "宠物饲养" },
-                            { value: "8222", label: "宠物医院服务" },
-                            { value: "8223", label: "宠物美容服务" },
-                            { value: "8224", label: "宠物寄托收养服务" },
-                            { value: "8229", label: "其他宠物服务" }
+                            {value: "8221", label: "宠物饲养"},
+                            {value: "8222", label: "宠物医院服务"},
+                            {value: "8223", label: "宠物美容服务"},
+                            {value: "8224", label: "宠物寄托收养服务"},
+                            {value: "8229", label: "其他宠物服务"}
                         ]
                     },
-                    { value: "829", label: "其他未列明服务业" }
+                    {value: "829", label: "其他未列明服务业"}
                 ]
             }
         ]
@@ -27560,45 +27556,45 @@ export const IndustryList = [
                 value: "83",
                 label: "教育",
                 children: [
-                    { value: "831", label: "学前教育" },
+                    {value: "831", label: "学前教育"},
                     {
                         value: "832",
                         label: "初等教育",
                         children: [
-                            { value: "8321", label: "普通小学教育" },
-                            { value: "8322", label: "成人小学教育" }
+                            {value: "8321", label: "普通小学教育"},
+                            {value: "8322", label: "成人小学教育"}
                         ]
                     },
                     {
                         value: "833",
                         label: "中等教育",
                         children: [
-                            { value: "8331", label: "普通初中教育" },
-                            { value: "8332", label: "职业初中教育" },
-                            { value: "8333", label: "成人初中教育" },
-                            { value: "8334", label: "普通高中教育" },
-                            { value: "8335", label: "成人高中教育" },
-                            { value: "8336", label: "中等职业学校教育" }
+                            {value: "8331", label: "普通初中教育"},
+                            {value: "8332", label: "职业初中教育"},
+                            {value: "8333", label: "成人初中教育"},
+                            {value: "8334", label: "普通高中教育"},
+                            {value: "8335", label: "成人高中教育"},
+                            {value: "8336", label: "中等职业学校教育"}
                         ]
                     },
                     {
                         value: "834",
                         label: "高等教育",
                         children: [
-                            { value: "8341", label: "普通高等教育" },
-                            { value: "8342", label: "成人高等教育" }
+                            {value: "8341", label: "普通高等教育"},
+                            {value: "8342", label: "成人高等教育"}
                         ]
                     },
-                    { value: "835", label: "特殊教育" },
+                    {value: "835", label: "特殊教育"},
                     {
                         value: "839",
                         label: "技能培训、教育辅助及其他教育",
                         children: [
-                            { value: "8391", label: "职业技能培训" },
-                            { value: "8392", label: "体校及体育培训" },
-                            { value: "8393", label: "文化艺术培训" },
-                            { value: "8394", label: "教育辅助服务" },
-                            { value: "8399", label: "其他未列明教育" }
+                            {value: "8391", label: "职业技能培训"},
+                            {value: "8392", label: "体校及体育培训"},
+                            {value: "8393", label: "文化艺术培训"},
+                            {value: "8394", label: "教育辅助服务"},
+                            {value: "8399", label: "其他未列明教育"}
                         ]
                     }
                 ]
@@ -27617,44 +27613,44 @@ export const IndustryList = [
                         value: "841",
                         label: "医院",
                         children: [
-                            { value: "8411", label: "综合医院" },
-                            { value: "8412", label: "中医医院" },
-                            { value: "8413", label: "中西医结合医院" },
-                            { value: "8414", label: "民族医院" },
-                            { value: "8415", label: "专科医院" },
-                            { value: "8416", label: "疗养院" }
+                            {value: "8411", label: "综合医院"},
+                            {value: "8412", label: "中医医院"},
+                            {value: "8413", label: "中西医结合医院"},
+                            {value: "8414", label: "民族医院"},
+                            {value: "8415", label: "专科医院"},
+                            {value: "8416", label: "疗养院"}
                         ]
                     },
                     {
                         value: "842",
                         label: "基层医疗卫生服务",
                         children: [
-                            { value: "8421", label: "社区卫生服务中心（站）" },
-                            { value: "8422", label: "街道卫生院" },
-                            { value: "8423", label: "乡镇卫生院" },
-                            { value: "8424", label: "村卫生室" },
-                            { value: "8425", label: "门诊部（所）" }
+                            {value: "8421", label: "社区卫生服务中心（站）"},
+                            {value: "8422", label: "街道卫生院"},
+                            {value: "8423", label: "乡镇卫生院"},
+                            {value: "8424", label: "村卫生室"},
+                            {value: "8425", label: "门诊部（所）"}
                         ]
                     },
                     {
                         value: "843",
                         label: "专业公共卫生服务",
                         children: [
-                            { value: "8431", label: "疾病预防控制中心" },
-                            { value: "8432", label: "专科疾病防治院（所、站）" },
-                            { value: "8433", label: "妇幼保健院（所、站）" },
-                            { value: "8434", label: "急救中心（站）服务" },
-                            { value: "8435", label: "采供血机构服务" },
-                            { value: "8436", label: "计划生育技术服务活动" }
+                            {value: "8431", label: "疾病预防控制中心"},
+                            {value: "8432", label: "专科疾病防治院（所、站）"},
+                            {value: "8433", label: "妇幼保健院（所、站）"},
+                            {value: "8434", label: "急救中心（站）服务"},
+                            {value: "8435", label: "采供血机构服务"},
+                            {value: "8436", label: "计划生育技术服务活动"}
                         ]
                     },
                     {
                         value: "849",
                         label: "其他卫生活动",
                         children: [
-                            { value: "8491", label: "健康体检服务" },
-                            { value: "8492", label: "临床检验服务" },
-                            { value: "8499", label: "其他未列明卫生服务" }
+                            {value: "8491", label: "健康体检服务"},
+                            {value: "8492", label: "临床检验服务"},
+                            {value: "8499", label: "其他未列明卫生服务"}
                         ]
                     }
                 ]
@@ -27667,22 +27663,22 @@ export const IndustryList = [
                         value: "851",
                         label: "提供住宿社会工作",
                         children: [
-                            { value: "8511", label: "干部休养所" },
-                            { value: "8512", label: "护理机构服务" },
-                            { value: "8513", label: "精神康复服务" },
-                            { value: "8514", label: "老年人、残疾人养护服务" },
-                            { value: "8515", label: "临终关怀服务" },
-                            { value: "8516", label: "孤残儿童收养和庇护服务" },
-                            { value: "8519", label: "其他提供住宿社会救助" }
+                            {value: "8511", label: "干部休养所"},
+                            {value: "8512", label: "护理机构服务"},
+                            {value: "8513", label: "精神康复服务"},
+                            {value: "8514", label: "老年人、残疾人养护服务"},
+                            {value: "8515", label: "临终关怀服务"},
+                            {value: "8516", label: "孤残儿童收养和庇护服务"},
+                            {value: "8519", label: "其他提供住宿社会救助"}
                         ]
                     },
                     {
                         value: "852",
                         label: "不提供住宿社会工作",
                         children: [
-                            { value: "8521", label: "社会看护与帮助服务" },
-                            { value: "8522", label: "康复辅具适配服务" },
-                            { value: "8529", label: "其他不提供住宿社会工作" }
+                            {value: "8521", label: "社会看护与帮助服务"},
+                            {value: "8522", label: "康复辅具适配服务"},
+                            {value: "8529", label: "其他不提供住宿社会工作"}
                         ]
                     }
                 ]
@@ -27697,18 +27693,18 @@ export const IndustryList = [
                 value: "86",
                 label: "新闻和出版业",
                 children: [
-                    { value: "861", label: "新闻业" },
+                    {value: "861", label: "新闻业"},
                     {
                         value: "862",
                         label: "出版业",
                         children: [
-                            { value: "8621", label: "图书出版" },
-                            { value: "8622", label: "报纸出版" },
-                            { value: "8623", label: "期刊出版" },
-                            { value: "8624", label: "音像制品出版" },
-                            { value: "8625", label: "电子出版物出版" },
-                            { value: "8626", label: "数字出版" },
-                            { value: "8629", label: "其他出版业" }
+                            {value: "8621", label: "图书出版"},
+                            {value: "8622", label: "报纸出版"},
+                            {value: "8623", label: "期刊出版"},
+                            {value: "8624", label: "音像制品出版"},
+                            {value: "8625", label: "电子出版物出版"},
+                            {value: "8626", label: "数字出版"},
+                            {value: "8629", label: "其他出版业"}
                         ]
                     }
                 ]
@@ -27717,34 +27713,34 @@ export const IndustryList = [
                 value: "87",
                 label: "广播、电视、电影和录音制作业",
                 children: [
-                    { value: "871", label: "广播" },
-                    { value: "872", label: "电视" },
-                    { value: "873", label: "影视节目制作" },
-                    { value: "874", label: "广播电视集成播控" },
-                    { value: "875", label: "电影和广播电视节目发行" },
-                    { value: "876", label: "电影放映" },
-                    { value: "877", label: "录音制作" }
+                    {value: "871", label: "广播"},
+                    {value: "872", label: "电视"},
+                    {value: "873", label: "影视节目制作"},
+                    {value: "874", label: "广播电视集成播控"},
+                    {value: "875", label: "电影和广播电视节目发行"},
+                    {value: "876", label: "电影放映"},
+                    {value: "877", label: "录音制作"}
                 ]
             },
             {
                 value: "88",
                 label: "文化艺术业",
                 children: [
-                    { value: "881", label: "文艺创作与表演" },
-                    { value: "882", label: "艺术表演场馆" },
+                    {value: "881", label: "文艺创作与表演"},
+                    {value: "882", label: "艺术表演场馆"},
                     {
                         value: "883",
                         label: "图书馆与档案馆",
                         children: [
-                            { value: "8831", label: "图书馆" },
-                            { value: "8832", label: "档案馆" }
+                            {value: "8831", label: "图书馆"},
+                            {value: "8832", label: "档案馆"}
                         ]
                     },
-                    { value: "884", label: "文物及非物质文化遗产保护" },
-                    { value: "885", label: "博物馆" },
-                    { value: "886", label: "烈士陵园、纪念馆" },
-                    { value: "887", label: "群众文体活动" },
-                    { value: "889", label: "其他文化艺术业" }
+                    {value: "884", label: "文物及非物质文化遗产保护"},
+                    {value: "885", label: "博物馆"},
+                    {value: "886", label: "烈士陵园、纪念馆"},
+                    {value: "887", label: "群众文体活动"},
+                    {value: "889", label: "其他文化艺术业"}
                 ]
             },
             {
@@ -27755,27 +27751,27 @@ export const IndustryList = [
                         value: "891",
                         label: "体育组织",
                         children: [
-                            { value: "8911", label: "体育竞赛组织" },
-                            { value: "8912", label: "体育保障组织" },
-                            { value: "8919", label: "其他体育组织" }
+                            {value: "8911", label: "体育竞赛组织"},
+                            {value: "8912", label: "体育保障组织"},
+                            {value: "8919", label: "其他体育组织"}
                         ]
                     },
                     {
                         value: "892",
                         label: "体育场地设施管理",
                         children: [
-                            { value: "8921", label: "体育场馆管理" },
-                            { value: "8929", label: "其他体育场地设施管理" }
+                            {value: "8921", label: "体育场馆管理"},
+                            {value: "8929", label: "其他体育场地设施管理"}
                         ]
                     },
-                    { value: "893", label: "健身休闲活动" },
+                    {value: "893", label: "健身休闲活动"},
                     {
                         value: "899",
                         label: "其他体育",
                         children: [
-                            { value: "8991", label: "体育中介代理服务" },
-                            { value: "8992", label: "体育健康服务" },
-                            { value: "8999", label: "其他未列明体育" }
+                            {value: "8991", label: "体育中介代理服务"},
+                            {value: "8992", label: "体育健康服务"},
+                            {value: "8999", label: "其他未列明体育"}
                         ]
                     }
                 ]
@@ -27788,35 +27784,35 @@ export const IndustryList = [
                         value: "901",
                         label: "室内娱乐活动",
                         children: [
-                            { value: "9011", label: "歌舞厅娱乐活动" },
-                            { value: "9012", label: "电子游艺厅娱乐活动" },
-                            { value: "9013", label: "网吧活动" },
-                            { value: "9019", label: "其他室内娱乐活动" }
+                            {value: "9011", label: "歌舞厅娱乐活动"},
+                            {value: "9012", label: "电子游艺厅娱乐活动"},
+                            {value: "9013", label: "网吧活动"},
+                            {value: "9019", label: "其他室内娱乐活动"}
                         ]
                     },
-                    { value: "902", label: "游乐园" },
-                    { value: "903", label: "休闲观光活动" },
+                    {value: "902", label: "游乐园"},
+                    {value: "903", label: "休闲观光活动"},
                     {
                         value: "904",
                         label: "彩票活动",
                         children: [
-                            { value: "9041", label: "体育彩票服务" },
-                            { value: "9042", label: "福利彩票服务" },
-                            { value: "9049", label: "其他彩票服务" }
+                            {value: "9041", label: "体育彩票服务"},
+                            {value: "9042", label: "福利彩票服务"},
+                            {value: "9049", label: "其他彩票服务"}
                         ]
                     },
                     {
                         value: "905",
                         label: "文化体育娱乐活动与经纪代理服务",
                         children: [
-                            { value: "9051", label: "文化活动服务" },
-                            { value: "9052", label: "体育表演服务" },
-                            { value: "9053", label: "文化娱乐经纪人" },
-                            { value: "9054", label: "体育经纪人" },
-                            { value: "9059", label: "其他文化艺术经纪代理" }
+                            {value: "9051", label: "文化活动服务"},
+                            {value: "9052", label: "体育表演服务"},
+                            {value: "9053", label: "文化娱乐经纪人"},
+                            {value: "9054", label: "体育经纪人"},
+                            {value: "9059", label: "其他文化艺术经纪代理"}
                         ]
                     },
-                    { value: "909", label: "其他娱乐业" }
+                    {value: "909", label: "其他娱乐业"}
                 ]
             }
         ]
@@ -27828,40 +27824,40 @@ export const IndustryList = [
             {
                 value: "91",
                 label: "中国共产党机关",
-                children: [{ value: "910", label: "中国共产党机关" }]
+                children: [{value: "910", label: "中国共产党机关"}]
             },
             {
                 value: "92",
                 label: "国家机构",
                 children: [
-                    { value: "921", label: "国家权力机构" },
+                    {value: "921", label: "国家权力机构"},
                     {
                         value: "922",
                         label: "国家行政机构",
                         children: [
-                            { value: "9221", label: "综合事务管理机构" },
-                            { value: "9222", label: "对外事务管理机构" },
-                            { value: "9223", label: "公共安全管理机构" },
-                            { value: "9224", label: "社会事务管理机构" },
-                            { value: "9225", label: "经济事务管理机构" },
-                            { value: "9226", label: "行政监督检查机构" }
+                            {value: "9221", label: "综合事务管理机构"},
+                            {value: "9222", label: "对外事务管理机构"},
+                            {value: "9223", label: "公共安全管理机构"},
+                            {value: "9224", label: "社会事务管理机构"},
+                            {value: "9225", label: "经济事务管理机构"},
+                            {value: "9226", label: "行政监督检查机构"}
                         ]
                     },
                     {
                         value: "923",
                         label: "监察委员会、人民法院和人民检察院",
                         children: [
-                            { value: "9231", label: "监察委员会" },
-                            { value: "9232", label: "人民法院" },
-                            { value: "9233", label: "人民检察院" }
+                            {value: "9231", label: "监察委员会"},
+                            {value: "9232", label: "人民法院"},
+                            {value: "9233", label: "人民检察院"}
                         ]
                     },
                     {
                         value: "929",
                         label: "其他国家机构",
                         children: [
-                            { value: "9291", label: "消防管理机构" },
-                            { value: "9299", label: "其他未列明国家机构" }
+                            {value: "9291", label: "消防管理机构"},
+                            {value: "9299", label: "其他未列明国家机构"}
                         ]
                     }
                 ]
@@ -27870,8 +27866,8 @@ export const IndustryList = [
                 value: "93",
                 label: "人民政协、民主党派",
                 children: [
-                    { value: "931", label: "人民政协" },
-                    { value: "932", label: "民主党派" }
+                    {value: "931", label: "人民政协"},
+                    {value: "932", label: "民主党派"}
                 ]
             },
             {
@@ -27882,16 +27878,16 @@ export const IndustryList = [
                         value: "941",
                         label: "基本保险",
                         children: [
-                            { value: "9411", label: "基本养老保险" },
-                            { value: "9412", label: "基本医疗保险" },
-                            { value: "9413", label: "失业保险" },
-                            { value: "9414", label: "工伤保险" },
-                            { value: "9415", label: "生育保险" },
-                            { value: "9419", label: "其他基本保险" }
+                            {value: "9411", label: "基本养老保险"},
+                            {value: "9412", label: "基本医疗保险"},
+                            {value: "9413", label: "失业保险"},
+                            {value: "9414", label: "工伤保险"},
+                            {value: "9415", label: "生育保险"},
+                            {value: "9419", label: "其他基本保险"}
                         ]
                     },
-                    { value: "942", label: "补充保险" },
-                    { value: "949", label: "其他社会保障" }
+                    {value: "942", label: "补充保险"},
+                    {value: "949", label: "其他社会保障"}
                 ]
             },
             {
@@ -27902,27 +27898,27 @@ export const IndustryList = [
                         value: "951",
                         label: "群众团体",
                         children: [
-                            { value: "9511", label: "工会" },
-                            { value: "9512", label: "妇联" },
-                            { value: "9513", label: "共青团" },
-                            { value: "9519", label: "其他群众团体" }
+                            {value: "9511", label: "工会"},
+                            {value: "9512", label: "妇联"},
+                            {value: "9513", label: "共青团"},
+                            {value: "9519", label: "其他群众团体"}
                         ]
                     },
                     {
                         value: "952",
                         label: "社会团体",
                         children: [
-                            { value: "9521", label: "专业性团体" },
-                            { value: "9522", label: "行业性团体" }
+                            {value: "9521", label: "专业性团体"},
+                            {value: "9522", label: "行业性团体"}
                         ]
                     },
-                    { value: "953", label: "基金会" },
+                    {value: "953", label: "基金会"},
                     {
                         value: "954",
                         label: "宗教组织",
                         children: [
-                            { value: "9541", label: "宗教团体服务" },
-                            { value: "9542", label: "宗教活动场所服务" }
+                            {value: "9541", label: "宗教团体服务"},
+                            {value: "9542", label: "宗教活动场所服务"}
                         ]
                     }
                 ]
@@ -27931,8 +27927,8 @@ export const IndustryList = [
                 value: "96",
                 label: "基层群众自治组织及其他组织",
                 children: [
-                    { value: "961", label: "社区居民自治组织" },
-                    { value: "962", label: "村民自治组织" }
+                    {value: "961", label: "社区居民自治组织"},
+                    {value: "962", label: "村民自治组织"}
                 ]
             }
         ]
@@ -27944,7 +27940,7 @@ export const IndustryList = [
             {
                 value: "97",
                 label: "国际组织",
-                children: [{ value: "970", label: "国际组织" }]
+                children: [{value: "970", label: "国际组织"}]
             }
         ]
     }
@@ -27965,106 +27961,91 @@ export const TYC = {
                         "value": "中国香港",
                         "name": "中国香港",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中国澳门",
                         "name": "中国澳门",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中国台湾",
                         "name": "中国台湾",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新加坡",
                         "name": "新加坡",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "韩国",
                         "name": "韩国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "日本",
                         "name": "日本",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "美国",
                         "name": "美国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "英属维尔京群岛",
                         "name": "英属维尔京群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "开曼群岛",
                         "name": "开曼群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "德国",
                         "name": "德国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "毛里求斯",
                         "name": "毛里求斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "荷兰",
                         "name": "荷兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "英国",
                         "name": "英国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "法国",
                         "name": "法国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "萨摩亚",
                         "name": "萨摩亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -28077,337 +28058,289 @@ export const TYC = {
                         "value": "阿富汗",
                         "name": "阿富汗",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "阿塞拜疆",
                         "name": "阿塞拜疆",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "阿曼",
                         "name": "阿曼",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "阿联酋",
                         "name": "阿联酋",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中国澳门",
                         "name": "中国澳门",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴林",
                         "name": "巴林",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "不丹",
                         "name": "不丹",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴勒斯坦",
                         "name": "巴勒斯坦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴基斯坦",
                         "name": "巴基斯坦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "朝鲜",
                         "name": "朝鲜",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "菲律宾",
                         "name": "菲律宾",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "格鲁吉亚",
                         "name": "格鲁吉亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "韩国",
                         "name": "韩国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "哈萨克斯坦",
                         "name": "哈萨克斯坦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉尔吉斯斯坦",
                         "name": "吉尔吉斯斯坦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "柬埔寨",
                         "name": "柬埔寨",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "卡塔尔",
                         "name": "卡塔尔",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "科威特",
                         "name": "科威特",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "老挝",
                         "name": "老挝",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黎巴嫩",
                         "name": "黎巴嫩",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马来西亚",
                         "name": "马来西亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马尔代夫",
                         "name": "马尔代夫",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "孟加拉国",
                         "name": "孟加拉国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "蒙古",
                         "name": "蒙古",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "缅甸",
                         "name": "缅甸",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "尼泊尔",
                         "name": "尼泊尔",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "日本",
                         "name": "日本",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "斯里兰卡",
                         "name": "斯里兰卡",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "沙特阿拉伯",
                         "name": "沙特阿拉伯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中国台湾",
                         "name": "中国台湾",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "泰国",
                         "name": "泰国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "塔吉克斯坦",
                         "name": "塔吉克斯坦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "土库曼斯坦",
                         "name": "土库曼斯坦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "土耳其",
                         "name": "土耳其",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "乌兹别克斯坦",
                         "name": "乌兹别克斯坦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "文莱",
                         "name": "文莱",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新加坡",
                         "name": "新加坡",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "叙利亚",
                         "name": "叙利亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中国香港",
                         "name": "中国香港",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "亚美尼亚",
                         "name": "亚美尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "伊朗",
                         "name": "伊朗",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "伊拉克",
                         "name": "伊拉克",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "约旦",
                         "name": "约旦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "也门",
                         "name": "也门",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "以色列",
                         "name": "以色列",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "印尼",
                         "name": "印尼",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "印度",
                         "name": "印度",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "越南",
                         "name": "越南",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -28420,379 +28353,325 @@ export const TYC = {
                         "value": "安哥拉",
                         "name": "安哥拉",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "埃塞俄比亚",
                         "name": "埃塞俄比亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "阿尔及利亚",
                         "name": "阿尔及利亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "埃及",
                         "name": "埃及",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "布基纳法索",
                         "name": "布基纳法索",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "博茨瓦纳",
                         "name": "博茨瓦纳",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "布隆迪",
                         "name": "布隆迪",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贝宁",
                         "name": "贝宁",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "赤道几内亚",
                         "name": "赤道几内亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "多哥",
                         "name": "多哥",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "厄立特里亚",
                         "name": "厄立特里亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "佛得角",
                         "name": "佛得角",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "刚果(金)",
                         "name": "刚果 (金) ",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "刚果(布)",
                         "name": "刚果 (布) ",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "冈比亚",
                         "name": "冈比亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉布提",
                         "name": "吉布提",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "津巴布韦",
                         "name": "津巴布韦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "加纳",
                         "name": "加纳",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "几内亚",
                         "name": "几内亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "几内亚比绍",
                         "name": "几内亚比绍",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "加蓬",
                         "name": "加蓬",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "科特迪瓦",
                         "name": "科特迪瓦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "肯尼亚",
                         "name": "肯尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "喀麦隆",
                         "name": "喀麦隆",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "科摩罗",
                         "name": "科摩罗",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "卢旺达",
                         "name": "卢旺达",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "利比里亚",
                         "name": "利比里亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "留尼汪",
                         "name": "留尼汪",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "利比亚",
                         "name": "利比亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "莱索托",
                         "name": "莱索托",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "摩洛哥",
                         "name": "摩洛哥",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "莫桑比克",
                         "name": "莫桑比克",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马达加斯加",
                         "name": "马达加斯加",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马里",
                         "name": "马里",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "毛里塔尼亚",
                         "name": "毛里塔尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "毛里求斯",
                         "name": "毛里求斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马拉维",
                         "name": "马拉维",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "南非",
                         "name": "南非",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "尼日利亚",
                         "name": "尼日利亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "纳米比亚",
                         "name": "纳米比亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "南苏丹",
                         "name": "南苏丹",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "尼日尔",
                         "name": "尼日尔",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "苏丹",
                         "name": "苏丹",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "塞舌尔",
                         "name": "塞舌尔",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "斯威士兰",
                         "name": "斯威士兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "塞拉利昂",
                         "name": "塞拉利昂",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "塞内加尔",
                         "name": "塞内加尔",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "索马里",
                         "name": "索马里",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "坦桑尼亚",
                         "name": "坦桑尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "突尼斯",
                         "name": "突尼斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "乌干达",
                         "name": "乌干达",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "赞比亚",
                         "name": "赞比亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中非",
                         "name": "中非",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "乍得",
                         "name": "乍得",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -28805,316 +28684,271 @@ export const TYC = {
                         "value": "爱沙尼亚",
                         "name": "爱沙尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "爱尔兰",
                         "name": "爱尔兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安道尔",
                         "name": "安道尔",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "阿尔巴尼亚",
                         "name": "阿尔巴尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "奥地利",
                         "name": "奥地利",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "冰岛",
                         "name": "冰岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "保加利亚",
                         "name": "保加利亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "波黑",
                         "name": "波黑",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "白俄罗斯",
                         "name": "白俄罗斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "波兰",
                         "name": "波兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "比利时",
                         "name": "比利时",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "北马其顿",
                         "name": "北马其顿",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "德国",
                         "name": "德国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "丹麦",
                         "name": "丹麦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "俄罗斯",
                         "name": "俄罗斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "法国",
                         "name": "法国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "芬兰",
                         "name": "芬兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "荷兰",
                         "name": "荷兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑山",
                         "name": "黑山",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "捷克",
                         "name": "捷克",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "克罗地亚",
                         "name": "克罗地亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "列支敦士登",
                         "name": "列支敦士登",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "卢森堡",
                         "name": "卢森堡",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "拉脱维亚",
                         "name": "拉脱维亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "立陶宛",
                         "name": "立陶宛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "罗马尼亚",
                         "name": "罗马尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马耳他",
                         "name": "马耳他",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "摩尔多瓦",
                         "name": "摩尔多瓦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "摩纳哥",
                         "name": "摩纳哥",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "挪威",
                         "name": "挪威",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "葡萄牙",
                         "name": "葡萄牙",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "瑞士",
                         "name": "瑞士",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "瑞典",
                         "name": "瑞典",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "斯洛伐克",
                         "name": "斯洛伐克",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "圣马力诺",
                         "name": "圣马力诺",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "塞尔维亚",
                         "name": "塞尔维亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "塞浦路斯",
                         "name": "塞浦路斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "斯洛文尼亚",
                         "name": "斯洛文尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "乌克兰",
                         "name": "乌克兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "西班牙",
                         "name": "西班牙",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "匈牙利",
                         "name": "匈牙利",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "希腊",
                         "name": "希腊",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "英国",
                         "name": "英国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "意大利",
                         "name": "意大利",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "直布罗陀",
                         "name": "直布罗陀",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -29127,92 +28961,79 @@ export const TYC = {
                         "value": "阿根廷",
                         "name": "阿根廷",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴拉圭",
                         "name": "巴拉圭",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴西",
                         "name": "巴西",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "秘鲁",
                         "name": "秘鲁",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "玻利维亚",
                         "name": "玻利维亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "厄瓜多尔",
                         "name": "厄瓜多尔",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "法属圭亚那",
                         "name": "法属圭亚那",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "圭亚那",
                         "name": "圭亚那",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "哥伦比亚",
                         "name": "哥伦比亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "苏里南",
                         "name": "苏里南",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "乌拉圭",
                         "name": "乌拉圭",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "委内瑞拉",
                         "name": "委内瑞拉",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "智利",
                         "name": "智利",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -29225,211 +29046,181 @@ export const TYC = {
                         "value": "阿鲁巴",
                         "name": "阿鲁巴",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安提瓜和巴布达",
                         "name": "安提瓜和巴布达",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴拿马",
                         "name": "巴拿马",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "波多黎各",
                         "name": "波多黎各",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "百慕大",
                         "name": "百慕大",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴哈马",
                         "name": "巴哈马",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴巴多斯",
                         "name": "巴巴多斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "伯利兹",
                         "name": "伯利兹",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "多米尼克",
                         "name": "多米尼克",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "多米尼加",
                         "name": "多米尼加",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "哥斯达黎加",
                         "name": "哥斯达黎加",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "格林纳达",
                         "name": "格林纳达",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "古巴",
                         "name": "古巴",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "海地",
                         "name": "海地",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "洪都拉斯",
                         "name": "洪都拉斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "加拿大",
                         "name": "加拿大",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "开曼群岛",
                         "name": "开曼群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "墨西哥",
                         "name": "墨西哥",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马提尼克",
                         "name": "马提尼克",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "美国",
                         "name": "美国",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "蒙特塞拉特",
                         "name": "蒙特塞拉特",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "尼加拉瓜",
                         "name": "尼加拉瓜",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "圣基茨和尼维斯",
                         "name": "圣基茨和尼维斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "圣文森特和格林纳丁斯",
                         "name": "圣文森特和格林纳丁斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "萨尔瓦多",
                         "name": "萨尔瓦多",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "特立尼达和多巴哥",
                         "name": "特立尼达和多巴哥",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "特克斯和凯科斯群岛",
                         "name": "特克斯和凯科斯群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "危地马拉",
                         "name": "危地马拉",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "英属维尔京群岛",
                         "name": "英属维尔京群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "牙买加",
                         "name": "牙买加",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -29442,120 +29233,103 @@ export const TYC = {
                         "value": "澳大利亚",
                         "name": "澳大利亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "巴布亚新几内亚",
                         "name": "巴布亚新几内亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "斐济",
                         "name": "斐济",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "基里巴斯",
                         "name": "基里巴斯",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "库克群岛",
                         "name": "库克群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "马绍尔群岛",
                         "name": "马绍尔群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "美属萨摩亚",
                         "name": "美属萨摩亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "密克罗尼西亚联邦",
                         "name": "密克罗尼西亚联邦",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "瑙鲁",
                         "name": "瑙鲁",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "帕劳",
                         "name": "帕劳",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "萨摩亚",
                         "name": "萨摩亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "所罗门群岛",
                         "name": "所罗门群岛",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "图瓦卢",
                         "name": "图瓦卢",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "汤加",
                         "name": "汤加",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "瓦努阿图",
                         "name": "瓦努阿图",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新西兰",
                         "name": "新西兰",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新喀里多尼亚",
                         "name": "新喀里多尼亚",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             }
@@ -29567,8 +29341,7 @@ export const TYC = {
                         "text": "一般而言，是指参与企业投资的股东所属国家/地区。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -29580,33 +29353,28 @@ export const TYC = {
                 "value": "12",
                 "name": "年报",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "09",
                 "name": "三季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "06",
                 "name": "中报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "03",
                 "name": "一季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasLandMortgage": {
         "key": "hasLandMortgage",
@@ -29616,26 +29384,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有土地抵押",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无土地抵押",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "assetReportPeriod": {
         "key": "assetReportPeriod",
@@ -29645,33 +29409,28 @@ export const TYC = {
                 "value": "12",
                 "name": "年报",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "09",
                 "name": "三季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "06",
                 "name": "中报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "03",
                 "name": "一季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasImportExportCredit": {
         "key": "hasImportExportCredit",
@@ -29681,26 +29440,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有进出口信用",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无进出口信用",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasBid": {
         "key": "hasBid",
@@ -29710,26 +29465,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有招投标",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无招投标",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "technologyType": {
         "key": "technologyType",
@@ -29739,187 +29490,160 @@ export const TYC = {
                 "value": "高新技术企业",
                 "name": "高新技术企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "科技型中小企业",
                 "name": "科技型中小企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "民营科技企业",
                 "name": "民营科技企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "专精特新小巨人",
                 "name": "专精特新小巨人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "专精特新企业",
                 "name": "专精特新企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "龙头企业",
                 "name": "龙头企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "独角兽",
                 "name": "独角兽",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "瞪羚企业",
                 "name": "瞪羚企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "牛羚企业",
                 "name": "牛羚企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "雏鹰企业",
                 "name": "雏鹰企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "中小企协AAA信用",
                 "name": "中小企协AAA信用",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "企业技术中心",
                 "name": "企业技术中心",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "众创空间",
                 "name": "众创空间",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "科技小巨人",
                 "name": "科技小巨人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "科技企业孵化器",
                 "name": "科技企业孵化器",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "技术创新示范企业",
                 "name": "技术创新示范企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "隐形冠军企业",
                 "name": "隐形冠军企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "技术先进型服务企业",
                 "name": "技术先进型服务企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "创新型企业",
                 "name": "创新型企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "小微企业",
                 "name": "小微企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "科技型初创企业",
                 "name": "科技型初创企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "火炬计划",
                 "name": "火炬计划",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "三同企业",
                 "name": "三同企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "制造业单项冠军",
                 "name": "制造业单项冠军",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "工程技术研究中心",
                 "name": "工程技术研究中心",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "创新型中小企业",
                 "name": "创新型中小企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "institutionType": {
         "key": "institutionType",
@@ -29939,15 +29663,13 @@ export const TYC = {
                                 "value": "一人有限责任公司",
                                 "name": "一人有限责任公司",
                                 "selected": 0,
-                                "childList": [
-                                ]
+                                "childList": []
                             },
                             {
                                 "value": "其他有限责任公司",
                                 "name": "其他有限责任公司",
                                 "selected": 0,
-                                "childList": [
-                                ]
+                                "childList": []
                             }
                         ]
                     },
@@ -29955,57 +29677,49 @@ export const TYC = {
                         "value": "股份有限公司",
                         "name": "股份有限公司",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "个人独资企业",
                         "name": "个人独资企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "普通合伙",
                         "name": "普通合伙",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "有限合伙",
                         "name": "有限合伙",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "全民所有制",
                         "name": "全民所有制",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "集体所有制",
                         "name": "集体所有制",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "联营企业",
                         "name": "联营企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "股份合作制",
                         "name": "股份合作企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30013,29 +29727,25 @@ export const TYC = {
                 "value": "个体工商户",
                 "name": "个体工商户",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "农民专业合作社",
                 "name": "农民专业合作社 (联合社) ",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "机关机构",
                 "name": "机关单位",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "事业单位",
                 "name": "事业单位",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "社会组织",
@@ -30046,29 +29756,25 @@ export const TYC = {
                         "value": "社会团体",
                         "name": "社会团体",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "民办非企业单位",
                         "name": "民办非企业单位",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "基金会",
                         "name": "基金会",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "其他社会组织",
                         "name": "其他社会组织",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30076,43 +29782,37 @@ export const TYC = {
                 "value": "律师事务所",
                 "name": "律师事务所",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "学校",
                 "name": "学校",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "医疗机构",
                 "name": "医疗机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "中国香港企业",
                 "name": "中国香港企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "中国台湾企业",
                 "name": "中国台湾企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "其他机构",
                 "name": "其他机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -30123,8 +29823,7 @@ export const TYC = {
                         "text": "一般而言，是指只有一个自然人股东或者一个法人股东的有限责任公司，简称“一人公司”、“独资公司”或“独股公司”。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "其他有限责任公司",
@@ -30133,8 +29832,7 @@ export const TYC = {
                         "text": "一般而言，此处的其他有限责任公司一般是指非独资的有限责任公司。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "股份有限公司",
@@ -30143,8 +29841,7 @@ export const TYC = {
                         "text": "一般而言，是指其全部资本分为等额股份，股东以其所持股份为限对公司承担责任，公司以其全部资产对公司的债务承担责任的企业法人。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "个体工商户",
@@ -30153,8 +29850,7 @@ export const TYC = {
                         "text": "一般而言，是指不具备法人资格，自然人从事工商经营，经依法登记，为个体工商户。个体工商户可分为个人经营和家庭经营。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "普通合伙",
@@ -30163,8 +29859,7 @@ export const TYC = {
                         "text": "一般而言，是指由普通合伙人组成，合伙人对合伙企业债务承担无限连带责任。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "有限合伙",
@@ -30173,8 +29868,7 @@ export const TYC = {
                         "text": "一般而言，是指由普通合伙人和有限合伙人组成，普通合伙人对合伙企业债务承担无限连带责任，有限合伙人以其认缴的出资额为限对合伙企业债务承担责任。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "全民所有制",
@@ -30183,8 +29877,7 @@ export const TYC = {
                         "text": "一般而言，是指企业财产属于全民所有的，依法自主经营、自负盈亏、独立核算的商品生产和经营单位。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "集体所有制",
@@ -30193,8 +29886,7 @@ export const TYC = {
                         "text": "一般而言，是指生产资料属于劳动群众集体所有、实行共同劳动、在分配方式上以按劳分配为主体的社会主义经济组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "联营企业",
@@ -30203,8 +29895,7 @@ export const TYC = {
                         "text": "一般而言，是指两个及两个以上相同或不同所有制性质的企业法人或事业单位法人，按自愿、平等、互利的原则，共同投资组成的经济组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "股份合作企业",
@@ -30213,8 +29904,7 @@ export const TYC = {
                         "text": "一般而言，是指以合作制为基础，由企业职工共同出资入股，吸收一定比例的社会资产投资组建，实行自主经营，自负盈亏，共同劳动，民主管理，按劳分配与按股分红相结合的一种集体经济组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "个人独资企业",
@@ -30223,8 +29913,7 @@ export const TYC = {
                         "text": "一般而言，是指由一个自然人投资，财产为投资人个人所有，投资人以其个人财产对企业债务承担无限责任的经营实体，不具备法人资格。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "农民专业合作社 (联合社) ",
@@ -30233,8 +29922,7 @@ export const TYC = {
                         "text": "一般而言，是指在农村家庭承包经营基础上，农产品的生产经营者或者农业生产经营服务的提供者、利用者，自愿联合、民主管理的互助性经济组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "机关单位",
@@ -30243,8 +29931,7 @@ export const TYC = {
                         "text": "一般而言，是指包括国家权力机关、国家行政机关、国家监察机关、司法机关、政党机关、政协组织和其他机关法人：机关法人单位的本部，以及国家权力机关分支机构、国家行政机关分支或派出机构、监察机关分支机构、人民法院分支机构、人民检察院分支机构等。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "事业单位",
@@ -30253,8 +29940,7 @@ export const TYC = {
                         "text": "一般而言，是指国家为了社会公益目的，由国家机关举办或者其他组织利用国有资产举办的，从事教育、科技、文化、卫生等活动的社会服务组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "社会团体",
@@ -30263,8 +29949,7 @@ export const TYC = {
                         "text": "一般而言，是指中国公民自愿组成，为实现会员共同意愿，按照其章程开展活动的非营利性社会组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "民办非企业单位",
@@ -30273,8 +29958,7 @@ export const TYC = {
                         "text": "一般而言，是指企业事业单位、社会团体和其他社会力量以及公民个人利用非国有资产举办的，从事非营利性社会服务活动的社会组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "基金会",
@@ -30283,8 +29967,7 @@ export const TYC = {
                         "text": "一般而言，是指利用自然人、法人或者其他组织捐赠的财产，以从事公益事业为目的，按照《基金会管理条例》的规定成立的非营利性法人。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "其他社会组织",
@@ -30293,8 +29976,7 @@ export const TYC = {
                         "text": "一般而言，是指未被明确划分为社会团体、民办非企业单位和基金会类型的其他社会组织类型。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "律师事务所",
@@ -30303,8 +29985,7 @@ export const TYC = {
                         "text": "一般而言，是指中华人民共和国律师执行职务进行业务活动的工作机构。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "学校",
@@ -30313,8 +29994,7 @@ export const TYC = {
                         "text": "一般而言，是指有计划、有组织、有系统的进行教育活动的重要场所，这里的学校包括但不限于学科教育、职业教育等类型。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "医疗机构",
@@ -30323,8 +30003,7 @@ export const TYC = {
                         "text": "一般而言，是指依据《医疗机构管理条例》设立的从事疾病诊断、治疗活动的卫生机构的总称。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "中国香港企业",
@@ -30333,8 +30012,7 @@ export const TYC = {
                         "text": "一般而言，是指依照中国法律在中国境内注册登记的，香港资本投资兴办的独立经营或者同国内企业合作生产、合作经营的公司、企业和其他经济组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "中国台湾企业",
@@ -30343,8 +30021,7 @@ export const TYC = {
                         "text": "一般而言，是指依照中国法律在中国境内注册登记的，台湾资本投资兴办的独立经营或者同国内企业合作生产、合作经营的公司、企业和其他经济组织。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "其他机构",
@@ -30353,8 +30030,7 @@ export const TYC = {
                         "text": "除上述定义以外的其他机构类型企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -30362,8 +30038,7 @@ export const TYC = {
         "key": "industryCode",
         "name": "所属行业",
         "items": IndustryList,
-        "explain": [
-        ]
+        "explain": []
     },
     "listedProcess": {
         "key": "listedProcess",
@@ -30378,50 +30053,43 @@ export const TYC = {
                         "value": "辅导期:上交所主板",
                         "name": "上交所主板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辅导期:上交所科创板",
                         "name": "上交所科创板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辅导期:深交所主板",
                         "name": "深交所主板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辅导期:深交所创业板",
                         "name": "深交所创业板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辅导期:北交所",
                         "name": "北交所",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辅导期:新三板",
                         "name": "新三板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辅导期:未披露",
                         "name": "未披露",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30434,43 +30102,37 @@ export const TYC = {
                         "value": "申报期:上交所主板",
                         "name": "上交所主板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "申报期:上交所科创板",
                         "name": "上交所科创板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "申报期:深交所主板",
                         "name": "深交所主板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "申报期:深交所创业板",
                         "name": "深交所创业板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "申报期:北交所",
                         "name": "北交所",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "申报期:港交所",
                         "name": "港交所",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30483,22 +30145,19 @@ export const TYC = {
                         "value": "发行期:A股",
                         "name": "A股",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "发行期:港股",
                         "name": "港股",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "发行期:新三板",
                         "name": "新三板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30506,22 +30165,19 @@ export const TYC = {
                 "value": "已上市",
                 "name": "已上市",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "已退市",
                 "name": "已退市",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "未上市",
                 "name": "未上市",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -30532,8 +30188,7 @@ export const TYC = {
                         "text": "是指有关机构对拟发行股票并上市的股份有限公司进行的规范化培训、辅导与监督的阶段。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "申报期",
@@ -30542,8 +30197,7 @@ export const TYC = {
                         "text": "是指发行人按照中国证监会有关规定制作注册申请文件，依法由保荐人保荐并向交易所申报阶段。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "发行期",
@@ -30552,8 +30206,7 @@ export const TYC = {
                         "text": "是指发行人申报的证券发行上市申请经证券主管机构核准或审核通过后，进入的上市前的证券发行阶段。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "已上市",
@@ -30562,8 +30215,7 @@ export const TYC = {
                         "text": "是指企业通过证券交易所首次公开向投资者发行股票，并成功上市交易。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "已退市",
@@ -30572,8 +30224,7 @@ export const TYC = {
                         "text": "是指上市公司由于未满足交易所的上市标准或其他原因，主动或被动终止上市的情形。当前仅支持筛选退市两年内的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -30585,33 +30236,28 @@ export const TYC = {
                 "value": "12",
                 "name": "年报",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "09",
                 "name": "三季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "06",
                 "name": "中报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "03",
                 "name": "一季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "phoneFilter": {
         "key": "phoneFilter",
@@ -30626,15 +30272,13 @@ export const TYC = {
                         "value": "2",
                         "name": "过滤有空号企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "1",
                         "name": "过滤全为空号企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30647,15 +30291,13 @@ export const TYC = {
                         "value": "2",
                         "name": "过滤有疑似代记账号企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "1",
                         "name": "过滤全为疑似代记账号企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30668,15 +30310,13 @@ export const TYC = {
                         "value": "0",
                         "name": "过滤有400/800号企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "2",
                         "name": "过滤全为400/800号企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             }
@@ -30689,8 +30329,7 @@ export const TYC = {
                         "text": "搜索列表和导出结果会过滤掉号码【有空号】或者【全为空号】的企业。仅检测境内手机号，不含固定电话。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "疑似代记账号",
@@ -30699,8 +30338,7 @@ export const TYC = {
                         "text": "搜索列表和导出结果会过滤掉号码【有疑似代记账号】或者【全为疑似代记账号】的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "400/800号",
@@ -30709,8 +30347,7 @@ export const TYC = {
                         "text": "搜索列表和导出结果会过滤掉号码【有400/800号】或者【全为400/800号】的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -30722,26 +30359,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有严重违法",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无严重违法",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "establishTime": {
         "key": "establishTime",
@@ -30751,62 +30384,52 @@ export const TYC = {
                 "value": "1",
                 "name": "3个月内",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "半年内",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "1年内",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "1-3年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "5",
                 "name": "3-5年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "6",
                 "name": "5-10年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "7",
                 "name": "10年以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "paidCapitalRange": {
         "key": "paidCapitalRange",
         "name": "实缴资本 (自定义) ",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "profitRelation": {
         "key": "profitRelation",
@@ -30816,47 +30439,40 @@ export const TYC = {
                 "value": "gt",
                 "name": "大于",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "gte",
                 "name": "大于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lt",
                 "name": "小于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lte",
                 "name": "小于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "eq",
                 "name": "等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "range",
                 "name": "介于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasTaxViolation": {
         "key": "hasTaxViolation",
@@ -30866,26 +30482,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有税收违法",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无税收违法",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "liabilityUnit": {
         "key": "liabilityUnit",
@@ -30895,35 +30507,29 @@ export const TYC = {
                 "value": "元",
                 "name": "元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "万",
                 "name": "万元",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "亿",
                 "name": "亿元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "assetRange": {
         "key": "assetRange",
         "name": "总资产",
         "right": "svip",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "listedType": {
         "key": "listedType",
@@ -30938,36 +30544,31 @@ export const TYC = {
                         "value": "A股:上交所沪主板",
                         "name": "上交所主板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "A股:上交所科创板",
                         "name": "上交所科创板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "A股:深交所深主板",
                         "name": "深交所主板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "A股:深交所创业板",
                         "name": "深交所创业板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "A股:北交所",
                         "name": "北交所",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -30985,15 +30586,13 @@ export const TYC = {
                                 "value": "港股:中概股(港股):赴港上市企业",
                                 "name": "赴港上市企业",
                                 "selected": 0,
-                                "childList": [
-                                ]
+                                "childList": []
                             },
                             {
                                 "value": "港股:中概股(港股):香港上市企业",
                                 "name": "香港上市企业",
                                 "selected": 0,
-                                "childList": [
-                                ]
+                                "childList": []
                             }
                         ]
                     },
@@ -31001,15 +30600,13 @@ export const TYC = {
                         "value": "港股:主板",
                         "name": "主板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "港股:创业板",
                         "name": "创业板",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -31027,15 +30624,13 @@ export const TYC = {
                                 "value": "美股:中概股(美股):赴美上市企业",
                                 "name": "赴美上市企业",
                                 "selected": 0,
-                                "childList": [
-                                ]
+                                "childList": []
                             },
                             {
                                 "value": "美股:中概股(美股):美国上市企业",
                                 "name": "美国上市企业",
                                 "selected": 0,
-                                "childList": [
-                                ]
+                                "childList": []
                             }
                         ]
                     },
@@ -31043,22 +30638,19 @@ export const TYC = {
                         "value": "美股:纳斯达克",
                         "name": "纳斯达克",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "美股:纽交所",
                         "name": "纽交所",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "美股:AMEX",
                         "name": "AMEX",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -31071,22 +30663,19 @@ export const TYC = {
                         "value": "新三板:基础层",
                         "name": "基础层",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新三板:创新层",
                         "name": "创新层",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新三板:两网及退市",
                         "name": "两网及退市",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -31094,8 +30683,7 @@ export const TYC = {
                 "value": "新四板",
                 "name": "新四板",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -31106,8 +30694,7 @@ export const TYC = {
                         "text": "一般而言，即人民币普通股票，是由中国境内注册公司发行，在境内上市，以人民币标明面值，供境内机构、组织或个人 (2013年4月1日起，境内港澳台居民可开立A股账户) 以人民币认购和交易的普通股股票。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "港股",
@@ -31116,8 +30703,7 @@ export const TYC = {
                         "text": "一般而言，是指在香港联合交易所上市的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "美股",
@@ -31126,8 +30712,7 @@ export const TYC = {
                         "text": "一般而言，是指在美国交易市场，如纽交所（NYSE）、纳斯达克（NASDAQ）、美交所（AMEX）等证券交易所上市的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "新三板",
@@ -31136,8 +30721,7 @@ export const TYC = {
                         "text": "一般而言，是指全国中小企业股份转让系统 (简称“全国股转系统”，俗称“新三板”) ，是经国务院批准，依据证券法设立的继上交所、深交所之后第三家全国性证券交易场所，也是我国第一家公司制运营的证券交易场所。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "新四板",
@@ -31146,8 +30730,7 @@ export const TYC = {
                         "text": "即“区域性股权交易市场”。一般而言，是为特定区域内的企业提供股权、债券转让和融资服务的私募市场，是公司规范治理、进入资本市场的孵化器，也为股份公司股权转让提供交易场所。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -31159,26 +30742,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有行政处罚",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无行政处罚",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasApp": {
         "key": "hasApp",
@@ -31188,26 +30767,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有APP应用",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无APP应用",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasStandardSetting": {
         "key": "hasStandardSetting",
@@ -31217,26 +30792,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有标准信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无标准信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "technologyTypeNew": {
         "key": "technologyTypeNew",
@@ -31247,141 +30818,121 @@ export const TYC = {
                 "value": "高新技术企业",
                 "name": "高新技术企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "科技部科技型中小企业",
                 "name": "科技部科技型中小企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家级制造业单项冠军示范企业",
                 "name": "国家级制造业单项冠军示范企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家级制造业单项冠军产品企业",
                 "name": "国家级制造业单项冠军产品企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家级制造业单项冠军培育企业",
                 "name": "国家级制造业单项冠军培育企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家企业技术中心",
                 "name": "国家企业技术中心",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家技术创新示范企业",
                 "name": "国家技术创新示范企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家级科技企业孵化器",
                 "name": "国家级科技企业孵化器",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家众创空间",
                 "name": "国家众创空间",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家级专精特新“小巨人”企业",
                 "name": "国家级专精特新“小巨人”企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国家级重点实验室",
                 "name": "国家级重点实验室",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "中国独角兽企业",
                 "name": "中国独角兽企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "中小企协AAA信用",
                 "name": "中小企协AAA信用",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "科技型初创企业",
                 "name": "科技型初创企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "龙头企业",
                 "name": "龙头企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "牛羚企业",
                 "name": "牛羚企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "火炬计划",
                 "name": "火炬计划",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "三同企业",
                 "name": "三同企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "工程技术研究中心",
                 "name": "工程技术研究中心",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "创新型企业",
                 "name": "创新型企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "省级专精特新“小巨人”企业",
@@ -31392,85 +30943,73 @@ export const TYC = {
                         "value": "北京专精特新“小巨人”企业",
                         "name": "北京专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省专精特新“小巨人”企业",
                         "name": "安徽省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵州省专精特新“小巨人”企业",
                         "name": "贵州省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省专精特新“小巨人”企业",
                         "name": "浙江省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省专精特新“小巨人”企业",
                         "name": "辽宁省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南省专精特新“小巨人”企业",
                         "name": "湖南省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西省专精特新“小巨人”企业",
                         "name": "山西省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "云南省专精特新“小巨人”企业",
                         "name": "云南省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省专精特新“小巨人”企业",
                         "name": "江苏省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省专精特新“小巨人”企业",
                         "name": "湖北省专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏专精特新“小巨人”企业",
                         "name": "宁夏专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆专精特新“小巨人”企业",
                         "name": "重庆专精特新“小巨人”企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -31483,218 +31022,187 @@ export const TYC = {
                         "value": "湖北省“专精特新”中小企业",
                         "name": "湖北省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆“专精特新”中小企业",
                         "name": "重庆“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海“专精特新”中小企业",
                         "name": "上海“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西省“专精特新”中小企业",
                         "name": "山西省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "甘肃省“专精特新”中小企业",
                         "name": "甘肃省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵州省“专精特新”中小企业",
                         "name": "贵州省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省“专精特新”中小企业",
                         "name": "陕西省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "西藏“专精特新”中小企业",
                         "name": "西藏“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省“专精特新”中小企业",
                         "name": "浙江省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑龙江省“专精特新”中小企业",
                         "name": "黑龙江省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新疆“专精特新”中小企业",
                         "name": "新疆“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省“专精特新”中小企业",
                         "name": "四川省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北省“专精特新”中小企业",
                         "name": "河北省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省“专精特新”中小企业",
                         "name": "安徽省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "云南省“专精特新”中小企业",
                         "name": "云南省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "北京“专精特新”中小企业",
                         "name": "北京“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广东省“专精特新”中小企业",
                         "name": "广东省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省“专精特新”中小企业",
                         "name": "福建省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "青海省“专精特新”中小企业",
                         "name": "青海省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江西省“专精特新”中小企业",
                         "name": "江西省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省“专精特新”中小企业",
                         "name": "河南省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广西省“专精特新”中小企业",
                         "name": "广西省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "海南省“专精特新”中小企业",
                         "name": "海南省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉林省“专精特新”中小企业",
                         "name": "吉林省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省“专精特新”中小企业",
                         "name": "山东省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省“专精特新”中小企业",
                         "name": "江苏省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南省“专精特新”中小企业",
                         "name": "湖南省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省“专精特新”中小企业",
                         "name": "辽宁省“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津“专精特新”中小企业",
                         "name": "天津“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏“专精特新”中小企业",
                         "name": "宁夏“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "内蒙古“专精特新”中小企业",
                         "name": "内蒙古“专精特新”中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -31707,218 +31215,187 @@ export const TYC = {
                         "value": "福建省企业技术中心",
                         "name": "福建省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省企业技术中心",
                         "name": "浙江省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省企业技术中心",
                         "name": "湖北省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵州省企业技术中心",
                         "name": "贵州省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆企业技术中心",
                         "name": "重庆企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省企业技术中心",
                         "name": "四川省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省企业技术中心",
                         "name": "安徽省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "甘肃省企业技术中心",
                         "name": "甘肃省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏企业技术中心",
                         "name": "宁夏企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉林省企业技术中心",
                         "name": "吉林省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省企业技术中心",
                         "name": "山东省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北省企业技术中心",
                         "name": "河北省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新疆企业技术中心",
                         "name": "新疆企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省企业技术中心",
                         "name": "江苏省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海企业技术中心",
                         "name": "上海企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省企业技术中心",
                         "name": "辽宁省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省企业技术中心",
                         "name": "河南省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西省企业技术中心",
                         "name": "山西省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "内蒙古企业技术中心",
                         "name": "内蒙古企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津企业技术中心",
                         "name": "天津企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "青海省企业技术中心",
                         "name": "青海省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "海南省企业技术中心",
                         "name": "海南省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江西省企业技术中心",
                         "name": "江西省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "西藏企业技术中心",
                         "name": "西藏企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广西省企业技术中心",
                         "name": "广西省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广东省企业技术中心",
                         "name": "广东省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "北京企业技术中心",
                         "name": "北京企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑龙江省企业技术中心",
                         "name": "黑龙江省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南省企业技术中心",
                         "name": "湖南省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省企业技术中心",
                         "name": "陕西省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "云南省企业技术中心",
                         "name": "云南省企业技术中心",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -31931,218 +31408,187 @@ export const TYC = {
                         "value": "天津科技企业孵化器",
                         "name": "天津科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省科技企业孵化器",
                         "name": "江苏省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新疆科技企业孵化器",
                         "name": "新疆科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海科技企业孵化器",
                         "name": "上海科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西省科技企业孵化器",
                         "name": "山西省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省科技企业孵化器",
                         "name": "湖北省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广西省科技企业孵化器",
                         "name": "广西省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "西藏科技企业孵化器",
                         "name": "西藏科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省科技企业孵化器",
                         "name": "河南省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑龙江省科技企业孵化器",
                         "name": "黑龙江省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省科技企业孵化器",
                         "name": "福建省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省科技企业孵化器",
                         "name": "浙江省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省科技企业孵化器",
                         "name": "辽宁省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北省科技企业孵化器",
                         "name": "河北省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省科技企业孵化器",
                         "name": "安徽省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省科技企业孵化器",
                         "name": "陕西省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏科技企业孵化器",
                         "name": "宁夏科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "甘肃省科技企业孵化器",
                         "name": "甘肃省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆科技企业孵化器",
                         "name": "重庆科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵州省科技企业孵化器",
                         "name": "贵州省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "海南省科技企业孵化器",
                         "name": "海南省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "青海省科技企业孵化器",
                         "name": "青海省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "内蒙古科技企业孵化器",
                         "name": "内蒙古科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "北京科技企业孵化器",
                         "name": "北京科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南省科技企业孵化器",
                         "name": "湖南省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "云南省科技企业孵化器",
                         "name": "云南省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省科技企业孵化器",
                         "name": "山东省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉林省科技企业孵化器",
                         "name": "吉林省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广东省科技企业孵化器",
                         "name": "广东省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省科技企业孵化器",
                         "name": "四川省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江西省科技企业孵化器",
                         "name": "江西省科技企业孵化器",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32155,113 +31601,97 @@ export const TYC = {
                         "value": "安徽省技术创新示范企业",
                         "name": "安徽省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省技术创新示范企业",
                         "name": "陕西省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广西省技术创新示范企业",
                         "name": "广西省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西省技术创新示范企业",
                         "name": "山西省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "甘肃省技术创新示范企业",
                         "name": "甘肃省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵州省技术创新示范企业",
                         "name": "贵州省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "西藏技术创新示范企业",
                         "name": "西藏技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北省技术创新示范企业",
                         "name": "河北省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省技术创新示范企业",
                         "name": "山东省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏技术创新示范企业",
                         "name": "宁夏技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省技术创新示范企业",
                         "name": "四川省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆技术创新示范企业",
                         "name": "重庆技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑龙江省技术创新示范企业",
                         "name": "黑龙江省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省技术创新示范企业",
                         "name": "河南省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省技术创新示范企业",
                         "name": "湖北省技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "内蒙古技术创新示范企业",
                         "name": "内蒙古技术创新示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32274,8 +31704,7 @@ export const TYC = {
                         "value": "湖北省隐形冠军示范企业",
                         "name": "湖北省隐形冠军示范企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32288,22 +31717,19 @@ export const TYC = {
                         "value": "湖北省隐形冠军培育企业",
                         "name": "湖北省隐形冠军培育企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省隐形冠军培育企业",
                         "name": "浙江省隐形冠军培育企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省隐形冠军培育企业",
                         "name": "陕西省隐形冠军培育企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32316,64 +31742,55 @@ export const TYC = {
                         "value": "浙江省科技小巨人企业",
                         "name": "浙江省科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省科技小巨人企业",
                         "name": "湖北省科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "青海省科技小巨人企业",
                         "name": "青海省科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海科技小巨人企业",
                         "name": "上海科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省科技小巨人企业",
                         "name": "山东省科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北省科技小巨人企业",
                         "name": "河北省科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏科技小巨人企业",
                         "name": "宁夏科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省科技小巨人企业",
                         "name": "福建省科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉林省科技小巨人企业",
                         "name": "吉林省科技小巨人企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32386,183 +31803,157 @@ export const TYC = {
                         "value": "广东省重点实验室",
                         "name": "广东省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省重点实验室",
                         "name": "湖北省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省重点实验室",
                         "name": "山东省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省重点实验室",
                         "name": "江苏省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑龙江省重点实验室",
                         "name": "黑龙江省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省重点实验室",
                         "name": "四川省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省重点实验室",
                         "name": "浙江省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西省重点实验室",
                         "name": "山西省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省重点实验室",
                         "name": "河南省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广西省重点实验室",
                         "name": "广西省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北省重点实验室",
                         "name": "河北省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "海南省重点实验室",
                         "name": "海南省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省重点实验室",
                         "name": "陕西省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉林省重点实验室",
                         "name": "吉林省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南省重点实验室",
                         "name": "湖南省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省重点实验室",
                         "name": "辽宁省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏重点实验室",
                         "name": "宁夏重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "内蒙古重点实验室",
                         "name": "内蒙古重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津重点实验室",
                         "name": "天津重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "云南省重点实验室",
                         "name": "云南省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省重点实验室",
                         "name": "安徽省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省重点实验室",
                         "name": "福建省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海重点实验室",
                         "name": "上海重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆重点实验室",
                         "name": "重庆重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新疆重点实验室",
                         "name": "新疆重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江西省重点实验室",
                         "name": "江西省重点实验室",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32575,211 +31966,181 @@ export const TYC = {
                         "value": "山西省创新型中小企业",
                         "name": "山西省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省创新型中小企业",
                         "name": "湖北省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省创新型中小企业",
                         "name": "陕西省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "海南省创新型中小企业",
                         "name": "海南省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省创新型中小企业",
                         "name": "江苏省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省创新型中小企业",
                         "name": "浙江省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江西省创新型中小企业",
                         "name": "江西省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆创新型中小企业",
                         "name": "重庆创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑龙江省创新型中小企业",
                         "name": "黑龙江省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏创新型中小企业",
                         "name": "宁夏创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省创新型中小企业",
                         "name": "四川省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "内蒙古创新型中小企业",
                         "name": "内蒙古创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省创新型中小企业",
                         "name": "福建省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵州省创新型中小企业",
                         "name": "贵州省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北省创新型中小企业",
                         "name": "河北省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省创新型中小企业",
                         "name": "辽宁省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "云南省创新型中小企业",
                         "name": "云南省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "西藏创新型中小企业",
                         "name": "西藏创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广西省创新型中小企业",
                         "name": "广西省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省创新型中小企业",
                         "name": "安徽省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "甘肃省创新型中小企业",
                         "name": "甘肃省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "新疆创新型中小企业",
                         "name": "新疆创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广东省创新型中小企业",
                         "name": "广东省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "北京创新型中小企业",
                         "name": "北京创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "青海省创新型中小企业",
                         "name": "青海省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省创新型中小企业",
                         "name": "河南省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南省创新型中小企业",
                         "name": "湖南省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省创新型中小企业",
                         "name": "山东省创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海创新型中小企业",
                         "name": "上海创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津创新型中小企业",
                         "name": "天津创新型中小企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32792,127 +32153,109 @@ export const TYC = {
                         "value": "江苏省技术先进型服务企业",
                         "name": "江苏省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省技术先进型服务企业",
                         "name": "四川省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津技术先进型服务企业",
                         "name": "天津技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省技术先进型服务企业",
                         "name": "安徽省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江省技术先进型服务企业",
                         "name": "浙江省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆技术先进型服务企业",
                         "name": "重庆技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省技术先进型服务企业",
                         "name": "陕西省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉林省技术先进型服务企业",
                         "name": "吉林省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "黑龙江省技术先进型服务企业",
                         "name": "黑龙江省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广东省技术先进型服务企业",
                         "name": "广东省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省技术先进型服务企业",
                         "name": "山东省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省技术先进型服务企业",
                         "name": "河南省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省技术先进型服务企业",
                         "name": "湖北省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "北京技术先进型服务企业",
                         "name": "北京技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海技术先进型服务企业",
                         "name": "上海技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省技术先进型服务企业",
                         "name": "福建省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省技术先进型服务企业",
                         "name": "辽宁省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南省技术先进型服务企业",
                         "name": "湖南省技术先进型服务企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32925,22 +32268,19 @@ export const TYC = {
                         "value": "山西省民营科技企业",
                         "name": "山西省民营科技企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "安徽省民营科技企业",
                         "name": "安徽省民营科技企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省民营科技企业",
                         "name": "江苏省民营科技企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -32953,50 +32293,43 @@ export const TYC = {
                         "value": "黑龙江省独角兽企业",
                         "name": "黑龙江省独角兽企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省独角兽企业",
                         "name": "福建省独角兽企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省独角兽企业",
                         "name": "辽宁省独角兽企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省独角兽企业",
                         "name": "湖北省独角兽企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆独角兽企业",
                         "name": "重庆独角兽企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省独角兽企业",
                         "name": "江苏省独角兽企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省独角兽企业",
                         "name": "山东省独角兽企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -33009,106 +32342,91 @@ export const TYC = {
                         "value": "广西省瞪羚企业",
                         "name": "广西省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆瞪羚企业",
                         "name": "重庆瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "海南省瞪羚企业",
                         "name": "海南省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北省瞪羚企业",
                         "name": "湖北省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "福建省瞪羚企业",
                         "name": "福建省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河南省瞪羚企业",
                         "name": "河南省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川省瞪羚企业",
                         "name": "四川省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "辽宁省瞪羚企业",
                         "name": "辽宁省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "陕西省瞪羚企业",
                         "name": "陕西省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津瞪羚企业",
                         "name": "天津瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏瞪羚企业",
                         "name": "宁夏瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏省瞪羚企业",
                         "name": "江苏省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西省瞪羚企业",
                         "name": "山西省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山东省瞪羚企业",
                         "name": "山东省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江西省瞪羚企业",
                         "name": "江西省瞪羚企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -33121,22 +32439,19 @@ export const TYC = {
                         "value": "辽宁省雏鹰企业",
                         "name": "辽宁省雏鹰企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁夏雏鹰企业",
                         "name": "宁夏雏鹰企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津雏鹰企业",
                         "name": "天津雏鹰企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             }
@@ -33148,8 +32463,7 @@ export const TYC = {
                         "text": "在科技型企业选项中，选项未标明“省级”的均为“国家级”。当前筛选结果均是在有效期内的数据。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -33161,26 +32475,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有知识产权出质",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无知识产权出质",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "businessOpportunity": {
         "key": "businessOpportunity",
@@ -33191,71 +32501,61 @@ export const TYC = {
                 "value": "registerCapitalInc",
                 "name": "近一个月注册资本增长50%以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "registerCapitalDec",
                 "name": "近一个月注册资本减少50%以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "registerAddrAlter",
                 "name": "近一个月有注册地址变更",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "controllerAlter",
                 "name": "近一个月有实际控制人变更",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "investInc",
                 "name": "近一个月新增对外投资",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "staffNumInc",
                 "name": "近一年员工人数增长50%以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "winnerInc",
                 "name": "近三个月中标政府招投标项目",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "financingInc",
                 "name": "近三个月内有融资",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "incomeInc",
                 "name": "连续三年营业收入正增长",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "trademarkInc",
                 "name": "近一个月有新增商标",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -33265,8 +32565,7 @@ export const TYC = {
                         "text": "天眼查商机指标是基于大数据计算而成，可为用户提供多场景下的商机线索查询选项。说明：近一年员工人数增长50%以上和连续三年营业收入正增长选项，此两类数据来源于企业年报，如当年年报未披露，则自动取上一年已披露的数据。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -33278,43 +32577,35 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有微信公众号",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无微信公众号",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "liabilityRange": {
         "key": "liabilityRange",
         "name": "总负债",
         "right": "svip",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "excludeGroupId": {
         "key": "excludeGroupId",
         "name": "过滤我的分组",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "profitReportPeriod": {
         "key": "profitReportPeriod",
@@ -33324,33 +32615,28 @@ export const TYC = {
                 "value": "12",
                 "name": "年报",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "09",
                 "name": "三季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "06",
                 "name": "中报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "03",
                 "name": "一季报",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasEquityFreeze": {
         "key": "hasEquityFreeze",
@@ -33360,32 +32646,27 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有股权冻结",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无股权冻结",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "word": {
         "key": "word",
         "name": "关键词",
-        "items": [
-        ],
+        "items": [],
         "explain": [
             {
                 "title": "【模糊】",
@@ -33394,8 +32675,7 @@ export const TYC = {
                         "text": "系统会先自动智能分词然后再进行搜索。如搜索“网络科技”，系统会自动分成“网络”“科技”然后进行搜索，只要查询范围内中出现“网络”和“科技”都会被搜索到。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "【精准】",
@@ -33404,8 +32684,7 @@ export const TYC = {
                         "text": "搜索结果必须完全包含完整的关键词。如搜索“网络科技”，搜索结果一定完整包含“网络科技”才能被搜索到，而“网络信息科技”或“科技网络”的结果不会被搜索到。带空格搜索词会对空格前后的词分别进行精准匹配。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -33418,36 +32697,31 @@ export const TYC = {
                 "value": "1",
                 "name": "90分以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "75-89分",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "60-74分",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "50-59分",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "5",
                 "name": "50分以下",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -33457,8 +32731,7 @@ export const TYC = {
                         "text": "天眼评分是基于多维度数据，从组织背景、经营现状、信用评级、创新能力、发展态势等几大维度综合计算的企业得分，是了解企业实力的直观参考方式。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -33470,26 +32743,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有专利信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无专利信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "certificateType": {
         "key": "certificateType",
@@ -33499,138 +32768,118 @@ export const TYC = {
                 "value": "电信设备进网许可证",
                 "name": "电信设备进网许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "电信业务经营许可证",
                 "name": "电信业务经营许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "建筑资质",
                 "name": "建筑资质",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "安全生产许可证",
                 "name": "安全生产许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "排污许可证",
                 "name": "排污许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "办学许可证",
                 "name": "办学许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "采矿许可证",
                 "name": "采矿许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "金融许可证",
                 "name": "金融许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "食品生产许可证",
                 "name": "食品生产许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "食品经营许可证",
                 "name": "食品经营许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "医疗器械生产许可证",
                 "name": "医疗器械生产许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "医疗器械经营许可证",
                 "name": "医疗器械经营许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "互联网药品信息服务许可证",
                 "name": "互联网药品信息服务许可证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "国产非特殊用途化妆品备案",
                 "name": "国产非特殊用途化妆品备案",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "强制性产品认证(CCC)",
                 "name": "强制性产品认证(CCC)",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "质量管理体系认证",
                 "name": "质量管理体系认证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "环境管理体系认证",
                 "name": "环境管理体系认证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "职业健康安全管理体系认证",
                 "name": "职业健康安全管理体系认证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "知识产权管理体系认证",
                 "name": "知识产权管理体系认证",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "capitalType": {
         "key": "capitalType",
@@ -33640,26 +32889,22 @@ export const TYC = {
                 "value": "1",
                 "name": "人民币",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "美元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "其它",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "companyScale": {
         "key": "companyScale",
@@ -33671,32 +32916,28 @@ export const TYC = {
                 "name": "大型",
                 "iconType": "L",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "中型",
                 "name": "中型",
                 "iconType": "M",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "小型",
                 "name": "小型",
                 "iconType": "S",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "微型",
                 "name": "微型",
                 "iconType": "XS",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -33706,8 +32947,7 @@ export const TYC = {
                         "text": "基于天眼查大数据模型，结合不同行业企业的经营数据，如企业的资产总额、经营利润、人员规模等 (其中上市/发债企业以合并报表口径) ，综合计算形成的\u003cb\u003eL(大型)\u003c/b\u003e、\u003cb\u003eM(中型)\u003c/b\u003e、\u003cb\u003eS(小型)\u003c/b\u003e和\u003cb\u003eXS(微型)\u003c/b\u003e四类企业规模分类体系 (其中不包含缺乏判定指标或新成立的企业) 。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -33719,43 +32959,37 @@ export const TYC = {
                 "value": "1",
                 "name": "0-100万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "100-200万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "200-500万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "500-1000万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "6",
                 "name": "1000-5000万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "7",
                 "name": "5000万以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -33765,18 +32999,15 @@ export const TYC = {
                         "text": "一般而言，是指公司在登记机关登记注册的资本额，也叫法定资本，为股东认缴的出资总额或者发起人认购的股本总额。非人民币币种的注册资本通过与当地货币汇率换算所得。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
     "staffNumRange": {
         "key": "staffNumRange",
         "name": "参保人数 (自定义) ",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "isBondIssuingCompany": {
         "key": "isBondIssuingCompany",
@@ -33786,26 +33017,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "是发债企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非发债企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "staffNum": {
         "key": "staffNum",
@@ -33815,54 +33042,46 @@ export const TYC = {
                 "value": "10",
                 "name": "0人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "11",
                 "name": "1-49人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "12",
                 "name": "50-99人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "13",
                 "name": "100-999人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "14",
                 "name": "1000-4999人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "15",
                 "name": "5000人以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "99",
                 "name": "未披露",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "aboveScale": {
         "key": "aboveScale",
@@ -33872,43 +33091,37 @@ export const TYC = {
                 "value": "规模以上工业",
                 "name": "规模以上工业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "资质内建筑业",
                 "name": "资质内建筑业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "限额以上批发和零售业",
                 "name": "限额以上批发和零售业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "限额以上住宿和餐饮业",
                 "name": "限额以上住宿和餐饮业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "房地产开发和经营业",
                 "name": "房地产开发和经营业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "规模以上服务业",
                 "name": "规模以上服务业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -33918,8 +33131,7 @@ export const TYC = {
                         "text": "规上企业是指对达到一定规模、资质或限额的法人单位的统称，是规模以上工业、资质内建筑业、限额以上批发和零售业、限额以上住宿和餐饮业、房地产开发和经营业、规模以上服务业企业的统称。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -33931,85 +33143,73 @@ export const TYC = {
                 "value": "种子轮/天使轮",
                 "name": "种子轮/天使轮",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "A轮",
                 "name": "A轮",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "B轮",
                 "name": "B轮",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "C轮",
                 "name": "C轮",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "D轮及以上",
                 "name": "D轮及以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "股权/债权/战略融资",
                 "name": "股权/债权/战略融资",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "定向增发",
                 "name": "定向增发",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "收购/并购",
                 "name": "收购/并购",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "战略合并",
                 "name": "战略合并",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "股权转让",
                 "name": "股权转让",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "私有化",
                 "name": "私有化",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "未融资",
                 "name": "未融资",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -34023,8 +33223,7 @@ export const TYC = {
                         "text": "天使轮，一般而言是指个人出资协助具有专门技术或独特概念而缺少自有资金的创业家进行创业，并承担创业中的高风险和享受创业成功后的高收益。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "A轮",
@@ -34033,8 +33232,7 @@ export const TYC = {
                         "text": "拥有成熟产品，完整详细的商业及盈利模式，同时在行业内有一定地位与口碑的项目。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "B轮",
@@ -34043,8 +33241,7 @@ export const TYC = {
                         "text": "项目基本上已经有了比较大的发展，商业模式与盈利模式均已得到很好的验证，有的已经开始盈利。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "C轮",
@@ -34053,8 +33250,7 @@ export const TYC = {
                         "text": "商业模式成熟、拥有大量用户、在行业内有主导或领导地位的阶段。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "D轮及以上",
@@ -34063,8 +33259,7 @@ export const TYC = {
                         "text": "一般而言是公司发展成熟，基本实现盈利，正在向上市方向准备的融资阶段。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "股权/债权/战略融资",
@@ -34079,8 +33274,7 @@ export const TYC = {
                         "text": "战略融资，是指从产业协同角度引入对企业业务发展有重大影响的投资人的融资行为。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "定向增发",
@@ -34089,8 +33283,7 @@ export const TYC = {
                         "text": "定向增发是增发的一种，一般而言是指上市公司向符合条件的少数特定投资者非公开发行债券或股票等投资产品的行为。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "收购/并购",
@@ -34102,8 +33295,7 @@ export const TYC = {
                         "text": "企业并购，一般而言是指以现金、债券、股票或其他有价证券的形式，通过收购债权、直接出资、控股及其他多种手段购买其他企业的股票或资 产取得其他企业的资产实际控制权使其失去法人地位或对其拥有控制权的行为。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "战略合并",
@@ -34112,8 +33304,7 @@ export const TYC = {
                         "text": "战略合并，一般而言是指两个以上的企业根据合同变成一个企业，共同发展、共同规划的策略。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "股权转让",
@@ -34122,8 +33313,7 @@ export const TYC = {
                         "text": "股权转让，一般而言是指企业的股东将其持有的股份或出资部分或全部转让给他人。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "私有化",
@@ -34132,8 +33322,7 @@ export const TYC = {
                         "text": "私有化，一般而言是指公有组织或公有财产的所有权人直接或由其代理人越权将公有组织或公有财产以及这些组织或财产的所有权及其派生权利合法或非法地由公有组织或公有财产的全体公民或某一集体所有转变为个别私人所有的行为及其过程。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -34145,19 +33334,16 @@ export const TYC = {
                 "value": "1",
                 "name": "是",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "profitUnit": {
         "key": "profitUnit",
@@ -34167,26 +33353,22 @@ export const TYC = {
                 "value": "元",
                 "name": "元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "万",
                 "name": "万元",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "亿",
                 "name": "亿元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "branchType": {
         "key": "branchType",
@@ -34196,40 +33378,34 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "是分支机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "非分支机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "有分支机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "无分支机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "liabilityRelation": {
         "key": "liabilityRelation",
@@ -34239,47 +33415,40 @@ export const TYC = {
                 "value": "gt",
                 "name": "大于",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "gte",
                 "name": "大于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lt",
                 "name": "小于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lte",
                 "name": "小于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "eq",
                 "name": "等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "range",
                 "name": "介于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasJudgmentDocument": {
         "key": "hasJudgmentDocument",
@@ -34289,35 +33458,29 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有裁判文书",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无裁判文书",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "profitRange": {
         "key": "profitRange",
         "name": "净利润",
         "right": "svip",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "hasSoftCopyright": {
         "key": "hasSoftCopyright",
@@ -34327,26 +33490,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有软件著作权",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无软件著作权",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasEquityPledge": {
         "key": "hasEquityPledge",
@@ -34356,22 +33515,19 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有股权出质",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无股权出质",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -34381,8 +33537,7 @@ export const TYC = {
                         "text": "一般是指将公司股权作为担保方式进行质押的行为，此处的筛选结果仅含涉及到的出质人。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -34394,22 +33549,19 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有ICP备案",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无ICP备案",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -34419,8 +33571,7 @@ export const TYC = {
                         "text": "检测企业是否有ICP备案的网站信息。ICP备案，是为了防止在网上从事非法的网站经营活动，打击不良互联网信息的传播，国家对互联网信息服务实行的备案制度。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -34432,26 +33583,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有环保处罚",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无环保处罚",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasWorkCopyright": {
         "key": "hasWorkCopyright",
@@ -34461,26 +33608,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有作品著作权",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无作品著作权",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "bookkeepingPhone": {
         "key": "bookkeepingPhone",
@@ -34490,22 +33633,19 @@ export const TYC = {
                 "value": "2",
                 "name": "过滤有疑似代记账号企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "过滤全为疑似代记账号企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "含疑似代记账号企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -34524,8 +33664,7 @@ export const TYC = {
                                 "text": "搜索列表和导出结果会过滤掉号码全部为疑似代记账号码的企业。"
                             }
                         ],
-                        "subList": [
-                        ]
+                        "subList": []
                     },
                     {
                         "title": "过滤有疑似代记账号码企业",
@@ -34534,8 +33673,7 @@ export const TYC = {
                                 "text": "搜索列表和导出结果会过滤掉号码中含疑似代记账号码的企业。"
                             }
                         ],
-                        "subList": [
-                        ]
+                        "subList": []
                     }
                 ]
             }
@@ -34549,26 +33687,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有合作风险",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无合作风险",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "economicTypeMethod": {
         "key": "economicTypeMethod",
@@ -34578,19 +33712,16 @@ export const TYC = {
                 "value": "1",
                 "name": "包含",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "不包含",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "certificateTypeMethod": {
         "key": "certificateTypeMethod",
@@ -34600,19 +33731,16 @@ export const TYC = {
                 "value": "1",
                 "name": "具备",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "不具备",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasJudicialCase": {
         "key": "hasJudicialCase",
@@ -34622,26 +33750,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有司法案件",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无司法案件",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasLiquidation": {
         "key": "hasLiquidation",
@@ -34651,26 +33775,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有清算信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无清算信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasRestrictConsumption": {
         "key": "hasRestrictConsumption",
@@ -34680,26 +33800,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有限制高消费",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无限制高消费",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasMortgage": {
         "key": "hasMortgage",
@@ -34709,26 +33825,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有动产抵押",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无动产抵押",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasPhone": {
         "key": "hasPhone",
@@ -34738,26 +33850,22 @@ export const TYC = {
                 "value": "3",
                 "name": "有有效手机号",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "有固定电话",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "有400/800号",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "annualReport": {
         "key": "annualReport",
@@ -34772,15 +33880,13 @@ export const TYC = {
                         "value": "2023-1",
                         "name": "有年报",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "2023-0",
                         "name": "无年报",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -34793,15 +33899,13 @@ export const TYC = {
                         "value": "2022-1",
                         "name": "有年报",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "2022-0",
                         "name": "无年报",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -34814,15 +33918,13 @@ export const TYC = {
                         "value": "2021-1",
                         "name": "有年报",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "2021-0",
                         "name": "无年报",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             }
@@ -34834,8 +33936,7 @@ export const TYC = {
                         "text": "根据《企业信息公示暂行条例》，企业应当每年1月1日至6月30日，通过企业信用信息公示系统向工商行政管理部门报送上一年度年度报告，并向社会公示。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -34843,8 +33944,7 @@ export const TYC = {
         "key": "financialData",
         "name": "财务数据",
         "right": "svip",
-        "items": [
-        ],
+        "items": [],
         "explain": [
             {
                 "contentList": [
@@ -34852,8 +33952,7 @@ export const TYC = {
                         "text": "来自公开披露的企业财务数据，包含且不仅限于企业工商年报、企业证券公告披露的合并报表及母公司报表 (其中在境外上市的境内运营主体数据来自其对应上市公司披露的财务数据) 以及其他公开数据来源。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -34870,22 +33969,19 @@ export const TYC = {
                         "value": "存续/在业",
                         "name": "存续/在业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "迁入",
                         "name": "迁入",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "迁出",
                         "name": "迁出",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -34898,15 +33994,13 @@ export const TYC = {
                         "value": "注销",
                         "name": "注销",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吊销",
                         "name": "吊销",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -34919,43 +34013,37 @@ export const TYC = {
                         "value": "撤销",
                         "name": "撤销",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "清算",
                         "name": "清算",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "停业",
                         "name": "停业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "已歇业",
                         "name": "已歇业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "责令关闭",
                         "name": "责令关闭",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "解散",
                         "name": "解散",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             }
@@ -34968,8 +34056,7 @@ export const TYC = {
                         "text": "一般而言，存续是指企业依法存在并继续正常运营。也被称作开业、正常、登记。在业是指企业正常开工生产，新建企业包括部分投产或试营业。因不同省份可能有细微的区别，一般在营、正常、经营、在营在册、有效、在业在册也是在业的意思。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "迁入",
@@ -34978,8 +34065,7 @@ export const TYC = {
                         "text": "一般而言，是指企业登记主管机关的变更，迁入新主管机关。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "迁出",
@@ -34988,8 +34074,7 @@ export const TYC = {
                         "text": "一般而言，是指企业登记主管机关的变更，迁离某主管机关，此处的迁出包含历史迁出。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "注销",
@@ -34998,8 +34083,7 @@ export const TYC = {
                         "text": "一般而言，是指企业自行通过法定流程申请注销营业执照以终止公司法人资格。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "吊销",
@@ -35008,8 +34092,7 @@ export const TYC = {
                         "text": "一般而言，是指工商局对违法企业作出的行政处罚。企业被吊销执照后，应当依法进行清算，清算结束并办理工商注销登记。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "撤销",
@@ -35018,8 +34101,7 @@ export const TYC = {
                         "text": "一般而言，是指工商行政主管部门或者其上级行政机关根据利害关系人的请求或者依据职权，作出的撤销行政行为的决定。通俗讲，撤销就是对已经完成的登记行为的否定，或者说是一种纠错行为，错误的登记丧失法律效力。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "清算",
@@ -35028,8 +34110,7 @@ export const TYC = {
                         "text": "一般而言，是指企业按章程规定解散以及由于破产或其他原因宣布终止经营后，对企业的财产、债权、债务进行全面清查，并进行收取债权，清偿债务和分配剩余财产的经济活动。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "停业",
@@ -35038,8 +34119,7 @@ export const TYC = {
                         "text": "一般而言，是指由某种原因，企业在期末处于停止生产经营活动待条件改变后仍恢复生产。包括自行停业和责令停产停业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "已歇业",
@@ -35048,8 +34128,7 @@ export const TYC = {
                         "text": "一般而言，是指因自然灾害、事故灾难、公共卫生事件、社会安全事件等原因造成经营困难的，市场主体可以自主决定在一定时期内歇业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "责令关闭",
@@ -35058,8 +34137,7 @@ export const TYC = {
                         "text": "一般而言，是指是对企事业单位的行政处罚，即人民政府依法作出决定命令其关闭。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "解散",
@@ -35068,8 +34146,7 @@ export const TYC = {
                         "text": "一般而言，是指公司已经解散并且已经注销了商业登记证。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -35081,26 +34158,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有微博",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无微博",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "employeeNum": {
         "key": "employeeNum",
@@ -35111,43 +34184,37 @@ export const TYC = {
                 "value": "1",
                 "name": "20人以内",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "20-99人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "100-299人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "300-999人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "5",
                 "name": "1000人及以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "99",
                 "name": "未披露",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -35157,8 +34224,7 @@ export const TYC = {
                         "text": "结合工商照面信息的人员规模及年报信息的参保人数综合计算得出。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -35170,22 +34236,19 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "是小微企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非小微企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -35195,8 +34258,7 @@ export const TYC = {
                         "text": "小微企业基于国家市场监督管理部门公布的小微企业库，依据企业营业收入，资产总额，从业人员数量等标准进行划分。企业划分由政府综合统计部门根据统计年报每年确定一次。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -35209,98 +34271,83 @@ export const TYC = {
                 "value": "进出口货物收发货人",
                 "name": "进出口货物收发货人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "报关企业",
                 "name": "报关企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "报关企业分支机构",
                 "name": "报关企业分支机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "特殊监管区双重身份企业",
                 "name": "特殊监管区双重身份企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "加工生产企业",
                 "name": "加工生产企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "临时注册企业",
                 "name": "临时注册企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "保税仓库",
                 "name": "保税仓库",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "进出境运输工具负责人",
                 "name": "进出境运输工具负责人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "进出口收发货人",
                 "name": "进出口收发货人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "进出口收发货人分支机构",
                 "name": "进出口收发货人分支机构",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "无进出口经营权的加工生产企业",
                 "name": "无进出口经营权的加工生产企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "无报关权的其他企业",
                 "name": "无报关权的其他企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "incomeRange": {
         "key": "incomeRange",
         "name": "营业收入 (自定义) ",
         "right": "svip",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "hasStateLandTransfer": {
         "key": "hasStateLandTransfer",
@@ -35310,26 +34357,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有国有土地受让",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无国有土地受让",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "isGeneralTaxpayerNew": {
         "key": "isGeneralTaxpayerNew",
@@ -35339,36 +34382,31 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "是一般纳税人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非一般纳税人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "是小规模纳税人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "非小规模纳税人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -35378,8 +34416,7 @@ export const TYC = {
                         "text": "一般而言，小规模纳税人是指年销售额在规定标准以下，并且会计核算不健全，不能按规定报送有关税务资料的增值税纳税人。一般纳税人是指年应征增值税销售额超过财政部规定的小规模纳税人标准的企业和企业性单位。非小规模纳税人、非一般纳税人包含无纳税人资质数据。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -35391,26 +34428,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有商标信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无商标信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "incomeReportYear": {
         "key": "incomeReportYear",
@@ -35420,33 +34453,28 @@ export const TYC = {
                 "value": "最新",
                 "name": "最新",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2023",
                 "name": "2023年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2022",
                 "name": "2022年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2021",
                 "name": "2021年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "phoneFilter400": {
         "key": "phoneFilter400",
@@ -35456,15 +34484,13 @@ export const TYC = {
                 "value": "0",
                 "name": "过滤有400/800号企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "含400/800号企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -35475,8 +34501,7 @@ export const TYC = {
                         "text": "搜索列表和导出结果会过滤掉号码含有400/800类号企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "过滤全为400/800号企业",
@@ -35485,18 +34510,15 @@ export const TYC = {
                         "text": "搜索列表和导出结果会过滤掉号码全部为400/800类号企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
     "establishTimeRange": {
         "key": "establishTimeRange",
         "name": "成立年限 (自定义) ",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "technologyTypeNewMethod": {
         "key": "technologyTypeNewMethod",
@@ -35506,19 +34528,16 @@ export const TYC = {
                 "value": "1",
                 "name": "是",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "profitReportYear": {
         "key": "profitReportYear",
@@ -35528,33 +34547,28 @@ export const TYC = {
                 "value": "最新",
                 "name": "最新",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2023",
                 "name": "2023年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2022",
                 "name": "2022年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2021",
                 "name": "2021年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "emptyPhoneFilter": {
         "key": "emptyPhoneFilter",
@@ -35564,8 +34578,7 @@ export const TYC = {
                 "value": "1",
                 "name": "过滤全为空号企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -35585,8 +34598,7 @@ export const TYC = {
                                 "text": "电话正常，可联系"
                             }
                         ],
-                        "subList": [
-                        ]
+                        "subList": []
                     },
                     {
                         "title": "异常电话",
@@ -35596,8 +34608,7 @@ export const TYC = {
                                 "text": "空号、风险号码或无法被识别号码，可能无法联系到该公司"
                             }
                         ],
-                        "subList": [
-                        ]
+                        "subList": []
                     },
                     {
                         "title": "大陆座机",
@@ -35607,8 +34618,7 @@ export const TYC = {
                                 "text": "大陆座机"
                             }
                         ],
-                        "subList": [
-                        ]
+                        "subList": []
                     },
                     {
                         "title": "服务电话",
@@ -35618,8 +34628,7 @@ export const TYC = {
                                 "text": "公司用于售前、售后客户服务咨询电话"
                             }
                         ],
-                        "subList": [
-                        ]
+                        "subList": []
                     }
                 ]
             }
@@ -35633,22 +34642,19 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有ICP备案",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无ICP备案",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -35658,8 +34664,7 @@ export const TYC = {
                         "text": "检测展示在企业主页基本信息模块中的官网是否有ICP备案。ICP备案，是为了防止在网上从事非法的网站经营活动，打击不良互联网信息的传播，国家对互联网信息服务实行的备案制度。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -35667,8 +34672,7 @@ export const TYC = {
         "key": "enterTopList",
         "name": "榜单",
         "right": "svip",
-        "items": [
-        ],
+        "items": [],
         "explain": [
             {
                 "contentList": [
@@ -35676,8 +34680,7 @@ export const TYC = {
                         "text": "当前结果包含境内、港台、美股企业，部分非上述类型企业暂不覆盖。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -35692,8 +34695,7 @@ export const TYC = {
                         "text": "支持对境内企业注册地址所属的行政区、功能区 (特区、开发区、新区等) 进行筛选。同一行政区内可能存在多个功能区，同一功能区内也可能存在多个行政区。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -35706,20 +34708,17 @@ export const TYC = {
                 "name": "模糊",
                 "selected": 1,
                 "explain": "系统会先自动智能分词然后再进行搜索。如搜索“网络科技”，系统会自动分成“网络”“科技”然后进行搜索，只要查询范围内中出现“网络”和“科技”都会被搜索到。",
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "精准",
                 "selected": 0,
                 "explain": "搜索结果必须完全包含完整的关键词。如搜索“网络科技”，搜索结果一定完整包含“网络科技”才能被搜索到，而“网络信息科技”或“科技网络”的结果不会被搜索到。带空格搜索词会对空格前后的词分别进行精准匹配。",
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasChangeInfo": {
         "key": "hasChangeInfo",
@@ -35729,26 +34728,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有变更信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无变更信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasTiktokKwai": {
         "key": "hasTiktokKwai",
@@ -35758,26 +34753,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有抖音/快手",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无抖音/快手",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasWebsite": {
         "key": "hasWebsite",
@@ -35787,26 +34778,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有官网信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无官网信息",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "liabilityReportYear": {
         "key": "liabilityReportYear",
@@ -35816,33 +34803,28 @@ export const TYC = {
                 "value": "最新",
                 "name": "最新",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2023",
                 "name": "2023年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2022",
                 "name": "2022年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2021",
                 "name": "2021年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "isGeneralTaxpayer": {
         "key": "isGeneralTaxpayer",
@@ -35852,26 +34834,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "是一般纳税人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非一般纳税人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "income": {
         "key": "income",
@@ -35882,54 +34860,46 @@ export const TYC = {
                 "value": "1",
                 "name": "0万以下",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "0-100万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "100-500万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "500-1000万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "5",
                 "name": "1000-5000万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "6",
                 "name": "5000万-1亿",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "7",
                 "name": "1亿以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "top500": {
         "key": "top500",
@@ -35939,28 +34909,23 @@ export const TYC = {
                 "value": "0",
                 "name": "中国500强",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "世界500强",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "employeeNumRange": {
         "key": "employeeNumRange",
         "name": "员工人数 (自定义) ",
         "right": "svip",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "scienceTechnologyGrade": {
         "key": "scienceTechnologyGrade",
@@ -35971,36 +34936,31 @@ export const TYC = {
                 "value": "卓越",
                 "name": "卓越",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "优秀",
                 "name": "优秀",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "良好",
                 "name": "良好",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "普通",
                 "name": "普通",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "入门",
                 "name": "入门",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -36010,8 +34970,7 @@ export const TYC = {
                         "text": "科创分是从企业创新能力、科创资质、研发实力、行业潜力以及成长性5个大类维度综合评价企业的科技创新能力以及发展潜力。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -36029,43 +34988,37 @@ export const TYC = {
                         "value": "工商银行",
                         "name": "工商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "建设银行",
                         "name": "建设银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "农业银行",
                         "name": "农业银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中国银行",
                         "name": "中国银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "交通银行",
                         "name": "交通银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "邮政储蓄银行",
                         "name": "邮政储蓄银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -36078,85 +35031,73 @@ export const TYC = {
                         "value": "招商银行",
                         "name": "招商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "兴业银行",
                         "name": "兴业银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浦发银行",
                         "name": "浦发银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中信银行",
                         "name": "中信银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "民生银行",
                         "name": "民生银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "光大银行",
                         "name": "光大银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "平安银行",
                         "name": "平安银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "华夏银行",
                         "name": "华夏银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广发银行",
                         "name": "广发银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙商银行",
                         "name": "浙商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "渤海银行",
                         "name": "渤海银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "恒丰银行",
                         "name": "恒丰银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -36169,400 +35110,343 @@ export const TYC = {
                         "value": "北京银行",
                         "name": "北京银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海银行",
                         "name": "上海银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江苏银行",
                         "name": "江苏银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "宁波银行",
                         "name": "宁波银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "南京银行",
                         "name": "南京银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "徽商银行",
                         "name": "徽商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "杭州银行",
                         "name": "杭州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "盛京银行",
                         "name": "盛京银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中原银行",
                         "name": "中原银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "厦门国际银行",
                         "name": "厦门国际银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津银行",
                         "name": "天津银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "成都银行",
                         "name": "成都银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "长沙银行",
                         "name": "长沙银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵阳银行",
                         "name": "贵阳银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "哈尔滨银行",
                         "name": "哈尔滨银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广州银行",
                         "name": "广州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆银行",
                         "name": "重庆银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "吉林银行",
                         "name": "吉林银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "郑州银行",
                         "name": "郑州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "贵州银行",
                         "name": "贵州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "昆仑银行",
                         "name": "昆仑银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江西银行",
                         "name": "江西银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "苏州银行",
                         "name": "苏州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "桂林银行",
                         "name": "桂林银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "甘肃银行",
                         "name": "甘肃银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "四川银行",
                         "name": "四川银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "大连银行",
                         "name": "大连银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "东莞银行",
                         "name": "东莞银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "河北银行",
                         "name": "河北银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "齐鲁银行",
                         "name": "齐鲁银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "青岛银行",
                         "name": "青岛银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖南银行",
                         "name": "湖南银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "西安银行",
                         "name": "西安银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "湖北银行",
                         "name": "湖北银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "珠海华润银行",
                         "name": "珠海华润银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "汉口银行",
                         "name": "汉口银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "九江银行",
                         "name": "九江银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "兰州银行",
                         "name": "兰州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "长安银行",
                         "name": "长安银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "台州银行",
                         "name": "台州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "泰隆商业银行",
                         "name": "泰隆商业银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "晋商银行",
                         "name": "晋商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江稠州商业银行",
                         "name": "浙江稠州商业银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广西北部湾银行",
                         "name": "广西北部湾银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "温州银行",
                         "name": "温州银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "富滇银行",
                         "name": "富滇银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广东华兴银行",
                         "name": "广东华兴银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "厦门银行",
                         "name": "厦门银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "蒙商银行",
                         "name": "蒙商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "山西银行",
                         "name": "山西银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "廊坊银行",
                         "name": "廊坊银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "威海市商业银行",
                         "name": "威海市商业银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "唐山银行",
                         "name": "唐山银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "张家口银行",
                         "name": "张家口银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "日照银行",
                         "name": "日照银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广东南粤银行",
                         "name": "广东南粤银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "重庆三峡银行",
                         "name": "重庆三峡银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -36575,113 +35459,97 @@ export const TYC = {
                         "value": "重庆农商银行",
                         "name": "重庆农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "上海农商银行",
                         "name": "上海农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "北京农商银行",
                         "name": "北京农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "广州农商银行",
                         "name": "广州农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "东莞农商银行",
                         "name": "东莞农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "成都农商银行",
                         "name": "成都农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "深圳农商银行",
                         "name": "深圳农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "江南农商银行",
                         "name": "江南农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "天津农商银行",
                         "name": "天津农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "顺德农商银行",
                         "name": "顺德农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "青岛农商银行",
                         "name": "青岛农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "杭州联合银行",
                         "name": "杭州联合银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "武汉农商银行",
                         "name": "武汉农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "南海农商银行",
                         "name": "南海农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "常熟农商银行",
                         "name": "常熟农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "萧山农商银行",
                         "name": "萧山农商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -36694,15 +35562,13 @@ export const TYC = {
                         "value": "微众银行",
                         "name": "微众银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "浙江网商银行",
                         "name": "浙江网商银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -36715,56 +35581,48 @@ export const TYC = {
                         "value": "汇丰银行",
                         "name": "汇丰银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "渣打银行",
                         "name": "渣打银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "花旗银行",
                         "name": "花旗银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "三菱日联银行",
                         "name": "三菱日联银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "三井住友银行",
                         "name": "三井住友银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "东亚银行",
                         "name": "东亚银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "瑞穗银行",
                         "name": "瑞穗银行",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasEmail": {
         "key": "hasEmail",
@@ -36774,26 +35632,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有联系邮箱",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无联系邮箱",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "enterTopListMethod": {
         "key": "enterTopListMethod",
@@ -36803,25 +35657,21 @@ export const TYC = {
                 "value": "1",
                 "name": "是",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "onlyCompany": {
         "key": "onlyCompany",
         "name": "仅看公司",
-        "items": [
-        ],
+        "items": [],
         "explain": [
             {
                 "contentList": [
@@ -36829,8 +35679,7 @@ export const TYC = {
                         "text": "搜索结果仅展示境内有限责任公司和股份有限公司，排除个体户等其他组织机构类型。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -36842,75 +35691,64 @@ export const TYC = {
                 "value": "company_name",
                 "name": "企业名称",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "scope",
                 "name": "经营范围",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "company_intro",
                 "name": "企业简介",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "contact_addr",
                 "name": "地址",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "brand_product",
                 "name": "品牌/产品",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "legal_person",
                 "name": "法定代表人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "patent",
                 "name": "专利",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "trademark",
                 "name": "商标",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "shareholder",
                 "name": "股东",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "staff",
                 "name": "主要人员",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasCommercialFranchising": {
         "key": "hasCommercialFranchising",
@@ -36920,26 +35758,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有特许经营备案",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无特许经营备案",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "financialDataMethod": {
         "key": "financialDataMethod",
@@ -36949,19 +35783,16 @@ export const TYC = {
                 "value": "1",
                 "name": "或",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "且",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasEnforcedPerson": {
         "key": "hasEnforcedPerson",
@@ -36971,26 +35802,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "是被执行人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非被执行人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "institutionTypeMethod": {
         "key": "institutionTypeMethod",
@@ -37000,19 +35827,16 @@ export const TYC = {
                 "value": "1",
                 "name": "包含",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "不包含",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasRecruit": {
         "key": "hasRecruit",
@@ -37022,26 +35846,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有招聘",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无招聘",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "incomeUnit": {
         "key": "incomeUnit",
@@ -37051,26 +35871,22 @@ export const TYC = {
                 "value": "元",
                 "name": "元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "万",
                 "name": "万元",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "亿",
                 "name": "亿元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "assetReportYear": {
         "key": "assetReportYear",
@@ -37080,50 +35896,41 @@ export const TYC = {
                 "value": "最新",
                 "name": "最新",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2023",
                 "name": "2023年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2022",
                 "name": "2022年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2021",
                 "name": "2021年",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "regCapitalRange": {
         "key": "regCapitalRange",
         "name": "注册资本 (自定义) ",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "registerInstitute": {
         "key": "registerInstitute",
         "name": "登记机关",
         "right": "svip",
-        "items": [
-        ],
-        "explain": [
-        ]
+        "items": [],
+        "explain": []
     },
     "patentType": {
         "key": "patentType",
@@ -37133,33 +35940,28 @@ export const TYC = {
                 "value": "1",
                 "name": "发明发布",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "发明授权",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "实用新型",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "外观设计",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "paidCapital": {
         "key": "paidCapital",
@@ -37169,43 +35971,37 @@ export const TYC = {
                 "value": "1",
                 "name": "0-100万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "100-200万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "200-500万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "500-1000万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "6",
                 "name": "1000-5000万",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "7",
                 "name": "5000万以上",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": [
@@ -37215,8 +36011,7 @@ export const TYC = {
                         "text": "企业实际收到的投资人投入的资本。除部分行业实行注册资本实缴制外，其他企业全部实施认缴登记制。全体股东认缴的出资额由股东按照公司章程的规定自公司成立之日起法定期限内缴足。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -37228,26 +36023,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非A级",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "A级",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "incomeRelation": {
         "key": "incomeRelation",
@@ -37257,47 +36048,40 @@ export const TYC = {
                 "value": "gt",
                 "name": "大于",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "gte",
                 "name": "大于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lt",
                 "name": "小于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lte",
                 "name": "小于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "eq",
                 "name": "等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "range",
                 "name": "介于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "assetUnit": {
         "key": "assetUnit",
@@ -37307,26 +36091,22 @@ export const TYC = {
                 "value": "元",
                 "name": "元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "万",
                 "name": "万元",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "亿",
                 "name": "亿元",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "sortType": {
         "key": "sortType",
@@ -37336,40 +36116,34 @@ export const TYC = {
                 "value": "0",
                 "name": "默认排序",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "注册资本从高到低",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "2",
                 "name": "注册资本从低到高",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "3",
                 "name": "成立日期从晚到早",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "4",
                 "name": "成立日期从早到晚",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "assetRelation": {
         "key": "assetRelation",
@@ -37379,47 +36153,40 @@ export const TYC = {
                 "value": "gt",
                 "name": "大于",
                 "selected": 1,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "gte",
                 "name": "大于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lt",
                 "name": "小于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "lte",
                 "name": "小于等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "eq",
                 "name": "等于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "range",
                 "name": "介于",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "economicType": {
         "key": "economicType",
@@ -37436,56 +36203,49 @@ export const TYC = {
                         "name": "央企",
                         "right": "svip",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "央企子公司",
                         "name": "央企子公司",
                         "right": "svip",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "省管国企",
                         "name": "省管国企",
                         "right": "svip",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "市管国企",
                         "name": "市管国企",
                         "right": "svip",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "国有全资企业",
                         "name": "国有全资企业",
                         "right": "svip",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "国有独资企业",
                         "name": "国有独资企业",
                         "right": "svip",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "国有控股企业",
                         "name": "国有控股企业",
                         "right": "svip",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -37493,8 +36253,7 @@ export const TYC = {
                 "value": "民营企业",
                 "name": "民营企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "港澳台投资企业",
@@ -37505,36 +36264,31 @@ export const TYC = {
                         "value": "港澳台合资经营企业",
                         "name": "港澳台合资经营企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "港澳台合作经营企业",
                         "name": "港澳台合作经营企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "港澳台独资企业",
                         "name": "港澳台独资企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "港澳台投资股份有限公司",
                         "name": "港澳台投资股份有限公司",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "其他港澳台投资企业",
                         "name": "其他港澳台投资企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             },
@@ -37547,36 +36301,31 @@ export const TYC = {
                         "value": "中外合资经营企业",
                         "name": "中外合资经营企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "中外合作经营企业",
                         "name": "中外合作经营企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "外商独资企业",
                         "name": "外商独资企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "外商投资股份有限公司",
                         "name": "外商投资股份有限公司",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     },
                     {
                         "value": "其他外商投资企业",
                         "name": "其他外商投资企业",
                         "selected": 0,
-                        "childList": [
-                        ]
+                        "childList": []
                     }
                 ]
             }
@@ -37589,8 +36338,7 @@ export const TYC = {
                         "text": "一般而言，指国务院授权国有资产监督管理委员会履行出资人职责的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "央企子公司",
@@ -37599,8 +36347,7 @@ export const TYC = {
                         "text": "一般而言，指国有资产监督管理委员会披露的央企旗下的子公司或成员企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "省管国企",
@@ -37609,8 +36356,7 @@ export const TYC = {
                         "text": "一般而言，指各省国有资产监督管理委员会披露的省属监管企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "市管国企",
@@ -37619,8 +36365,7 @@ export const TYC = {
                         "text": "一般而言，指各直辖市和地级市国有资产监督管理委员会所披露的市属监管企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "国有全资企业",
@@ -37629,8 +36374,7 @@ export const TYC = {
                         "text": "一般而言，指政府部门、机构、事业单位、国有独资企业单独或共同出资，直接或间接合计持股为100%的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "国有独资企业",
@@ -37639,8 +36383,7 @@ export const TYC = {
                         "text": "一般而言，指国家单独出资、由国务院或者地方人民政府授权本级人民政府国有资产监督管理机构履行出资人职责的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "国有控股企业",
@@ -37649,8 +36392,7 @@ export const TYC = {
                         "text": "一般而言，是指在企业的全部资本中，国家资本（股本）所占比例大于50%的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "民营企业",
@@ -37659,8 +36401,7 @@ export const TYC = {
                         "text": "一般而言，是指民间私有资本投资、民间私人进行经营且由民间所有人享受收益、承担风险的经济实体。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "港澳台合资经营企业",
@@ -37669,8 +36410,7 @@ export const TYC = {
                         "text": "一般而言，指港澳台地区投资者与内地企业依照《中华人民共和国外商投资法》及有关法律的规定，按合同规定的比例投资设立、分享利润和分担风险的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "港澳台合作经营企业",
@@ -37679,8 +36419,7 @@ export const TYC = {
                         "text": "一般而言，指港澳台地区投资者与内地企业依照《中华人民共和国外商投资法》及有关法律的规定，依照合作合同的约定进行投资或提供条件设立、分配利润和分担风险的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "港澳台独资企业",
@@ -37689,8 +36428,7 @@ export const TYC = {
                         "text": "一般而言，指依照《中华人民共和国外商投资法》及有关法律的规定，在内地由港澳台地区投资者全额投资设立的企业。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "港澳台投资股份有限公司",
@@ -37699,8 +36437,7 @@ export const TYC = {
                         "text": "一般而言，指根据国家有关规定，经外经贸部依法批准设立，其中港、澳、台商的股本占公司注册资本的比例达25%以上的股份有限公司。凡其中港、澳、台商的股本占公司注册资本的比例小于25%的，属于内资企业中的股份有限公司。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "其他港澳台投资企业",
@@ -37709,8 +36446,7 @@ export const TYC = {
                         "text": "一般而言，指在中国境内参照相关法律及规章制度的规定，依法设立的港、澳、台商投资合伙企业等。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "中外合资经营企业",
@@ -37718,8 +36454,7 @@ export const TYC = {
                     {
                         "text": "一般而言，是指中国合营者与外国合营者依照中国法律的规定，在中国境内共同投资、共同经营、并按投资比例分享利润、分担风险及亏损的企业。"
                     }],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "中外合作经营企业",
@@ -37727,8 +36462,7 @@ export const TYC = {
                     "text": "一般而言，是指外国企业或外国人与中国内地企业依照《中华人民共和国外商投资法》及有关法律的规定，依照合作合同的约定进行投资或提供条件设立、分配利润和分担风险的企业。"
                 }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "外商投资股份有限公司",
@@ -37737,8 +36471,7 @@ export const TYC = {
                         "text": "一般而言，是指根据国家有关规定，经外经贸部依法批准设立，其中外资的股本占公司注册资本的比例达25%以上的股份有限公司。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "外商独资企业",
@@ -37747,8 +36480,7 @@ export const TYC = {
                         "text": "一般而言，是指依照《中华人民共和国外商投资法》等有关法律在中国境内设立的全部资本由外国投资者投资的企业，不包括外国的企业和其他经济组织在中国境内的分支机构。"
                     }
                 ],
-                "subList": [
-                ]
+                "subList": []
             },
             {
                 "title": "其他外商投资企业",
@@ -37756,8 +36488,7 @@ export const TYC = {
                     {
                         "text": "一般而言，是指外商投资合伙企业和其他未区分的外商投资企业，其中外商投资合伙企业是指2个以上外国企业或者个人在中国境内设立的合伙企业，以及外国企业或者个人与中国的自然人、法人和其他组织在中国境内设立的合伙企业。"
                     }],
-                "subList": [
-                ]
+                "subList": []
             }
         ]
     },
@@ -37769,26 +36500,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "是城投企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "非城投企业",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasBankruptcy": {
         "key": "hasBankruptcy",
@@ -37798,22 +36525,19 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有破产案件",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无破产案件",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
         "explain": []
@@ -37826,26 +36550,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有失信被执行人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无失信被执行人",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     },
     "hasBusinessAbnormality": {
         "key": "hasBusinessAbnormality",
@@ -37855,26 +36575,22 @@ export const TYC = {
                 "value": "none",
                 "name": "不限",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "1",
                 "name": "有经营异常",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             },
             {
                 "value": "0",
                 "name": "无经营异常",
                 "selected": 0,
-                "childList": [
-                ]
+                "childList": []
             }
         ],
-        "explain": [
-        ]
+        "explain": []
     }
 }
 

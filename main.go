@@ -30,6 +30,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"runtime"
+	"time"
 )
 
 //go:embed all:frontend/dist
@@ -49,6 +50,14 @@ func main() {
 		Height:   defaultHeight,
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {
 			event.EmitV2(event.AppExit, event.EventDetail{})
+			if wailsRuntime.WindowIsMinimised(ctx) {
+				wailsRuntime.WindowUnminimise(ctx)
+			}
+			wailsRuntime.WindowSetAlwaysOnTop(ctx, true)
+			time.AfterFunc(100*time.Millisecond, func() {
+				wailsRuntime.WindowShow(ctx)
+				wailsRuntime.WindowSetAlwaysOnTop(ctx, false)
+			})
 			return true
 		},
 		Frameless: runtime.GOOS != "darwin",

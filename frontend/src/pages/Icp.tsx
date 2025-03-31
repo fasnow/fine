@@ -47,7 +47,7 @@ const ServiceOptions = [
 
 const TabContent: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null)
-    const [pageSizeOptions] = useState([40, 80, 100])
+    const [pageSizeOptions] = useState([40])
     const [inputCache, setInputCache] = useState<string>("")
     const [total, setTotal] = useState<number>(0)
     const [currentPageNum, setCurrentPageNum] = useState<number>(1)

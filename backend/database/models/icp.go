@@ -28,7 +28,8 @@ type ICPTaskSlice struct {
 	BaseModel
 	TaskID      int64  `gorm:"not null"`
 	UnitToQuery string // 查询关键字
-	Status      int    // 记录是否查询过
+	CurrentPage int
+	Status      int // 记录是否查询过
 	ServiceType string
 	Items       []*ItemWithID `gorm:"foreignKey:SliceID"`
 }

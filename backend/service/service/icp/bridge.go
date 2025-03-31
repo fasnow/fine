@@ -20,6 +20,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
+	"math"
 	"strings"
 	"sync"
 	"time"
@@ -46,6 +47,7 @@ type Bridge struct {
 	historyRepo      repository.HistoryRepository
 	cacheTotal       repository.CacheTotal
 	proxyHistoryRepo repository.ProxyHistoryRepository
+	exportLogRepo    repository.ExportLogRepository
 }
 
 func NewICPBridge(app *application.Application) *Bridge {
@@ -59,6 +61,7 @@ func NewICPBridge(app *application.Application) *Bridge {
 		historyRepo:      repository.NewHistoryRepository(db),
 		cacheTotal:       repository.NewCacheTotal(db),
 		proxyHistoryRepo: repository.NewProxyHistoryRepository(db),
+		exportLogRepo:    repository.NewExportLogRepository(db),
 	}
 	icpClient := NewClient()
 	bridgeClient.icp = icpClient
@@ -179,8 +182,8 @@ func (r *Bridge) query(pageNum, pageSize int, serviceType string, query string, 
 				return nil, err3 // 触发重试
 			}
 
-			// 403 错误
-			if err3.Error() == "403 Forbidden" {
+			if err3.Error() == "403 Forbidden" || errors.Is(err3, ctx.DeadlineExceeded) {
+				err1 = err3
 				return nil, err3 // 触发重试
 			}
 
@@ -227,8 +230,8 @@ func (r *Bridge) queryWithStatusContext(pageNum, pageSize int, serviceType strin
 					return nil, err3 // 触发重试
 				}
 
-				// 403 错误
-				if err3.Error() == "403 Forbidden" {
+				if err3.Error() == "403 Forbidden" || errors.Is(err3, ctx.DeadlineExceeded) {
+					err1 = err3
 					return nil, err3 // 触发重试
 				}
 
@@ -264,7 +267,7 @@ func (r *Bridge) ExportCache(key string, total int) (int64, error) {
 	}
 	go func() {
 		items, _, err := r.icpRepo.FindByPartialKeyV2(key, 1, total)
-		service2.SaveToExcel(err, exportID, event.ICPExport, r.app.Logger, func() error {
+		service2.SaveToExcel(err, nil, exportID, event.ICPExport, r.app.Logger, func() error {
 			return r.icp.Export(items, outputAbsFilepath)
 		})
 	}()
@@ -287,56 +290,88 @@ func (r *Bridge) Export(pageID int64) (int64, error) {
 		return 0, err
 	}
 	ctx2, cancel := ctx.WithCancel(ctx.Background())
-	var err1 error
 	go func() {
-		result, _ := backoff.RetryWithData(func() (*Result, error) {
-			req := NewQueryReqBuilder().PageNum(1).PageSize(queryLog.Total).ServiceType(queryLog.ServiceType).UnitName(queryLog.UnitName).Build()
-			if result, err3 := r.icp.Query(req); err3 != nil {
-				if err3.Error() == IllegalRequestError.Error() || err3.Error() == CaptchaMismatchError.Error() || err3.Error() == TokenExpiredError.Error() {
-					if err4 := backoff.Retry(func() error {
-						if err5 := r.icp.SetTokenFromRemote(); err5 != nil {
-							return err5 // 触发重试,重新获取token
+		var err1 error
+		totalPage := int(math.Ceil(float64(queryLog.Total) / 40.0))
+		for i := 1; i <= totalPage; i++ {
+			result, _ := backoff.RetryWithData(func() (*Result, error) {
+				req := NewQueryReqBuilder().PageNum(i).PageSize(40).ServiceType(queryLog.ServiceType).UnitName(queryLog.UnitName).Build()
+				if result, err3 := r.icp.Query(req); err3 != nil {
+					if err3.Error() == IllegalRequestError.Error() || err3.Error() == CaptchaMismatchError.Error() || err3.Error() == TokenExpiredError.Error() {
+						if err4 := backoff.Retry(func() error {
+							if err5 := r.icp.SetTokenFromRemote(); err5 != nil {
+								return err5 // 触发重试,重新获取token
+							}
+							return nil
+						}, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3)); err4 != nil {
+							// 无法更新token,后续流程不再继续
+							err1 = err4
+							cancel()
+							return nil, err4 // 这里只需要返回一个错误即可,最终收到的都是ctxCancelError
 						}
-						return nil
-					}, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3)); err4 != nil {
-						// 无法更新token,后续流程不再继续
-						cancel()
-						err1 = err4
-						return nil, err4 // 这里只需要返回一个错误即可,最终收到的都是ctxCancelError
+						// 更新token,后续流程继续
+						return nil, err3 // 触发重试
 					}
-					// 更新token,后续流程继续
-					return nil, err3 // 触发重试
-				}
 
-				// 非预期错误,后续流程不再继续
-				cancel()
-				err1 = err3
-				return nil, err3
-			} else {
-				return result, nil
+					if err3.Error() == "403 Forbidden" || errors.Is(err3, ctx.DeadlineExceeded) {
+						err1 = err3
+						return nil, err3 // 触发重试
+					}
+
+					// 非预期错误,后续流程不再继续
+					err1 = err3
+					cancel()
+					return nil, err3
+				} else {
+					err1 = nil
+					return result, nil
+				}
+			}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3), ctx2))
+			if err1 != nil {
+				break
 			}
-		}, backoff.WithContext(backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3), ctx2))
-		service2.SaveToExcel(err1, exportID, event.ICPExport, r.app.Logger, func() error {
-			return r.icp.Export(result.Items, outputAbsFilepath)
+			if err := r.icpRepo.CreateBulk(exportID, result.Items); err != nil {
+				r.app.Logger.Error(err)
+			}
+			time.Sleep(10 * time.Second)
+		}
+		result, err := r.icpRepo.GetBulkByPageID(exportID)
+		if err != nil {
+			return
+		}
+		var items []*icp.Item
+		for _, item := range result {
+			items = append(items, item.Item)
+		}
+		service2.SaveToExcel(nil, err1, exportID, event.ICPExport, r.app.Logger, func() error {
+			return r.icp.Export(items, outputAbsFilepath)
 		})
 	}()
 
 	return exportID, nil
 }
 
-func (r *Bridge) queryAll(serviceType, query string, statCtx *context.StatusContext) (*Result, error) {
+func (r *Bridge) queryAll(serviceType, query string, currentPage int, statCtx *context.StatusContext) (*Result, error, error) {
 	result, err := r.queryWithStatusContext(1, 1, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2, statCtx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if result.Total == 0 || result.Total == 1 { // 没有数据或只有一条就返回当前结果就行
-		return result, nil
+		return result, nil, nil
 	}
-	result2, err := r.queryWithStatusContext(1, result.Total, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2, statCtx)
-	if err != nil {
-		return nil, err
+	totalPage := int(math.Ceil(float64(result.Total) / 40.0))
+	result = &Result{
+		Total: result.Total,
 	}
-	return result2, nil
+	for i := currentPage; i <= totalPage; i++ {
+		t, err := r.queryWithStatusContext(1, 40, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2, statCtx)
+		if err != nil {
+			return result, err, nil
+		}
+		result.PageNum = i
+		result.Items = append(result.Items, t.Items...)
+	}
+	return result, nil, nil
 }
 
 func (r *Bridge) SaveICPConfig(cfg config.ICP) error {
@@ -518,7 +553,7 @@ shouldTerminal:
 						<-sem
 						wg.Done()
 					}()
-					result, err := r.queryAll(s.ServiceType, s.UnitToQuery, ts.ctx)
+					result, subErr, err := r.queryAll(s.ServiceType, s.UnitToQuery, s.CurrentPage, ts.ctx)
 					if err != nil {
 						ts.ctx.SendError(err)
 						return
@@ -528,8 +563,16 @@ shouldTerminal:
 						for _, item := range result.Items {
 							s.Items = append(s.Items, &models.ItemWithID{TaskID: ts.task.TaskID, Item: item})
 						}
-						s.Status = status.Stopped
+						s.CurrentPage = result.PageNum
+						if subErr != nil {
+							s.Status = status.Error
+						} else {
+							s.Status = status.Stopped
+						}
 						ts.resultChan <- s
+						if subErr != nil {
+							ts.ctx.SendError(subErr)
+						}
 					default:
 					}
 				}(slice)
@@ -663,6 +706,7 @@ func (r *Bridge) TaskCreate(taskName string, targets []string, serviceTypes []st
 				TaskID:      taskID,
 				UnitToQuery: target,
 				Status:      status.Waiting,
+				CurrentPage: 1,
 				ServiceType: serviceType,
 			})
 		}
@@ -808,7 +852,7 @@ func (r *Bridge) TaskExportData(key string, taskID int64) (int64, error) {
 		for _, item := range itemWithIDs {
 			items = append(items, item.Item)
 		}
-		service2.SaveToExcel(nil, exportID, event.ICPExport, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, nil, exportID, event.ICPExport, r.app.Logger, func() error {
 			return r.icp.Export(items, outputAbsFilepath)
 		})
 	}()

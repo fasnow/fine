@@ -18,7 +18,7 @@ func GetBackOffWithMaxRetries(max uint64, interval time.Duration, multiplier flo
 	return backoff.WithMaxRetries(bf, max)
 }
 
-func SaveToExcel(getDataErr error, exportID int64, eventName string, logger *logrus.Logger, exportFunc func() error) {
+func SaveToExcel(getDataErr, subErr error, exportID int64, eventName string, logger *logrus.Logger, exportFunc func() error) {
 	exportLogRepo := repository.NewExportLogRepository(database.GetConnection())
 	data := event.EventDetail{
 		ID: exportID,
@@ -56,6 +56,9 @@ func SaveToExcel(getDataErr error, exportID int64, eventName string, logger *log
 	}
 	exportLog.Status = status.Stopped
 	data.Status = status.Stopped
+	if subErr != nil {
+		exportLog.Error = subErr.Error()
+	}
 	if err3 := exportLogRepo.UpdateByExportID(exportLog); err3 != nil {
 		exportLog.Status = status.Error
 		exportLog.Error = err3.Error()

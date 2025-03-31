@@ -62,11 +62,17 @@ func SetContext(context context.Context) {
 }
 
 func EmitNewExportItemEvent(eventName string, data EventDetail) {
+	if ctx == nil {
+		return
+	}
 	runtime.EventsEmit(ctx, eventName, data)
 	runtime.EventsEmit(ctx, NewExportItem)
 }
 
 func Emit(eventName string, data EventDetail) {
+	if ctx == nil {
+		return
+	}
 	runtime.EventsEmit(ctx, eventName, data)
 }
 
@@ -79,6 +85,9 @@ type EventDetail struct {
 }
 
 func EmitV2(eventName string, data EventDetail) {
+	if ctx == nil {
+		return
+	}
 	runtime.EventsEmit(ctx, eventName, data)
 }
 

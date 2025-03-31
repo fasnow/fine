@@ -170,7 +170,7 @@ func (r *Bridge) Export(pageID int64, pageNum, pageSize int64) (int64, error) {
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.Item)
 		}
-		service2.SaveToExcel(nil, exportID, event.FOFAExport, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, nil, exportID, event.FOFAExport, r.app.Logger, func() error {
 			return r.fofa.Export(exportItems, outputAbsFilepath, queryLog.Fields)
 		})
 	}()

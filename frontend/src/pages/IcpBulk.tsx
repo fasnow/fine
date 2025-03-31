@@ -1,6 +1,15 @@
 import {CloudDownloadOutlined, LoadingOutlined} from '@ant-design/icons';
 import {Button, Checkbox, Flex, Input, Modal, Pagination, Popconfirm, Space, Splitter, Tag, Tooltip} from 'antd';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {
+    createRef,
+    forwardRef,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState
+} from 'react';
 import {errorNotification} from '@/component/Notification';
 import {useSelector} from 'react-redux';
 import {formatTimeSpent} from '@/util/util';
@@ -418,13 +427,14 @@ const IcpTask = React.forwardRef<IcpTaskProps, any>((props, ref) => {
     </Flex>)
 })
 
-interface IcpTaskResultProps {
-    taskID?: number
+
+export interface IcpTaskResultRef {
+    query: (taskID: number) => void
 }
 
 type PageDataType2 = WithIndex<models.ItemWithID>
 
-const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
+const IcpTaskResult = forwardRef<IcpTaskResultRef>((props, ref)=>{
     const history = useSelector((state: RootState) => state.app.global.history)
     const event = useSelector((state: RootState) => state.app.global.event)
     const stat = useSelector((state: RootState) => state.app.global.status)
@@ -435,6 +445,7 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
     const [currentPageSize, setCurrentPageSize] = useState<number>(pageSizeOptions[0])
     const [inputCache, setInputCache] = useState<string>('')
     const [loading, setLoading] = useState<boolean>(false)
+    const [taskID, setTaskID] = useState(0)
 
     const gridRef = useRef<AgGridReact>(null)
     const [isExporting, setIsExporting] = useState<boolean>(false)
@@ -452,12 +463,6 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
     ]);
 
     useEffect(() => {
-        if (props.taskID) {
-            handleNewQuery("", currentPageSize)
-        }
-    }, [props.taskID]);
-
-    useEffect(() => {
         EventsOn(event.ICPExport, (eventDetail: event.EventDetail) => {
             if (eventDetail.ID !== exportID.current) {
                 return
@@ -470,11 +475,16 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
         })
     }, []);
 
-    const handleNewQuery = (unitName: string, pageSize: number) => {
+    useImperativeHandle(ref, () => ({
+        query: (taskID: number) => handleNewQuery(taskID,"", currentPageSize),
+    }));
+
+    const handleNewQuery = (taskID: number,unitName: string, pageSize: number) => {
+        setTaskID(taskID)
         setCurrentPageNum(1)
         setTotal(0)
         setLoading(true)
-        TaskGetData(unitName, 1, pageSize, props.taskID || 0)
+        TaskGetData(unitName, 1, pageSize, taskID)
             .then(r => {
                 let index = 0
                 setTotal(r.Total)
@@ -489,7 +499,7 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
         if (newPage !== currentPageNum && newSize === currentPageSize) {
             setCurrentPageNum(newPage)
             setLoading(true)
-            TaskGetData(inputCache, newPage, currentPageSize, props.taskID || 0)
+            TaskGetData(inputCache, newPage, currentPageSize, taskID)
                 .then(r => {
                     let index = (newPage - 1) * currentPageSize
                     setTotal(r.Total)
@@ -502,7 +512,7 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
         //size发生变换
         if (newSize !== currentPageSize) {
             setCurrentPageSize(newSize)
-            handleNewQuery(inputCache, newSize)
+            handleNewQuery(taskID,inputCache, newSize)
         }
     }
 
@@ -514,7 +524,7 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
         setIsExporting(true)
         setDisable(true)
         try {
-            exportID.current = await TaskExportData(inputCache, props.taskID || 0)
+            exportID.current = await TaskExportData(inputCache, taskID)
         } catch (e) {
             errorNotification("导出结果", e)
             setDisable(false)
@@ -548,14 +558,14 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
     </Flex>)
 
     return <Flex vertical style={{height: "100%", paddingTop: '10px', boxSizing: 'border-box', gap: '5px'}}>
-        {props.taskID !== 0 && <Flex justify={"center"}><Candidate
+        {taskID !== 0 && <Flex justify={"center"}><Candidate
             placeholder={"名称"}
             style={{width: '400px'}}
             size={"small"}
             allowClear
             onSearch={value => {
                 setInputCache(value)
-                handleNewQuery(value, currentPageSize)
+                handleNewQuery(taskID, value, currentPageSize)
             }}
             items={[
                 {
@@ -591,16 +601,18 @@ const IcpTaskResult: React.FC<IcpTaskResultProps> = (props) => {
         </div>
         {footer}
     </Flex>
-}
+})
 const IcpBulk: React.FC = () => {
-    const [taskID, setTaskID] = useState<number>(0)
+    const ref = createRef<IcpTaskResultRef>()
     return (<Flex vertical style={{height: "100%"}}>
         <Splitter layout="vertical" lazy={true}>
             <Splitter.Panel collapsible defaultSize={"30%"}>
-                <IcpTask onSelectedTask={setTaskID}/>
+                <IcpTask onSelectedTask={(id:number)=> {
+                    ref.current?.query(id)
+                }}/>
             </Splitter.Panel>
             <Splitter.Panel collapsible>
-                <IcpTaskResult taskID={taskID}/>
+                <IcpTaskResult ref={ref}/>
             </Splitter.Panel>
         </Splitter>
     </Flex>)

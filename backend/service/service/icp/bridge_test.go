@@ -218,3 +218,17 @@ func TestTask(t *testing.T) {
 	}
 	select {}
 }
+
+func TestBridge_Export(t *testing.T) {
+	c := NewICPBridge(application.DefaultApp)
+	application.DefaultApp.ProxyManager.SetTimeout(5 * time.Second)
+	time.AfterFunc(3*time.Second, func() {
+		application.DefaultApp.ProxyManager.SetProxy("http://127.0.0.1:8082")
+	})
+	_, err := c.Export(660337492324421)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	select {}
+}

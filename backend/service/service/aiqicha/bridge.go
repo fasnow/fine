@@ -85,7 +85,7 @@ func (r *Bridge) ExportAllCopyright(pid string) (int64, error) {
 			return total, nil
 		}, service2.GetBackOffWithMaxRetries(10, 3*time.Second, 1))
 		if err2 != nil {
-			service2.SaveToExcel(err2, exportID, event.AiQiCha, r.app.Logger, func() error {
+			service2.SaveToExcel(err2, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
 				return nil
 			})
 			return
@@ -106,7 +106,7 @@ func (r *Bridge) ExportAllCopyright(pid string) (int64, error) {
 			}
 			items = append(items, result...)
 		}
-		service2.SaveToExcel(nil, exportID, event.AiQiCha, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
 			return r.aiQiCha.ExportCopyrights(items, outputAbsFilepath)
 		})
 	}()
@@ -129,7 +129,7 @@ func (r *Bridge) ExportAllBranch(pid string) (int64, error) {
 			return total, nil
 		}, service2.GetBackOffWithMaxRetries(10, 3*time.Second, 1))
 		if err2 != nil {
-			service2.SaveToExcel(err2, exportID, event.AiQiCha, r.app.Logger, func() error {
+			service2.SaveToExcel(err2, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
 				return nil
 			})
 			return
@@ -150,7 +150,7 @@ func (r *Bridge) ExportAllBranch(pid string) (int64, error) {
 			}
 			items = append(items, result...)
 		}
-		service2.SaveToExcel(nil, exportID, event.AiQiCha, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
 			return r.aiQiCha.ExportBranches(items, outputAbsFilepath)
 		})
 	}()

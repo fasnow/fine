@@ -262,36 +262,76 @@ const DownloadViewContent: React.FC = () => {
                                             </span>
                                         </Title>
                                         <span>
-                                            {item.status === status.Deleted &&
-                                                <label style={{
-                                                    paddingLeft: "0px",
-                                                    paddingTop: "0px",
-                                                    height: "22px",
-                                                    fontSize: "12px"
-                                                }}>已删除</label>}
-                                            {item.status === status.Error &&
+                                            {
+                                                item.status === status.Deleted &&
+                                                <label
+                                                    style={{
+                                                        paddingLeft: "0px",
+                                                        paddingTop: "0px",
+                                                        height: "22px",
+                                                        fontSize: "12px"
+                                                    }}>
+                                                    已删除
+                                                </label>
+                                            }
+                                            {
+                                                item.status === status.Error &&
                                                 <Flex><label style={{
                                                     paddingLeft: "0px",
                                                     paddingTop: "0px",
                                                     height: "22px",
                                                     fontSize: "12px",
-                                                }}>导出失败<Title text={item.error}><ExclamationCircleOutlined/></Title></label></Flex>}
-                                            {item.status === status.Running &&
-                                                <label style={{
-                                                    paddingLeft: "0px",
-                                                    paddingTop: "0px",
-                                                    height: "22px",
-                                                    fontSize: "12px",
-                                                    color: "#1677ff"
-                                                }}>正在导出<LoadingOutlined/></label>}
-                                            {item.status === status.Stopped && <Button style={{
-                                                paddingLeft: "0px",
-                                                paddingTop: "0px",
-                                                height: "22px",
-                                                fontSize: "12px"
-                                            }} type="link"
-                                                                                       onClick={() => openFile(item.dir, item.filename)}
-                                            >打开文件</Button>}
+                                                }}>
+                                                    导出失败
+                                                    <Title
+                                                        text={item.error}><ExclamationCircleOutlined/></Title></label>
+                                                </Flex>
+                                            }
+                                            {
+                                                item.status === status.Running &&
+                                                <label
+                                                    style={{
+                                                        paddingLeft: "0px",
+                                                        paddingTop: "0px",
+                                                        height: "22px",
+                                                        fontSize: "12px",
+                                                        color: "#1677ff"
+                                                    }}>
+                                                    正在导出<LoadingOutlined/>
+                                                </label>
+                                            }
+                                            {
+                                                item.status === status.Stopped &&
+                                                <span
+                                                    style={{
+                                                        paddingLeft: "0px",
+                                                        paddingTop: "0px",
+                                                        height: "22px",
+                                                        fontSize: "12px"
+                                                    }}
+                                                >
+                                                    <Button
+                                                        style={{
+                                                            paddingLeft: "0px",
+                                                            paddingTop: "0px",
+                                                            height: "22px",
+                                                            fontSize: "12px"
+                                                        }}
+                                                        type="link"
+                                                        onClick={() => openFile(item.dir, item.filename)
+                                                        }
+                                                    >
+                                                        打开文件
+                                                    </Button>
+                                                    {
+                                                        item.error !== "" &&
+                                                        <span>
+                                                            无/仅部分数据<Title
+                                                            text={item.error}><ExclamationCircleOutlined/></Title>
+                                                        </span>
+                                                    }
+                                                </span>
+                                            }
 
                                         </span>
                                         {item.status === status.Stopped && <span

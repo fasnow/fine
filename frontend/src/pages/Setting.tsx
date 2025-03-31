@@ -22,14 +22,6 @@ export const buttonProps: ButtonProps = {
     type: "default", shape: "round", size: "small"
 };
 
-const LabelCssProps: CSSProperties = {
-    display: "inline-block", textAlign: "left", paddingRight: "5px", height: "24px"
-}
-
-const LabelCssProp2: CSSProperties = {...LabelCssProps, width: "48px"}
-
-const LabelCssProps3: CSSProperties = {...LabelCssProps, width: "100px"}
-
 export interface ProxyPros {
     labelWidth?: number
     title?: string

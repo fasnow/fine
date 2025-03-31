@@ -263,7 +263,7 @@ func (r *Bridge) RealtimeServiceDataExport(pageID int64, pageNum, pageSize int) 
 		for _, cacheItem := range cacheItems {
 			exportItems = append(exportItems, cacheItem.RealtimeServiceItem)
 		}
-		service2.SaveToExcel(nil, exportID, event.QuakeExport, r.app.Logger, func() error {
+		service2.SaveToExcel(nil, nil, exportID, event.QuakeExport, r.app.Logger, func() error {
 			return r.quake.Export(exportItems, outputAbsFilepath)
 		})
 	}()

@@ -44,7 +44,7 @@ func (r *IcpTaskRepositoryImpl) FindResultByPartialKey(key string, taskID int64)
 func (r *IcpTaskRepositoryImpl) ResetTask(taskID int64) error {
 	// 开启事务
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// 1. 更新 ICPTask 的 DecompileStatus
+		// 1. 更新 ICPTask
 		if err := tx.Model(&models.ICPTask{}).
 			Where("task_id = ?", taskID).
 			Updates(map[string]interface{}{"status": status.Waiting, "message": "", "current": 0, "time_spent": 0}).
@@ -52,10 +52,11 @@ func (r *IcpTaskRepositoryImpl) ResetTask(taskID int64) error {
 			return err
 		}
 
-		// 2. 更新所有关联的 ICPTaskSlice 的 DecompileStatus
+		// 2. 更新所有关联的 ICPTaskSlice
 		if err := tx.Model(&models.ICPTaskSlice{}).
 			Where("task_id = ?", taskID).
-			Update("status", status.Waiting).Error; err != nil {
+			Update("status", status.Waiting).
+			Update("current_page", 1).Error; err != nil {
 			return err
 		}
 

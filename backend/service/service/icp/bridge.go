@@ -364,7 +364,7 @@ func (r *Bridge) queryAll(serviceType, query string, currentPage int, statCtx *c
 		Total: result.Total,
 	}
 	for i := currentPage; i <= totalPage; i++ {
-		t, err := r.queryWithStatusContext(1, 40, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2, statCtx)
+		t, err := r.queryWithStatusContext(i, 40, serviceType, query, r.app.Config.ICP.AuthErrorRetryNum2, r.app.Config.ICP.ForbiddenErrorRetryNum2, statCtx)
 		if err != nil {
 			return result, err, nil
 		}

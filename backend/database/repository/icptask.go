@@ -4,7 +4,6 @@ import (
 	"fine/backend/constant/status"
 	"fine/backend/database/models"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type IcpTaskRepository interface {
@@ -115,14 +114,40 @@ func (r *IcpTaskRepositoryImpl) GetRunningTasks() ([]*models.ICPTask, error) {
 }
 
 func (r *IcpTaskRepositoryImpl) Delete(taskID int64) error {
-	task := &models.ICPTask{}
-	if err := r.db.Where("task_id = ?", taskID).First(task).Error; err != nil {
-		return err
-	}
-	if err := r.db.Select(clause.Associations).Delete(task).Error; err != nil {
-		return err
-	}
-	return nil
+	// 开启事务
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		task := &models.ICPTask{}
+		if err := tx.Where("task_id = ?", taskID).First(task).Error; err != nil {
+			return err
+		}
+
+		var sliceIDs []int64
+		if err := tx.Model(&models.ICPTaskSlice{}).
+			Where("task_id = ?", task.TaskID).
+			Pluck("id", &sliceIDs).Error; err != nil {
+			return err
+		}
+
+		// 删除任务
+		if err := tx.Delete(task).Error; err != nil {
+			return err
+		}
+
+		// 删除关联的所有 ICPTaskSlice
+		if err := tx.Where("task_id", task.TaskID).Delete(&models.ICPTaskSlice{}).Error; err != nil {
+			return err
+		}
+
+		// 删除 ICPTaskSlice 关联的所有 ItemWithID
+		if len(sliceIDs) > 0 {
+			if err := tx.Where("slice_id IN ?", sliceIDs).
+				Delete(&models.ItemWithID{}).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func (r *IcpTaskRepositoryImpl) GetByTaskID(taskID int64, associationDetails bool) (*models.ICPTask, error) {

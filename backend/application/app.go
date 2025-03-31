@@ -31,7 +31,7 @@ import (
 	"time"
 )
 
-const Version = "2.2.0"
+const Version = "2.2.1"
 
 func init() {
 	ini.PrettyFormat = false

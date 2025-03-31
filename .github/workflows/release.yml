@@ -109,13 +109,11 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            feature: 新图标 @ChinaRan0 #27, @xslzlccc #31, @JackeyLov5 #36;
-            enhance: 小程序信息异步显示;
-            enhance: 部分UI;
-            fix: httpx 路径选择BUG @Anonym0usPlayer #35;
-            fix: httpx flag无法保存;
-            fix: httpx 右键菜单;
-            fix: hunter 右键菜单"查询标题"。
+            enhance: 表格tooltip；
+            enhance: ICP导出 @shanxigetanxiaochou #43；
+            fix: 股权结构图显示有加号实际可能无下一个节点的错误；
+            fix: httpx 模块路径选择问题 @Anonym0usPlayer #35。
+            
             
             
 

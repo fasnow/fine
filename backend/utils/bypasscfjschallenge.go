@@ -4,21 +4,21 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"fine/backend/proxy/v2"
 	"fmt"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/cdproto/target"
 	"github.com/chromedp/chromedp"
+	"github.com/fasnow/goproxy"
 	"github.com/go-vgo/robotgo"
 	"net/http"
 	"time"
 )
 
 // BypassCFJSChallenge 返回cf_clearance和对于的最后一次请求
-func BypassCFJSChallenge(proxyManager *proxy.Manager, targetUrl string) (*http.Request, string, error) {
+func BypassCFJSChallenge(proxyManager *goproxy.GoProxy, targetUrl string) (*http.Request, string, error) {
 	proxyUrl := ""
 	if proxyManager != nil {
-		proxyUrl = proxyManager.ProxyString()
+		proxyUrl = proxyManager.String()
 	}
 	screenWidth, screenHeight := robotgo.GetScreenSize() // 获取屏幕分辨率
 	winWidth, winHeight := 800, 600                      // 设定窗口大小

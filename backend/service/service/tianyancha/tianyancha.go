@@ -1,13 +1,13 @@
 package tianyancha
 
 import (
-	"fine/backend/proxy/v2"
+	"github.com/fasnow/goproxy"
 	"net/http"
 )
 
 type TianYanCha struct {
 	http         *http.Client
-	proxyManager *proxy.Manager
+	proxyManager *goproxy.GoProxy
 	token        string
 }
 
@@ -18,7 +18,7 @@ func NewClient(token string) *TianYanCha {
 	}
 }
 
-func (r *TianYanCha) UseProxyManager(manager *proxy.Manager) {
+func (r *TianYanCha) UseProxyManager(manager *goproxy.GoProxy) {
 	r.proxyManager = manager
 	r.http = manager.GetClient()
 }

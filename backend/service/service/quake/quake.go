@@ -2,7 +2,7 @@ package quake
 
 import (
 	"errors"
-	"fine/backend/proxy/v2"
+	"github.com/fasnow/goproxy"
 	"net/http"
 )
 
@@ -160,7 +160,7 @@ func New(key string) *Quake {
 	return client
 }
 
-func (r *Quake) UseProxyManager(manager *proxy.Manager) {
+func (r *Quake) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 

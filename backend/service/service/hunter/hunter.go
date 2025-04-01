@@ -3,10 +3,10 @@ package hunter
 import (
 	"encoding/json"
 	"errors"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/model/hunter"
 	"fine/backend/service/service"
 	"fine/backend/utils"
+	"github.com/fasnow/goproxy"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -29,7 +29,7 @@ func NewClient(key string) *Hunter {
 	}
 }
 
-func (r *Hunter) UseProxyManager(manager *proxy.Manager) {
+func (r *Hunter) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 

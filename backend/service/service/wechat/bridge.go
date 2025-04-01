@@ -7,10 +7,10 @@ import (
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/model/wechat"
 	"fine/backend/utils"
 	"fmt"
+	"github.com/fasnow/goproxy"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"net/http"
@@ -52,7 +52,7 @@ type Bridge struct {
 	queryMiniAPPInfoConcurrencyChan chan struct{}
 }
 
-func (r *Bridge) UseProxyManager(manager *proxy.Manager) {
+func (r *Bridge) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 	r.wechat.UseProxyManager(manager)
 }

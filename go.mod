@@ -8,6 +8,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20250222051814-50c6cb17f10a
 	github.com/chromedp/chromedp v0.13.1
 	github.com/ditashi/jsbeautifier-go v0.0.0-20141206144643-2520a8026a9c
+	github.com/fasnow/goproxy v0.0.0-20250401070048-5a7fb3df6a0d
 	github.com/go-vgo/robotgo v0.110.6
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
@@ -22,8 +23,8 @@ require (
 	github.com/xuri/excelize/v2 v2.8.0
 	github.com/yitter/idgenerator-go v1.3.3
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
-	golang.org/x/crypto v0.33.0
-	golang.org/x/net v0.35.0
+	golang.org/x/crypto v0.36.0
+	golang.org/x/net v0.38.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/datatypes v1.2.5
@@ -93,7 +94,7 @@ require (
 	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect

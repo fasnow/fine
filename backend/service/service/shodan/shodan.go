@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/model/shodan"
 	"fine/backend/service/model/shodan/properties"
 	"fine/backend/service/service"
@@ -14,6 +13,7 @@ import (
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/cdproto/target"
 	"github.com/chromedp/chromedp"
+	"github.com/fasnow/goproxy"
 	"github.com/go-vgo/robotgo"
 	"github.com/tidwall/gjson"
 	"io"
@@ -31,14 +31,14 @@ type Shodan struct {
 	cookie       string
 	userAgent    string
 	mutex        sync.Mutex
-	proxyManager *proxy.Manager
+	proxyManager *goproxy.GoProxy
 	header       http.Header
 }
 
 func New(key string) *Shodan {
 	s := &Shodan{
 		key:    key,
-		http:   proxy.DefaultHTTP,
+		http:   goproxy.DefaultHTTPClient,
 		header: http.Header{},
 	}
 	s.header.Add("Connection", "keep-alive")
@@ -58,7 +58,7 @@ func (r *Shodan) GenAuthQueryParam() url.Values {
 	return params
 }
 
-func (r *Shodan) UseProxyManager(manager *proxy.Manager) {
+func (r *Shodan) UseProxyManager(manager *goproxy.GoProxy) {
 	r.proxyManager = manager
 	r.http = manager.GetClient()
 }
@@ -73,7 +73,7 @@ func (r *Shodan) bypassCFJSChallenge(url string) (http.Header, []byte, error) {
 
 	var proxyUrl string
 	if r.proxyManager != nil {
-		proxyUrl = r.proxyManager.ProxyString()
+		proxyUrl = r.proxyManager.String()
 	}
 
 	// 创建 ChromeDP 执行分配器选项

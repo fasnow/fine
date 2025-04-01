@@ -3,9 +3,9 @@ package aiqicha
 import (
 	"encoding/json"
 	"errors"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/service"
 	"fine/backend/utils"
+	"github.com/fasnow/goproxy"
 	"github.com/tidwall/gjson"
 	"net/http"
 	"net/url"
@@ -17,7 +17,7 @@ const BaseAPIUrl = "https://aiqicha.baidu.com"
 
 type AiQiCha struct {
 	http         *http.Client
-	proxyManager *proxy.Manager
+	proxyManager *goproxy.GoProxy
 	cookie       string
 }
 
@@ -28,7 +28,7 @@ func New(token string) *AiQiCha {
 	}
 }
 
-func (r *AiQiCha) UseProxyManager(manager *proxy.Manager) {
+func (r *AiQiCha) UseProxyManager(manager *goproxy.GoProxy) {
 	r.proxyManager = manager
 	r.http = manager.GetClient()
 }
@@ -92,7 +92,7 @@ func (c *AreaNode) UnmarshalJSON(data []byte) error {
 func (r *AiQiCha) request(req *service.Request, auth bool) ([]byte, error) {
 	req.BodyParams.Decorate(req)
 	req.Header.Add("Referer", BaseAPIUrl)
-	req.Header.Add("User-Agent", proxy.DefaultUA)
+	req.Header.Add("User-Agent", goproxy.DefaultUA)
 	if auth {
 		req.Header.Add("Cookie", r.cookie)
 	}

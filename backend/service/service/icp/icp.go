@@ -5,11 +5,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fine/backend/application"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/model/icp"
 	"fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
+	"github.com/fasnow/goproxy"
 	"github.com/tidwall/gjson"
 	"io"
 	"net/http"
@@ -71,7 +71,7 @@ func NewClient() *ICP {
 	}
 }
 
-func (r *ICP) UseProxyManager(manager *proxy.Manager) {
+func (r *ICP) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 
@@ -87,7 +87,7 @@ func (r *ICP) SetTokenFromRemote() error {
 	req.Method = "POST"
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Set("Referer", referer)
-	req.Header.Add("User-Agent", proxy.DefaultUA)
+	req.Header.Add("User-Agent", goproxy.DefaultUA)
 	req.Header.Set("Cookie", "__jsluid_s = 6452684553c30942fcb8cff8d5aa5a5b")
 	req.BodyParams.Set("authKey", fmt.Sprintf("%x", md5.Sum([]byte("testtest"+timeStampStr))))
 	req.BodyParams.Set("timeStamp", timeStampStr)

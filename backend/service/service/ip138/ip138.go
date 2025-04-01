@@ -1,7 +1,7 @@
 package ip138
 
 import (
-	"fine/backend/proxy/v2"
+	"github.com/fasnow/goproxy"
 	"net/http"
 )
 
@@ -49,6 +49,6 @@ func NewClient() *IP138 {
 	return client
 }
 
-func (r *IP138) UseProxyManager(manager *proxy.Manager) {
+func (r *IP138) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }

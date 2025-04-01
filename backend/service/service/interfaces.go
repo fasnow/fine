@@ -1,12 +1,12 @@
 package service
 
 import (
-	"fine/backend/proxy/v2"
+	"github.com/fasnow/goproxy"
 	"net/url"
 )
 
 type Client interface {
 	SetAuth(auth string)
 	GenAuthQueryParam() url.Values
-	UseProxyManager(manager *proxy.Manager)
+	UseProxyManager(manager *goproxy.GoProxy)
 }

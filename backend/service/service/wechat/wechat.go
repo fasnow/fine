@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fine/backend/beauty"
 	"fine/backend/matcher"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/model/wechat"
 	"fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
+	"github.com/fasnow/goproxy"
 	"github.com/tidwall/gjson"
 	"golang.org/x/crypto/pbkdf2"
 	"io"
@@ -49,7 +49,7 @@ type WeChat struct {
 func New(applet string) *WeChat {
 	return &WeChat{
 		http: &http.Client{
-			Timeout: proxy.DefaultTimeout,
+			Timeout: goproxy.DefaultTimeout,
 		},
 		Applet:         applet,
 		jsBeautifier:   beauty.NewJSBeautifier(),
@@ -59,7 +59,7 @@ func New(applet string) *WeChat {
 	}
 }
 
-func (r *WeChat) UseProxyManager(manager *proxy.Manager) {
+func (r *WeChat) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 

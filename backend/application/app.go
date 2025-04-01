@@ -10,10 +10,10 @@ import (
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
 	"fine/backend/logger"
-	"fine/backend/proxy/v2"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/buger/jsonparser"
+	"github.com/fasnow/goproxy"
 	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -114,7 +114,7 @@ type Application struct {
 	ConfigFile   string
 	AppDir       string
 	http         *http.Client
-	ProxyManager *proxy.Manager
+	ProxyManager *goproxy.GoProxy
 	Logger       *logrus.Logger
 	UserHome     string
 
@@ -124,7 +124,7 @@ type Application struct {
 func NewApp() *Application {
 	app := &Application{
 		Config:       &config.Config{},
-		ProxyManager: proxy.NewManager(),
+		ProxyManager: goproxy.New(),
 	}
 	app.init()
 	app.UseProxyManager(app.ProxyManager)
@@ -268,7 +268,7 @@ func (r *Application) loadConfigFile() error {
 		if err := r.ProxyManager.SetProxy(p); err != nil {
 			r.Logger.Error("set global proxy error: " + err.Error())
 		}
-		r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
+		r.Logger.Info("global proxy enabled on " + r.ProxyManager.String())
 	} else {
 		r.Logger.Info("global proxy disabled")
 	}
@@ -345,7 +345,7 @@ func ShowErrorMessage(message string) {
 	}
 }
 
-func (r *Application) UseProxyManager(manager *proxy.Manager) {
+func (r *Application) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 
@@ -436,12 +436,12 @@ func (r *Application) SaveProxy(proxy config.Proxy) error {
 			if proxy.Pass != "" {
 				auth += ":" + proxy.Pass + "@"
 				_ = r.ProxyManager.SetProxy(fmt.Sprintf("%s://%s%s:%s", proxy.Type, auth, proxy.Host, proxy.Port))
-				r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
+				r.Logger.Info("global proxy enabled on " + r.ProxyManager.String())
 				return nil
 			}
 		}
 		_ = r.ProxyManager.SetProxy(fmt.Sprintf("%s://%s:%s", proxy.Type, proxy.Host, proxy.Port))
-		r.Logger.Info("global proxy enabled on " + r.ProxyManager.ProxyString())
+		r.Logger.Info("global proxy enabled on " + r.ProxyManager.String())
 		if err := r.proxyHistoryRepo.Create(models.ProxyHistory{
 			Proxy: proxy,
 		}); err != nil {

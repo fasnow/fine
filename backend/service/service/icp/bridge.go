@@ -11,13 +11,13 @@ import (
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/model/icp"
 	service2 "fine/backend/service/service"
 	"fine/backend/service/service/exportlog"
 	"fine/backend/utils"
 	"fmt"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/fasnow/goproxy"
 	"github.com/pkg/errors"
 	"github.com/yitter/idgenerator-go/idgen"
 	"math"
@@ -403,7 +403,7 @@ func (r *Bridge) SetProxy(p config.Proxy) error {
 		}
 	}
 	if p.Enable {
-		var pm = proxy.NewManager()
+		var pm = goproxy.New()
 		r.icp.UseProxyManager(pm)
 		pm.SetTimeout(r.app.Config.ICP.Timeout)
 		if p.User != "" {
@@ -415,7 +415,7 @@ func (r *Bridge) SetProxy(p config.Proxy) error {
 					return err
 				}
 
-				r.app.Logger.Info("icp proxy enabled on " + pm.ProxyString())
+				r.app.Logger.Info("icp proxy enabled on " + pm.String())
 				return nil
 			}
 		}
@@ -423,7 +423,7 @@ func (r *Bridge) SetProxy(p config.Proxy) error {
 
 			return err
 		}
-		r.app.Logger.Info("icp proxy enabled on " + pm.ProxyString())
+		r.app.Logger.Info("icp proxy enabled on " + pm.String())
 		if err := r.proxyHistoryRepo.Create(models.ProxyHistory{Proxy: p}); err != nil {
 			r.app.Logger.Error(err)
 		}

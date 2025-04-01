@@ -3,10 +3,10 @@ package fofa
 import (
 	"encoding/json"
 	"errors"
-	"fine/backend/proxy/v2"
 	"fine/backend/service/model/fofa"
 	"fine/backend/service/service"
 	"fine/backend/utils"
+	"github.com/fasnow/goproxy"
 	"github.com/tidwall/gjson"
 	"net/http"
 	netUrl "net/url"
@@ -149,7 +149,7 @@ func New(key string) *Fofa {
 	return f
 }
 
-func (r *Fofa) UseProxyManager(manager *proxy.Manager) {
+func (r *Fofa) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 

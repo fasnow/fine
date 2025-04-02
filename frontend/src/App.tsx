@@ -211,7 +211,8 @@ const App: React.FC = () => {
                             motionDurationMid: '0',
                             motionDurationSlow: '0',
                             motionEaseInOutCirc: '',
-                            motionEaseOutCirc: ''
+                            motionEaseOutCirc: '',
+                            colorBgMask:''
                         }
                     }
                 }}
@@ -219,7 +220,6 @@ const App: React.FC = () => {
                 <Modal
                     footer={null}
                     closeIcon={false}
-                    mask={false}
                     open={open}
                     styles={{
                         content: {

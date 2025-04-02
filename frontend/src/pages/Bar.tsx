@@ -661,10 +661,10 @@ const Bar: React.FC = () => {
             }
         )
         EventsOn(event.WindowSizeChange, (r) => {
-            if (r === 0 && f.current) {
+            if (r.Data === 0 && f.current) {
                 setIsFullScreen(false)
                 f.current = false
-            } else if (r === 1 && !f.current) {
+            } else if (r.Data === 1 && !f.current) {
                 setIsFullScreen(true)
                 f.current = true
             }

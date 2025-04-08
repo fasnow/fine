@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func columnNumberToName(n int) string {
+func ColumnNumberToName(n int) string {
 	name := ""
 	for n > 0 {
 		n--
@@ -19,6 +19,7 @@ func columnNumberToName(n int) string {
 
 func SaveToExcel(data [][]any, outfile string) error {
 	file := excelize.NewFile()
+	sheetName := "Sheet1"
 
 	// 添加数据
 	for i := 0; i < len(data); i++ {
@@ -34,66 +35,66 @@ func SaveToExcel(data [][]any, outfile string) error {
 					row[j] = strings.ToUpper(value)
 				}
 			}
-			if err = file.SetSheetRow("Sheet1", startCell, &row); err != nil {
+			if err = file.SetSheetRow(sheetName, startCell, &row); err != nil {
 				return err
 			}
 			continue
 		}
-		if err = file.SetSheetRow("Sheet1", startCell, &row); err != nil {
+		if err = file.SetSheetRow(sheetName, startCell, &row); err != nil {
 			return err
 		}
 	}
 
-	// 表头颜色填充
+	border := []excelize.Border{
+		{
+			Type:  "right",
+			Color: "#000000",
+			Style: 1,
+		},
+		{
+			Type:  "left",
+			Color: "#000000",
+			Style: 1,
+		},
+		{
+			Type:  "top",
+			Color: "#000000",
+			Style: 1,
+		},
+		{
+			Type:  "bottom",
+			Color: "#000000",
+			Style: 1,
+		},
+	}
+
+	// 表头格式
 	headerStyle, err := file.NewStyle(&excelize.Style{
-		Fill: excelize.Fill{Type: "pattern", Color: []string{"#d0cece"}, Pattern: 1, Shading: 1},
-		Alignment: &excelize.Alignment{
-			Horizontal: "center",
-		},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"#d0cece"}, Pattern: 1},
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+		Border:    border,
 	})
 	if err != nil {
 		return err
 	}
-
-	err = file.SetCellStyle("Sheet1", "A1", columnNumberToName(len(data[0]))+"1", headerStyle)
+	err = file.SetCellStyle(sheetName, "A1", ColumnNumberToName(len(data[0]))+"1", headerStyle)
 	if err != nil {
 		return err
 	}
 
-	// 添加边框
+	// 数据格式
 	dataStyle, err := file.NewStyle(&excelize.Style{
-		Fill: excelize.Fill{Type: "pattern"},
-		Alignment: &excelize.Alignment{
-			Horizontal: "left",
-		},
-		Border: []excelize.Border{
-			{
-				Type:  "right",
-				Color: "#000000",
-				Style: 1,
-			},
-			{
-				Type:  "left",
-				Color: "#000000",
-				Style: 1,
-			},
-			{
-				Type:  "top",
-				Color: "#000000",
-				Style: 1,
-			},
-			{
-				Type:  "bottom",
-				Color: "#000000",
-				Style: 1,
-			},
-		},
+		Fill:      excelize.Fill{Type: "pattern"},
+		Alignment: &excelize.Alignment{Horizontal: "left"},
+		Border:    border,
 	})
 	if err != nil {
 		return err
 	}
 
-	if err = file.SetCellStyle("Sheet1", "A1", columnNumberToName(len(data[0]))+strconv.Itoa(len(data)), dataStyle); err != nil {
+	FreezeFirstRow(file, sheetName)
+
+	if err = file.SetCellStyle(sheetName, "A2", ColumnNumberToName(len(data[0]))+strconv.Itoa(len(data)), dataStyle); err != nil {
 		return err
 	}
 	if err := CreateDirectory(filepath.Dir(outfile)); err != nil {

@@ -116,7 +116,7 @@ func (r *Bridge) ExportInvestRecordByDepth(pid string, depth int, minRate, maxRa
 	if len(strings.TrimSpace(pid)) == 0 {
 		return 0, fmt.Errorf("pid不能为空")
 	}
-	if minRate == 0 || maxRate == 0 || minRate > maxRate {
+	if (minRate == 0 && maxRate == 0) || minRate > maxRate {
 		return 0, fmt.Errorf("错误的投资比例范围: %f-%f", minRate, maxRate)
 	}
 	dataTypes = utils.RemoveEmptyAndDuplicateString(dataTypes)

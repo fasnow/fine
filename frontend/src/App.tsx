@@ -31,6 +31,7 @@ import Draggable from "react-draggable";
 import AppIcon from "@/assets/images/appicon.png"
 import Shodan from "@/pages/Shodan";
 import dayjs from 'dayjs';
+import {MessageInstance} from "antd/es/message/interface";
 
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
@@ -38,12 +39,12 @@ provideGlobalGridOptions({theme: themeQuartz.withParams({rowBorder: true, column
 
 // 定义context的默认值
 const defaultMessageContext = {
-    // success: () => console.warn('没有MessageProvider包裹'),
-    // error: () => console.warn('没有MessageProvider包裹'),
+    success: () => console.warn('没有MessageProvider包裹'),
+    error: () => console.warn('没有MessageProvider包裹'),
     // 其他message方法...
 };
 
-const MessageContext = createContext(defaultMessageContext);
+export const MessageContext = createContext<MessageInstance | null>(null);
 
 const App: React.FC = () => {
     const [disabled, setDisabled] = useState(true);

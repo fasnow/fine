@@ -26,7 +26,7 @@ import {TYC} from "@/pages/Constants";
 import {CheckboxOptionType} from "antd/es/checkbox/Group";
 import type {CascaderProps} from 'antd/es/cascader'
 import Candidate, {ItemType} from "@/component/Candidate";
-import './Aiqicha.css'
+import './AiQiCha.css'
 import {
     ExportInvestRecordByDepth,
     GetBranchList,

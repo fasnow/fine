@@ -37,13 +37,6 @@ LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2a
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 provideGlobalGridOptions({theme: themeQuartz.withParams({rowBorder: true, columnBorder: true})}); // Mark all grids as using legacy themes
 
-// 定义context的默认值
-const defaultMessageContext = {
-    success: () => console.warn('没有MessageProvider包裹'),
-    error: () => console.warn('没有MessageProvider包裹'),
-    // 其他message方法...
-};
-
 export const MessageContext = createContext<MessageInstance | null>(null);
 
 const App: React.FC = () => {

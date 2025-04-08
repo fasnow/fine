@@ -21,6 +21,13 @@ macOS提示文件损坏请执行下面命令后重新打开。
 ```
 sudo xattr -d com.apple.quarantine Fine.app
 ```
+
+# 注意事项
+
+- windows小程序路径一般为`...\WeChat Files\Applet`，需选择包含目录结构如：`...\Applet\wx...\12\__APP__.wxapkg`，反编译仅提取了文件做敏感信息查找或者简单可阅读，微信开发者工具无法运行
+- httpx无法运行一般为权限问题
+- 数据表格默认均可单元格和多范围选中按键复制
+
 # 自主编译
 
 第一步：环境。

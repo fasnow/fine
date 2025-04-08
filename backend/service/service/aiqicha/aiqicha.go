@@ -731,7 +731,7 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 
 	// 设置主表头（扩展包含版权和分支机构信息）
 	mainHeaders := []string{
-		"序号", "层级", "关联企业", "PID", "企业名称", "投资比例", "注册资本", "状态", "版权数量", "分支机构数量", "Logo",
+		"序号", "层级", "关联企业", "企业名称", "投资比例", "注册资本", "状态", "版权数量", "分支机构数量", "Logo",
 	}
 	for col, header := range mainHeaders {
 		cell, _ := excelize.CoordinatesToCellName(col+1, 1)
@@ -753,7 +753,7 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 	branchSheet := "分支机构"
 	f.NewSheet(branchSheet)
 	branchHeaders := []string{
-		"序号", "关联企业", "企业PID", "机构名称", "注册日期", "注册资本", "机构Logo", "负责人",
+		"序号", "关联企业", "机构名称", "注册日期", "注册资本", "机构Logo", "负责人",
 	}
 	for col, header := range branchHeaders {
 		cell, _ := excelize.CoordinatesToCellName(col+1, 1)
@@ -786,7 +786,6 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 			mainRow - 1,
 			level,
 			parentPID,
-			node.Pid,
 			node.EntName,
 			node.RegRate,
 			node.RegCapital,
@@ -828,7 +827,6 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 			branchCols := []interface{}{
 				branchRow - 1,
 				node.EntName,
-				branch.Pid,
 				branch.EntName,
 				branch.StartDate,
 				branch.RegCapital,

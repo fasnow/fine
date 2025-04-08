@@ -333,8 +333,9 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     const [pageData, setPageData] = useState<PageDataType[]>([])
     const [columnDefs] = useState<ColDef[]>(props.colDefs || [
         {headerName: '序号', field: "index", width: 80, pinned: 'left', tooltipField: 'index'},
-        {headerName: 'IP', field: "ip", width: 150, pinned: 'left', tooltipField: 'ip'},
-        {headerName: '域名', field: "domain", width: 200, tooltipField: 'domain'},
+        {headerName: 'URL', field: "Link", width: 200, tooltipField: 'Link', pinned: 'left'},
+        {headerName: 'IP', field: "ip", width: 150, tooltipField: 'ip'},
+        {headerName: '域名', field: "domain", width: 200, tooltipField: 'domain', hide: true},
         {headerName: '端口', field: "port", width: 80, tooltipField: 'port'},
         {
             headerName: '协议',
@@ -444,14 +445,13 @@ const TabContent: React.FC<TabContentProps> = (props) => {
     }, [])
     const getContextMenuItems = useCallback((params: GetContextMenuItemsParams): any => {
         if (!pageData || pageData.length === 0 || !params.node) return []
-        const url = formattedUrl(params.node?.data)
         const cellValue = formattedValueForCopy(params.column?.getColId(), params.node?.data)
         return [
             {
                 name: "浏览器打开URL",
-                disabled: !url,
+                disabled: !params.node?.data.Link,
                 action: () => {
-                    BrowserOpenURL(url)
+                    BrowserOpenURL(params.node?.data.Link)
                 },
             },
             {
@@ -508,7 +508,7 @@ const TabContent: React.FC<TabContentProps> = (props) => {
                 name: "复制URL列",
                 action: () => {
                     const t: string[] = getSortedData<PageDataType>(gridRef.current?.api).map(item => {
-                        return formattedUrl(item)
+                        return item.Link
                     })
                     copy(t.join("\n"))
                 },
@@ -568,21 +568,6 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             t.push(location.street_cn)
         }
         return t
-    }
-
-    const formattedUrl = (data: PageDataType) => {
-        const domain = data.domain
-        const ip = data.ip
-        const schema = data.service?.name
-        const port = data.port
-        let url
-        const host = domain || ip
-        if (schema === 'http/ssl') {
-            url = (port === 443 ? 'https://' : 'http://') + host + ":" + port
-        } else {
-            url = schema + '://' + host + ":" + port
-        }
-        return url
     }
 
     const getColDefs = () => {

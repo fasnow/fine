@@ -1,6 +1,20 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
 import * as d3 from 'd3';
-import {Button, Drawer, Flex, Input, InputNumber, Modal, Spin, Tag, Tooltip} from "antd";
+import {
+    Button,
+    Checkbox,
+    Drawer,
+    Flex,
+    GetProp,
+    Input,
+    InputNumber,
+    Modal,
+    Pagination,
+    Spin,
+    Tabs,
+    Tag,
+    Tooltip
+} from "antd";
 import TabsV2 from "@/component/TabsV2";
 import {errorNotification} from '@/component/Notification';
 import {appActions, RootState} from '@/store/store';
@@ -12,9 +26,26 @@ import {TYC} from "@/pages/Constants";
 import {CheckboxOptionType} from "antd/es/checkbox/Group";
 import type {CascaderProps} from 'antd/es/cascader'
 import Candidate, {ItemType} from "@/component/Candidate";
-import './Aiqicha.css'
-import {GetInvestRecord, GetShareholder, GetStockChart, SetAuth, Suggest} from "../../wailsjs/go/aiqicha/Bridge";
+import './AiQiCha.css'
+import {
+    ExportInvestRecordByDepth,
+    GetBranchList,
+    GetCopyrightList,
+    GetICPList,
+    GetInvestRecord,
+    GetShareholder,
+    GetStockChart,
+    SetAuth,
+    Suggest
+} from "../../wailsjs/go/aiqicha/Bridge";
+import {AgGridReact} from "ag-grid-react";
+import {AGGridCommonOptions} from "@/pages/Props";
+import {WithIndex} from "@/component/Interface";
+import {ColDef} from "ag-grid-community";
+import Label from "@/component/Label";
+import Number from "@/component/Number";
 import {copy} from "@/util/util";
+import {MessageContext} from "@/App";
 import InvestRecord = aiqicha.InvestRecord;
 import Shareholder = aiqicha.Shareholder;
 
@@ -1088,8 +1119,9 @@ const TabContent: React.FC = () => {
     const [open, setOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);
     const [currentCompany, setCurrentCompany] = React.useState<{ name: string, id: string }>({id: "", name: ""});
+    const [name, setName] = useState("")
+    const [pid, setPid] = useState("")
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const [containerHeight, setContainerHeight] = useState(0)
     const [ratioMin, setRatioMin] = useState(0)
     const [ratioMax, setRatioMax] = useState(100)
     const ratioMinRef = useRef(ratioMin)
@@ -1099,6 +1131,8 @@ const TabContent: React.FC = () => {
     const query = async (name: string, id: string) => {
         treeInstance?.clear()
         setCurrentCompany({name: name, id: id})
+        setName(name)
+        setPid(id)
         setOpen(true)
         setLoading(true)
         try {
@@ -1123,14 +1157,20 @@ const TabContent: React.FC = () => {
                     filterForShow: filterForShow,
                     onNodeClick: (data) => {
                         if ('name' in data) {
+                            setPid(data.pid)
+                            setName(data.name)
                             copy(data.name)
                             return
                         }
                         if ('entName' in data) {
+                            setPid(data.pid)
+                            setName(data.entName)
                             copy(data.entName)
                             return
                         }
                         if ('nodeName' in data) {
+                            setPid(data["nodeId"])
+                            setName(data["nodeName"])
                             copy(data["nodeName"])
                             return
                         }
@@ -1198,6 +1238,7 @@ const TabContent: React.FC = () => {
         }
         return true
     }
+
     return (
         <div ref={containerRef} style={{
             overflow: 'hidden',
@@ -1326,34 +1367,6 @@ const TabContent: React.FC = () => {
                     </Flex>
                 </Flex>
             </div>
-            {/*<Table*/}
-            {/*    rowKey={"index"}*/}
-            {/*    bordered*/}
-            {/*    sticky*/}
-            {/*    size="small"*/}
-            {/*    virtual*/}
-            {/*    columns={defaultColumns}*/}
-            {/*    scroll={{y: tableHeight, x: '100%', scrollToFirstRowOnChange: true}}*/}
-            {/*    dataSource={pageData}*/}
-            {/*    pagination={false}*/}
-            {/*    footer={()=>{*/}
-            {/*        return <div style={{width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>*/}
-            {/*            <Pagination*/}
-            {/*                showQuickJumper*/}
-            {/*                showSizeChanger*/}
-            {/*                total={total}*/}
-            {/*                pageSizeOptions={pageSizeOptions}*/}
-            {/*                defaultPageSize={pageSizeOptions[1]}*/}
-            {/*                defaultCurrent={1}*/}
-            {/*                current={currentPage}*/}
-            {/*                showTotal={(total) => `${total} items`}*/}
-            {/*                size="small"*/}
-            {/*                onChange={(page, size) => handlePaginationChange(page, size)}*/}
-            {/*            />*/}
-            {/*            /!*<this.ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize}/>*!/*/}
-            {/*        </div>*/}
-            {/*    }}*/}
-            {/*/>*/}
             <Drawer
                 closable={false}
                 open={open}
@@ -1371,10 +1384,7 @@ const TabContent: React.FC = () => {
                 // }}
             >
                 <Flex vertical style={{height: "100%", position: 'relative'}}>
-                    {/*<Spin spinning={loading} style={{position: "absolute", height: "100%", width: "100%"}}>*/}
-                    {/*    */}
-                    {/*</Spin>*/}
-                    <Flex gap={20} style={{zIndex: 10, position: "absolute", backgroundColor: "#ffffff", right: "0"}}>
+                    <Flex gap={20} style={{zIndex: 10, position: "absolute", backgroundColor: "#ffffff", left: "0"}}>
                         <Tag bordered={false} color="#108ee9"
                              style={{fontSize: "14px", fontWeight: "bold"}}>{currentCompany.name}</Tag>
                         {/*<span>*/}
@@ -1384,7 +1394,6 @@ const TabContent: React.FC = () => {
                         {/*        <Radio value={"存续/在业"}>存续/在业</Radio>*/}
                         {/*    </Radio.Group>*/}
                         {/*</span>*/}
-
                         <Flex>
                             <Tag bordered={false} color="cyan" style={{fontSize: "14px"}}>控股比例</Tag>
                             <InputNumber value={ratioMin} size={"small"} max={100} min={0} suffix={"%"}
@@ -1410,13 +1419,319 @@ const TabContent: React.FC = () => {
                             {/* 动态生成内容由 D3.js 完成 */}
                         </div>
                     </Spin>
+                    <DataTab pid={pid} name={name}/>
                 </Flex>
             </Drawer>
         </div>
     );
 };
 
-const Aiqicha = () => {
+interface Info {
+    name?: string | undefined
+    pid?: string | undefined
+    icpTotal?: number
+    copyrightTotal?: number
+    branchTotal?: number
+}
+
+interface FooterProps {
+    total: number
+    pageSizeOptions: number[]
+    defaultPageSize: number
+    currentPage: number
+    onPaginationChange: (pageNum: number, pageSize: number) => void
+    info: Info
+}
+
+const Footer: React.FC<FooterProps> = (props) => {
+    const messageApi = useContext(MessageContext);
+    const [open, setOpen] = useState(false)
+    const [depth, setDepth] = useState(1)
+    const [ratioMin, setRatioMin] = useState(0.5)
+    const [ratioMax, setRatioMax] = useState(1)
+    const [dataType, setDataType] = useState<any[]>(["icp"])
+
+    const handlePaginationChange = (pageNum: number, pageSize: number) => {
+        if (props.onPaginationChange) {
+            props.onPaginationChange(pageNum, pageSize)
+        }
+    }
+
+    const onOK = () => {
+        setOpen(false)
+        ExportInvestRecordByDepth(props.info.pid || "", depth, ratioMin, ratioMax, dataType)
+            .then(
+                r=> {
+                    messageApi?.success(`请至下载列表查看进度`)
+                }
+            )
+            .catch(
+                err => errorNotification("错误", err)
+            )
+
+    }
+
+    const onCancel = () => {
+        setOpen(false)
+    }
+
+    const onChange: GetProp<typeof Checkbox.Group, 'onChange'> = (checkedValues) => {
+        setDataType(checkedValues)
+    };
+
+
+    return <div>
+        <Flex justify={"right"} align={'center'} gap={20} style={{padding: '5px', boxSizing: "border-box"}}>
+            <Pagination
+                showQuickJumper
+                showSizeChanger
+                total={props.total}
+                pageSizeOptions={props.pageSizeOptions}
+                defaultPageSize={props.defaultPageSize}
+                // defaultCurrent={props.currentPage}
+                current={props.currentPage}
+                showTotal={(total) => `${total} items`}
+                size="small"
+                onChange={(page, size) => handlePaginationChange(page, size)}
+            />
+            <Button size={"small"} type={"primary"} onClick={() => setOpen(true)}>导出控股树</Button>
+        </Flex>
+        <Modal
+            destroyOnClose
+            style={{top: "20%"}}
+            maskClosable={false}
+            mask={false}
+            open={open}
+            onCancel={onCancel}
+            onOk={onOK}
+            okButtonProps={{size: 'small'}}
+            cancelButtonProps={{size: 'small'}}
+            title={"控股树导出"}
+        >
+            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                <Label labelWidth={80} label={"企业名称"} value={props.info.name}/>
+                <Label labelWidth={80} label={"PID"} value={props.info.pid}/>
+                <Label labelWidth={80} label={"导出内容"} value={
+                    <Checkbox.Group value={dataType} onChange={onChange}>
+                        <Checkbox value="icp">备案信息({props.info.icpTotal})</Checkbox>
+                        <Checkbox value="copyright">软件著作({props.info.copyrightTotal})</Checkbox>
+                        <Tooltip title={"分公司默认采取单线程、分页大小为1000策略获取,分公司过多将增加耗时"}
+                                 placement={"bottom"}>
+                            <Checkbox value="branch">分公司({props.info.branchTotal})</Checkbox>
+                        </Tooltip>
+                    </Checkbox.Group>
+                }/>
+                <Label labelWidth={80} label={"控股比例"} value={
+                    <>
+                        <InputNumber value={ratioMin} size={"small"} max={1} min={0}
+                                     onChange={(v) => setRatioMin(v === null ? 0.5 : v)}
+                        />-<InputNumber value={ratioMax} size={"small"} max={1} min={0}
+                                        onChange={(v) => setRatioMax(v === null ? 1 : v)}/>
+                    </>
+                }/>
+                <Label labelWidth={80} label={"导出层级"} value={
+                    <Number tooltip={"小于0导出所有层级, 等于0导出当前节点, 大于0导出指定层级"}
+                            tooltipPlacement={'bottom'} value={depth}
+                            onChange={(value) => {
+                                setDepth(value as number)
+                                return true
+                            }}/>
+                }/>
+
+            </div>
+        </Modal>
+    </div>
+}
+
+type PageDataTypeICP = WithIndex<aiqicha.ICP>
+
+type PageDataTypeCopyright = WithIndex<aiqicha.Copyright>
+
+type PageDataTypeBranch = WithIndex<aiqicha.Branch>
+
+interface DataTabProps {
+    pid: string
+    name: string
+}
+
+const DataTab: React.FC<DataTabProps> = (props) => {
+    const [icpCurrentPage, setIcpCurrentPage] = useState(1)
+    const [copyrightCurrentPage, setCopyrightCurrentPage] = useState(1)
+    const [branchCurrentPage, setBranchCurrentPage] = useState(1)
+    const [icpTotal, setIcpTotal] = useState(0)
+    const [copyrightTotal, setCopyrightTotal] = useState(0)
+    const [branchTotal, setBranchTotal] = useState(0)
+    const [icps, setICPs] = useState<PageDataTypeICP[]>([])
+    const [copyrights, setCopyrights] = useState<PageDataTypeCopyright[]>([])
+    const [branches, setbranches] = useState<PageDataTypeBranch[]>([])
+    const [info, setInfo] = useState<Info>({})
+    const [icpColDef] = useState<ColDef[]>([
+        {headerName: '序号', field: "index", width: 80, pinned: 'left', tooltipField: 'index'},
+        {headerName: "首页地址", field: "homeSite", tooltipField: 'homeSite'},
+        {headerName: "网站名称", field: "siteName", tooltipField: 'siteName', width: 300},
+        {headerName: "域名", field: "domain", tooltipField: 'domain', width: 300},
+        {headerName: "备案号", field: "icpNo", tooltipField: 'icpNo'}
+    ])
+    const [copyrightColDef] = useState<ColDef[]>([
+        {headerName: '序号', field: "index", width: 80, pinned: 'left', tooltipField: 'index'},
+        {headerName: "软件名称", field: "softwareName", tooltipField: 'softwareName', width: 350},
+        {headerName: "软件简称", field: "shortName", tooltipField: 'shortName'},
+        {headerName: "版本号", field: "batchNum", tooltipField: 'batchNum', width: 100},
+        {headerName: "软件著作分类", field: "softwareType", tooltipField: 'softwareType', width: 120},
+        {headerName: "行业分类", field: "typeCode", tooltipField: 'typeCode', width: 120},
+        {headerName: "登记号", field: "regNo", tooltipField: 'regNo', width: 180},
+        {headerName: "登记日期", field: "regDate", tooltipField: 'regDate'},
+        {headerName: "首次发表日期", field: "firstDate", tooltipField: 'firstDate'}
+    ])
+    const [branchColDef] = useState<ColDef[]>([
+        {headerName: '序号', field: "index", width: 80, pinned: 'left', tooltipField: 'index'},
+        {headerName: "企业名称", field: "entName", tooltipField: 'entName', width: 350},
+        {headerName: "注册日期", field: "startDate", tooltipField: 'startDate', width: 120},
+        {headerName: "注册资本", field: "regCapital", tooltipField: 'regCapital', width: 100},
+        {headerName: "企业Logo", field: "logo", tooltipField: 'logo'},
+        {headerName: "负责人", field: "legalPerson", tooltipField: 'legalPerson'},
+        {headerName: "状态", field: "openStatus", tooltipField: 'openStatus'}
+    ])
+
+    useEffect(() => {
+        setInfo({name: props.name, pid: props.pid})
+        if (!props.pid)return
+        GetICPList(props.pid, 1).then(
+            r => {
+                setInfo(prevState => ({...prevState, icpTotal: r.Total}))
+                setIcpTotal(r.Total)
+                setICPs(r.Data.map((value, index) => {
+                    return {index: index + 1, ...value} as PageDataTypeICP
+                }))
+            }
+        ).catch(e => errorNotification("错误", e))
+        GetBranchList(props.pid, 1).then(
+            r => {
+                setInfo(prevState => ({...prevState, branchTotal: r.Total}))
+                setBranchTotal(r.Total)
+                setbranches(r.Data.map((value, index) => {
+                    return {index: index + 1, ...value} as PageDataTypeBranch
+                }))
+            }
+        ).catch(e => errorNotification("错误", e))
+        GetCopyrightList(props.pid, 1).then(
+            r => {
+                setCopyrightTotal(r.Total)
+                setInfo(prevState => ({...prevState, copyrightTotal: r.Total}))
+                setCopyrights(r.Data.map((value, index) => {
+                    return {index: index + 1, ...value} as PageDataTypeCopyright
+                }))
+            }
+        ).catch(e => errorNotification("错误", e))
+
+    }, [props.pid, props.name])
+
+    const items = useMemo(() => {
+        return [
+            {
+                key: "icp",
+                label: `备案信息(${icpTotal})`,
+                closable: false,
+                children: <Flex vertical style={{height: '100%', padding: '5px', boxSizing: 'border-box'}}>
+                    <AgGridReact
+                        {...AGGridCommonOptions}
+                        rowData={icps}
+                        columnDefs={icpColDef}
+                        loading={false}
+                    />
+                    <Footer info={info} currentPage={icpCurrentPage} total={icpTotal}
+                            pageSizeOptions={[100]} defaultPageSize={100}
+                            onPaginationChange={
+                                (pageNum, pageSize) => {
+                                    if (!props.pid) return
+                                    GetICPList(props.pid, pageNum).then(
+                                        r => {
+                                            setInfo(prevState => ({...prevState, icpTotal: r.Total}))
+                                            setIcpTotal(r.Total)
+                                            setICPs(r.Data.map((value, index) => {
+                                                return {index: (pageNum - 1) * pageSize + index + 1, ...value} as PageDataTypeICP
+                                            }))
+                                            setIcpCurrentPage(pageNum)
+                                        }
+                                    ).catch(e => errorNotification("错误", e))
+                                }
+                            }/>
+                </Flex>
+            },
+            {
+                key: "copyright",
+                label: `软件著作(${copyrightTotal})`,
+                closable: false,
+                children: <Flex vertical
+                                style={{height: '100%', padding: '5px', boxSizing: 'border-box'}}><AgGridReact
+                    {...AGGridCommonOptions}
+                    rowData={copyrights}
+                    columnDefs={copyrightColDef}
+                    loading={false}
+                />
+                    <Footer info={info} currentPage={copyrightCurrentPage} total={copyrightTotal}
+                            pageSizeOptions={[10]}
+                            defaultPageSize={10} onPaginationChange={
+                        (pageNum, pageSize) => {
+                            if (!props.pid) return
+
+                            GetCopyrightList(props.pid, pageNum).then(
+                                r => {
+                                    setInfo(prevState => ({...prevState, copyrightTotal: r.Total}))
+                                    setCopyrightTotal(r.Total)
+                                    setCopyrights(r.Data.map((value, index) => {
+                                        return {index: (pageNum - 1) * pageSize + index + 1, ...value} as PageDataTypeCopyright
+                                    }))
+                                    setCopyrightCurrentPage(pageNum)
+                                }
+                            ).catch(e => errorNotification("错误", e))
+                        }
+                    }/>
+                </Flex>
+            },
+            {
+                key: "branch",
+                label: `分公司(${branchTotal})`,
+                closable: false,
+                children: <Flex vertical style={{height: '100%', padding: '5px', boxSizing: 'border-box'}}><AgGridReact
+                    {...AGGridCommonOptions}
+                    rowData={branches}
+                    columnDefs={branchColDef}
+                    loading={false}
+                />
+                    <Footer info={info} currentPage={branchCurrentPage} total={branchTotal}
+                            pageSizeOptions={[100]}
+                            defaultPageSize={100} onPaginationChange={
+                        (pageNum, pageSize) => {
+                            if (!props.pid) return
+                            GetBranchList(props.pid, pageNum).then(
+                                r => {
+                                    setInfo(prevState => ({...prevState, branchTotal: r.Total}))
+                                    setBranchTotal(r.Total)
+                                    setbranches(r.Data.map((value, index) => {
+                                        return {index: (pageNum - 1) * pageSize + index + 1, ...value} as PageDataTypeBranch
+                                    }))
+                                    setBranchCurrentPage(pageNum)
+                                }
+                            ).catch(e => errorNotification("错误", e))
+                        }
+                    }/>
+                </Flex>
+            },
+        ]
+    }, [icpTotal, branchTotal, copyrightTotal, icps, branches, copyrights])
+
+    return <Tabs
+        style={{height: '100%'}}
+        tabBarExtraContent={{
+            left: <Tag bordered={false} color="#108ee9"
+                       style={{fontSize: "14px", fontWeight: "bold"}}>{info.name}</Tag>
+        }}
+        items={items}
+    />
+}
+
+const AiQiCha = () => {
     return <TabsV2 defaultTabContent={<TabContent/>} tabBarExtraContent={{
         left: <div style={{
             width: "auto",
@@ -1428,4 +1743,4 @@ const Aiqicha = () => {
     }}/>
 }
 
-export default Aiqicha;
+export default AiQiCha;

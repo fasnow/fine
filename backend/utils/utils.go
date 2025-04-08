@@ -1,12 +1,44 @@
 package utils
 
 import (
+	"github.com/xuri/excelize/v2"
 	"golang.org/x/net/html"
 	"gorm.io/gorm"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
+
+// FreezeFirstRow 冻结每个工作表的第一行
+func FreezeFirstRow(file *excelize.File, sheetName string) error {
+	return file.SetPanes(sheetName, &excelize.Panes{
+		Freeze:      true,
+		Split:       false,
+		XSplit:      0,
+		YSplit:      1,
+		TopLeftCell: "A2",
+		ActivePane:  "bottomLeft",
+	})
+}
+
+func ParsePercentage(percentStr string) float64 {
+	if len(percentStr) == 0 || percentStr[len(percentStr)-1] != '%' {
+		return 0
+	}
+
+	numStr := percentStr[:len(percentStr)-1]
+	if len(numStr) == 0 {
+		return 0
+	}
+
+	value, err := strconv.ParseFloat(numStr, 64)
+	if err != nil {
+		return 0
+	}
+
+	return value / 100
+}
 
 func GetTableName(db *gorm.DB, model interface{}) string {
 	stmt := &gorm.Statement{DB: db}

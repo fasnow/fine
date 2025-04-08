@@ -771,7 +771,6 @@ const TabContent: React.FC<TabContentProps> = (props) => {
             />
             <ExportDataPanel id={pageIDMap.current[1]} total={total} currentPageSize={currentPageSize}/>
         </Flex>)
-
     return <Flex vertical gap={5} style={{height: '100%'}}>
         <Flex justify={'center'} align={"center"} gap={5}>
             <Candidate

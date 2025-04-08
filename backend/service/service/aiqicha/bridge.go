@@ -9,9 +9,9 @@ import (
 	"fine/backend/database/repository"
 	service2 "fine/backend/service/service"
 	"fine/backend/service/service/exportlog"
-	"github.com/cenkalti/backoff/v4"
-	"math"
-	"time"
+	"fine/backend/utils"
+	"fmt"
+	"strings"
 )
 
 type Bridge struct {
@@ -61,97 +61,87 @@ func (r *Bridge) GetInvestRecord(pid string) ([]InvestRecord, error) {
 	return r.aiQiCha.GetInvestRecord(pid)
 }
 
-func (r *Bridge) GetCopyrightList(pid string, pageNum int) (int64, []*Copyright, error) {
-	return r.aiQiCha.GetCopyrightList(pid, pageNum, 10) // 最大只支持10
+type GetCopyrightListResult struct {
+	Total int64
+	Data  []*Copyright
 }
 
-func (r *Bridge) GetBranchList(pid string, pageNum int) (int64, []*Branch, error) {
-	return r.aiQiCha.GetBranchList(pid, pageNum, 100)
+func (r *Bridge) GetCopyrightList(pid string, pageNum int) (*GetCopyrightListResult, error) {
+	total, copyrights, err := r.aiQiCha.GetCopyrights(pid, pageNum, 10)
+	if err != nil {
+		r.app.Logger.Error(err)
+		return nil, err
+	}
+	return &GetCopyrightListResult{
+		Total: total,
+		Data:  copyrights,
+	}, nil
 }
 
-func (r *Bridge) ExportAllCopyright(pid string) (int64, error) {
+type GetBranchListResult struct {
+	Total int64
+	Data  []*Branch
+}
+
+func (r *Bridge) GetBranchList(pid string, pageNum int) (*GetBranchListResult, error) {
+	total, branches, err := r.aiQiCha.GetBranches(pid, pageNum, 100)
+	if err != nil {
+		r.app.Logger.Error(err)
+		return nil, err
+	}
+	return &GetBranchListResult{
+		Total: total,
+		Data:  branches,
+	}, nil
+}
+
+type GetICPListResult struct {
+	Total int64
+	Data  []*ICP
+}
+
+func (r *Bridge) GetICPList(pid string, pageNum int) (*GetICPListResult, error) {
+	total, icps, err := r.aiQiCha.GetICPs(pid, pageNum, 100)
+	if err != nil {
+		r.app.Logger.Error(err)
+		return nil, err
+	}
+	return &GetICPListResult{
+		Total: total,
+		Data:  icps,
+	}, nil
+}
+
+func (r *Bridge) ExportInvestRecordByDepth(pid string, depth int, minRate, maxRate float64, dataTypes []string) (int64, error) {
+	if len(strings.TrimSpace(pid)) == 0 {
+		return 0, fmt.Errorf("pid不能为空")
+	}
+	if (minRate == 0 && maxRate == 0) || minRate > maxRate {
+		return 0, fmt.Errorf("错误的投资比例范围: %f-%f", minRate, maxRate)
+	}
+	dataTypes = utils.RemoveEmptyAndDuplicateString(dataTypes)
 	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("AiQiCha")
 	if err != nil {
 		r.app.Logger.Error(err)
 		return 0, err
 	}
 	go func() {
-		total, err2 := backoff.RetryWithData(func() (int64, error) {
-			total, _, err2 := r.aiQiCha.GetCopyrightList(pid, 1, 1)
-			if err2 != nil {
-				r.app.Logger.Error(err2)
-				return 0, err2
+		var subErr error
+		tree, err := r.aiQiCha.GetInvestTree(pid, depth, minRate, maxRate, dataTypes)
+		if err != nil {
+			r.app.Logger.Error(err)
+			if tree != nil {
+				subErr = err
+				service2.SaveToExcel(nil, subErr, exportID, event.AiQiCha, r.app.Logger, func() error {
+					return r.aiQiCha.Export(tree, outputAbsFilepath)
+				})
+				return
 			}
-			return total, nil
-		}, service2.GetBackOffWithMaxRetries(10, 3*time.Second, 1))
-		if err2 != nil {
-			service2.SaveToExcel(err2, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
-				return nil
-			})
+			service2.SaveToExcel(err, nil, exportID, event.AiQiCha, r.app.Logger, nil)
 			return
 		}
-		maxPageNum := int(math.Ceil(float64(total / 10)))
-		items := make([]*Copyright, 0)
-		for pageNum := 1; pageNum <= maxPageNum; pageNum++ {
-			result, err3 := backoff.RetryWithData(func() ([]*Copyright, error) {
-				_, list, err3 := r.aiQiCha.GetCopyrightList(pid, pageNum, 10)
-				if err3 != nil {
-					r.app.Logger.Error(err3)
-					return nil, err3
-				}
-				return list, nil
-			}, service2.GetBackOffWithMaxRetries(10, 3*time.Second, 1))
-			if err3 != nil {
-				break
-			}
-			items = append(items, result...)
-		}
 		service2.SaveToExcel(nil, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
-			return r.aiQiCha.ExportCopyrights(items, outputAbsFilepath)
-		})
-	}()
-	return exportID, nil
-}
-
-func (r *Bridge) ExportAllBranch(pid string) (int64, error) {
-	exportID, outputAbsFilepath, err := r.exportLogBridge.Create("AiQiCha")
-	if err != nil {
-		r.app.Logger.Error(err)
-		return 0, err
-	}
-	go func() {
-		total, err2 := backoff.RetryWithData(func() (int64, error) {
-			total, _, err2 := r.aiQiCha.GetBranchList(pid, 1, 1)
-			if err2 != nil {
-				r.app.Logger.Error(err2)
-				return 0, err2
-			}
-			return total, nil
-		}, service2.GetBackOffWithMaxRetries(10, 3*time.Second, 1))
-		if err2 != nil {
-			service2.SaveToExcel(err2, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
-				return nil
-			})
-			return
-		}
-		maxPageNum := int(math.Ceil(float64(total / 1000)))
-		items := make([]*Branch, 0)
-		for pageNum := 1; pageNum <= maxPageNum; pageNum++ {
-			result, err3 := backoff.RetryWithData(func() ([]*Branch, error) {
-				_, list, err3 := r.aiQiCha.GetBranchList(pid, pageNum, 1000)
-				if err3 != nil {
-					r.app.Logger.Error(err3)
-					return nil, err3
-				}
-				return list, nil
-			}, service2.GetBackOffWithMaxRetries(10, 3*time.Second, 1))
-			if err3 != nil {
-				break
-			}
-			items = append(items, result...)
-		}
-		service2.SaveToExcel(nil, nil, exportID, event.AiQiCha, r.app.Logger, func() error {
-			return r.aiQiCha.ExportBranches(items, outputAbsFilepath)
+			return r.aiQiCha.Export(tree, outputAbsFilepath)
 		})
 	}()
 	return exportID, nil

@@ -22,6 +22,7 @@ type RealtimeServiceItem struct {
 	Location   Location    `json:"location"`
 	Time       string      `json:"time"`
 	Asn        int         `json:"asn"` //自治域编号
+	Link       string
 }
 
 type RealtimeHostItem struct {

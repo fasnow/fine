@@ -40,6 +40,29 @@ func (r *realtimeService) Service(req *RealtimeServiceReq) (*RealtimeServiceData
 	if result.Items == nil {
 		result.Items = make([]*quake.RealtimeServiceItem, 0)
 	}
+	for _, item := range result.Items {
+		if item != nil {
+			host := item.Domain
+			if host == "" {
+				host = item.IP
+			}
+			protocol := item.Service.Name
+			portStr := strconv.Itoa(item.Port)
+			path := item.Service.HTTP.Path
+			var link string
+			switch protocol {
+			case "http/ssl":
+				link = "https://" + host + ":" + portStr
+			case "http":
+				link = "http://" + host + ":" + portStr
+			default:
+			}
+			if link != "" && path != "" {
+				link += path
+			}
+			item.Link = link
+		}
+	}
 	return result, nil
 }
 
@@ -416,7 +439,7 @@ func (r *Quake) User() (*User, error) {
 }
 
 func (r *Quake) Export(items []*quake.RealtimeServiceItem, filename string) error {
-	var headers = []any{"ID", "IP", "域名", "主机", "端口", "协议", "响应码", "网页标题", "组件", "网站路径", "中间件", "证书", "操作系统", "运营商", "地理位置", "场景", "自治域", "自治域编号", "更新时间"}
+	var headers = []any{"序号", "链接", "IP", "域名", "主机", "端口", "协议", "响应码", "网页标题", "组件", "网站路径", "中间件", "证书", "操作系统", "运营商", "地理位置", "场景", "自治域", "自治域编号", "更新时间"}
 	var data = [][]any{headers}
 	for i, item := range items {
 		var component []string
@@ -453,6 +476,7 @@ func (r *Quake) Export(items []*quake.RealtimeServiceItem, filename string) erro
 		}
 		var tmpItem = []any{
 			i + 1,
+			item.Link,
 			item.IP,
 			item.Domain,
 			item.Hostname,

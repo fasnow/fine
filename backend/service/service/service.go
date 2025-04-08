@@ -37,6 +37,11 @@ func SaveToExcel(getDataErr, subErr error, exportID int64, eventName string, log
 		data.Status = status.Error
 		data.Error = getDataErr.Error()
 		logger.Error(getDataErr, data)
+		if err2 := exportLogRepo.UpdateByExportID(exportLog); err2 != nil {
+			logger.Error(err2, data)
+			event.EmitNewExportItemEvent(eventName, data)
+			return
+		}
 		event.EmitNewExportItemEvent(eventName, data)
 		return
 	}

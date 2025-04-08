@@ -1447,7 +1447,7 @@ const Footer: React.FC<FooterProps> = (props) => {
     const messageApi = useContext(MessageContext);
     const [open, setOpen] = useState(false)
     const [depth, setDepth] = useState(1)
-    const [ratioMin, setRatioMin] = useState(0)
+    const [ratioMin, setRatioMin] = useState(0.5)
     const [ratioMax, setRatioMax] = useState(1)
     const [dataType, setDataType] = useState<any[]>(["icp"])
 
@@ -1462,7 +1462,7 @@ const Footer: React.FC<FooterProps> = (props) => {
         ExportInvestRecordByDepth(props.info.pid || "", depth, ratioMin, ratioMax, dataType)
             .then(
                 r=> {
-                    messageApi?.success(`任务ID${r},请至下载列表查看进度`)
+                    messageApi?.success(`请至下载列表查看进度`)
                 }
             )
             .catch(
@@ -1524,7 +1524,7 @@ const Footer: React.FC<FooterProps> = (props) => {
                 <Label labelWidth={80} label={"控股比例"} value={
                     <>
                         <InputNumber value={ratioMin} size={"small"} max={1} min={0}
-                                     onChange={(v) => setRatioMin(v === null ? 0 : v)}
+                                     onChange={(v) => setRatioMin(v === null ? 0.5 : v)}
                         />-<InputNumber value={ratioMax} size={"small"} max={1} min={0}
                                         onChange={(v) => setRatioMax(v === null ? 1 : v)}/>
                     </>
@@ -1595,6 +1595,7 @@ const DataTab: React.FC<DataTabProps> = (props) => {
 
     useEffect(() => {
         setInfo({name: props.name, pid: props.pid})
+        if (!props.pid)return
         GetICPList(props.pid, 1).then(
             r => {
                 setInfo(prevState => ({...prevState, icpTotal: r.Total}))

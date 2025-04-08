@@ -102,7 +102,7 @@ func (r *AiQiCha) request(req *service.Request, auth bool) ([]byte, error) {
 	}
 	bytes, err := req.Fetch(r.http, BaseAPIUrl, func(response *http.Response) error {
 		if response.StatusCode != 200 {
-			return errors.New(strconv.Itoa(response.StatusCode))
+			return errors.New(response.Status)
 		}
 		return nil
 	})
@@ -620,6 +620,9 @@ func (r *AiQiCha) GetAllICPs(pid string) ([]*ICP, error) {
 	if err != nil {
 		return nil, err
 	}
+	if total == 0 {
+		return allICPs, nil
+	}
 
 	// 腾讯备案1k多点所以一次性全部查询
 	_, icps, err := r.GetICPs(pid, 1, int(total))
@@ -720,26 +723,26 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 	defer f.Close()
 
 	// 创建主工作表
-	sheetName := "公司投资结构"
-	index, err := f.NewSheet(sheetName)
+	mainSheetName := "公司投资结构"
+	index, err := f.NewSheet(mainSheetName)
 	if err != nil {
 		return fmt.Errorf("创建工作表失败: %w", err)
 	}
 
 	// 设置主表头（扩展包含版权和分支机构信息）
 	mainHeaders := []string{
-		"序号", "层级", "关联PID", "PID", "企业名称", "投资比例", "注册资本", "状态", "版权数量", "分支机构数量", "Logo",
+		"序号", "层级", "关联企业", "PID", "企业名称", "投资比例", "注册资本", "状态", "版权数量", "分支机构数量", "Logo",
 	}
 	for col, header := range mainHeaders {
 		cell, _ := excelize.CoordinatesToCellName(col+1, 1)
-		f.SetCellValue(sheetName, cell, header)
+		f.SetCellValue(mainSheetName, cell, header)
 	}
 
 	// 创建版权信息工作表
 	copyrightSheet := "版权信息"
 	f.NewSheet(copyrightSheet)
 	copyrightHeaders := []string{
-		"序号", "关联企业PID", "著作人", "软件名称", "软件简称", "版本号", "软件著作分类", "行业分类", "登记号", "登记日期", "首次发表日期",
+		"序号", "关联企业", "著作人", "软件名称", "软件简称", "版本号", "软件著作分类", "行业分类", "登记号", "登记日期", "首次发表日期",
 	}
 	for col, header := range copyrightHeaders {
 		cell, _ := excelize.CoordinatesToCellName(col+1, 1)
@@ -750,15 +753,26 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 	branchSheet := "分支机构"
 	f.NewSheet(branchSheet)
 	branchHeaders := []string{
-		"序号", "关联企业PID", "机构PID", "机构名称", "注册日期", "注册资本", "机构Logo", "负责人",
+		"序号", "关联企业", "企业PID", "机构名称", "注册日期", "注册资本", "机构Logo", "负责人",
 	}
 	for col, header := range branchHeaders {
 		cell, _ := excelize.CoordinatesToCellName(col+1, 1)
 		f.SetCellValue(branchSheet, cell, header)
 	}
 
+	// 创建ICP工作表
+	icpSheet := "备案信息"
+	f.NewSheet(icpSheet)
+	icpHeaders := []string{
+		"序号", "关联企业", "首页地址", "网站名称", "域名", "备案号",
+	}
+	for col, header := range icpHeaders {
+		cell, _ := excelize.CoordinatesToCellName(col+1, 1)
+		f.SetCellValue(icpSheet, cell, header)
+	}
+
 	// 初始化行计数器
-	mainRow, copyrightRow, branchRow := 2, 2, 2
+	mainRow, copyrightRow, branchRow, icpRow := 2, 2, 2, 2
 
 	// 递归写入数据
 	var writeNode func(*ExportNode, int, string)
@@ -781,24 +795,17 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 			len(node.Branches),
 			node.Logo,
 		}
-
 		for col, value := range mainCols {
 			cell, _ := excelize.CoordinatesToCellName(col+1, mainRow)
-			f.SetCellValue(sheetName, cell, value)
+			f.SetCellValue(mainSheetName, cell, value)
 		}
-
-		// 设置缩进显示层级关系
-		if level > 0 {
-			cell, _ := excelize.CoordinatesToCellName(3, mainRow) // 企业名称列
-			currentValue, _ := f.GetCellValue(sheetName, cell)
-			f.SetCellStr(sheetName, cell, currentValue)
-		}
+		mainRow++
 
 		// 写入版权信息
 		for _, copyright := range node.Copyrights {
 			copyrightCols := []interface{}{
 				copyrightRow - 1,
-				node.Pid,
+				node.EntName,
 				copyright.SoftwareWork,
 				copyright.SoftwareName,
 				copyright.ShortName,
@@ -820,7 +827,7 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 		for _, branch := range node.Branches {
 			branchCols := []interface{}{
 				branchRow - 1,
-				node.Pid,
+				node.EntName,
 				branch.Pid,
 				branch.EntName,
 				branch.StartDate,
@@ -835,23 +842,39 @@ func (r *AiQiCha) Export(root *ExportNode, outputFilepath string) error {
 			branchRow++
 		}
 
-		mainRow++
+		// 写入ICP信息
+		for _, icp := range node.ICPs {
+			icpCols := []interface{}{
+				icpRow - 1,
+				node.EntName,
+				strings.Join(icp.HomeSite, "\n"),
+				icp.SiteName,
+				strings.Join(icp.Domain, "\n"),
+				icp.IcpNo,
+			}
+			for col, value := range icpCols {
+				cell, _ := excelize.CoordinatesToCellName(col+1, icpRow)
+				f.SetCellValue(icpSheet, cell, value)
+			}
+			icpRow++
+		}
 
 		// 递归处理子节点
 		for _, child := range node.ChildrenNodes {
-			writeNode(child, level+1, node.Pid)
+			writeNode(child, level+1, node.EntName)
 		}
 	}
 
-	writeNode(root, 0, "0")
+	writeNode(root, 0, "")
 
-	r.SetExcelStyle(f, "公司投资结构", len(mainHeaders), mainRow-1)
-	r.SetExcelStyle(f, "版权信息", len(copyrightHeaders), copyrightRow-1)
-	r.SetExcelStyle(f, "分支机构", len(branchHeaders), branchRow-1)
-
-	utils.FreezeFirstRow(f, "公司投资结构")
-	utils.FreezeFirstRow(f, "版权信息")
-	utils.FreezeFirstRow(f, "分支机构")
+	r.SetExcelStyle(f, mainSheetName, len(mainHeaders), mainRow-1)
+	r.SetExcelStyle(f, copyrightSheet, len(copyrightHeaders), copyrightRow-1)
+	r.SetExcelStyle(f, branchSheet, len(branchHeaders), branchRow-1)
+	r.SetExcelStyle(f, icpSheet, len(icpHeaders), icpRow-1)
+	utils.FreezeFirstRow(f, mainSheetName)
+	utils.FreezeFirstRow(f, copyrightSheet)
+	utils.FreezeFirstRow(f, branchSheet)
+	utils.FreezeFirstRow(f, icpSheet)
 
 	f.SetActiveSheet(index)
 

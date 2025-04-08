@@ -30,20 +30,13 @@ import type {DraggableData, DraggableEvent} from 'react-draggable';
 import Draggable from "react-draggable";
 import AppIcon from "@/assets/images/appicon.png"
 import Shodan from "@/pages/Shodan";
-import dayjs from 'dayjs';
+import {MessageInstance} from "antd/es/message/interface";
 
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 provideGlobalGridOptions({theme: themeQuartz.withParams({rowBorder: true, columnBorder: true})}); // Mark all grids as using legacy themes
 
-// 定义context的默认值
-const defaultMessageContext = {
-    // success: () => console.warn('没有MessageProvider包裹'),
-    // error: () => console.warn('没有MessageProvider包裹'),
-    // 其他message方法...
-};
-
-const MessageContext = createContext(defaultMessageContext);
+const MessageContext = createContext<MessageInstance | null>(null);
 
 const App: React.FC = () => {
     const [disabled, setDisabled] = useState(true);
@@ -224,7 +217,7 @@ const App: React.FC = () => {
                                 motionDurationSlow: '0',
                                 motionEaseInOutCirc: '',
                                 motionEaseOutCirc: '',
-                                colorBgMask:''
+                                colorBgMask: ''
                             }
                         }
                     }}
@@ -276,7 +269,8 @@ const App: React.FC = () => {
                             <img style={{height: '70px'}} draggable={false} src={AppIcon} alt={""}/>
                             <span style={{fontWeight: 'bold', fontSize: '12px'}}>确定退出吗？</span>
                             <Flex justify={"space-between"} style={{width: '100%'}} gap={10}>
-                                <Button size={"small"} style={{width: "100%"}} onClick={() => setOpen(false)}>取消</Button>
+                                <Button size={"small"} style={{width: "100%"}}
+                                        onClick={() => setOpen(false)}>取消</Button>
                                 <Button size={"small"} style={{width: "100%"}} type={"primary"}
                                         onClick={() => Exit()}>确认</Button>
                             </Flex>

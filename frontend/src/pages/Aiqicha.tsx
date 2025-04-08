@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
 import * as d3 from 'd3';
 import {
     Button,
@@ -45,6 +45,7 @@ import {ColDef} from "ag-grid-community";
 import Label from "@/component/Label";
 import Number from "@/component/Number";
 import {copy} from "@/util/util";
+import {MessageContext} from "@/App";
 import InvestRecord = aiqicha.InvestRecord;
 import Shareholder = aiqicha.Shareholder;
 
@@ -1443,11 +1444,12 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = (props) => {
+    const messageApi = useContext(MessageContext);
     const [open, setOpen] = useState(false)
     const [depth, setDepth] = useState(1)
     const [ratioMin, setRatioMin] = useState(0)
     const [ratioMax, setRatioMax] = useState(1)
-    const [dataType,setDataType] = useState<any[]>(["icp"])
+    const [dataType, setDataType] = useState<any[]>(["icp"])
 
     const handlePaginationChange = (pageNum: number, pageSize: number) => {
         if (props.onPaginationChange) {
@@ -1456,11 +1458,16 @@ const Footer: React.FC<FooterProps> = (props) => {
     }
 
     const onOK = () => {
-        ExportInvestRecordByDepth(props.info.pid || "",depth,ratioMin,ratioMax,dataType)
+        setOpen(false)
+        ExportInvestRecordByDepth(props.info.pid || "", depth, ratioMin, ratioMax, dataType)
             .then(
-                
+                r=> {
+                    messageApi?.success(`任务ID${r},请至下载列表查看进度`)
+                }
             )
-            .catch()
+            .catch(
+                err => errorNotification("错误", err)
+            )
 
     }
 

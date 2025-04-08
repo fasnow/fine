@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {Button, ConfigProvider, Flex, Layout as Lay, Modal, Spin, Tabs} from 'antd';
+import React, {createContext, useEffect, useRef, useState} from 'react';
+import {Button, ConfigProvider, Flex, Layout as Lay, message, Modal, Spin, Tabs} from 'antd';
 import 'dayjs/locale/zh-cn';
 import locale from 'antd/locale/zh_CN';
 import {errorNotification} from "@/component/Notification";
@@ -22,7 +22,7 @@ import Test from "@/pages/Test";
 import type {Tab} from 'rc-tabs/lib/interface'
 import {ModuleRegistry, provideGlobalGridOptions, themeQuartz} from "ag-grid-community";
 import {AllEnterpriseModule, LicenseManager} from 'ag-grid-enterprise';
-import Aiqicha from "@/pages/Aiqicha";
+import AiQiCha from "@/pages/AiQiCha";
 import {Exit, GetAllConstants} from "../wailsjs/go/application/Application";
 import {GetRunningTaskNum} from "../wailsjs/go/icp/Bridge";
 import {css, cx} from "antd-style";
@@ -35,6 +35,15 @@ import dayjs from 'dayjs';
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 provideGlobalGridOptions({theme: themeQuartz.withParams({rowBorder: true, columnBorder: true})}); // Mark all grids as using legacy themes
+
+// 定义context的默认值
+const defaultMessageContext = {
+    // success: () => console.warn('没有MessageProvider包裹'),
+    // error: () => console.warn('没有MessageProvider包裹'),
+    // 其他message方法...
+};
+
+const MessageContext = createContext(defaultMessageContext);
 
 const App: React.FC = () => {
     const [disabled, setDisabled] = useState(true);
@@ -76,7 +85,7 @@ const App: React.FC = () => {
         {
             key: '爱企查',
             label: '爱企查',
-            children: <Aiqicha/>,
+            children: <AiQiCha/>,
         },
         {
             key: 'HTTPX',
@@ -100,6 +109,7 @@ const App: React.FC = () => {
         },
     ]);
     const [open, setOpen] = useState<boolean>(false)
+    const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
         (async () => {
@@ -132,12 +142,12 @@ const App: React.FC = () => {
                 //   error：Error对象
                 console.error(message, source, lineno, colno, error)
             }
-            const currentDate = new Date();
-            const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
-            const bodyElement = document.body;
-            if (isQingmingJie) {
-                bodyElement.style.filter = 'grayscale(100%)';
-            }
+            // const currentDate = new Date();
+            // const isQingmingJie = currentDate.getMonth() === 3 && currentDate.getDate() >= 4 && currentDate.getDate() <= 6;
+            // const bodyElement = document.body;
+            // if (isQingmingJie) {
+            //     bodyElement.style.filter = 'grayscale(100%)';
+            // }
         })()
     }, []);
 
@@ -156,147 +166,150 @@ const App: React.FC = () => {
     };
 
 
-    return <ConfigProvider
-        locale={locale}
-        theme={{
-            components: {
-                Dropdown: {
-                    motionDurationMid: "0s",
-                    motionEaseInOutCirc: "cubic-bezier(0.78, 0.14, 0.15, 0.86)"
-                },
-                Modal: {
-                    paddingLG: 5,
-                    paddingMD: 10,
-                    paddingContentHorizontalLG: 10
-                },
-                Collapse: {
-                    marginSM: 0,
-                    paddingSM: 0
-                },
-                Tabs: {
-                    cardHeight: CssConfig.tab.height,
-                    cardPadding: "0px 0px 0px 0px",
-                    cardPaddingSM: "0px 0px 0px 0px",
-                    verticalItemPadding: "0px 0px",
-                    borderRadiusLG: 0,
-                    borderRadius: 0,
-                    horizontalItemPadding: "0px 0px 0px 0px",
-                    horizontalMargin: "0 0 0 0",
-                    inkBarColor: "#ffa940",
-                },
-                Table: {
-                    cellPaddingBlockSM: 4,
-                },
-                Splitter: {
-                    splitBarSize: 5,
-                    splitBarDraggableSize: 0
-                },
+    return <MessageContext.Provider value={messageApi}>
+        {contextHolder}
+        <ConfigProvider
+            locale={locale}
+            theme={{
+                components: {
+                    Dropdown: {
+                        motionDurationMid: "0s",
+                        motionEaseInOutCirc: "cubic-bezier(0.78, 0.14, 0.15, 0.86)"
+                    },
+                    Modal: {
+                        paddingLG: 5,
+                        paddingMD: 10,
+                        paddingContentHorizontalLG: 10
+                    },
+                    Collapse: {
+                        marginSM: 0,
+                        paddingSM: 0
+                    },
+                    Tabs: {
+                        cardHeight: CssConfig.tab.height,
+                        cardPadding: "0px 0px 0px 0px",
+                        cardPaddingSM: "0px 0px 0px 0px",
+                        verticalItemPadding: "0px 0px",
+                        borderRadiusLG: 0,
+                        borderRadius: 0,
+                        horizontalItemPadding: "0px 0px 0px 0px",
+                        horizontalMargin: "0 0 0 0",
+                        inkBarColor: "#ffa940",
+                    },
+                    Table: {
+                        cellPaddingBlockSM: 4,
+                    },
+                    Splitter: {
+                        splitBarSize: 5,
+                        splitBarDraggableSize: 0
+                    },
 
-            },
-        }}
-    >
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: '#ffffff',
-            margin: '0',
-            padding: '0',
-            height: '100%',
-            width: '100%',
-        }}>
-            <ConfigProvider
-                theme={{
-                    components: {
-                        Modal: {
-                            motionDurationMid: '0',
-                            motionDurationSlow: '0',
-                            motionEaseInOutCirc: '',
-                            motionEaseOutCirc: '',
-                            colorBgMask:''
+                },
+            }}
+        >
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: '#ffffff',
+                margin: '0',
+                padding: '0',
+                height: '100%',
+                width: '100%',
+            }}>
+                <ConfigProvider
+                    theme={{
+                        components: {
+                            Modal: {
+                                motionDurationMid: '0',
+                                motionDurationSlow: '0',
+                                motionEaseInOutCirc: '',
+                                motionEaseOutCirc: '',
+                                colorBgMask:''
+                            }
                         }
-                    }
-                }}
-            >
-                <Modal
-                    footer={null}
-                    closeIcon={false}
-                    open={open}
-                    styles={{
-                        content: {
-                            backgroundColor: 'rgba(255, 255, 255, 0)', /* 设置背景颜色和透明度 */
-                            padding: 0
-                        },
                     }}
-                    style={{cursor: "default"}}
-                    width={260}
-                    modalRender={(modal) => (
-                        <Draggable
-                            disabled={disabled}
-                            bounds={bounds}
-                            nodeRef={draggleRef}
-                            onStart={(event, uiData) => onStart(event, uiData)}
-                        >
-                            <div
-                                style={{
-                                    userSelect: 'none',
-                                    width: '100%',
-                                    height: '100%',
-                                    borderRadius: '10px',
-                                    boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
-                                    backgroundColor: 'rgba(241, 241, 241,0.3)', /* 设置背景颜色和透明度 */
-                                }}
-                                className={cx(css`
+                >
+                    <Modal
+                        footer={null}
+                        closeIcon={false}
+                        open={open}
+                        styles={{
+                            content: {
+                                backgroundColor: 'rgba(255, 255, 255, 0)', /* 设置背景颜色和透明度 */
+                                padding: 0
+                            },
+                        }}
+                        style={{cursor: "default"}}
+                        width={260}
+                        modalRender={(modal) => (
+                            <Draggable
+                                disabled={disabled}
+                                bounds={bounds}
+                                nodeRef={draggleRef}
+                                onStart={(event, uiData) => onStart(event, uiData)}
+                            >
+                                <div
+                                    style={{
+                                        userSelect: 'none',
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: '10px',
+                                        boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
+                                        backgroundColor: 'rgba(241, 241, 241,0.3)', /* 设置背景颜色和透明度 */
+                                    }}
+                                    className={cx(css`
                                 backdrop-filter: blur(20px); /*毛玻璃效果*/
                             `)}
-                                ref={draggleRef}>{modal}</div>
-                        </Draggable>
-                    )}
-                >
-                    <Flex align={"center"} justify={"center"} vertical gap={20}
-                          onMouseOver={() => {
-                              if (disabled) {
-                                  setDisabled(false);
-                              }
-                          }
-                          }
-                          style={{padding: 10}}
+                                    ref={draggleRef}>{modal}</div>
+                            </Draggable>
+                        )}
                     >
-                        <img style={{height: '70px'}} draggable={false} src={AppIcon} alt={""}/>
-                        <span style={{fontWeight: 'bold', fontSize: '12px'}}>确定退出吗？</span>
-                        <Flex justify={"space-between"} style={{width: '100%'}} gap={10}>
-                            <Button size={"small"} style={{width: "100%"}} onClick={() => setOpen(false)}>取消</Button>
-                            <Button size={"small"} style={{width: "100%"}} type={"primary"}
-                                    onClick={() => Exit()}>确认</Button>
+                        <Flex align={"center"} justify={"center"} vertical gap={20}
+                              onMouseOver={() => {
+                                  if (disabled) {
+                                      setDisabled(false);
+                                  }
+                              }
+                              }
+                              style={{padding: 10}}
+                        >
+                            <img style={{height: '70px'}} draggable={false} src={AppIcon} alt={""}/>
+                            <span style={{fontWeight: 'bold', fontSize: '12px'}}>确定退出吗？</span>
+                            <Flex justify={"space-between"} style={{width: '100%'}} gap={10}>
+                                <Button size={"small"} style={{width: "100%"}} onClick={() => setOpen(false)}>取消</Button>
+                                <Button size={"small"} style={{width: "100%"}} type={"primary"}
+                                        onClick={() => Exit()}>确认</Button>
+                            </Flex>
                         </Flex>
-                    </Flex>
-                </Modal>
-            </ConfigProvider>
+                    </Modal>
+                </ConfigProvider>
 
-            {
-                loading ? <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '100%',
-                    }}><Spin spinning={true}/></div>
-                    :
-                    <>
-                        <Lay.Header style={CssConfig.title}><Bar/></Lay.Header>
-                        <Tabs
-                            style={{width: "100%", height: '100%', overflow: 'hidden'}}
-                            items={tabs}
-                            tabBarStyle={{
-                                backgroundColor: 'rgba(242, 242, 242,1)',
-                                padding: "0 10px",
-                                borderBottom: "solid 1px #eaecf2"
-                            }}
-                        />
-                    </>
+                {
+                    loading ? <div style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%',
+                        }}><Spin spinning={true}/></div>
+                        :
+                        <>
+                            <Lay.Header style={CssConfig.title}><Bar/></Lay.Header>
+                            <Tabs
+                                style={{width: "100%", height: '100%', overflow: 'hidden'}}
+                                items={tabs}
+                                tabBarStyle={{
+                                    backgroundColor: 'rgba(242, 242, 242,1)',
+                                    padding: "0 10px",
+                                    borderBottom: "solid 1px #eaecf2"
+                                }}
+                            />
+                        </>
 
-            }
-        </div>
-    </ConfigProvider>
+                }
+            </div>
+        </ConfigProvider>
+    </MessageContext.Provider>
 }
 
 export default App

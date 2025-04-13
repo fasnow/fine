@@ -34,16 +34,10 @@ golang https://go.dev/dl/
 wails https://wails.io/docs/gettingstarted/installation
 ```
 
-第二步：初始化。
+第二步：生成的可执行文件在`fine/build/bin`目录下。
 
 ```
-git clone https://github.com/fasnow/fine.git && cd fine && go mod tidy && cd frontend && npm install --force
-```
-
-第三步：生成的可执行文件在`fine/build/bin`目录下。
-
-```
-cd fine && wails build
+git clone https://github.com/fasnow/fine.git && cd fine && wails build
 ```
 
 ## TODO

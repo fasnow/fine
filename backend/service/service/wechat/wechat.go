@@ -12,16 +12,19 @@ import (
 	"fine/backend/service/service"
 	"fine/backend/utils"
 	"fmt"
-	"github.com/fasnow/goproxy"
-	"github.com/tidwall/gjson"
-	"golang.org/x/crypto/pbkdf2"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
+	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/fasnow/goproxy"
+	"github.com/tidwall/gjson"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
@@ -44,6 +47,7 @@ type WeChat struct {
 	htmlBeautifier *beauty.HTMLBeautifier
 	jsonBeautifier *beauty.JSONBeautifier
 	matcher        *matcher.Matcher
+	beauty         bool
 }
 
 func New(applet string) *WeChat {
@@ -55,7 +59,8 @@ func New(applet string) *WeChat {
 		jsBeautifier:   beauty.NewJSBeautifier(),
 		htmlBeautifier: beauty.NewHTMLBeautifier(),
 		jsonBeautifier: beauty.NewJSONBeautifier(),
-		matcher:        matcher.New([]string{}),
+		matcher:        matcher.New(nil),
+		beauty:         false,
 	}
 }
 
@@ -63,8 +68,8 @@ func (r *WeChat) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 
-func (r *WeChat) SetRegex(regexes []string) {
-	r.matcher.SetRegex(utils.RemoveEmptyAndDuplicateString(regexes))
+func (r *WeChat) SetRules(rules []*matcher.Rule) {
+	r.matcher.SetRules(rules)
 }
 
 func (r *WeChat) SetApplet(applet string) {
@@ -229,39 +234,100 @@ func (r *WeChat) GetAllMiniAppWxapkgs() ([][]string, error) {
 	return allWxapkgs, nil
 }
 
-func (r *WeChat) ExtractInfo(content string) []string {
-	return r.matcher.FindAll(content)
+func (r *WeChat) ExtractInfo(content string) []matcher.MatchResult {
+	return r.matcher.FindAllOptimized(content)
 }
 
 func (r *WeChat) unpackFile(data []byte, filesInfo []*WxapkgFile, outputDir string, eventFunc func(err error)) []string {
 	var filesName []string
-	for _, fileInfo := range filesInfo {
-		filename := filepath.Join(outputDir, fileInfo.Name)
-		filesName = append(filesName, filename)
-		content := data[fileInfo.Offset : fileInfo.Offset+fileInfo.Size]
-		ext := strings.ToLower(filepath.Ext(fileInfo.Name))
-		var err error
-		var t []byte
-		switch ext {
-		case ".js":
-			t, err = r.jsBeautifier.Beauty(content)
-		case ".html":
-			t, err = r.htmlBeautifier.Beauty(content)
-		case ".json":
-			t, err = r.jsonBeautifier.Beauty(content)
-		default:
-			continue
-		}
-		if err != nil && eventFunc != nil {
-			eventFunc(err)
-		} else if err == nil {
-			content = t
-		}
-		err = utils.WriteFile(filename, content, 0764)
-		if err != nil && eventFunc != nil {
-			eventFunc(err)
-		}
+	var wg sync.WaitGroup
+	fileChan := make(chan string, len(filesInfo))
+	errChan := make(chan error, len(filesInfo))
+
+	maxWorkers := runtime.NumCPU() * 2
+	if maxWorkers < 1 {
+		maxWorkers = 1
 	}
+	workerPool := make(chan struct{}, maxWorkers)
+
+	// 启动错误处理goroutine
+	go func() {
+		for err := range errChan {
+			if eventFunc != nil {
+				eventFunc(err)
+			}
+		}
+	}()
+
+	// 启动文件处理goroutine
+	for _, fileInfo := range filesInfo {
+		wg.Add(1)
+		workerPool <- struct{}{}
+
+		go func(fileInfo *WxapkgFile) {
+			defer func() {
+				<-workerPool
+				wg.Done()
+				// 强制垃圾回收
+				runtime.GC()
+				debug.FreeOSMemory()
+			}()
+
+			filename := filepath.Join(outputDir, fileInfo.Name)
+			content := data[fileInfo.Offset : fileInfo.Offset+fileInfo.Size]
+			ext := strings.ToLower(filepath.Ext(fileInfo.Name))
+			if r.beauty {
+				var t []byte
+				var err2 error
+
+				switch ext {
+				case ".js":
+					t, err2 = r.jsBeautifier.Beauty(content)
+				case ".html":
+					t, err2 = r.htmlBeautifier.Beauty(content)
+				case ".json":
+					t, err2 = r.jsonBeautifier.Beauty(content)
+				default:
+					fileChan <- filename
+					return
+				}
+
+				if err2 != nil {
+					errChan <- err2
+					return
+				}
+				content = t
+			}
+
+			// 创建目录
+			dir := filepath.Dir(filename)
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				errChan <- err
+				return
+			}
+
+			// 使用缓冲写入
+			if err := utils.WriteFile(filename, content, 0764); err != nil {
+				errChan <- err
+				return
+			}
+
+			fileChan <- filename
+		}(fileInfo)
+	}
+
+	// 等待所有goroutine完成
+	go func() {
+		wg.Wait()
+		close(fileChan)
+		close(errChan)
+	}()
+
+	// 收集结果
+	for filename := range fileChan {
+		filesName = append(filesName, filename)
+	}
+
 	return filesName
 }
 
@@ -402,4 +468,10 @@ func (r *WeChat) QueryMimiAPPInfo(appid string) (*wechat.Info, error) {
 	result.UsesCount = gjson.Get(string(bodyBytes), "data.uses_count").String()
 	result.PrincipalName = gjson.Get(string(bodyBytes), "data.principal_name").String()
 	return result, nil
+}
+
+func (r *WeChat) EnableBeauty(enable bool) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	r.beauty = enable
 }

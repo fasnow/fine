@@ -5,22 +5,23 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fine/backend/application"
-	"fine/backend/proxy/v2"
 	"fmt"
-	"github.com/chromedp/cdproto/fetch"
-	"github.com/chromedp/cdproto/network"
-	"github.com/chromedp/cdproto/target"
-	"github.com/chromedp/chromedp"
-	"github.com/go-vgo/robotgo"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/chromedp/cdproto/fetch"
+	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/cdproto/target"
+	"github.com/chromedp/chromedp"
+	"github.com/fasnow/goproxy"
+	"github.com/go-vgo/robotgo"
 )
 
 func TestShodan_HostIP(t *testing.T) {
 	c := New("")
-	p := proxy.NewManager()
+	p := goproxy.New()
 	p.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(p)
 	c.SetAuth(application.DefaultApp.Config.Shodan.Token)
@@ -33,7 +34,7 @@ func TestShodan_HostIP(t *testing.T) {
 }
 
 func TestShodan_User(t *testing.T) {
-	p := proxy.NewManager()
+	p := goproxy.New()
 	p.SetProxy("http://127.0.0.1:8081")
 	c := New(application.DefaultApp.Config.Shodan.Token)
 	c.UseProxyManager(p)
@@ -53,7 +54,7 @@ func getPostDataAfterCF(url string) (http.Header, []byte, error) {
 	y := (screenHeight - winHeight) / 2
 	// 创建 ChromeDP 执行分配器选项
 	opts := []chromedp.ExecAllocatorOption{
-		chromedp.ProxyServer(application.DefaultApp.ProxyManager.ProxyString()),
+		chromedp.ProxyServer(application.DefaultApp.ProxyManager.String()),
 		chromedp.Flag("headless", false),                                        // 禁用 Headless 模式
 		chromedp.Flag("disable-blink-features", "AutomationControlled"),         // 隐藏自动化标志
 		chromedp.Flag("disable-features", "Translate"),                          // 关闭翻译功能

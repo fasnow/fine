@@ -3,14 +3,15 @@ package quake
 import (
 	"encoding/json"
 	"fine/backend/application"
-	"fine/backend/proxy/v2"
 	"fmt"
 	"testing"
+
+	"github.com/fasnow/goproxy"
 )
 
 func TestRealtimeService_Service(t *testing.T) {
 	c := New(application.DefaultApp.Config.Quake.Token)
-	p := proxy.NewManager()
+	p := goproxy.New()
 	p.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(p)
 	req := NewRealtimeServiceReqBuilder().

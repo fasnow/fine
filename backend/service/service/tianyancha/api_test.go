@@ -3,13 +3,14 @@ package tianyancha
 import (
 	"encoding/json"
 	"fine/backend/application"
-	"fine/backend/proxy/v2"
 	"testing"
+
+	"github.com/fasnow/goproxy"
 )
 
 func TestTianYanCha_GetIndustryList(t *testing.T) {
 	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
-	c.UseProxyManager(proxy.NewManager())
+	c.UseProxyManager(goproxy.New())
 	list, err := c.GetIndustryList()
 	if err != nil {
 		t.Error(err)
@@ -24,7 +25,7 @@ func TestTianYanCha_GetIndustryList(t *testing.T) {
 
 func TestTianYanCha_GetAreaList(t *testing.T) {
 	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
-	c.UseProxyManager(proxy.NewManager())
+	c.UseProxyManager(goproxy.New())
 	list, err := c.GetAreaList()
 	if err != nil {
 		t.Error(err)
@@ -39,7 +40,7 @@ func TestTianYanCha_GetAreaList(t *testing.T) {
 
 func TestTianYanCha_Search(t *testing.T) {
 	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
-	m := proxy.NewManager()
+	m := goproxy.New()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
 	c.SetAuth("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMzA5NjM1NTMzMCIsImlhdCI6MTczMzYzMTM5NSwiZXhwIjoxNzM2MjIzMzk1fQ.dM3nb_JiiIRO1Zahilrdrlygi0I0G_z4OWHPMlgJ5NKJpZ31E3OYTx07Y_BvrTrCdhyDmfz830JU6m9NeyGciQ")
@@ -57,7 +58,7 @@ func TestTianYanCha_Search(t *testing.T) {
 
 func TestTianYanCha_Suggest(t *testing.T) {
 	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
-	m := proxy.NewManager()
+	m := goproxy.New()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
 	c.SetAuth("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMzA5NjM1NTMzMCIsImlhdCI6MTczMzYzMTM5NSwiZXhwIjoxNzM2MjIzMzk1fQ.dM3nb_JiiIRO1Zahilrdrlygi0I0G_z4OWHPMlgJ5NKJpZ31E3OYTx07Y_BvrTrCdhyDmfz830JU6m9NeyGciQ")
@@ -75,7 +76,7 @@ func TestTianYanCha_Suggest(t *testing.T) {
 
 func TestTianYanCha_GetInvestee(t *testing.T) {
 	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
-	m := proxy.NewManager()
+	m := goproxy.New()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
 	c.SetAuth("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMzA5NjM1NTMzMCIsImlhdCI6MTczMzYzMTM5NSwiZXhwIjoxNzM2MjIzMzk1fQ.dM3nb_JiiIRO1Zahilrdrlygi0I0G_z4OWHPMlgJ5NKJpZ31E3OYTx07Y_BvrTrCdhyDmfz830JU6m9NeyGciQ")
@@ -93,7 +94,7 @@ func TestTianYanCha_GetInvestee(t *testing.T) {
 
 func TestTianYanCha_GetHolder(t *testing.T) {
 	c := NewClient(application.DefaultApp.Config.TianYanCha.Token)
-	m := proxy.NewManager()
+	m := goproxy.New()
 	_ = m.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(m)
 	c.SetAuth("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMzA5NjM1NTMzMCIsImlhdCI6MTczMzYzMTM5NSwiZXhwIjoxNzM2MjIzMzk1fQ.dM3nb_JiiIRO1Zahilrdrlygi0I0G_z4OWHPMlgJ5NKJpZ31E3OYTx07Y_BvrTrCdhyDmfz830JU6m9NeyGciQ")

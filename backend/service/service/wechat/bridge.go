@@ -7,30 +7,34 @@ import (
 	"fine/backend/database"
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
+	"fine/backend/matcher"
 	"fine/backend/service/model/wechat"
 	"fine/backend/utils"
 	"fmt"
-	"github.com/fasnow/goproxy"
-	"github.com/pkg/errors"
-	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	runtime2 "runtime"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/fasnow/goproxy"
+	"github.com/pkg/errors"
+	"github.com/yitter/idgenerator-go/idgen"
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 var filteredFileExt = []string{".png", ".jpg", ".jpeg", ".wxapkg", ".br"}
+var filteredAPIExt = []string{".wxss", ".wxml", "index.html"}
 
 type Bridge struct {
 	app                      *application.Application
 	wxRepo                   repository.WechatRepository
 	http                     *http.Client
-	regexMap                 sync.Map
 	wechat                   *WeChat
 	mutex                    sync.Mutex
 	autoDecompile            bool
@@ -80,15 +84,15 @@ func NewBridge(app *application.Application) *Bridge {
 		miniAPPInfoChan:                 make(chan wechat.Info, 5),
 		queryMiniAPPInfoConcurrencyChan: make(chan struct{}, 3),
 	}
-	c.SetRegex(app.Config.Wechat.Rules)
+	c.SetRules(app.Config.Wechat.Rules)
 	c.wxRepo.RestVersionTaskStatus()
 	c.UseProxyManager(app.ProxyManager)
 	c.fileMonitor()
 	return c
 }
 
-func (r *Bridge) SetRegex(regexes []string) {
-	r.wechat.SetRegex(regexes)
+func (r *Bridge) SetRules(rules []*matcher.Rule) {
+	r.wechat.SetRules(rules)
 }
 
 // 创建版本任务
@@ -261,7 +265,7 @@ func (r *Bridge) decompile(task *models.VersionDecompileTask) []string {
 		}
 		for filename, bytes := range wxapkgMap {
 			baseFilename := filepath.Base(filename)
-			dir := filepath.Join(r.app.Config.WechatDataDir, task.AppID, task.Number, baseFilename[0:len(baseFilename)-7])
+			dir := filepath.Join(r.app.Config.WechatDataDir, task.AppID, task.Number, strings.TrimSuffix(baseFilename, ".wxapkg"))
 			files, err := r.wechat.UnpackWxapkg(bytes, dir, nil)
 			if err != nil {
 				r.app.Logger.Error(err)
@@ -371,7 +375,7 @@ func (r *Bridge) extractInfo(task *models.VersionDecompileTask, files []string) 
 			Err  error
 			Msg  string
 		}{Task: task, Stat: status.Running, Err: nil, Msg: "敏感信息提取中"}
-		var results []string
+		var results []matcher.MatchResult
 		for _, file := range files {
 			// 跳过指定后缀本文件
 			if utils.StringSliceContain(filteredFileExt, filepath.Ext(file)) {
@@ -382,11 +386,63 @@ func (r *Bridge) extractInfo(task *models.VersionDecompileTask, files []string) 
 			if err != nil {
 				continue
 			}
-			t := r.wechat.ExtractInfo(string(bytes))
-			results = append(results, t...)
+			results = append(results, r.wechat.ExtractInfo(string(bytes))...)
 		}
-		results = utils.RemoveEmptyAndDuplicateString(results)
-		task.Matched = strings.Join(results, "\n")
+
+		// 释放可回收但未归还系统的内存
+		runtime2.GC()
+		debug.FreeOSMemory()
+
+		// 按ID分组并去重结果
+		groupedResults := make(map[int64][]string)
+		for _, result := range results {
+			if result.Rule == nil {
+				continue
+			}
+			// 获取当前规则ID下的所有匹配结果
+			matches := groupedResults[result.Rule.ID]
+			// 添加新的匹配结果
+			matches = append(matches, result.Matches...)
+			// 去重
+			matches = utils.RemoveEmptyAndDuplicateString(matches)
+			// 过滤掉以filteredAPIext结尾的字符串
+			filteredMatches := make([]string, 0)
+			for _, match := range matches {
+				hasFilteredSuffix := false
+				for _, ext := range filteredAPIExt {
+					if strings.HasSuffix(match, ext) {
+						hasFilteredSuffix = true
+						break
+					}
+				}
+				if !hasFilteredSuffix {
+					filteredMatches = append(filteredMatches, match)
+				}
+			}
+			matches = filteredMatches
+			groupedResults[result.Rule.ID] = matches
+		}
+
+		// 重新构建去重后的结果
+		dedupedResults := make([]matcher.MatchResult, 0)
+		for ruleID, matches := range groupedResults {
+			// 查找原始规则
+			var rule *matcher.Rule
+			for _, r := range results {
+				if r.Rule != nil && r.Rule.ID == ruleID {
+					rule = r.Rule
+					break
+				}
+			}
+			if rule != nil {
+				dedupedResults = append(dedupedResults, matcher.MatchResult{
+					Rule:    rule,
+					Matches: matches,
+				})
+			}
+		}
+		results = dedupedResults
+		task.MatchedV2 = datatypes.NewJSONType(results)
 		r.extractStatusChan <- struct {
 			Task *models.VersionDecompileTask
 			Stat int
@@ -394,21 +450,6 @@ func (r *Bridge) extractInfo(task *models.VersionDecompileTask, files []string) 
 			Msg  string
 		}{Task: task, Stat: status.Stopped, Err: nil, Msg: "敏感信息提取完成"}
 	}()
-}
-
-func (r *Bridge) getRegex(regex string) (*regexp.Regexp, error) {
-	if value, ok := r.regexMap.Load(regex); ok {
-		if t, ok := value.(*regexp.Regexp); ok {
-			return t, nil
-		}
-		return nil, fmt.Errorf("unexpected type in regexMap for key %s", regex)
-	}
-	compiled, err := regexp.Compile(regex)
-	if err != nil {
-		return nil, err
-	}
-	r.regexMap.Store(regex, compiled)
-	return compiled, nil
 }
 
 func (r *Bridge) checkVersionTaskStatus(task *models.VersionDecompileTask, allowedStoppedStatus bool) bool {
@@ -503,31 +544,78 @@ func (r *Bridge) SetAppletPath(path string) error {
 	return nil
 }
 
-func (r *Bridge) SaveWechatRules(rules []string) error {
-	var t []string
-	for _, rule := range rules {
-		tt := fmt.Sprintf("\"%s\"", rule)
-		ttt, err := strconv.Unquote(tt)
-		if err != nil {
-			return errors.New("语法错误：" + tt)
+func (r *Bridge) GetWechatRules() []matcher.Rule {
+	var t []matcher.Rule
+	for _, rule := range r.app.Config.Wechat.Rules {
+		var regexes []string
+		for _, v := range rule.Regexes {
+			regexes = append(regexes, strconv.Quote(v))
 		}
-		t = append(t, ttt)
+		t = append(t, matcher.Rule{
+			ID:      rule.ID,
+			Name:    rule.Name,
+			Enable:  rule.Enable,
+			Regexes: regexes,
+		})
 	}
-	r.app.Config.Wechat.Rules = t
+	return t
+}
+
+func (r *Bridge) AddWechatRules(rule *matcher.Rule) (int64, error) {
+	id := idgen.NextId()
+	rule.ID = id
+	rule.Regexes = utils.RemoveEmptyAndDuplicateString(rule.Regexes)
+	for i, v := range rule.Regexes {
+		ttt, err := strconv.Unquote(v)
+		if err != nil {
+			return 0, errors.New("语法错误：" + v)
+		}
+		rule.Regexes[i] = ttt
+	}
+	r.app.Config.Wechat.Rules = append(r.app.Config.Wechat.Rules, rule)
 	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		r.app.Logger.Error(err)
+		return 0, err
+	}
+	r.wechat.SetRules(r.app.Config.Wechat.Rules)
+	return id, nil
+}
+
+func (r *Bridge) DeleteWechatRules(id int64) error {
+	for i, rule := range r.app.Config.Wechat.Rules {
+		if rule.ID == id {
+			r.app.Config.Wechat.Rules = append(r.app.Config.Wechat.Rules[:i], r.app.Config.Wechat.Rules[i+1:]...)
+			break
+		}
+	}
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		r.app.Logger.Error(err)
 		return err
 	}
-	r.wechat.SetRegex(t)
+	r.wechat.SetRules(r.app.Config.Wechat.Rules)
 	return nil
 }
 
-func (r *Bridge) GetWechatRules() []string {
-	var t []string
-	for _, rule := range r.app.Config.Wechat.Rules {
-		tt := strconv.Quote(rule)
-		t = append(t, tt[1:len(tt)-1])
+func (r *Bridge) UpdateWechatRule(rule *matcher.Rule) error {
+	for i, v := range rule.Regexes {
+		ttt, err := strconv.Unquote(v)
+		if err != nil {
+			return errors.New("语法错误：" + v)
+		}
+		rule.Regexes[i] = ttt
 	}
-	return t
+	for i, v := range r.app.Config.Wechat.Rules {
+		if v.ID == rule.ID {
+			r.app.Config.Wechat.Rules[i] = rule
+			break
+		}
+	}
+	if err := r.app.WriteConfig(r.app.Config); err != nil {
+		r.app.Logger.Error(err)
+		return err
+	}
+	r.wechat.SetRules(r.app.Config.Wechat.Rules)
+	return nil
 }
 
 func (r *Bridge) Decompile(item wechat.InfoToFront) {
@@ -540,10 +628,15 @@ func (r *Bridge) Decompile(item wechat.InfoToFront) {
 					return
 				}
 				r.app.Logger.Debug(task)
+
 				// 跳过正在反编译或者信息提取的任务
 				passed := r.checkVersionTaskStatus(task, true)
 				if !passed {
 					return
+				}
+
+				if err := r.restDecompileStatus(task); err != nil {
+					r.app.Logger.Error(err)
 				}
 
 				files := r.decompile(task)
@@ -551,6 +644,19 @@ func (r *Bridge) Decompile(item wechat.InfoToFront) {
 			}(item.MiniAppBaseInfo.AppID, versionTaskStatus.Number)
 		}
 	}()
+}
+
+func (r *Bridge) restDecompileStatus(task *models.VersionDecompileTask) error {
+	// 更新状态
+	task.DecompileStatus = status.Waiting
+	task.MatchStatus = status.Waiting
+	task.MatchedV2 = datatypes.NewJSONType([]matcher.MatchResult{})
+	if err := r.wxRepo.UpdateVersionTask(task); err != nil {
+		return err
+	}
+
+	// 删除文件
+	return os.RemoveAll(filepath.Join(r.app.Config.WechatDataDir, task.AppID, task.Number))
 }
 
 func (r *Bridge) decompileBulk(items []wechat.InfoToFront) {
@@ -561,6 +667,9 @@ func (r *Bridge) decompileBulk(items []wechat.InfoToFront) {
 				if err != nil {
 					r.app.Logger.Error(err)
 					continue
+				}
+				if !r.autoDecompile {
+					return
 				}
 
 				r.decompileConcurrencyChan <- struct{}{}
@@ -600,19 +709,25 @@ func (r *Bridge) ClearDecompiled() error {
 	return os.RemoveAll(r.app.Config.WechatDataDir)
 }
 
-func (r *Bridge) GetMatchedString(appid, version string) []string {
+func (r *Bridge) GetMatchedString(appid, version string) []matcher.MatchResult {
 	task, err := r.wxRepo.FindVersionTaskByAppIDAndVersionNum(appid, version)
 	if err != nil {
 		r.app.Logger.Error(err)
 		return nil
 	}
-	return strings.Split(task.Matched, "\n")
+	return task.MatchedV2.Data()
 }
 
 func (r *Bridge) AutoDecompile(enable bool) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.autoDecompile = enable
+}
+
+func (r *Bridge) EnableBeauty(enable bool) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	r.wechat.EnableBeauty(enable)
 }
 
 type MiniAPPInfoCache struct {
@@ -628,6 +743,7 @@ func (r *MiniAPPInfoCache) TakeALl() []wechat.Info {
 	r.items = r.items[:0]
 	return result
 }
+
 func (r *MiniAPPInfoCache) Add(info wechat.Info) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fine/backend/matcher"
 	"time"
 )
 
@@ -31,14 +32,6 @@ type Proxy struct {
 	Port   string `ini:"port" `
 	User   string `ini:"user" `
 	Pass   string `ini:"pass" `
-}
-
-type Rule struct {
-	Adafruit bool
-	Airtable bool
-	Algolia  bool
-	Beamer   bool
-	Branch   bool
 }
 
 type Wechat struct {
@@ -129,7 +122,20 @@ type Wechat struct {
 	//AdafruitAPIKey bool   `ini:"Adafruit_API_Key"`
 	DecompileConcurrency int
 	ExtractConcurrency   int
-	Rules                []string `ini:"rule,,allowshadow"  comment:"清空则会生成默认值"`
+	Rules                RuleList
+}
+
+type RuleList []*matcher.Rule
+
+func (r *RuleList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var entries []*matcher.Rule
+	if err := unmarshal(&entries); err != nil {
+		// YAML 不是 []RuleEntry 格式，则置空
+		*r = nil
+		return nil // 不返回 error，只是不加载内容
+	}
+	*r = entries
+	return nil
 }
 
 type Httpx struct {

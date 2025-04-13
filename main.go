@@ -20,7 +20,9 @@ import (
 	"fine/backend/service/service/shodan"
 	"fine/backend/service/service/tianyancha"
 	"fine/backend/service/service/wechat"
-	"fine/backend/task"
+	"runtime"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
@@ -29,20 +31,15 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
-	"runtime"
-	"time"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
-var mainApp *application.Application
-
 func main() {
 	defaultWidth := 1200
 	defaultHeight := 800
-	mainApp = application.DefaultApp
-	taskManager := task.Manager{ICP: icp.NewICPBridge(mainApp)}
+	mainApp := application.DefaultApp
 	opts := &options.App{
 		LogLevel: logger.DEBUG,
 		Title:    "Fine",
@@ -107,7 +104,7 @@ func main() {
 			osoperation.NewRuntime(mainApp),
 			osoperation.NewPath(),
 			httpx.NewBridge(mainApp),
-			taskManager.ICP,
+			icp.NewBridge(mainApp),
 			ip138.NewBridge(mainApp),
 			fofa.NewBridge(mainApp),
 			hunter.NewBridge(mainApp),

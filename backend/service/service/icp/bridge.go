@@ -50,7 +50,7 @@ type Bridge struct {
 	exportLogRepo    repository.ExportLogRepository
 }
 
-func NewICPBridge(app *application.Application) *Bridge {
+func NewBridge(app *application.Application) *Bridge {
 	db := database.GetConnection()
 	bridgeClient := &Bridge{
 		app:              app,

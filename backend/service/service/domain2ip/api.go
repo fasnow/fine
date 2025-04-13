@@ -3,13 +3,14 @@ package domain2ip
 import (
 	"encoding/json"
 	"fine/backend/application"
-	"fine/backend/proxy/v2"
-	"github.com/miekg/dns"
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/fasnow/goproxy"
+	"github.com/miekg/dns"
+	"github.com/pkg/errors"
 )
 
 type IP2Domain struct {
@@ -24,7 +25,7 @@ func New(app *application.Application) *IP2Domain {
 	}
 }
 
-func (r *IP2Domain) UseProxyManager(manager *proxy.Manager) {
+func (r *IP2Domain) UseProxyManager(manager *goproxy.GoProxy) {
 	r.http = manager.GetClient()
 }
 
@@ -59,7 +60,7 @@ type IPDetail struct {
 
 func (r *IP2Domain) GetIPDetail(ip string) (*IPDetail, error) {
 	request, err := http.NewRequest("GET", "https://ip-moe.zerodream.net/?ip="+ip, nil)
-	request.Header.Add("User-Agent", proxy.DefaultUA)
+	request.Header.Add("User-Agent", goproxy.DefaultUA)
 	if err != nil {
 		return nil, err
 	}

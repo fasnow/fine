@@ -28,17 +28,14 @@ import {
     BrowserOpenURL,
     EventsOn,
     Quit,
-    WindowMaximise,
     WindowMinimise,
-    WindowToggleMaximise,
-    WindowUnmaximise
-} from "../../wailsjs/runtime";
+    WindowToggleMaximise} from "../../wailsjs/runtime";
 import {errorNotification, infoNotification} from "@/component/Notification";
 import semver from "semver/preload";
 import {Title} from "@/component/Title";
 import {GetPlatform, OpenFile, OpenFolder, ShowItemInFolder} from "../../wailsjs/go/osoperation/Runtime";
-import {CheckUpdate, SaveProxy} from "../../wailsjs/go/application/Application";
-import {config, exportlog} from "../../wailsjs/go/models";
+import {CheckUpdate, GetSystemInfo, SaveProxy} from "../../wailsjs/go/application/Application";
+import {config, exportlog, utils} from "../../wailsjs/go/models";
 import {GetByOffset, MarkAllAsDeleted, MarkAsDeleted} from "../../wailsjs/go/exportlog/Bridge";
 import Item = exportlog.Item;
 
@@ -49,81 +46,124 @@ const buttonStyle: React.CSSProperties = {
     transition: "0s",
     opacity: 1
 };
+const SystemInfo: React.FC = () => {
+    const [systemInfo, setSystemInfo] = useState<utils.SystemStats>({
+        PID: 0,
+        SystemCPUUsage: 0,
+        ProcessCPUUsage: 0,
+        ProcessMemUsage: 0,
+        ProcessMemPercent: 0,
+        TotalMemory: 0,
+        AvailableMemory: 0,
+        CPUCores: 0
+    });
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            GetSystemInfo().then(info => {
+                if (info) {
+                    setSystemInfo(info)
+                }
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <Tooltip 
+            color="#ffffff"
+            title={
+                <div style={{padding: "0px", width: "200px", color: "black"}}>
+                    <div>
+                        <span>进程ID: </span>
+                        <span style={{float: "right"}}>{systemInfo.PID}</span>
+                    </div>
+                    <Divider style={{margin: "2px 0"}}/>
+                    <div>
+                        <span>CPU使用率: </span>
+                        <span style={{float: "right"}}>{systemInfo.ProcessCPUUsage.toFixed(1)}%</span>
+                        <div style={{
+                            width: "100%",
+                            height: "4px",
+                            backgroundColor: "#f0f0f0",
+                            borderRadius: "2px",
+                            overflow: "hidden"
+                        }}>
+                            <div style={{
+                                width: `${systemInfo.ProcessCPUUsage}%`,
+                                height: "100%",
+                                backgroundColor: systemInfo.ProcessCPUUsage > 80 ? "#ff4d4f" : "#1890ff",
+                                transition: "width 0.3s ease"
+                            }}/>
+                        </div>
+                    </div>
+                    <Divider style={{margin: "2px 0"}}/>
+                    <div>
+                        <span>内存使用: </span>
+                        <span style={{float: "right"}}>{(systemInfo.ProcessMemUsage / 1024 / 1024).toFixed(1)} MB ({systemInfo.ProcessMemPercent.toFixed(1)}%)</span>
+                        <div style={{
+                            width: "100%",
+                            height: "4px",
+                            backgroundColor: "#f0f0f0",
+                            borderRadius: "2px",
+                            overflow: "hidden"
+                        }}>
+                            <div style={{
+                                width: `${systemInfo.ProcessMemPercent}%`,
+                                height: "100%",
+                                backgroundColor: systemInfo.ProcessMemPercent > 80 ? "#ff4d4f" : "#1890ff",
+                                transition: "width 0.3s ease"
+                            }}/>
+                        </div>
+                    </div>
+                </div>
+            }
+        >
+            <div style={{display: "flex", alignItems: "center", gap: "4px",pointerEvents:"auto"}}>
+                <div style={{
+                    width: "100px",
+                    height: "10px",
+                    backgroundColor: "#f0f0f0",
+                    borderRadius: "10px",
+                    overflow: "hidden"
+                }}>
+                    <div style={{
+                        width: `${systemInfo.ProcessCPUUsage}%`,
+                        height: "100%",
+                        backgroundColor: systemInfo.ProcessCPUUsage > 80 ? "#ff4d4f" : "#1890ff",
+                        transition: "width 0.3s ease"
+                    }}/>
+                </div>
+                <span style={{fontSize: "12px"}}>{systemInfo.ProcessCPUUsage.toFixed(1)}%</span>
+            </div>
+        </Tooltip>
+    );
+};
+
 
 const appIcon = (platform: string) => {
     if (platform === "windows") {
         return <span
-            style={{fontSize: "24px", display: 'flex', alignItems: "center", marginLeft: "5px"}}>
+            style={{fontSize: "24px", display: 'flex', alignItems: "center", marginLeft: "5px", marginRight: "5px"}}>
             <img
                 style={{height: "24px"}}
                 src={favicon}
                 draggable="false"
                 id="appIcon"
             />
+            <Divider type="vertical" style={{height: "24px"}}/>
+            <span style={{marginLeft: "5px", marginRight: "5px"}}>
+                <SystemInfo/>
+            </span>
         </span>
     }
+    return <span
+        style={{fontSize: "24px", display: 'flex', alignItems: "center", marginLeft: "70px"}}>
+            <Divider type="vertical" style={{height: "24px"}}/>
+        <SystemInfo/>
+    </span>
 };
-
-class TitleBarOverlay extends React.Component {
-    state = {
-        fullScreen: false,
-    };
-
-    componentDidMount() {
-        // const imageElement = document.getElementById('appIcon');
-        // if (imageElement) {
-        //     imageElement.addEventListener('click', () => {
-        //         genshinLaunch()
-        //     });
-        // }
-
-    }
-
-    render(): React.ReactNode {
-        return (
-            <div>
-                <Button
-                    type="text"
-                    style={buttonStyle}
-                    icon={<LineOutlined/>}
-                    size="small"
-                    onClick={WindowMinimise}
-                />
-                {this.state.fullScreen ? (
-                    <Button
-                        type="text"
-                        style={buttonStyle}
-                        icon={<CompressOutlined/>}
-                        size="small"
-                        onClick={() => {
-                            WindowUnmaximise();
-                            this.setState({fullScreen: false});
-                        }}
-                    />
-                ) : (
-                    <Button
-                        type="text"
-                        style={buttonStyle}
-                        icon={<ExpandOutlined/>}
-                        size="small"
-                        onClick={() => {
-                            WindowMaximise();
-                            this.setState({fullScreen: true});
-                        }}
-                    />
-                )}
-                <Button
-                    type="text"
-                    style={buttonStyle}
-                    icon={<CloseOutlined/>}
-                    size="small"
-                    className="exit-button"
-                    onClick={Quit}
-                />
-            </div>
-        );
-    }
-}
 
 const DownloadViewContent: React.FC = () => {
     const [data, setData] = useState<Item[]>([])
@@ -360,12 +400,6 @@ const DownloadViewContent: React.FC = () => {
             </div>
         </>
     );
-};
-
-// 获取当前日期字符串
-const getTodayDate = () => {
-    const date = new Date();
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 };
 
 const Update: React.FC = () => {
@@ -652,7 +686,6 @@ const Bar: React.FC = () => {
     //必须搭配使用,EventsOn里面获取不到isFullScreen更新后的值
     const [isFullScreen, setIsFullScreen] = useState<boolean>(false)
     const f = useRef<boolean>(false)
-    const [open, setOpen] = useState<boolean>(false)
     const event = useSelector((state: RootState) => state.app.global.event)
     useEffect(() => {
         GetPlatform().then(

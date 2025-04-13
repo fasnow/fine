@@ -12,14 +12,6 @@ import (
 	"fine/backend/logger"
 	"fine/backend/utils"
 	"fmt"
-	"github.com/buger/jsonparser"
-	"github.com/fasnow/goproxy"
-	"github.com/hashicorp/go-version"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"github.com/yitter/idgenerator-go/idgen"
-	"gopkg.in/ini.v1"
-	"gopkg.in/yaml.v3"
 	"io"
 	"net/http"
 	"os"
@@ -29,6 +21,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/buger/jsonparser"
+	"github.com/fasnow/goproxy"
+	"github.com/hashicorp/go-version"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"github.com/yitter/idgenerator-go/idgen"
+	"gopkg.in/ini.v1"
+	"gopkg.in/yaml.v3"
 )
 
 const Version = "2.3.0"
@@ -102,14 +103,14 @@ var defaultConfig = &config.Config{
 	Wechat: config.Wechat{
 		Rules:                DefaultRegex,
 		DecompileConcurrency: 5,
-		ExtractConcurrency:   20,
+		ExtractConcurrency:   runtime.NumCPU() * 3,
 	},
 }
 
 var DefaultApp = NewApp()
 
 type Application struct {
-	Ctx          context.Context
+	ctx          context.Context
 	Config       *config.Config
 	ConfigFile   string
 	AppDir       string
@@ -145,25 +146,16 @@ func (r *Application) init() {
 			r.AppDir = filepath.Join(r.UserHome, "fine")
 		}
 	}
-	r.ConfigFile = filepath.Join(r.AppDir, "config.ini")
+	r.ConfigFile = filepath.Join(r.AppDir, "config.yaml")
 	if utils.FileExist(r.ConfigFile) {
-		// ini 转 yaml
-		if err := r.transformConfigFile(); err != nil {
+		if err := r.loadConfigFile(); err != nil {
 			ShowErrorMessage(err.Error())
 			os.Exit(1)
 		}
 	} else {
-		r.ConfigFile = filepath.Join(r.AppDir, "config.yaml")
-		if utils.FileExist(r.ConfigFile) {
-			if err := r.loadConfigFile(); err != nil {
-				ShowErrorMessage(err.Error())
-				os.Exit(1)
-			}
-		} else {
-			if err := r.generateConfigFile(); err != nil {
-				ShowErrorMessage(err.Error())
-				os.Exit(1)
-			}
+		if err := r.generateConfigFile(); err != nil {
+			ShowErrorMessage(err.Error())
+			os.Exit(1)
 		}
 	}
 }
@@ -208,6 +200,7 @@ func (r *Application) loadConfigFile() error {
 		r.Config.DatabaseFile = filepath.Join(r.AppDir, "data", "data.db")
 		needUpdate = true
 	}
+	r.Logger = logger.NewWithLogDir(r.Config.LogDataDir)
 	if r.Config.ExportDataDir == "" {
 		r.Config.ExportDataDir = filepath.Join(r.AppDir, "data", "export")
 		needUpdate = true
@@ -246,16 +239,58 @@ func (r *Application) loadConfigFile() error {
 	}
 	currentVersion, _ := version.NewVersion(Version)
 	configFileVersion, err := version.NewVersion(r.Config.Version)
-	if err != nil || currentVersion.GreaterThan(configFileVersion) {
-		r.Config.Version = Version
-		r.Config.Wechat.Rules = utils.RemoveEmptyAndDuplicateString(append(r.Config.Wechat.Rules, DefaultRegex...))
+
+	if len(r.Config.Wechat.Rules) == 0 {
+		r.Config.Wechat.Rules = DefaultRegex
 		needUpdate = true
 	}
-	if needUpdate {
-		return r.WriteConfig(r.Config)
+	if err != nil || currentVersion.GreaterThan(configFileVersion) {
+		r.Config.Version = Version
+		needUpdate = true
 	}
 
-	r.Logger = logger.NewWithLogDir(r.Config.LogDataDir)
+	// 创建默认规则副本
+	defaultRuleCopy := make(config.RuleList, len(DefaultRegex))
+	copy(defaultRuleCopy, DefaultRegex)
+
+	// 找出自定义规则
+	customRules := make(config.RuleList, 0)
+	defaultRuleIDs := make(map[int64]bool)
+	existingDefaultRules := make(map[int64]bool)
+
+	// 获取默认规则的ID集合
+	for _, rule := range DefaultRegex {
+		defaultRuleIDs[rule.ID] = true
+	}
+
+	// 遍历现有规则
+	for _, rule := range r.Config.Wechat.Rules {
+		if !defaultRuleIDs[rule.ID] {
+			// 不在默认规则ID中的为自定义规则
+			customRules = append(customRules, rule)
+		} else {
+			// 在默认规则中的,更新到默认规则副本中
+			existingDefaultRules[rule.ID] = true
+			for i, defaultRule := range defaultRuleCopy {
+				if defaultRule.ID == rule.ID {
+					defaultRuleCopy[i].Name = rule.Name
+					defaultRuleCopy[i].Enable = rule.Enable
+					break
+				}
+			}
+		}
+	}
+
+	// 如果现有规则中缺少某些默认规则,则需要添加
+	if len(existingDefaultRules) < len(DefaultRegex) {
+		needUpdate = true
+	}
+
+	// 合并默认规则副本和自定义规则
+	r.Config.Wechat.Rules = append(defaultRuleCopy, customRules...)
+	if needUpdate {
+		r.WriteConfig(r.Config)
+	}
 
 	//代理
 	if r.Config.Proxy.Enable {
@@ -354,13 +389,13 @@ func (r *Application) SetContext(ctx context.Context) {
 }
 
 func (r *Application) GetContext() context.Context {
-	return r.Ctx
+	return r.ctx
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (r *Application) startup(ctx context.Context) {
-	r.Ctx = ctx
+	r.ctx = ctx
 }
 
 func (r *Application) Fetch(url string) ([]byte, error) {
@@ -585,4 +620,13 @@ type Constant struct {
 	Status  status.StatusEnum   `json:"status"`
 	History history.HistoryEnum `json:"history"`
 	Config  config.Config       `json:"config"`
+}
+
+func (r *Application) GetSystemInfo() *utils.SystemStats {
+	stats, err := utils.GetSystemStats()
+	if err != nil {
+		r.Logger.Error("获取系统信息失败: " + err.Error())
+		return nil
+	}
+	return stats
 }

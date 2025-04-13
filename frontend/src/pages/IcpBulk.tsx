@@ -14,7 +14,6 @@ import {errorNotification} from '@/component/Notification';
 import {useSelector} from 'react-redux';
 import {formatTimeSpent} from '@/util/util';
 import {EventsOn} from "../../wailsjs/runtime";
-
 import {
     TaskCreate,
     TaskDelete,

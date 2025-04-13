@@ -3,9 +3,10 @@ package fofa
 import (
 	"encoding/json"
 	"fine/backend/application"
-	"fine/backend/proxy/v2"
 	"fmt"
 	"testing"
+
+	"github.com/fasnow/goproxy"
 )
 
 func TestFofa_User(t *testing.T) {
@@ -25,7 +26,7 @@ func TestFofa_User(t *testing.T) {
 
 func TestStatisticalAggs_Query(t *testing.T) {
 	c := New(application.DefaultApp.Config.Fofa.Token)
-	proxy := proxy.NewManager()
+	proxy := goproxy.New()
 	proxy.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(proxy)
 	req := NewStatAggsReqBuilder().Fields("country").Query("title=百度").Build()
@@ -45,7 +46,7 @@ func TestStatisticalAggs_Query(t *testing.T) {
 
 func TestHostAggs_Host(t *testing.T) {
 	c := New(application.DefaultApp.Config.Fofa.Token)
-	proxy := proxy.NewManager()
+	proxy := goproxy.New()
 	proxy.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(proxy)
 	req := NewHostStatReqBuilder().Detail(true).Host("78.48.50.249").Build()
@@ -65,7 +66,7 @@ func TestHostAggs_Host(t *testing.T) {
 
 func TestFofa_Query(t *testing.T) {
 	c := New(application.DefaultApp.Config.Fofa.Token)
-	proxy := proxy.NewManager()
+	proxy := goproxy.New()
 	proxy.SetProxy("http://127.0.0.1:8081")
 	c.UseProxyManager(proxy)
 	req := NewSearchAllReqBuilder().Page(1).Size(10).Query("domain=baidu.com").Fields("link").Build()

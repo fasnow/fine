@@ -22,7 +22,7 @@ func TestBridge_SetProxy(t *testing.T) {
 	} else {
 		t.Log(result)
 	}
-	b := NewICPBridge(app)
+	b := NewBridge(app)
 
 	p := config.Proxy{
 		Enable: true,
@@ -116,7 +116,7 @@ func TestTime(t *testing.T) {
 
 func TestBridge_CreateTask(t *testing.T) {
 	app := application.DefaultApp
-	c := NewICPBridge(app)
+	c := NewBridge(app)
 	if err := c.TaskCreate("test", []string{"1"}, []string{"1"}); err != nil {
 		t.Error(err)
 		return
@@ -125,7 +125,7 @@ func TestBridge_CreateTask(t *testing.T) {
 
 func TestBridge_GetByTaskID(t *testing.T) {
 	app := application.DefaultApp
-	c := NewICPBridge(app)
+	c := NewBridge(app)
 	if r, err := c.icpTaskRepo.GetByTaskID(643309493575749, true); err != nil {
 		t.Error(err)
 		return
@@ -140,7 +140,7 @@ func TestBridge_GetByTaskID(t *testing.T) {
 
 func TestBridge_executeTask(t *testing.T) {
 	app := application.DefaultApp
-	c := NewICPBridge(app)
+	c := NewBridge(app)
 	c.TaskRun(647116238929989)
 	select {}
 }
@@ -188,7 +188,7 @@ func TestBridge_Context(t *testing.T) {
 }
 
 func TestBridge_Query(t *testing.T) {
-	c := NewICPBridge(application.DefaultApp)
+	c := NewBridge(application.DefaultApp)
 	data, err := c.Query(0, "中国邮政集团有限公司芜湖市分公司", 1, 1, "1")
 	if err != nil {
 		t.Error(err)
@@ -198,7 +198,7 @@ func TestBridge_Query(t *testing.T) {
 }
 
 func TestTask(t *testing.T) {
-	c := NewICPBridge(application.DefaultApp)
+	c := NewBridge(application.DefaultApp)
 	c.SetProxy(config.Proxy{
 		Enable: true,
 		Type:   "http",
@@ -220,7 +220,7 @@ func TestTask(t *testing.T) {
 }
 
 func TestBridge_Export(t *testing.T) {
-	c := NewICPBridge(application.DefaultApp)
+	c := NewBridge(application.DefaultApp)
 	application.DefaultApp.ProxyManager.SetTimeout(5 * time.Second)
 	time.AfterFunc(3*time.Second, func() {
 		application.DefaultApp.ProxyManager.SetProxy("http://127.0.0.1:8082")

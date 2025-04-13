@@ -10,7 +10,7 @@ interface PasswordProps {
 
 const Label:React.FC<PasswordProps>=(props)=>{
     return <Flex justify={"left"}>
-        <span style={{display: "inline-block", textAlign: "left", paddingRight: "5px", height: "24px", width: props.labelWidth || 'fit-content'}}>{props.label}</span>
+        <span style={{display: "inline-block", textAlign: "left", paddingRight: "5px", height: "24px", minWidth: props.labelWidth || 'fit-content', maxWidth: props.labelWidth || 'fit-content'}}>{props.label}</span>
         {props.value}
     </Flex>
 }

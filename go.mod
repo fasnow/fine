@@ -17,6 +17,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/miekg/dns v1.1.59
 	github.com/pkg/errors v0.9.1
+	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/shirou/gopsutil/v4 v4.25.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tidwall/gjson v1.14.2
 	github.com/wailsapp/wails/v2 v2.10.1
@@ -57,7 +59,7 @@ require (
 	github.com/leaanthony/gosod v1.0.4 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect
 	github.com/leaanthony/u v1.1.1 // indirect
-	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
+	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -72,12 +74,11 @@ require (
 	github.com/robotn/xgb v0.10.0 // indirect
 	github.com/robotn/xgbutil v0.10.0 // indirect
 	github.com/samber/lo v1.49.1 // indirect
-	github.com/shirou/gopsutil/v4 v4.25.1 // indirect
 	github.com/tailscale/win v0.0.0-20250213223159-5992cb43ca35 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	github.com/tklauser/go-sysconf v0.3.14 // indirect
-	github.com/tklauser/numcpus v0.9.0 // indirect
+	github.com/tklauser/go-sysconf v0.3.15 // indirect
+	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
@@ -94,7 +95,7 @@ require (
 	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect

@@ -3,12 +3,13 @@ package wechat
 import (
 	"encoding/json"
 	"fine/backend/application"
-	"fine/backend/proxy/v2"
 	"fine/backend/utils"
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/fasnow/goproxy"
 )
 
 func TestWeChat_GetAllMiniProgram(t *testing.T) {
@@ -110,7 +111,7 @@ func TestWeChat_ExtractInfo(t *testing.T) {
 		}
 		filesName = append(filesName, tt...)
 	}
-	c.SetRegex(application.DefaultRegex)
+	c.SetRules(application.DefaultRegex)
 	var results []string
 	for _, file := range filesName {
 		// 跳过指定后缀本文件
@@ -122,7 +123,10 @@ func TestWeChat_ExtractInfo(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		results = append(results, c.ExtractInfo(string(bytes))...)
+		t := c.ExtractInfo(string(bytes))
+		for _, v := range t {
+			results = append(results, v.Matches...)
+		}
 	}
 	results = utils.RemoveEmptyAndDuplicateString(results)
 	t.Log(results)
@@ -140,7 +144,7 @@ func TestWeChat_GetAllMiniAppWxapkg(t *testing.T) {
 
 func TestWeChat_QueryMimiAPPInfo(t *testing.T) {
 	c := New(application.DefaultApp.Config.Wechat.Applet)
-	pm := proxy.NewManager()
+	pm := goproxy.New()
 	c.UseProxyManager(pm)
 	pm.SetProxy("http://127.0.0.1:8081")
 	info, err := c.QueryMimiAPPInfo("wx2c348cf579062e56")

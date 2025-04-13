@@ -1,7 +1,10 @@
 package models
 
 import (
+	"fine/backend/matcher"
 	"fine/backend/service/model/wechat"
+
+	"gorm.io/datatypes"
 )
 
 type MiniAppDecompileTask struct {
@@ -16,6 +19,7 @@ type VersionDecompileTask struct {
 	DecompileStatus int
 	MatchStatus     int
 	Matched         string
+	MatchedV2       datatypes.JSONType[[]matcher.MatchResult]
 	Message         string
 }
 

@@ -270,7 +270,6 @@ export const MiniProgram: React.FC = () => {
     const [matchedResult, setMatchedResult] = useState<string>("");
     const appIdRef = useRef<string>("");
     const versionRef = useRef<string>("");
-    const dataCachePath = useRef<string>("");
     const dispatch = useDispatch();
     const cfg = useSelector(
         (state: RootState) => state.app.global.config || new config.Config()
@@ -655,7 +654,7 @@ export const MiniProgram: React.FC = () => {
                                                                         onClick={async () => {
                                                                             OpenFolder(
                                                                                 await Join([
-                                                                                    dataCachePath.current,
+                                                                                    cfg.WechatDataDir,
                                                                                     item.AppID,
                                                                                     i.Number,
                                                                                 ])

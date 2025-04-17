@@ -10,6 +10,7 @@ import (
 	"fine/backend/database/models"
 	"fine/backend/database/repository"
 	"fine/backend/logger"
+	"fine/backend/matcher"
 	"fine/backend/utils"
 	"fmt"
 	"io"
@@ -237,24 +238,28 @@ func (r *Application) loadConfigFile() error {
 		r.Config.Wechat.ExtractConcurrency = 20
 		needUpdate = true
 	}
-	currentVersion, _ := version.NewVersion(Version)
-	configFileVersion, err := version.NewVersion(r.Config.Version)
 
 	if len(r.Config.Wechat.Rules) == 0 {
 		r.Config.Wechat.Rules = DefaultRegex
 		needUpdate = true
 	}
+
+	isNewVersion := false
+
+	currentVersion, _ := version.NewVersion(Version)
+	configFileVersion, err := version.NewVersion(r.Config.Version)
 	if err != nil || currentVersion.GreaterThan(configFileVersion) {
 		r.Config.Version = Version
+		isNewVersion = true
 		needUpdate = true
 	}
 
 	// 创建默认规则副本
-	defaultRuleCopy := make(config.RuleList, len(DefaultRegex))
+	defaultRuleCopy := make(matcher.RuleList, len(DefaultRegex))
 	copy(defaultRuleCopy, DefaultRegex)
 
 	// 找出自定义规则
-	customRules := make(config.RuleList, 0)
+	customRules := make(matcher.RuleList, 0)
 	defaultRuleIDs := make(map[int64]bool)
 	existingDefaultRules := make(map[int64]bool)
 
@@ -269,6 +274,9 @@ func (r *Application) loadConfigFile() error {
 			// 不在默认规则ID中的为自定义规则
 			customRules = append(customRules, rule)
 		} else {
+			if isNewVersion {
+				continue
+			}
 			// 在默认规则中的,更新到默认规则副本中
 			existingDefaultRules[rule.ID] = true
 			for i, defaultRule := range defaultRuleCopy {

@@ -31,6 +31,19 @@ type Matcher struct {
 	mutex    sync.Mutex
 }
 
+type RuleList []*Rule
+
+func (r *RuleList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var entries []*Rule
+	if err := unmarshal(&entries); err != nil {
+		// YAML 不是 []RuleEntry 格式，则置空
+		*r = nil
+		return nil // 不返回 error，只是不加载内容
+	}
+	*r = entries
+	return nil
+}
+
 func New(rules []*Rule) *Matcher {
 	return &Matcher{
 		rules: rules,
@@ -95,9 +108,7 @@ func (r *Matcher) FindAllOptimized(content string) []MatchResult {
 				// 执行匹配
 				submatches := re.FindAllStringSubmatch(content, -1)
 				for _, submatch := range submatches {
-					if len(submatch) > 1 {
-						matches = append(matches, submatch[1:]...)
-					} else if len(submatch) == 1 {
+					if len(submatch) > 0 {
 						matches = append(matches, submatch[0])
 					}
 				}

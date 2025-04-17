@@ -29,10 +29,11 @@ import DirectorySelector from "@/component/DirectorySelector";
 import InfoToFront = wechat.InfoToFront;
 import VersionTaskStatus = wechat.VersionTaskStatus;
 import { AgGridReact, CustomTooltipProps } from "ag-grid-react";
-import { AGGridCommonOptions, AGGridCommonOptionsNoCopy } from "./Props";
+import { AGGridCommonOptions, AGGridCommonOptionsNoCopy, MonacoEditorProps } from "./Props";
 import { CellValueChangedEvent, ColDef, GetRowIdParams, ICellRendererParams, ValueFormatterParams } from "ag-grid-enterprise";
 import { WithIndex } from "@/component/Interface";
 import Label from "@/component/Label";
+import { Editor } from "@monaco-editor/react";
 
 type PageDataType = WithIndex<matcher.Rule>
 
@@ -225,7 +226,7 @@ const RuleModal: React.FC<RuleModalProps> = ({ onRulesChange }) => {
                 width={1000}
                 styles={{
                     body: {
-                        height: "300px",
+                        height: "400px",
                     },
                 }}
                 okText={selectedRule?.ID ? "保存" : "新增"}
@@ -238,12 +239,17 @@ const RuleModal: React.FC<RuleModalProps> = ({ onRulesChange }) => {
                     <Label labelWidth={40} label="名称" value={<Input value={selectedRule?.Name} onChange={(e) => {
                         setSelectedRule(prev => prev ? { ...prev, Name: e.target.value } : null);
                     }} />} />
-                    <Label labelWidth={40} label="正则" value={
-                        <Flex vertical gap={5} style={{ width: "100%" }}>
-                            <TextArea autoSize={{ minRows: 10 }} wrap="off" value={selectedRule?.Regexes?.join("\n")} onChange={(e) => {
-                                setSelectedRule(prev => prev ? { ...prev, Regexes: e.target.value.split("\n") } : null);
-                            }} placeholder="每行一个正则表达式" />
-                            <div style={{ color: "#ff4d4f", fontSize: "12px", fontWeight: "bold" }}>正则表达式必须用双引号包裹</div>
+                    <Label labelWidth={40} label="正则" style={{ height: "100%" }} value={
+                        <Flex vertical gap={5} style={{ height: "100%", width: "100%" }}>
+                            <div style={{ height: "100%" }}>
+                                <Editor
+                                    {...MonacoEditorProps}
+                                    value={selectedRule?.Regexes?.join("\n")} onChange={(v) => {
+                                        setSelectedRule(prev => prev ? { ...prev, Regexes: v?.split("\n") || [] } : null);
+                                    }}
+                                />
+                            </div>
+                            <div style={{ color: "#ff4d4f", fontSize: "12px", fontWeight: "bold" }}>正则表达式必须用双引号包裹，每行一个</div>
                         </Flex>
                     } />
                 </Flex>
@@ -383,20 +389,6 @@ export const MiniProgram: React.FC = () => {
                     errorNotification("错误", e);
                 });
         }
-    };
-
-    const getApis = () => {
-        const regex: RegExp =
-            /\/(?:[\w-]+\/)*[\w-]+(.cgi|.php|.action|.jsp|.jspx|.asp|.aspx|.py|.rb|.html|.htm|.tpl|.do|.jsf)?\/*\??(?:[\w=&-]+)?\)*/gi;
-        const matches = matchedResult.matchAll(regex);
-        const items: string[] = [];
-        for (const match of matches) {
-            items.push(match[0]);
-        }
-        if (items.length === 0) {
-            return;
-        }
-        copy(Array.from(new Set(items)).join("\n"));
     };
 
     const getMatchedString = (appid: string, version: string) => {
@@ -699,7 +691,7 @@ export const MiniProgram: React.FC = () => {
                     </ConfigProvider>
                 </Splitter.Panel>
                 <Splitter.Panel min={"15%"}>
-                    <Flex vertical gap={5} style={{ height: "100%" }}>
+                    <Flex vertical gap={5} style={{ height: "100%", marginLeft: '10px', overflow: "hidden" }}>
                         <Flex>
                             {select?.appid && (
                                 <Flex>
@@ -715,20 +707,19 @@ export const MiniProgram: React.FC = () => {
                                     </Tag>
                                 </Flex>
                             )}
-                            <Button size={"small"} type={"primary"} onClick={getApis}>
-                                提取API
-                            </Button>
                         </Flex>
                         <Tabs style={{ height: "100%" }}
                             items={tabs.map((tab) => ({
                                 key: tab.key,
                                 label: tab.label,
-                                children: <TextArea
-                                    value={tab.value}
-                                    style={{ height: "100%" }}
-                                    onChange={(e) => updateTabContent(tab.key, e.target.value)}
-                                    placeholder="请输入内容"
-                                />,
+                                children: <div style={{ height: "100%", position: "relative", padding: "10px", boxSizing: "border-box", overflow: "hidden" }}>
+                                    <Editor
+                                        {...MonacoEditorProps}
+                                        value={tab.value}
+                                        onChange={(v) => updateTabContent(tab.key, v || "")}
+                                    />
+                                </div>
+                                ,
                             }))}
                         />
                     </Flex>

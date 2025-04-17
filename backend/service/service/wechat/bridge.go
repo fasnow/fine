@@ -29,7 +29,7 @@ import (
 )
 
 var filteredFileExt = []string{".png", ".jpg", ".jpeg", ".wxapkg", ".br"}
-var filteredAPIExt = []string{".wxss", ".wxml", "index.html"}
+var filteredAPIExt = []string{".wxss", ".wxml"} //".wxss", ".wxml", "index.html"
 
 type Bridge struct {
 	app                      *application.Application
@@ -420,6 +420,18 @@ func (r *Bridge) extractInfo(task *models.VersionDecompileTask, files []string) 
 				}
 			}
 			matches = filteredMatches
+
+			// 去除前后单双引号
+			for i, match := range matches {
+				if strings.HasPrefix(match, "\"") || strings.HasPrefix(match, "'") {
+					match = strings.TrimPrefix(match, "\"")
+					match = strings.TrimPrefix(match, "'")
+					match = strings.TrimSuffix(match, "\"")
+					match = strings.TrimSuffix(match, "'")
+					matches[i] = match
+				}
+			}
+
 			groupedResults[result.Rule.ID] = matches
 		}
 
@@ -597,6 +609,7 @@ func (r *Bridge) DeleteWechatRules(id int64) error {
 }
 
 func (r *Bridge) UpdateWechatRule(rule *matcher.Rule) error {
+	rule.Regexes = utils.RemoveEmptyAndDuplicateString(rule.Regexes)
 	for i, v := range rule.Regexes {
 		ttt, err := strconv.Unquote(v)
 		if err != nil {

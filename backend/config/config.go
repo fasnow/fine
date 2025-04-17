@@ -122,20 +122,7 @@ type Wechat struct {
 	//AdafruitAPIKey bool   `ini:"Adafruit_API_Key"`
 	DecompileConcurrency int
 	ExtractConcurrency   int
-	Rules                RuleList
-}
-
-type RuleList []*matcher.Rule
-
-func (r *RuleList) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var entries []*matcher.Rule
-	if err := unmarshal(&entries); err != nil {
-		// YAML 不是 []RuleEntry 格式，则置空
-		*r = nil
-		return nil // 不返回 error，只是不加载内容
-	}
-	*r = entries
-	return nil
+	Rules                matcher.RuleList
 }
 
 type Httpx struct {

@@ -109,4 +109,5 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            feat: 小程序信息规则分类 #47 @VSolitus。
+            enhance: 更新小程序信息匹配规则；
+            fix: 文件夹无法打开 #55 @diaoxueyu。

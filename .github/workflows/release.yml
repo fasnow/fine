@@ -109,5 +109,4 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            enhance: 更新小程序信息匹配规则；
-            fix: 文件夹无法打开 #55 @diaoxueyu。
+            fix: windows下小程序提取结果一直加载 #65 @Yn8rt。

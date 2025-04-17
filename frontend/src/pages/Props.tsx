@@ -39,6 +39,7 @@ export const AGGridCommonOptionsNoCopy: GridOptions = {
 }
 
 export const MonacoEditorProps:EditorProps = {
+    defaultValue:"",// windows下不设置会导致长时间加载
     defaultLanguage:"plaintext",
     theme:"vs-dark",
     options: {

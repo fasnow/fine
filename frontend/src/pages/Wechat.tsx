@@ -29,11 +29,12 @@ import DirectorySelector from "@/component/DirectorySelector";
 import InfoToFront = wechat.InfoToFront;
 import VersionTaskStatus = wechat.VersionTaskStatus;
 import { AgGridReact, CustomTooltipProps } from "ag-grid-react";
-import { AGGridCommonOptions, AGGridCommonOptionsNoCopy, MonacoEditorProps } from "./Props";
+import { AGGridCommonOptionsNoCopy } from "./Props";
 import { CellValueChangedEvent, ColDef, GetRowIdParams, ICellRendererParams, ValueFormatterParams } from "ag-grid-enterprise";
 import { WithIndex } from "@/component/Interface";
 import Label from "@/component/Label";
 import { Editor } from "@monaco-editor/react";
+import { MonacoEditorProps } from "@/config/monaco";
 
 type PageDataType = WithIndex<matcher.Rule>
 

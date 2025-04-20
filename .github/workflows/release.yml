@@ -109,4 +109,4 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            fix: windows下小程序提取结果一直加载 #65 @Yn8rt。
+            fix: 小程序提取结果无法加载，定位为cdn问题，现已改为本地加载（refix: #65 @Yn8rt）。

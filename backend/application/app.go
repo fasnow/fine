@@ -33,7 +33,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const Version = "2.4.2"
+const Version = "2.4.3"
 
 func init() {
 	ini.PrettyFormat = false

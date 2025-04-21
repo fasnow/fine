@@ -526,14 +526,14 @@ const Update: React.FC = () => {
                     </span>
                     <Tag style={{fontSize: "14px"}} bordered={false} color="green">{releaseVersion}</Tag>
                 </Flex>
-                <Flex vertical>
+                <Flex vertical wrap={true}>
                     <span>更新内容:</span>
-                    {
-                        releaseDescription && releaseDescription.replace(/\n(?!\n?$)/g, '\n')
-                            .split("\n").map((item, i) => {
-                                return <span key={i} style={{whiteSpace: "pre", marginLeft: "10px"}}>{item}</span>
-                            })
-                    }
+                    <ul style={{maxHeight: "200px", overflow: "auto", padding: 0, margin: 0, listStylePosition: "inside"}}>
+                        {releaseDescription && releaseDescription.replace(/\n(?!\n?$)/g, '\n')
+                            .split("\n").map((item, i) => (
+                                <li key={i} style={{whiteSpace: "wrap", marginLeft: "10px"}}>{item}</li>
+                            ))}
+                    </ul>
                 </Flex>
                 <Flex vertical>
                     <span>

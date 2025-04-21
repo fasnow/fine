@@ -9,7 +9,7 @@ require (
 	github.com/chromedp/chromedp v0.13.1
 	github.com/ditashi/jsbeautifier-go v0.0.0-20141206144643-2520a8026a9c
 	github.com/fasnow/goproxy v0.0.0-20250401070048-5a7fb3df6a0d
-	github.com/go-vgo/robotgo v0.110.6
+	github.com/go-vgo/robotgo v1.0.0-rc2.1.0.20250419195642-57b5e5bca258
 	github.com/goccy/go-json v0.10.2
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-version v1.7.0
@@ -52,7 +52,6 @@ require (
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c // indirect
 	github.com/labstack/echo/v4 v4.13.3 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
@@ -85,6 +84,7 @@ require (
 	github.com/vcaesar/gops v0.40.0 // indirect
 	github.com/vcaesar/imgo v0.40.2 // indirect
 	github.com/vcaesar/keycode v0.10.1 // indirect
+	github.com/vcaesar/screenshot v0.11.0 // indirect
 	github.com/vcaesar/tt v0.20.1 // indirect
 	github.com/wailsapp/go-webview2 v1.0.19 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect

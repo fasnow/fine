@@ -31,7 +31,7 @@ import AppIcon from "@/assets/images/appicon.png"
 import Shodan from "@/pages/Shodan";
 import dayjs from 'dayjs';
 import { MessageInstance } from "antd/es/message/interface";
-
+import styles from './App.module.css';
 LicenseManager.setLicenseKey('[v3][Release][0102]_NDEwMjI5OTk5MzAwMA==ab24fd9f2af3b5617494923ea58bebea')
 ModuleRegistry.registerModules([AllEnterpriseModule]);
 provideGlobalGridOptions({ theme: themeQuartz.withParams({ rowBorder: true, columnBorder: true }) }); // Mark all grids as using legacy themes
@@ -193,15 +193,7 @@ const App: React.FC = () => {
             }}
         >
             <AntdApp style={{ height: "100%" }}>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    backgroundColor: '#ffffff',
-                    margin: '0',
-                    padding: '0',
-                    height: '100%',
-                    width: '100%',
-                }}>
+                <div className={styles.appContainer}>
                     <ConfigProvider
                         theme={{
                             components: {
@@ -235,18 +227,9 @@ const App: React.FC = () => {
                                     onStart={(event, uiData) => onStart(event, uiData)}
                                 >
                                     <div
-                                        style={{
-                                            userSelect: 'none',
-                                            width: '100%',
-                                            height: '100%',
-                                            borderRadius: '10px',
-                                            boxShadow: 'rgba(0,0,0, 0.3) 0px 5px 30px', // 添加边框阴影
-                                            backgroundColor: 'rgba(241, 241, 241,0.3)', /* 设置背景颜色和透明度 */
-                                        }}
-                                        className={cx(css`
-                                backdrop-filter: blur(20px); /*毛玻璃效果*/
-                            `)}
-                                        ref={draggleRef}>{modal}</div>
+                                        className={styles.modalContainer}
+                                        ref={draggleRef}>{modal}
+                                    </div>
                                 </Draggable>
                             )}
                         >

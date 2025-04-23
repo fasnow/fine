@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	runtime2 "runtime"
 	"runtime/debug"
 	"strconv"
@@ -615,8 +616,15 @@ func (r *Bridge) UpdateWechatRule(rule *matcher.Rule) error {
 		if err != nil {
 			return errors.New("语法错误：" + v)
 		}
+
+		// 校验正则表达式语法
+		if _, err := regexp.Compile(ttt); err != nil {
+			return errors.New("语法错误: " + v)
+		}
+
 		rule.Regexes[i] = ttt
 	}
+
 	for i, v := range r.app.Config.Wechat.Rules {
 		if v.ID == rule.ID {
 			r.app.Config.Wechat.Rules[i] = rule

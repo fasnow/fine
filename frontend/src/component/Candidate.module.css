@@ -1,0 +1,58 @@
+.panel {
+    position: relative;
+}
+
+.panelTitle {
+    margin-bottom: 8px;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.listItem {
+    overflow: hidden;
+}
+
+.item {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.item:hover {
+    background-color: #f0f0f0;
+}
+
+.container {
+    position: relative;
+}
+
+.inputContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dropdown {
+    position: absolute;
+    width: 100%;
+    background-color: #ffffff;
+    z-index: 9999;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    padding: 5px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.hidden {
+    display: none;
+} 

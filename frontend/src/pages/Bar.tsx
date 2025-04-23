@@ -15,7 +15,7 @@ import {
 } from "@ant-design/icons";
 import {Badge, Button, ConfigProvider, Divider, Flex, List, Modal, Popover, Space, Spin, Tag, Tooltip,} from "antd";
 import React, {useEffect, useRef, useState} from "react";
-import "./Bar.css";
+import styles from "./Bar.module.css";
 import {useDispatch, useSelector} from "react-redux";
 import {GITHUB_URL, ISSUE_URL} from "@/component/type";
 import wailsJson from '../../../wails.json';
@@ -74,68 +74,44 @@ const SystemInfo: React.FC = () => {
         <Tooltip 
             color="#ffffff"
             title={
-                <div style={{padding: "0px", width: "200px", color: "black"}}>
+                <div className={styles.systemInfo}>
                     <div>
                         <span>进程ID: </span>
-                        <span style={{float: "right"}}>{systemInfo.PID}</span>
+                        <span className={styles.floatRight}>{systemInfo.PID}</span>
                     </div>
-                    <Divider style={{margin: "2px 0"}}/>
+                    <Divider className={styles.smallDivider}/>
                     <div>
                         <span>CPU使用率: </span>
-                        <span style={{float: "right"}}>{systemInfo.ProcessCPUUsage.toFixed(1)}%</span>
-                        <div style={{
-                            width: "100%",
-                            height: "4px",
-                            backgroundColor: "#f0f0f0",
-                            borderRadius: "2px",
-                            overflow: "hidden"
-                        }}>
-                            <div style={{
+                        <span className={styles.floatRight}>{systemInfo.ProcessCPUUsage.toFixed(1)}%</span>
+                        <div className={styles.progressBar}>
+                            <div className={styles.progressFill} style={{
                                 width: `${systemInfo.ProcessCPUUsage}%`,
-                                height: "100%",
                                 backgroundColor: systemInfo.ProcessCPUUsage > 80 ? "#ff4d4f" : "#1890ff",
-                                transition: "width 0.3s ease"
                             }}/>
                         </div>
                     </div>
-                    <Divider style={{margin: "2px 0"}}/>
+                    <Divider className={styles.smallDivider}/>
                     <div>
                         <span>内存使用: </span>
-                        <span style={{float: "right"}}>{(systemInfo.ProcessMemUsage / 1024 / 1024).toFixed(1)} MB ({systemInfo.ProcessMemPercent.toFixed(1)}%)</span>
-                        <div style={{
-                            width: "100%",
-                            height: "4px",
-                            backgroundColor: "#f0f0f0",
-                            borderRadius: "2px",
-                            overflow: "hidden"
-                        }}>
-                            <div style={{
+                        <span className={styles.floatRight}>{(systemInfo.ProcessMemUsage / 1024 / 1024).toFixed(1)} MB ({systemInfo.ProcessMemPercent.toFixed(1)}%)</span>
+                        <div className={styles.progressBar}>
+                            <div className={styles.progressFill} style={{
                                 width: `${systemInfo.ProcessMemPercent}%`,
-                                height: "100%",
                                 backgroundColor: systemInfo.ProcessMemPercent > 80 ? "#ff4d4f" : "#1890ff",
-                                transition: "width 0.3s ease"
                             }}/>
                         </div>
                     </div>
                 </div>
             }
         >
-            <div style={{display: "flex", alignItems: "center", gap: "4px",pointerEvents:"auto"}}>
-                <div style={{
-                    width: "100px",
-                    height: "10px",
-                    backgroundColor: "#f0f0f0",
-                    borderRadius: "10px",
-                    overflow: "hidden"
-                }}>
-                    <div style={{
+            <div className={styles.systemInfoContainer}>
+                <div className={styles.cpuBar}>
+                    <div className={styles.progressFill} style={{
                         width: `${systemInfo.ProcessCPUUsage}%`,
-                        height: "100%",
                         backgroundColor: systemInfo.ProcessCPUUsage > 80 ? "#ff4d4f" : "#1890ff",
-                        transition: "width 0.3s ease"
                     }}/>
                 </div>
-                <span style={{fontSize: "12px"}}>{systemInfo.ProcessCPUUsage.toFixed(1)}%</span>
+                <span className={styles.cpuText}>{systemInfo.ProcessCPUUsage.toFixed(1)}%</span>
             </div>
         </Tooltip>
     );
@@ -144,23 +120,21 @@ const SystemInfo: React.FC = () => {
 
 const appIcon = (platform: string) => {
     if (platform === "windows") {
-        return <span
-            style={{fontSize: "24px", display: 'flex', alignItems: "center", marginLeft: "5px", marginRight: "5px"}}>
+        return <span className={styles.windowsAppIcon}>
             <img
-                style={{height: "24px"}}
+                className={styles.appIconImage}
                 src={favicon}
                 draggable="false"
                 id="appIcon"
             />
-            <Divider type="vertical" style={{height: "24px"}}/>
-            <span style={{marginLeft: "5px", marginRight: "5px"}}>
+            <Divider type="vertical" className={styles.verticalDivider}/>
+            <span className={styles.systemInfoWrapper}>
                 <SystemInfo/>
             </span>
         </span>
     }
-    return <span
-        style={{fontSize: "24px", display: 'flex', alignItems: "center", marginLeft: "70px"}}>
-            <Divider type="vertical" style={{height: "24px"}}/>
+    return <span className={styles.macAppIcon}>
+        <Divider type="vertical" className={styles.verticalDivider}/>
         <SystemInfo/>
     </span>
 };
@@ -683,7 +657,6 @@ const Bar: React.FC = () => {
     const [platform, setPlatform] = useState<string>("")
     const version = useRef(wailsJson.info.productVersion)
 
-    //必须搭配使用,EventsOn里面获取不到isFullScreen更新后的值
     const [isFullScreen, setIsFullScreen] = useState<boolean>(false)
     const f = useRef<boolean>(false)
     const event = useSelector((state: RootState) => state.app.global.event)
@@ -707,25 +680,23 @@ const Bar: React.FC = () => {
     return (
         <div
             id="drag"
-            className="bar"
-            // draggable
+            className={styles.bar}
             onDoubleClick={() => {
                 WindowToggleMaximise();
                 f.current = !f.current
                 setIsFullScreen(pre => !pre)
             }}
         >
-            <div className="left">{appIcon(platform)}</div>
-            <div className="right" onDoubleClick={(e) => e.stopPropagation()}>
+            <div className={styles.left}>{appIcon(platform)}</div>
+            <div className={styles.right} onDoubleClick={(e) => e.stopPropagation()}>
                 <Space size={1}>
-                    <span onClick={genshinLaunch}
-                          style={{color: "#4676c3", margin: "0px 10px 0px 10px"}}> v{version.current}</span>
+                    <span onClick={genshinLaunch} className={styles.versionText}> v{version.current}</span>
                     <DownloadHistory/>
                     <Update/>
                     <Tooltip placement="bottom" title="Github">
                         <Button
                             type="text"
-                            style={buttonStyle}
+                            className={styles.button}
                             icon={<GithubOutlined/>}
                             size="small"
                             onClick={() => {
@@ -736,7 +707,7 @@ const Bar: React.FC = () => {
                     <Tooltip placement={platform === "windows" ? "bottom" : "bottomLeft"} title="提交Bug">
                         <Button
                             type="text"
-                            style={buttonStyle}
+                            className={styles.button}
                             icon={<BugOutlined/>}
                             size="small"
                             onClick={() => {
@@ -748,7 +719,7 @@ const Bar: React.FC = () => {
                         platform === "windows" && <div>
                             <Button
                                 type="text"
-                                style={buttonStyle}
+                                className={styles.button}
                                 icon={<LineOutlined/>}
                                 size="small"
                                 onClick={WindowMinimise}
@@ -756,7 +727,7 @@ const Bar: React.FC = () => {
                             {isFullScreen ? (
                                 <Button
                                     type="text"
-                                    style={buttonStyle}
+                                    className={styles.button}
                                     icon={<CompressOutlined/>}
                                     size="small"
                                     onClick={() => {
@@ -768,7 +739,7 @@ const Bar: React.FC = () => {
                             ) : (
                                 <Button
                                     type="text"
-                                    style={buttonStyle}
+                                    className={styles.button}
                                     icon={<ExpandOutlined/>}
                                     size="small"
                                     onClick={(e) => {
@@ -780,10 +751,9 @@ const Bar: React.FC = () => {
                             )}
                             <Button
                                 type="text"
-                                style={buttonStyle}
+                                className={`${styles.button} ${styles.exitButton}`}
                                 icon={<CloseOutlined/>}
                                 size="small"
-                                className="exit-button"
                                 onClick={Quit}
                             />
                         </div>

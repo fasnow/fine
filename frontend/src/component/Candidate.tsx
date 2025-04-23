@@ -23,6 +23,7 @@ import {
 import { SearchProps } from "antd/es/input";
 import { SearchOutlined } from "@ant-design/icons";
 import { SizeType } from "antd/es/config-provider/SizeContext";
+import styles from './Candidate.module.css';
 
 export interface ItemType<T> {
     value: string | number;
@@ -83,15 +84,14 @@ const Panel = <T,>() => React.forwardRef<any, BasePanelProps<T>>((props, ref) =>
     };
 
     return (
-        <div onMouseLeave={() => setSelectedKey(null)}>
+        <div className={styles.panel} onMouseLeave={() => setSelectedKey(null)}>
             {
                 props.title &&
-                <Tag bordered={false} color="cyan">{props.title}</Tag>
+                <Tag bordered={false} color="cyan" className={styles.panelTitle}>{props.title}</Tag>
             }
             {
                 loading ? (
-                    <Spin spinning={true}
-                        style={{ display: "flex", justifyContent: 'center', alignItems: 'center' }} />
+                    <Spin spinning={true} className={styles.loading} />
                 ) : (
                     <ConfigProvider
                         theme={{
@@ -109,23 +109,14 @@ const Panel = <T,>() => React.forwardRef<any, BasePanelProps<T>>((props, ref) =>
                             style={{ maxHeight: 200 }}
                             renderItem={(item, index) => {
                                 const isSelected = item.value === selectedKey;
-                                return <List.Item key={index} style={{ overflow: 'hidden' }}>
+                                return <List.Item key={index} className={styles.listItem}>
                                     <span
+                                        className={`${styles.item} ${isSelected ? styles.selected : ''}`}
                                         onMouseOver={() => handleMouseOver(item.value)}
                                         onClick={(e) => {
                                             if (props.onSelectItem) {
                                                 props.onSelectItem(item)
                                             }
-                                        }}
-                                        style={{
-                                            cursor: 'pointer',
-                                            backgroundColor: isSelected ? '#f0f0f0' : 'transparent',
-                                            padding: '5px',
-                                            borderRadius: '3px',
-                                            overflow: "hidden",
-                                            whiteSpace: "nowrap",
-                                            textOverflow: 'ellipsis',
-                                            width: "100%",
                                         }}
                                     >
                                         {item.label}
@@ -264,7 +255,7 @@ const Candidate = React.memo(<T,>(props: CandidateProps<T>) => {
     }, [value])
 
     return (
-        <div ref={rootDivRef} style={{ position: "relative" }}>
+        <div ref={rootDivRef} className={styles.container}>
             <Flex justify={'center'} align={'center'}>
                 {
                     onSearch ? <Space.Compact>
@@ -282,19 +273,7 @@ const Candidate = React.memo(<T,>(props: CandidateProps<T>) => {
                     />
                 }
             </Flex>
-            <div style={{
-                position: 'absolute',
-                width: '100%',
-                backgroundColor: "#ffffff",
-                zIndex: "9999",
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1)',
-                borderRadius: '3px',
-                padding: '5px',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                display: open ? 'block' : 'none',
-                boxSizing: 'border-box'
-            }}>
+            <div ref={itemsDivRef} className={`${styles.dropdown} ${!open ? styles.hidden : ''}`}>
                 {panels}
             </div>
         </div>

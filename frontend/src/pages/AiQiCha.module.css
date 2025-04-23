@@ -1,0 +1,54 @@
+.wrapper {
+    height: 100%
+}
+
+.ant-spin-container {
+    height: 100%;
+}
+
+.container {
+    overflow: hidden;
+    height: 100%;
+}
+
+.candidate {
+    width: 400px;
+}
+
+.drawerContent {
+    height: 100%;
+    position: relative;
+}
+
+.drawerHeader {
+    z-index: 10;
+    position: absolute;
+    background-color: #ffffff;
+    left: 0;
+}
+
+.companyTag {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.ratioTag {
+    font-size: 14px;
+}
+
+.spinWrapper {
+    height: 100%;
+}
+
+.graphContainer {
+    height: 100%;
+    width: 100%;
+}
+
+.authSettingContainer {
+    width: auto;
+    height: 23px;
+    display: flex;
+    align-items: center;
+    background-color: #f1f3f4;
+}

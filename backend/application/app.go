@@ -128,6 +128,7 @@ func NewApp() *Application {
 		Config:       &config.Config{},
 		ProxyManager: goproxy.New(),
 	}
+	app.ProxyManager.AutoSetUserAgent(true)
 	app.init()
 	app.UseProxyManager(app.ProxyManager)
 	database.SetDatabaseFile(app.Config.DatabaseFile)

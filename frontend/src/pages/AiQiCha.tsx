@@ -26,7 +26,7 @@ import {TYC} from "@/pages/Constants";
 import {CheckboxOptionType} from "antd/es/checkbox/Group";
 import type {CascaderProps} from 'antd/es/cascader'
 import Candidate, {ItemType} from "@/component/Candidate";
-import './AiQiCha.css'
+import styles from './AiQiCha.module.css';
 import {
     ExportInvestRecordByDepth,
     GetBranchList,
@@ -1240,11 +1240,7 @@ const TabContent: React.FC = () => {
     }
 
     return (
-        <div ref={containerRef} style={{
-            overflow: 'hidden',
-            height: '100%'
-        }}
-        >
+        <div ref={containerRef} className={styles.container}>
             <div ref={filterRef}>
                 <Flex vertical gap={10}>
                     <Flex justify={'center'}>
@@ -1287,83 +1283,6 @@ const TabContent: React.FC = () => {
 
                         >
                         </Candidate>
-                        {/*</Flex>*/}
-                        {/*<Flex gap={10}>*/}
-                        {/*    <span style={LabelCssProps}>{TYC.scopeType.nodeName}</span>*/}
-                        {/*    <Checkbox.Group*/}
-                        {/*        options={TYC.scopeType.items.map(item=>{return {label: item.nodeName, value: item.value}})}*/}
-                        {/*    />*/}
-                        {/*</Flex>*/}
-                        {/*<Flex gap={10} wrap>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.industryCode.nodeName}</span>*/}
-                        {/*        <Cascader*/}
-                        {/*            {...SharedOptions}*/}
-                        {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.industryCode.items}/>*/}
-                        {/*    </Flex>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.areaCode.nodeName}</span>*/}
-                        {/*        <Cascader*/}
-                        {/*            {...SharedOptions}*/}
-                        {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.areaCode.items}*/}
-                        {/*        />*/}
-                        {/*    </Flex>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <BadgeWrapper info={TYC.companyScale.right.toUpperCase()}>*/}
-                        {/*            <span style={LabelCssProps}>{TYC.companyScale.nodeName}</span>*/}
-                        {/*        </BadgeWrapper>*/}
-                        {/*        <Cascader*/}
-                        {/*            {...SharedOptions}*/}
-                        {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.companyScale.items.map(item=>{return {label: item.nodeName, value: item.value}})}/>*/}
-                        {/*    </Flex>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <BadgeWrapper info={TYC.tycScore.right.toUpperCase()}>*/}
-                        {/*            <span style={LabelCssProps}>{TYC.tycScore.nodeName}</span>*/}
-                        {/*        </BadgeWrapper>*/}
-                        {/*        <Cascader*/}
-                        {/*            {...SharedOptions}*/}
-                        {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.tycScore.items.map(item=>{return {label: item.nodeName, value: item.value}})}/>*/}
-                        {/*    </Flex>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <BadgeWrapper info={TYC.scienceTechnologyGrade.right.toUpperCase()}>*/}
-                        {/*            <span style={LabelCssProps}>{TYC.scienceTechnologyGrade.nodeName}</span>*/}
-                        {/*        </BadgeWrapper>*/}
-                        {/*        <Cascader*/}
-                        {/*            {...SharedOptions}*/}
-                        {/*            style={{width:"140px"}}*/}
-                        {/*            options={TYC.scienceTechnologyGrade.items.map(item=>{return {label: item.nodeName, value: item.value}})}/>*/}
-                        {/*    </Flex>*/}
-                        {/*</Flex>*/}
-                        {/*<Flex>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.paidCapital.nodeName}</span>*/}
-                        {/*        <Checkbox.Group*/}
-                        {/*            options={TYC.paidCapital.items.map(item=>{return {label: item.nodeName, value: item.value}})}*/}
-                        {/*        />*/}
-                        {/*    </Flex>*/}
-                        {/*</Flex>*/}
-                        {/*<Flex vertical>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <BadgeWrapper info={"VIP"}>*/}
-                        {/*            <span style={{...LabelCssProps}}>{TYC.regStatus.nodeName}</span>*/}
-                        {/*        </BadgeWrapper>*/}
-                        {/*        <Checkbox.Group*/}
-                        {/*            defaultValue={["存续/在业", "迁入", "迁出"]}*/}
-                        {/*            options={getRegStatus()}*/}
-                        {/*        />*/}
-                        {/*    </Flex>*/}
-                        {/*</Flex>*/}
-                        {/*<Flex vertical>*/}
-                        {/*    <Flex gap={10}>*/}
-                        {/*        <span style={LabelCssProps}>{TYC.branchType.nodeName}</span>*/}
-                        {/*        <Checkbox.Group*/}
-                        {/*            options={TYC.branchType.items.map(item=>{return {label: item.nodeName, value: item.value}})}*/}
-                        {/*        />*/}
-                        {/*    </Flex>*/}
                     </Flex>
                 </Flex>
             </div>
@@ -1379,23 +1298,12 @@ const TabContent: React.FC = () => {
                     }
                 }}
                 placement="right"
-                // drawerRender={(dom)=>{
-                //     return <div style={{height:"100%"}}>{dom}</div>
-                // }}
             >
-                <Flex vertical style={{height: "100%", position: 'relative'}}>
-                    <Flex gap={20} style={{zIndex: 10, position: "absolute", backgroundColor: "#ffffff", left: "0"}}>
-                        <Tag bordered={false} color="#108ee9"
-                             style={{fontSize: "14px", fontWeight: "bold"}}>{currentCompany.name}</Tag>
-                        {/*<span>*/}
-                        {/*    <Tag bordered={false} color="cyan" style={{fontSize:"14px"}}>经营状态</Tag>*/}
-                        {/*    <Radio.Group size={"small"} onChange={e=>{}} defaultValue={"存续/在业"}>*/}
-                        {/*        <Radio value={"不限"}>不限</Radio>*/}
-                        {/*        <Radio value={"存续/在业"}>存续/在业</Radio>*/}
-                        {/*    </Radio.Group>*/}
-                        {/*</span>*/}
+                <Flex vertical className={styles.drawerContent}>
+                    <Flex gap={20} className={styles.drawerHeader}>
+                        <Tag bordered={false} color="#108ee9" className={styles.companyTag}>{currentCompany.name}</Tag>
                         <Flex>
-                            <Tag bordered={false} color="cyan" style={{fontSize: "14px"}}>控股比例</Tag>
+                            <Tag bordered={false} color="cyan" className={styles.ratioTag}>控股比例</Tag>
                             <InputNumber value={ratioMin} size={"small"} max={100} min={0} suffix={"%"}
                                          onChange={(v) => {
                                              ratioMinRef.current = v === null ? 0 : v
@@ -1414,8 +1322,8 @@ const TabContent: React.FC = () => {
                             setOpen(false)
                         }}>返回</Button>
                     </Flex>
-                    <Spin spinning={loading} style={{height: "100%"}} wrapperClassName={"wrapper"}>
-                        <div ref={graphRef} style={{height: "100%", width: "100%"}}>
+                    <Spin spinning={loading} className={styles.spinWrapper}>
+                        <div ref={graphRef} className={styles.graphContainer}>
                             {/* 动态生成内容由 D3.js 完成 */}
                         </div>
                     </Spin>
@@ -1733,13 +1641,7 @@ const DataTab: React.FC<DataTabProps> = (props) => {
 
 const AiQiCha = () => {
     return <TabsV2 defaultTabContent={<TabContent/>} tabBarExtraContent={{
-        left: <div style={{
-            width: "auto",
-            height: "23px",
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "#f1f3f4"
-        }}><AuthSetting/></div>
+        left: <div className={styles.authSettingContainer}><AuthSetting/></div>
     }}/>
 }
 

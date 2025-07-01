@@ -117,4 +117,5 @@ jobs:
             fix: #79 @chenroot1 程序panic导致的异常退出;
             fix: #101 @Aries014 备案信息结果重复;
             fix: #103 @VSolitus 无法正常启动;
-            fix: #105 @nhqqxs 无法获取非网站备案详细信息。
+            fix: #105 @nhqqxs 无法获取非网站备案详细信息;
+            fix: #106 @Joker123op 无法获取非网站备案详细信息。

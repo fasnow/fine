@@ -109,4 +109,12 @@ jobs:
             artifacts/**
           token: ${{ secrets.FINE }}
           body: |
-            fix: 小程序提取结果无法加载，定位为cdn问题，现已改为本地加载（refix: #65 @Yn8rt）。
+            feat: 内置httpx;
+            feat: 新增端口扫描和指纹识别;
+            update: #87 @Lyf888lyf 表格tooltip延迟2s;
+            fix: #67 @addbba-cmy icp批量查询输入过多导致的异常;
+            fix: #72 @comxza 小程序html文件格式异常;
+            fix: #79 @chenroot1 程序panic导致的异常退出;
+            fix: #101 @Aries014 备案信息结果重复;
+            fix: #103 @VSolitus 无法正常启动;
+            fix: #105 @nhqqxs 无法获取非网站备案详细信息。

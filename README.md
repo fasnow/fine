@@ -15,7 +15,7 @@
 ![6](README_images/miniapp.png)
 
 # 使用说明
-- macOS提示文件损坏请执行`sudo xattr -d com.apple.quarantine Fine.app`命令后重新打开；
+- macOS提示文件损坏请执行`sudo xattr -d com.apple.quarantine Fine.app`命令后重新打开
 - 超时均采用纳秒
 - 资产测绘API KEY自行在对应平台获取
 - 天眼查AUTH-TOKEN为登陆后Cookie中的`auth_token`字段内容

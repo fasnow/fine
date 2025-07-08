@@ -6,7 +6,6 @@
 3、使用者理解并同意，使用本工具可能涉及访问和操作各种计算机系统和网络资源，使用者应自行承担因违反这些法律规定而产生的全部法律责任。开发者、贡献者或相关组织不承担因使用者违反法律规定而导致的任何法律后果或责任。
 
 # Fine
-设置认证信息，天眼查为auth_token，爱企查为cookie。ICP批量查询务必使用代理池(如：https://github.com/thinkoaa/Deadpool )。
 
 ![1](README_images/setting.png)
 ![2](README_images/fofa.png)
@@ -15,12 +14,16 @@
 ![5](README_images/portscan.png)
 ![6](README_images/miniapp.png)
 
-
-
-# 注意事项
+# 使用说明
 - macOS提示文件损坏请执行`sudo xattr -d com.apple.quarantine Fine.app`命令后重新打开；
-- 微信v4暂无法反编译，小程序路径需选择包含目录结构如：`...\选择该目录\wx...\12\__APP__.wxapkg`，反编译仅提取了文件做敏感信息查找或者简单可阅读，微信开发者工具无法运行；
-- 数据表格默认均可单元格和多范围选中按键复制。
+- 超时均采用纳秒
+- 资产测绘API KEY自行在对应平台获取
+- 天眼查AUTH-TOKEN为登陆后Cookie中的`auth_token`字段内容
+- 爱企查Cookie需要Burp/Yakit等抓包获取
+- ICP批量查询务必使用代理池，因代理问题批量任务终止可点击`继续`进行查询不用重新执行开始
+- HTTPX不会使用全局代理，只会使用设置的代理
+- 端口扫描依托于域名解析的IP，如果识别不到请更换DNS，线程根据本机资源设置，QPS根据目标资源大致设置
+- 小程序敏感信息提取`只支持微信v3`，`v4不支持`，路径选择为: `..../选择本级目录/wx...../12/__APP__.wxapkg`，具体位置自行查询
 
 ## TODO
 
@@ -30,4 +33,5 @@
 代码变动较大不太规范，后续稳定后考虑重新开源
 
 # 交流群
-![7](README_images/qcode.png)
+
+<img src="README_images/qcode.png" alt="alt text" height="200" />

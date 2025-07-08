@@ -116,5 +116,7 @@ typings/
 backend/service/service/wechat/decompile*
 **/log
 **/*.ini
+**/*.zip
+**/*.exe
 **/*.txt
 **/wailsjs

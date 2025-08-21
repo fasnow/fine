@@ -29,9 +29,6 @@
 
 ？？？
 
-# 关于开源
-代码变动较大不太规范，后续稳定后考虑重新开源
-
 # 交流群
 
 <img src="README_images/qrcode.png" alt="alt text" height="200" />

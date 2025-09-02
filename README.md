@@ -23,7 +23,11 @@
 - ICP批量查询务必使用代理池，因代理问题批量任务终止可点击`继续`进行查询不用重新执行开始
 - HTTPX不会使用全局代理，只会使用设置的代理
 - 端口扫描依托于域名解析的IP，如果识别不到请更换DNS，线程根据本机资源设置，QPS根据目标资源大致设置
-- 小程序敏感信息提取路径选择为: `..../选择本级目录/wx...../12/__APP__.wxapkg`，具体位置自行查询
+- 微信小程序Applet目录
+    -    windows v3: 设置->文件管理->微信文件的默认保存位置，打开文件管理器访问前一步的路径，选择该目录下的Applet文件夹
+    -    windows v4: C:\Users\xxxxxx\AppData\Roaming\Tencent\xwechat\radium\Applet\packages
+    -    macOS v3:  /Users/xxxxxx/Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages
+    -    macOS v4:  /Users/xxxxxx/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium/Applet/packages
 
 ## TODO
 

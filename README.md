@@ -7,32 +7,17 @@
 
 # Fine
 
+由于工具的维护与更新需要花费大量时间与精力，现采取订阅制度，<b>部分功能收费【ICP批量查询、爱企查导出、小程序敏感信息提取】，其余功能不受限</b>，后续新加的功能可能也会收费，具体费用进群了解
+
+<img src="README_images/qrcode.png" alt="alt text" height="200" />
+
+# 功能模块
+
+> macOS提示文件损坏请执行`sudo xattr -d com.apple.quarantine Fine.app`命令后重新打开
+
 ![1](README_images/setting.png)
 ![2](README_images/fofa.png)
 ![3](README_images/icp.png)
 ![4](README_images/aiqicha.png)
 ![5](README_images/portscan.png)
 ![6](README_images/miniapp.png)
-
-# 使用说明
-- macOS提示文件损坏请执行`sudo xattr -d com.apple.quarantine Fine.app`命令后重新打开
-- 超时均采用纳秒
-- 资产测绘API KEY自行在对应平台获取
-- 天眼查AUTH-TOKEN为登陆后Cookie中的`auth_token`字段内容
-- 爱企查Cookie需要Burp/Yakit等抓包获取
-- ICP批量查询务必使用代理池，因代理问题批量任务终止可点击`继续`进行查询不用重新执行开始
-- HTTPX不会使用全局代理，只会使用设置的代理
-- 端口扫描依托于域名解析的IP，如果识别不到请更换DNS，线程根据本机资源设置，QPS根据目标资源大致设置
-- 微信小程序Applet目录
-    -    windows v3: 设置->文件管理->微信文件的默认保存位置，打开文件管理器访问前一步的路径，选择该目录下的Applet文件夹
-    -    windows v4: C:\Users\xxxxxx\AppData\Roaming\Tencent\xwechat\radium\Applet\packages
-    -    macOS v3:  /Users/xxxxxx/Library/Containers/com.tencent.xinWeChat/Data/.wxapplet/packages
-    -    macOS v4:  /Users/xxxxxx/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium/Applet/packages
-
-## TODO
-
-？？？
-
-# 交流群
-
-<img src="README_images/qrcode.png" alt="alt text" height="200" />

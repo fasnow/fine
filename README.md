@@ -32,4 +32,5 @@
 ![6](README_images/miniapp.png)
 
 
-[![Star History Chart](https://api.star-history.com/svg?repos=fasnow/fine&type=Date)](https://www.star-history.com/#fasnow/fine&Date)
+# Star Chart
+[![Star Chart](https://starchart.cc/fasnow/fine.svg?variant=adaptive)](https://starchart.cc/fasnow/fine)

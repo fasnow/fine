@@ -30,3 +30,6 @@
 ![3](README_images/icp.png)
 ![4](README_images/aiqicha.png)
 ![6](README_images/miniapp.png)
+
+
+[![Star History Chart](https://api.star-history.com/svg?repos=fasnow/fine&type=Date)](https://www.star-history.com/#fasnow/fine&Date)

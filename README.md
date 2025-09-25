@@ -12,12 +12,9 @@
 4. 工具致谢页面中的师傅可以找我领取对应激活码，其余老粉我都是随机赠送时长的。
 
 
-<img src="README_images/qrcode.png" alt="alt text" height="200" />
-
-
 微信号：fasnowww
 
-朋友的[圈子](https://pc.fenchuan8.com/#/index?forum=106741&yqm=11GB)，感兴趣的可以了解下，进圈3天后免费送一个月激活码：
+朋友的[圈子](https://pc.fenchuan8.com/#/index?forum=106741&yqm=11GB)，感兴趣的可以了解下，进圈3天后免费送2个月激活码：
 1. 适配DDDD的实战POC优化；
 2. SRC和HVV实战思路和案例（目前猎聘和蔚来SRC总榜第一）；
 3. 代码审计的一些报告；

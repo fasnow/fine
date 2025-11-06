@@ -14,7 +14,7 @@
 
 微信号：fasnowww
 
-朋友的[圈子](https://pc.fenchuan8.com/#/index?forum=106741&yqm=11GB)，感兴趣的可以了解下，进圈3天后免费送2个月激活码：
+朋友的[圈子](https://pc.fenchuan8.com/#/index?forum=106741&yqm=11GB)，感兴趣的可以了解下，<b>进圈子后购买可享折扣价</b>：
 1. 适配DDDD的实战POC优化；
 2. SRC和HVV实战思路和案例（目前猎聘和蔚来SRC总榜第一）；
 3. 代码审计的一些报告；
@@ -28,6 +28,7 @@
 ![1](README_images/setting.png)
 ![2](README_images/fofa.png)
 ![3](README_images/icp.png)
+![5](README_images/icp2.png)
 ![4](README_images/aiqicha.png)
 ![6](README_images/miniapp.png)
 
